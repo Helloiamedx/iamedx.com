@@ -30,6 +30,8 @@ type FoldTextProps = {
   className?: string;
   style?: CSSProperties;
   onComplete?: () => void;
+  /** After fold: run one synced highlight sweep across the whole line. */
+  shine?: boolean;
 };
 
 const HINGE_CONFIG: Record<
@@ -74,6 +76,7 @@ export function FoldText({
   className = "",
   style = {},
   onComplete,
+  shine = false,
 }: FoldTextProps) {
   const rootRef = useRef<HTMLSpanElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
@@ -194,6 +197,24 @@ export function FoldText({
 
     let scrollTrigger: { kill: () => void } | undefined;
     let hoverHandler: (() => void) | undefined;
+    let cancelled = false;
+
+    const waitForStableLayout = async () => {
+      // Wait for webfonts so wrap width matches the final face (not Helvetica swap).
+      if (document.fonts?.ready) {
+        try {
+          await document.fonts.ready;
+        } catch {
+          /* ignore */
+        }
+      }
+      // Two frames: post-font layout + paint settle before measuring/animating.
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => resolve());
+        });
+      });
+    };
 
     if (trigger === "hover") {
       gsap.set(pieces, {
@@ -213,16 +234,25 @@ export function FoldText({
           trigger: root,
           start: "top 82%",
           once: true,
-          onEnter: () => play(false),
+          onEnter: () => {
+            void waitForStableLayout().then(() => {
+              if (!cancelled) play(false);
+            });
+          },
         });
       });
     } else if (trigger === "loop") {
-      play(true);
+      void waitForStableLayout().then(() => {
+        if (!cancelled) play(true);
+      });
     } else {
-      play(false);
+      void waitForStableLayout().then(() => {
+        if (!cancelled) play(false);
+      });
     }
 
     return () => {
+      cancelled = true;
       if (hoverHandler) root.removeEventListener("mouseenter", hoverHandler);
       scrollTrigger?.kill();
       killTimeline();
@@ -242,6 +272,83 @@ export function FoldText({
     hingeConfig.rotateY,
   ]);
 
+  useEffect(() => {
+    if (!shine || typeof window === "undefined") return undefined;
+
+    const root = rootRef.current;
+    if (!root) return undefined;
+
+    const reduceMotion =
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) return undefined;
+
+    const pieces = Array.from(
+      root.querySelectorAll<HTMLElement>(".fold-text-piece"),
+    );
+    if (!pieces.length) return undefined;
+
+    const state = { shift: 0 };
+    let tween: gsap.core.Tween | null = null;
+
+    const measure = () => {
+      let minLeft = Infinity;
+      let maxRight = -Infinity;
+      pieces.forEach((piece) => {
+        const rect = piece.getBoundingClientRect();
+        minLeft = Math.min(minLeft, rect.left);
+        maxRight = Math.max(maxRight, rect.right);
+      });
+      const shineWidth = Math.max(1, maxRight - minLeft);
+      root.style.setProperty("--fold-shine-w", `${shineWidth}px`);
+      pieces.forEach((piece) => {
+        const rect = piece.getBoundingClientRect();
+        piece.style.setProperty(
+          "--fold-shine-offset",
+          `${rect.left - minLeft}px`,
+        );
+      });
+      return shineWidth;
+    };
+
+    const play = () => {
+      const shineWidth = measure();
+      // Move highlight band fully across text (left → right).
+      const from = -shineWidth;
+      const to = shineWidth;
+      state.shift = from;
+      root.style.setProperty("--shine-shift", `${from}px`);
+
+      tween?.kill();
+      tween = gsap.fromTo(
+        state,
+        { shift: from },
+        {
+          shift: to,
+          duration: 2.6,
+          ease: "none",
+          repeat: -1,
+          repeatDelay: 0.85,
+          onUpdate: () => {
+            root.style.setProperty("--shine-shift", `${state.shift}px`);
+          },
+        },
+      );
+    };
+
+    play();
+    window.addEventListener("resize", play);
+    return () => {
+      window.removeEventListener("resize", play);
+      tween?.kill();
+      pieces.forEach((piece) => {
+        piece.style.removeProperty("--fold-shine-offset");
+        piece.style.backgroundPosition = "";
+      });
+      root.style.removeProperty("--fold-shine-w");
+      root.style.removeProperty("--shine-shift");
+    };
+  }, [shine]);
+
   const rootStyle: CSSProperties = {
     "--fold-text-font-size":
       typeof fontSize === "number" ? `${fontSize}px` : fontSize,
@@ -253,7 +360,7 @@ export function FoldText({
   return (
     <span
       ref={rootRef}
-      className={`fold-text ${className}`.trim()}
+      className={`fold-text${shine ? " is-shiny" : ""}${className ? ` ${className}` : ""}`.trim()}
       style={rootStyle}
     >
       <span className="fold-text-sr-only">{text}</span>

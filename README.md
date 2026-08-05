@@ -50,23 +50,24 @@ public/
 
 ## Brand assets
 
-Place files under `public/`:
+Static media is served from Cloudflare R2 via `https://assets.iamedx.com`.
+In code, use `asset("/path")` from [`lib/assets.ts`](lib/assets.ts).
 
-- Fonts: `public/fonts/SF-Pro-Display-{Light,Regular,Medium,Bold,Heavy,Black}.woff2`
-- Logos: `public/brand/iamedxlogo-black.svg`, `iamedxlogo-white.svg`
-- Favicon: `public/brand/favicon.svg`
+Examples:
 
-Source URLs (vendor into repo; do not hotlink long-term):
+- `https://assets.iamedx.com/fonts/SF-Pro-Display-*.woff2`
+- `https://assets.iamedx.com/brand/iamedxlogo-black.svg`
+- `https://assets.iamedx.com/brand/iamedxlogo-white.svg`
+- `https://assets.iamedx.com/brand/favicon.svg`
+- `https://assets.iamedx.com/videos/large.mp4`
+- `https://assets.iamedx.com/projects/...`
 
-- https://iamedx.com/fonts/SF-Pro-Display-*.woff2
-- https://iamedx.com/brand/iamedxlogo-black.svg
-- https://iamedx.com/brand/iamedxlogo-white.svg
-- https://iamedx.com/brand/favicon.svg
+Upload new files to the R2 bucket that backs `assets.iamedx.com` (same path layout).
 
 ## Content editing
 
 - **Services / prices:** edit `content/services.ts`
-- **Projects:** edit `content/projects.ts`, add images under `public/projects/`
+- **Projects:** edit `content/projects.ts`, upload images to R2 under `projects/`
 - **Insights:** add `content/insights/your-slug.mdx` with `title`, `date`, `excerpt`, and `tags` frontmatter  
   Tags must match the Insights menu (e.g. `Manufacturing Processes`, `China Manufacturing`). Example:
 

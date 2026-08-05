@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   useEffect,
   useId,
@@ -11,17 +12,21 @@ import {
   type CSSProperties,
 } from "react";
 import { ClickSpark } from "@/components/ClickSpark";
+import { GlareHover } from "@/components/GlareHover";
 import { MobileBubbleNav } from "@/components/MobileBubbleNav";
 import { contactCta, primaryNav, type NavItem } from "@/content/nav";
+import { asset } from "@/lib/assets";
 
 const CLOSE_DELAY_MS = 180;
 const CLOSE_ANIMATION_MS = 480;
 
 export function Header() {
+  const pathname = usePathname();
   const [openKey, setOpenKey] = useState<string | null>(null);
   const [panelKey, setPanelKey] = useState<string | null>(null);
   const [panelOffset, setPanelOffset] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [atHero, setAtHero] = useState(pathname === "/");
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clearPanelTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const headerRef = useRef<HTMLElement>(null);
@@ -29,6 +34,26 @@ export function Header() {
   const trackRef = useRef<HTMLDivElement>(null);
   const triggerRefs = useRef<Record<string, HTMLElement | null>>({});
   const menuId = useId();
+
+  useEffect(() => {
+    if (pathname !== "/") {
+      setAtHero(false);
+      return;
+    }
+
+    function onScroll() {
+      // Any downward scroll leaves the clear-over-video chrome immediately.
+      setAtHero(window.scrollY <= 0);
+    }
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [pathname]);
 
   function clearCloseTimer() {
     if (closeTimer.current) {
@@ -181,6 +206,8 @@ export function Header() {
   const isPanelOpen = Boolean(openKey);
   const panelItem = primaryNav.find((item) => item.label === panelKey && item.mega);
   const isExpanded = isPanelOpen || mobileOpen;
+  /* Homepage over hero (not scrolled past / not expanded): clear chrome */
+  const overMedia = pathname === "/" && !isExpanded && atHero;
 
   return (
     <>
@@ -195,18 +222,29 @@ export function Header() {
 
       <header
         ref={headerRef}
-        className={`site-header${isExpanded ? " is-expanded" : ""}`}
+        className={`site-header${isExpanded ? " is-expanded" : ""}${overMedia ? " is-over-media" : ""}`}
         onMouseLeave={scheduleClose}
       >
         <div className="shell site-header__bar">
           <Link href="/" className="site-logo" aria-label="iamedx home">
             <Image
-              src="/brand/iamedxlogo-black.svg"
+              src={asset("/brand/iamedxlogo-white.svg")}
+              alt=""
+              width={92}
+              height={32}
+              priority
+              unoptimized
+              className="site-logo__img site-logo__img--white"
+              aria-hidden="true"
+            />
+            <Image
+              src={asset("/brand/iamedxlogo-black.svg")}
               alt="iamedx"
               width={92}
               height={32}
               priority
               unoptimized
+              className="site-logo__img site-logo__img--black"
             />
           </Link>
 
@@ -230,13 +268,24 @@ export function Header() {
 
           <div className="site-header__actions">
             <ClickSpark>
-              <Link
-                href={contactCta.href}
-                className="nav-contact"
-                onMouseEnter={scheduleClose}
+              <GlareHover
+                width="auto"
+                height="auto"
+                background="#0076dd"
+                borderRadius="999px"
+                borderColor="#0076dd"
+                glareColor="#ffffff"
+                glareOpacity={0.55}
+                className="nav-contact-glare"
               >
-                {contactCta.label}
-              </Link>
+                <Link
+                  href={contactCta.href}
+                  className="nav-contact"
+                  onMouseEnter={scheduleClose}
+                >
+                  {contactCta.label}
+                </Link>
+              </GlareHover>
             </ClickSpark>
             <button
               type="button"

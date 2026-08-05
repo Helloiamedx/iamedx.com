@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import { asset } from "@/lib/assets";
 import "./globals.css";
+
+const favicon = asset("/brand/favicon.svg");
 
 export const metadata: Metadata = {
   title: {
@@ -11,9 +14,9 @@ export const metadata: Metadata = {
   description:
     "End-to-end product manufacturing partner — projects, services, and insights.",
   icons: {
-    icon: [{ url: "/brand/favicon.svg", type: "image/svg+xml", sizes: "any" }],
-    apple: [{ url: "/brand/favicon.svg", type: "image/svg+xml" }],
-    shortcut: "/brand/favicon.svg",
+    icon: [{ url: favicon, type: "image/svg+xml", sizes: "any" }],
+    apple: [{ url: favicon, type: "image/svg+xml" }],
+    shortcut: favicon,
   },
 };
 

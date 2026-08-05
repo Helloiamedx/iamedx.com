@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { HeroActions } from "@/components/HeroActions";
 import { HeroHeadline } from "@/components/HeroHeadline";
 import { getFeaturedProjects } from "@/content/projects";
 import { getAllInsights } from "@/lib/insights";
+import { asset } from "@/lib/assets";
 
 export default function HomePage() {
   const featured = getFeaturedProjects(3);
@@ -24,10 +24,7 @@ export default function HomePage() {
           />
         </div>
         <div className="hero__content">
-          <h1 className="hero__title">
-            <HeroHeadline />
-          </h1>
-          <HeroActions />
+          <HeroHeadline />
         </div>
       </section>
 

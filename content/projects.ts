@@ -1,3 +1,5 @@
+import { asset } from "@/lib/assets";
+
 export type Material =
   | "wood"
   | "metal"
@@ -41,7 +43,7 @@ export const projects: Project[] = [
     ips: ["the-witcher"],
     summary: "A modular walnut organizer developed from sketch through small-batch production.",
     role: ["product-development", "sample-development", "production-management"],
-    coverImage: "/projects/placeholder-wood.svg",
+    coverImage: asset("/projects/placeholder-wood.svg"),
     year: 2024,
     featured: true,
     challenge: "Need a clean desktop system that could be CNC-cut at scale without finishing issues.",
@@ -54,7 +56,7 @@ export const projects: Project[] = [
     ips: ["halo-guardians", "destiny"],
     summary: "Precision metal tray with controlled surface finish for retail gift sets.",
     role: ["factory-sourcing", "factory-verification", "sample-development"],
-    coverImage: "/projects/placeholder-metal.svg",
+    coverImage: asset("/projects/placeholder-metal.svg"),
     year: 2024,
     featured: true,
     challenge: "Find a metal shop that could hold tolerance and consistent brushing.",
@@ -67,7 +69,7 @@ export const projects: Project[] = [
     ips: ["starfield"],
     summary: "Structural paper mailer designed for unboxing and ship durability.",
     role: ["custom-packaging", "sample-development"],
-    coverImage: "/projects/placeholder-paper.svg",
+    coverImage: asset("/projects/placeholder-paper.svg"),
     year: 2023,
     featured: false,
     challenge: "Reduce plastic while keeping transit protection for fragile goods.",
@@ -80,7 +82,7 @@ export const projects: Project[] = [
     ips: ["cyberpunk-2077", "doom"],
     summary: "Pigmented resin coaster set with controlled pour and edge finishing.",
     role: ["product-development", "sample-development", "production-management"],
-    coverImage: "/projects/placeholder-resin.svg",
+    coverImage: asset("/projects/placeholder-resin.svg"),
     year: 2025,
     featured: true,
     challenge: "Stabilize color batches and demolding defects across a gift SKU.",
@@ -93,7 +95,7 @@ export const projects: Project[] = [
     ips: ["horizon-zero-dawn", "tomb-raider"],
     summary: "Durable fabric pouch with controlled stitch quality for travel SKUs.",
     role: ["product-development", "sample-development", "production-management"],
-    coverImage: "/projects/placeholder-fabric.svg",
+    coverImage: asset("/projects/placeholder-fabric.svg"),
     year: 2025,
     featured: true,
     challenge: "Lock fabric hand-feel and seam strength across colorways.",
@@ -106,7 +108,7 @@ export const projects: Project[] = [
     ips: ["the-elder-scrolls", "dragon-age"],
     summary: "Small-batch leather folio with edge paint and hardware consistency.",
     role: ["factory-sourcing", "sample-development", "production-management"],
-    coverImage: "/projects/placeholder-leather.svg",
+    coverImage: asset("/projects/placeholder-leather.svg"),
     year: 2024,
     featured: false,
     challenge: "Match leather grade and tooling depth across suppliers.",

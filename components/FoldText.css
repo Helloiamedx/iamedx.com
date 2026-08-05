@@ -9,7 +9,8 @@
   white-space: pre-wrap;
   user-select: text;
   max-width: 100%;
-  text-wrap: balance;
+  /* Avoid text-wrap: balance — it lays out once, then reflows (e.g. 4 lines → 3). */
+  text-wrap: wrap;
 }
 
 .fold-text-sr-only {
@@ -56,6 +57,46 @@
   transform-style: preserve-3d;
   backface-visibility: hidden;
   will-change: transform, opacity;
+  /* Hide until GSAP runs so fallback-font / first-paint wrap never flashes. */
+  opacity: 0;
+}
+
+/* One traveling highlight across the whole line.
+   Bottom layer keeps base color on every glyph; top layer is the sweep. */
+.fold-text.is-shiny {
+  --shine-shift: 0px;
+  --fold-shine-w: 100%;
+}
+
+.fold-text.is-shiny .fold-text-piece {
+  background-image:
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      transparent 40%,
+      #ffffff 50%,
+      transparent 60%,
+      transparent 100%
+    ),
+    linear-gradient(
+      var(--fold-text-color, #b5b5b5),
+      var(--fold-text-color, #b5b5b5)
+    );
+  background-size:
+    var(--fold-shine-w) 100%,
+    100% 100%;
+  background-repeat: no-repeat, no-repeat;
+  background-position:
+    calc(var(--shine-shift) - var(--fold-shine-offset, 0px)) 50%,
+    0 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.fold-text.is-shiny .fold-text-piece::after {
+  opacity: 0 !important;
 }
 
 .fold-text-piece::after {
@@ -111,5 +152,11 @@
 
   .fold-text-piece::after {
     opacity: 0 !important;
+  }
+
+  .fold-text.is-shiny .fold-text-piece {
+    background-image: none;
+    -webkit-text-fill-color: var(--fold-text-color, currentColor);
+    color: var(--fold-text-color, currentColor);
   }
 }

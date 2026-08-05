@@ -12,6 +12,13 @@
   -webkit-backdrop-filter: saturate(200%) blur(48px);
 }
 
+/* Solid brand CTAs stay punchy on frosted chrome */
+.glare-hover.nav-contact-glare,
+.glare-hover.hero-cta--contact {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
 .glare-hover::before {
   content: "";
   position: absolute;
