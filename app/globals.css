@@ -63,27 +63,69 @@
   --accent: #0076dd;
   --line: rgba(11, 11, 11, 0.12);
   --font-sans: "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  /* Fluid content shell: ~1008px laptop → wider on large displays, never a hard 1200 lock */
-  --shell-max: 63rem;
-  --shell-gutter: clamp(1.25rem, 3.5vw, 2.75rem);
+  /* Fluid content shell: denser steps so laptops/desktops stay wide without a hard lock */
+  --shell-max: 63rem; /* 1008 — default / small laptop */
+  --shell-gutter: clamp(1.15rem, 2.8vw, 2.5rem);
   --header-bar-h: 3.5rem;
+}
+
+@media (min-width: 1100px) {
+  :root {
+    --shell-max: 66rem; /* 1056 */
+  }
+}
+
+@media (min-width: 1200px) {
+  :root {
+    --shell-max: 70rem; /* 1120 */
+  }
 }
 
 @media (min-width: 1280px) {
   :root {
-    --shell-max: 68rem;
+    --shell-max: 74rem; /* 1184 — 13" MacBook */
+  }
+}
+
+@media (min-width: 1366px) {
+  :root {
+    --shell-max: 78rem; /* 1248 — common Windows laptop */
+  }
+}
+
+@media (min-width: 1440px) {
+  :root {
+    --shell-max: 82rem; /* 1312 */
   }
 }
 
 @media (min-width: 1512px) {
   :root {
-    --shell-max: 76rem;
+    --shell-max: 88rem; /* 1408 — 14" MacBook Pro */
+  }
+}
+
+@media (min-width: 1600px) {
+  :root {
+    --shell-max: 92rem; /* 1472 */
   }
 }
 
 @media (min-width: 1728px) {
   :root {
-    --shell-max: 84rem;
+    --shell-max: 100rem; /* 1600 — 16" MacBook Pro */
+  }
+}
+
+@media (min-width: 1920px) {
+  :root {
+    --shell-max: 110rem; /* 1760 — Full HD+ */
+  }
+}
+
+@media (min-width: 2200px) {
+  :root {
+    --shell-max: 120rem; /* 1920 — ultra-wide / high-res */
   }
 }
 
@@ -845,7 +887,11 @@ p {
 .hero__content {
   position: relative;
   z-index: 1;
-  width: min(76rem, calc(100% - var(--shell-gutter) * 2));
+  /* Slightly tighter than the nav shell so the headline reads more balanced */
+  width: min(
+    calc(var(--shell-max) * 0.86),
+    calc(100% - var(--shell-gutter) * 2)
+  );
   margin: 0 auto;
   padding: calc(var(--header-bar-h) + 2rem) 0 3.5rem;
   display: flex;
@@ -878,6 +924,42 @@ p {
   width: 100%;
   max-width: 100%;
   text-align: center;
+}
+
+.hero-headline__line {
+  width: 100%;
+}
+
+.hero-keyword {
+  position: relative;
+  display: inline-block;
+  vertical-align: baseline;
+  white-space: nowrap;
+  color: var(--hero-keyword-color, #00e5ff);
+  perspective: 720px;
+}
+
+.hero-keyword__viewport {
+  display: inline-flex !important;
+  justify-content: center;
+  overflow: visible;
+  vertical-align: baseline;
+  transform-style: preserve-3d;
+}
+
+.hero-keyword__word {
+  display: inline-block;
+  white-space: nowrap;
+  will-change: transform;
+  color: inherit;
+  transform-style: preserve-3d;
+}
+
+.hero-keyword__letter {
+  display: inline-block;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform, opacity, filter;
 }
 
 .hero__actions {
