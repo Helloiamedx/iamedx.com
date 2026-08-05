@@ -7,9 +7,8 @@ import {
   useRef,
   useState,
   type CSSProperties,
-  type HTMLAttributes,
 } from "react";
-import { motion } from "motion/react";
+import { motion, type HTMLMotionProps } from "motion/react";
 
 const styles = {
   wrapper: {
@@ -47,7 +46,7 @@ export type DecryptedTextProps = {
   animateOn?: AnimateOn;
   clickMode?: ClickMode;
   onComplete?: () => void;
-} & Omit<HTMLAttributes<HTMLSpanElement>, "children">;
+} & Omit<HTMLMotionProps<"span">, "children">;
 
 export function DecryptedText({
   text,
