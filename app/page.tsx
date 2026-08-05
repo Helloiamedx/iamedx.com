@@ -15,7 +15,7 @@ export default function HomePage() {
         <div className="hero__media" aria-hidden="true">
           <video
             className="hero__video"
-            src="https://iamedx.com/videos/large.mp4"
+            src="https://assets.iamedx.com/videos/large.mp4"
             autoPlay
             muted
             loop
