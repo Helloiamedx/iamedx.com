@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getInsightBySlug, getInsightSlugs } from "@/lib/insights";
+import {
+  getInsightBySlug,
+  getInsightSlugs,
+  getInsightTagLabels,
+} from "@/lib/insights";
 
 type InsightPageProps = {
   params: Promise<{ slug: string }>;
@@ -37,6 +41,18 @@ export default async function InsightDetailPage({ params }: InsightPageProps) {
         <time dateTime={insight.date}>{insight.date}</time>
         <h1>{insight.title}</h1>
         <p className="lede">{insight.excerpt}</p>
+        {insight.tags.length > 0 ? (
+          <p className="insight-tags">
+            {insight.tags.map((tagSlug, index) => (
+              <span key={tagSlug}>
+                {index > 0 ? " · " : null}
+                <Link href={`/insights?tag=${tagSlug}`}>
+                  {getInsightTagLabels([tagSlug])[0]}
+                </Link>
+              </span>
+            ))}
+          </p>
+        ) : null}
       </header>
       <article className="prose">
         {insight.content.split("\n\n").map((paragraph) => (

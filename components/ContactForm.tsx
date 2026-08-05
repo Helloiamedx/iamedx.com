@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { ClickSpark } from "@/components/ClickSpark";
 
 type ContactFormProps = {
   presetMessage?: string;
@@ -41,9 +42,11 @@ export function ContactForm({ presetMessage = "" }: ContactFormProps) {
           required
         />
       </label>
-      <button type="submit" className="button">
-        Open email to hello@iamedx.com
-      </button>
+      <ClickSpark>
+        <button type="submit" className="button">
+          Open email to hello@iamedx.com
+        </button>
+      </ClickSpark>
     </form>
   );
 }

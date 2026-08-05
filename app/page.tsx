@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import { HeroActions } from "@/components/HeroActions";
+import { HeroHeadline } from "@/components/HeroHeadline";
 import { getFeaturedProjects } from "@/content/projects";
 import { getAllInsights } from "@/lib/insights";
 
@@ -10,28 +12,22 @@ export default function HomePage() {
   return (
     <main>
       <section className="hero">
-        <div className="hero__media" aria-hidden="true" />
-        <div className="hero__content">
-          <Image
-            src="/brand/iamedxlogo-white.svg"
-            alt="iamedx"
-            width={220}
-            height={48}
-            priority
-            className="hero__logo"
+        <div className="hero__media" aria-hidden="true">
+          <video
+            className="hero__video"
+            src="https://iamedx.com/videos/large.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
           />
-          <h1>From factory search to finished goods.</h1>
-          <p>
-            End-to-end product manufacturing support — pick the stages you need.
-          </p>
-          <div className="hero__actions">
-            <Link href="/services" className="button button--light">
-              View services
-            </Link>
-            <Link href="/contact" className="button button--ghost">
-              Contact
-            </Link>
-          </div>
+        </div>
+        <div className="hero__content">
+          <h1 className="hero__title">
+            <HeroHeadline />
+          </h1>
+          <HeroActions />
         </div>
       </section>
 

@@ -5,17 +5,23 @@ import { materials, type Material } from "@/content/projects";
 
 type ProjectFilterProps = {
   active: Material | "all";
+  activeIp?: string | null;
 };
 
-export function ProjectFilter({ active }: ProjectFilterProps) {
+export function ProjectFilter({ active, activeIp }: ProjectFilterProps) {
   return (
     <div className="project-filter" role="list">
+      {activeIp ? (
+        <Link href="/projects" role="listitem" className="is-active">
+          Clear IP filter
+        </Link>
+      ) : null}
       {materials.map((material) => {
         const href =
           material.id === "all"
             ? "/projects"
             : `/projects?material=${material.id}`;
-        const isActive = active === material.id;
+        const isActive = !activeIp && active === material.id;
 
         return (
           <Link

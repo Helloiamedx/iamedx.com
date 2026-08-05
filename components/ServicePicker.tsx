@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { ClickSpark } from "@/components/ClickSpark";
 import { currency, services, type Service } from "@/content/services";
 
 function formatPrice(service: Service) {
@@ -82,9 +83,11 @@ export function ServicePicker() {
         <p className="service-summary__total">
           Estimated total: {currency} {total}
         </p>
-        <Link href={inquireHref} className="button">
-          Inquire about selected services
-        </Link>
+        <ClickSpark>
+          <Link href={inquireHref} className="button">
+            Inquire about selected services
+          </Link>
+        </ClickSpark>
       </aside>
     </div>
   );

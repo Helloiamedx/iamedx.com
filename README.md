@@ -67,7 +67,20 @@ Source URLs (vendor into repo; do not hotlink long-term):
 
 - **Services / prices:** edit `content/services.ts`
 - **Projects:** edit `content/projects.ts`, add images under `public/projects/`
-- **Insights:** add `content/insights/your-slug.mdx` with `title`, `date`, `excerpt` frontmatter
+- **Insights:** add `content/insights/your-slug.mdx` with `title`, `date`, `excerpt`, and `tags` frontmatter  
+  Tags must match the Insights menu (e.g. `Manufacturing Processes`, `China Manufacturing`). Example:
+
+```mdx
+---
+title: Notes from a first production run
+date: 2025-11-12
+excerpt: What usually breaks between sample and mass production.
+tags:
+  - Manufacturing Processes
+  - Quality Control
+---
+```
+
 
 ## Deploy (Vercel)
 

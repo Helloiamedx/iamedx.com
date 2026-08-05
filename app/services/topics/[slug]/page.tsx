@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ClickSpark } from "@/components/ClickSpark";
 import { findServiceTopic, servicesMega } from "@/content/nav";
 
 type TopicPageProps = {
@@ -43,9 +44,11 @@ export default async function ServiceTopicPage({ params }: TopicPageProps) {
         confirms the mega-menu route is wired.
       </p>
       <p>
-        <Link href="/contact" className="button">
-          Contact
-        </Link>
+        <ClickSpark>
+          <Link href="/contact" className="button">
+            Contact
+          </Link>
+        </ClickSpark>
       </p>
     </main>
   );

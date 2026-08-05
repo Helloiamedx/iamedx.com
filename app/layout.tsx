@@ -11,7 +11,9 @@ export const metadata: Metadata = {
   description:
     "End-to-end product manufacturing partner — projects, services, and insights.",
   icons: {
-    icon: "/brand/favicon.svg",
+    icon: [{ url: "/brand/favicon.svg", type: "image/svg+xml", sizes: "any" }],
+    apple: [{ url: "/brand/favicon.svg", type: "image/svg+xml" }],
+    shortcut: "/brand/favicon.svg",
   },
 };
 
