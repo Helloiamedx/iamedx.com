@@ -3,7 +3,6 @@
 import { useState, type FormEvent } from "react";
 import { ClickSpark } from "@/components/ClickSpark";
 import { GlareHover, GLARE_WIPE_MS } from "@/components/GlareHover";
-import { BorderBeam } from "@/components/ui/border-beam";
 import { contactInfo } from "@/content/nav";
 
 function buildMailto(email: string, message: string) {
@@ -25,14 +24,8 @@ export function FooterContactForm() {
   };
 
   return (
-    <BorderBeam
-      className="footer-contact-beam"
-      size="md"
-      theme="dark"
-      colorVariant="ocean"
-      borderRadius={16}
-    >
-      <div className="footer-contact">
+    <div className="footer-contact-beam">
+      <div className="footer-contact site-footer__panel">
         <h2 className="footer-contact__title">Get in touch</h2>
         <form className="footer-contact__form" onSubmit={onSubmit}>
           <label className="footer-contact__label" htmlFor="footer-contact-email">
@@ -84,6 +77,6 @@ export function FooterContactForm() {
           </div>
         </form>
       </div>
-    </BorderBeam>
+    </div>
   );
 }

@@ -246,7 +246,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     fragColor.rgb *= (1.0 - noiseAmount + noiseAmount * n);
   }
 
-  float brightness = 1.0 - (coord.y / iResolution.y);
+  float brightness = coord.y / iResolution.y;
   fragColor.x *= 0.1 + brightness * 0.8;
   fragColor.y *= 0.3 + brightness * 0.6;
   fragColor.z *= 0.5 + brightness * 0.5;

@@ -293,7 +293,8 @@ p {
   --footer-panel-radius: 16px;
   --footer-panel-pad: 1rem;
   --footer-panel-pad-x: 1.05rem;
-  --footer-panel-bg: #242426;
+  --footer-panel-bg: rgba(36, 36, 38, 0.54);
+  --footer-panel-border: rgba(255, 255, 255, 0.14);
   --footer-contact-radius: var(--footer-panel-radius);
   --footer-video-radius: 12px;
   /* Min space between link columns when L/R flush (space-between) */
@@ -318,6 +319,23 @@ p {
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  /* Slight lift so beams read clearer through frost */
+  filter: brightness(1.35) contrast(1.08);
+  /* Keep glow strongest at the bottom so it reads as light through card bases */
+  -webkit-mask-image: linear-gradient(
+    to top,
+    #000 0%,
+    #000 48%,
+    rgba(0, 0, 0, 0.7) 78%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to top,
+    #000 0%,
+    #000 48%,
+    rgba(0, 0, 0, 0.7) 78%,
+    transparent 100%
+  );
 }
 
 .site-footer__shell {
@@ -348,7 +366,7 @@ p {
   /* Desktop 3-col: media grows · links + contact hug · equal tight gaps */
   display: grid;
   grid-template-columns: minmax(0, 1fr) max-content max-content;
-  grid-template-areas: "tl tr tm";
+  grid-template-areas: "tl tm tr";
   column-gap: 10px;
   row-gap: clamp(1.5rem, 3vw, 2.25rem);
   /* Three panels stretch to equal height; tops share one baseline */
@@ -360,15 +378,18 @@ p {
   margin-top: 0;
 }
 
-/* Shared dark card chrome — media / links / contact */
+/* Shared frost glass — media / links / contact (lets LightRays show through) */
 .site-footer__panel,
 .footer-contact {
   box-sizing: border-box;
   margin: 0;
   padding: var(--footer-panel-pad) var(--footer-panel-pad-x);
   border-radius: var(--footer-panel-radius);
+  border: 1px solid var(--footer-panel-border);
   background: var(--footer-panel-bg);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  backdrop-filter: saturate(160%) blur(22px);
+  -webkit-backdrop-filter: saturate(160%) blur(22px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .site-footer__bottom {
@@ -850,14 +871,14 @@ p {
   }
 }
 
-/* Narrow: video → links → contact → rule → legal/social */
+/* Narrow: video → contact → links → rule → legal/social */
 @media (max-width: 899px) {
   .site-footer__top-band {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
       "tl"
-      "tr"
-      "tm";
+      "tm"
+      "tr";
     column-gap: 0;
     row-gap: 1.75rem;
   }

@@ -9,17 +9,9 @@ import { FooterContactForm } from "@/components/FooterContactForm";
 import { FooterScrollColumn } from "@/components/FooterScrollColumn";
 import { LightRays } from "@/components/LightRays";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
-import { BorderBeam } from "@/components/ui/border-beam";
 import { asset } from "@/lib/assets";
 
 const MENU_ROW_SIZE = 4;
-
-const panelBeam = {
-  size: "md" as const,
-  theme: "dark" as const,
-  colorVariant: "ocean" as const,
-  borderRadius: 16,
-};
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -33,7 +25,7 @@ export function Footer() {
           raysOrigin="bottom-center"
           raysColor="#ffffff"
           raysSpeed={1}
-          lightSpread={0.5}
+          lightSpread={2.2}
           rayLength={3}
           followMouse
           mouseInfluence={0.1}
@@ -47,10 +39,10 @@ export function Footer() {
       </div>
 
       <div className="shell site-footer__shell">
-        {/* Left media · center links · right contact — three equal panels */}
+        {/* Left media · center contact · right links */}
         <div className="site-footer__top-band">
           <div className="site-footer__tl">
-            <BorderBeam className="footer-panel-beam" {...panelBeam}>
+            <div className="footer-panel-beam">
               <div className="site-footer__panel site-footer__panel--media">
                 <p className="site-footer__tagline">{footerTagline}</p>
                 <ProtectedVideo
@@ -60,11 +52,15 @@ export function Footer() {
                   aria-label="Turning ideas into products"
                 />
               </div>
-            </BorderBeam>
+            </div>
+          </div>
+
+          <div className="site-footer__tm">
+            <FooterContactForm />
           </div>
 
           <div className="site-footer__tr">
-            <BorderBeam className="footer-panel-beam" {...panelBeam}>
+            <div className="footer-panel-beam">
               <nav
                 className="site-footer__panel site-footer__panel--links"
                 aria-label="Footer"
@@ -86,11 +82,7 @@ export function Footer() {
                   ))}
                 </div>
               </nav>
-            </BorderBeam>
-          </div>
-
-          <div className="site-footer__tm">
-            <FooterContactForm />
+            </div>
           </div>
         </div>
 
