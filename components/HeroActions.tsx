@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { ClickSpark } from "@/components/ClickSpark";
-import { GlareHover } from "@/components/GlareHover";
+import { GlareHover, GLARE_WIPE_MS } from "@/components/GlareHover";
+import { SpecularButton } from "@/components/SpecularButton";
 
 type HeroActionsProps = {
   revealed?: boolean;
@@ -15,23 +15,44 @@ export function HeroActions({ revealed = false }: HeroActionsProps) {
       aria-hidden={!revealed}
     >
       <ClickSpark>
+        {/*
+          Stack (bottom → top): GlareHover fill → glare wipe (::before) → label.
+          SpecularButton fill must stay transparent or it buries the wipe.
+        */}
         <GlareHover
           width="auto"
           height="auto"
-          background="rgba(255, 255, 255, 0.72)"
+          background="rgba(11, 11, 11, 0.72)"
           borderRadius="999px"
-          borderColor="rgba(255, 255, 255, 0.35)"
+          borderColor="transparent"
           glareColor="#ffffff"
-          glareOpacity={0.55}
-          className="hero-cta hero-cta--services"
+          glareOpacity={0.65}
+          transitionDuration={GLARE_WIPE_MS}
+          className="hero-cta-glare hero-cta-glare--dark"
         >
-          <Link
+          <SpecularButton
             href="/services"
-            className="hero-cta__link"
+            className="hero-cta hero-cta--services hero-cta__link"
+            tint="#0b0b0b"
+            tintOpacity={0}
+            textColor="#ffffff"
+            lineColor="#ffffff"
+            baseColor="#3a3a3a"
+            blur={0}
+            radius={999}
+            intensity={0.82}
+            thickness={0.78}
+            shineSize={20}
+            shineFade={38}
+            speed={0.85}
+            autoAnimate
+            pauseOnHover
+            followMouse={false}
+            enabled={revealed}
             tabIndex={revealed ? undefined : -1}
           >
             View services
-          </Link>
+          </SpecularButton>
         </GlareHover>
       </ClickSpark>
 
@@ -39,20 +60,37 @@ export function HeroActions({ revealed = false }: HeroActionsProps) {
         <GlareHover
           width="auto"
           height="auto"
-          background="#0076dd"
+          background="rgba(255, 255, 255, 0.16)"
           borderRadius="999px"
-          borderColor="#0076dd"
+          borderColor="transparent"
           glareColor="#ffffff"
-          glareOpacity={0.55}
-          className="hero-cta hero-cta--contact"
+          glareOpacity={0.6}
+          transitionDuration={GLARE_WIPE_MS}
+          className="hero-cta-glare hero-cta-glare--glass"
         >
-          <Link
-            href="/contact"
-            className="hero-cta__link"
+          <SpecularButton
+            href="/projects"
+            className="hero-cta hero-cta--projects hero-cta__link"
+            tint="#ffffff"
+            tintOpacity={0}
+            textColor="#ffffff"
+            lineColor="#ffffff"
+            baseColor="#8a8a8a"
+            blur={0}
+            radius={999}
+            intensity={0.85}
+            thickness={0.8}
+            shineSize={20}
+            shineFade={38}
+            speed={0.85}
+            autoAnimate
+            pauseOnHover
+            followMouse={false}
+            enabled={revealed}
             tabIndex={revealed ? undefined : -1}
           >
-            Contact
-          </Link>
+            View projects
+          </SpecularButton>
         </GlareHover>
       </ClickSpark>
     </div>

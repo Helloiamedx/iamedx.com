@@ -3,6 +3,9 @@
 import type { CSSProperties, ReactNode } from "react";
 import "./GlareHover.css";
 
+/** Site-wide CTA glare wipe — keep every GlareHover on this pace */
+export const GLARE_WIPE_MS = 1000;
+
 type GlareHoverProps = {
   width?: string;
   height?: string;
@@ -48,7 +51,7 @@ export function GlareHover({
   glareOpacity = 0.5,
   glareAngle = -45,
   glareSize = 250,
-  transitionDuration = 650,
+  transitionDuration = GLARE_WIPE_MS,
   playOnce = false,
   className = "",
   style = {},

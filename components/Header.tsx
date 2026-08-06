@@ -12,13 +12,22 @@ import {
   type CSSProperties,
 } from "react";
 import { ClickSpark } from "@/components/ClickSpark";
-import { GlareHover } from "@/components/GlareHover";
+import { GlareHover, GLARE_WIPE_MS } from "@/components/GlareHover";
 import { MobileBubbleNav } from "@/components/MobileBubbleNav";
 import { contactCta, primaryNav, type NavItem } from "@/content/nav";
 import { asset } from "@/lib/assets";
 
 const CLOSE_DELAY_MS = 180;
 const CLOSE_ANIMATION_MS = 480;
+/* Curtain: 480ms + last-column stagger 210ms — keep frost off until done */
+const MOBILE_CURTAIN_MS = 700;
+
+function canHoverFine() {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia("(hover: hover) and (pointer: fine)").matches
+  );
+}
 
 export function Header() {
   const pathname = usePathname();
@@ -26,6 +35,8 @@ export function Header() {
   const [panelKey, setPanelKey] = useState<string | null>(null);
   const [panelOffset, setPanelOffset] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
+  /* Stays true through open + close curtain so frost doesn't fight the strips */
+  const [mobileSurface, setMobileSurface] = useState(false);
   const [atHero, setAtHero] = useState(pathname === "/");
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clearPanelTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -55,6 +66,19 @@ export function Header() {
     };
   }, [pathname]);
 
+  useEffect(() => {
+    if (mobileOpen) {
+      setMobileSurface(true);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setMobileSurface(false);
+    }, MOBILE_CURTAIN_MS);
+
+    return () => clearTimeout(timer);
+  }, [mobileOpen]);
+
   function clearCloseTimer() {
     if (closeTimer.current) {
       clearTimeout(closeTimer.current);
@@ -72,6 +96,8 @@ export function Header() {
   function alignPanelToTrigger(label: string) {
     const trigger = triggerRefs.current[label];
     const panel = headerRef.current?.querySelector<HTMLElement>(".mega-panel");
+    const track = trackRef.current;
+    const shell = headerRef.current?.querySelector<HTMLElement>(".shell");
     if (!trigger || !panel) return;
 
     const link = trigger.querySelector<HTMLElement>(".site-nav__link");
@@ -79,11 +105,45 @@ export function Header() {
     const styles = window.getComputedStyle(el);
     const padLeft = Number.parseFloat(styles.paddingLeft) || 0;
 
-    // Offset relative to the mega panel's left edge (not the viewport alone).
-    const panelLeft = panel.getBoundingClientRect().left;
+    const panelRect = panel.getBoundingClientRect();
+    const panelLeft = panelRect.left;
     const textLeft = el.getBoundingClientRect().left + padLeft;
-    const left = Math.max(16, Math.round(textLeft - panelLeft));
-    setPanelOffset(left);
+    const shellLeft = shell?.getBoundingClientRect().left ?? 16;
+    const shellRight = shell?.getBoundingClientRect().right ?? window.innerWidth - 16;
+    const rightGutter = Math.max(16, window.innerWidth - shellRight);
+
+    /* Prefer Apple-style: columns start under the trigger label. */
+    const preferred = Math.max(0, Math.round(textLeft - panelLeft));
+    /* Floor: same left edge as the logo / content shell. */
+    const minLeft = Math.max(0, Math.round(shellLeft - panelLeft));
+
+    /*
+     * If trigger-align would clip columns past the right gutter (common on
+     * iPad-width when nav is centered), pull left — down to the shell edge.
+     */
+    const cols = track?.querySelector<HTMLElement>(".mega-columns");
+    let contentWidth = 0;
+    if (cols) {
+      const pieces = Array.from(cols.children) as HTMLElement[];
+      const gap = Number.parseFloat(getComputedStyle(cols).columnGap || getComputedStyle(cols).gap) || 0;
+      contentWidth = pieces.reduce((sum, el, index) => {
+        return sum + el.getBoundingClientRect().width + (index > 0 ? gap : 0);
+      }, 0);
+    }
+
+    let left = preferred;
+    if (contentWidth > 0) {
+      const maxLeft = Math.round(
+        window.innerWidth - panelLeft - rightGutter - contentWidth,
+      );
+      if (preferred > maxLeft) {
+        left = Math.max(minLeft, maxLeft);
+      }
+    } else if (window.matchMedia("(max-width: 1679px)").matches) {
+      left = minLeft;
+    }
+
+    setPanelOffset((prev) => (prev === left ? prev : left));
   }
 
   function openMenu(key: string) {
@@ -109,6 +169,17 @@ export function Header() {
     closeTimer.current = setTimeout(() => closeMenu(), CLOSE_DELAY_MS);
   }
 
+  /** Hover menus only — touch taps synthesize mouseleave and would flash-close. */
+  function scheduleCloseFromHover() {
+    if (!canHoverFine()) return;
+    scheduleClose();
+  }
+
+  function openMenuFromHover(key: string) {
+    if (!canHoverFine()) return;
+    openMenu(key);
+  }
+
   useLayoutEffect(() => {
     if (!openKey) return;
 
@@ -118,7 +189,7 @@ export function Header() {
     });
 
     return () => cancelAnimationFrame(frame);
-  }, [openKey, panelKey]);
+  }, [openKey, panelKey, panelOffset]);
 
   useLayoutEffect(() => {
     const panel = panelRef.current;
@@ -160,7 +231,12 @@ export function Header() {
     }
 
     function onResize() {
-      if (openKey) alignPanelToTrigger(openKey);
+      if (!openKey) return;
+      if (window.matchMedia("(max-width: 899px)").matches) {
+        closeMenu();
+        return;
+      }
+      alignPanelToTrigger(openKey);
     }
 
     window.addEventListener("keydown", onKeyDown);
@@ -174,18 +250,29 @@ export function Header() {
   }, [openKey]);
 
   useEffect(() => {
+    /* Only lock scroll for the full-screen mobile menu.
+       Locking for desktop mega removes the scrollbar, shifts layout under the
+       cursor, fires mouseleave, and the panel appears then instantly closes. */
     if (!mobileOpen) {
-      document.body.style.overflow = openKey ? "hidden" : "";
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.inset = "";
+      document.body.style.width = "";
       document.body.style.touchAction = "";
+      document.body.style.paddingRight = "";
       return;
     }
 
     const scrollY = window.scrollY;
+    const scrollbar = window.innerWidth - document.documentElement.clientWidth;
     document.body.style.overflow = "hidden";
     document.body.style.position = "fixed";
     document.body.style.inset = `-${scrollY}px 0 0 0`;
     document.body.style.width = "100%";
     document.body.style.touchAction = "none";
+    if (scrollbar > 0) {
+      document.body.style.paddingRight = `${scrollbar}px`;
+    }
 
     const preventTouch = (event: TouchEvent) => {
       event.preventDefault();
@@ -199,13 +286,14 @@ export function Header() {
       document.body.style.inset = "";
       document.body.style.width = "";
       document.body.style.touchAction = "";
+      document.body.style.paddingRight = "";
       window.scrollTo(0, scrollY);
     };
-  }, [mobileOpen, openKey]);
+  }, [mobileOpen]);
 
   const isPanelOpen = Boolean(openKey);
   const panelItem = primaryNav.find((item) => item.label === panelKey && item.mega);
-  const isExpanded = isPanelOpen || mobileOpen;
+  const isExpanded = isPanelOpen || mobileOpen || mobileSurface;
   /* Homepage over hero (not scrolled past / not expanded): clear chrome */
   const overMedia = pathname === "/" && !isExpanded && atHero;
 
@@ -222,8 +310,8 @@ export function Header() {
 
       <header
         ref={headerRef}
-        className={`site-header${isExpanded ? " is-expanded" : ""}${overMedia ? " is-over-media" : ""}`}
-        onMouseLeave={scheduleClose}
+        className={`site-header${isExpanded ? " is-expanded" : ""}${overMedia ? " is-over-media" : ""}${mobileSurface ? " is-mobile-surface" : ""}`}
+        onMouseLeave={scheduleCloseFromHover}
       >
         <div className="shell site-header__bar">
           <Link href="/" className="site-logo" aria-label="iamedx home">
@@ -261,7 +349,11 @@ export function Header() {
                 onOpen={() => {
                   if (item.mega) openMenu(item.label);
                 }}
-                onCloseSchedule={scheduleClose}
+                onOpenFromHover={() => {
+                  if (item.mega) openMenuFromHover(item.label);
+                }}
+                onClose={closeMenu}
+                onCloseSchedule={scheduleCloseFromHover}
               />
             ))}
           </nav>
@@ -276,12 +368,13 @@ export function Header() {
                 borderColor="#0076dd"
                 glareColor="#ffffff"
                 glareOpacity={0.55}
+                transitionDuration={GLARE_WIPE_MS}
                 className="nav-contact-glare"
               >
                 <Link
                   href={contactCta.href}
                   className="nav-contact"
-                  onMouseEnter={scheduleClose}
+                  onMouseEnter={scheduleCloseFromHover}
                 >
                   {contactCta.label}
                 </Link>
@@ -354,6 +447,13 @@ export function Header() {
           id={`${menuId}-mobile`}
           aria-hidden={!mobileOpen}
         >
+          {/* Vertical columns slide down left→right (~25% each) */}
+          <div className="mobile-nav__curtain" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+            <span />
+          </div>
           <div className="shell mobile-nav__inner">
             <MobileBubbleNav
               open={mobileOpen}
@@ -372,6 +472,8 @@ type NavTriggerProps = {
   isOpen: boolean;
   triggerRef: (node: HTMLElement | null) => void;
   onOpen: () => void;
+  onOpenFromHover: () => void;
+  onClose: () => void;
   onCloseSchedule: () => void;
 };
 
@@ -381,6 +483,8 @@ function NavTrigger({
   isOpen,
   triggerRef,
   onOpen,
+  onOpenFromHover,
+  onClose,
   onCloseSchedule,
 }: NavTriggerProps) {
   if (!item.mega) {
@@ -399,7 +503,7 @@ function NavTrigger({
     <div
       ref={triggerRef}
       className={`site-nav__item${isOpen ? " is-open" : ""}`}
-      onMouseEnter={onOpen}
+      onMouseEnter={onOpenFromHover}
       onFocus={onOpen}
     >
       <Link
@@ -409,11 +513,11 @@ function NavTrigger({
         aria-haspopup="true"
         aria-controls={`${menuId}-desktop`}
         onClick={(event) => {
-          if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+          if (canHoverFine()) {
             return;
           }
           event.preventDefault();
-          if (isOpen) onCloseSchedule();
+          if (isOpen) onClose();
           else onOpen();
         }}
       >

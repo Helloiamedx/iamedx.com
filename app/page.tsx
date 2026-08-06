@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { HeroHeadline } from "@/components/HeroHeadline";
+import { ProtectedVideo } from "@/components/ProtectedVideo";
 import { getFeaturedProjects } from "@/content/projects";
 import { getAllInsights } from "@/lib/insights";
 import { asset } from "@/lib/assets";
@@ -13,13 +14,9 @@ export default function HomePage() {
     <main>
       <section className="hero">
         <div className="hero__media" aria-hidden="true">
-          <video
+          <ProtectedVideo
             className="hero__video"
-            src="https://assets.iamedx.com/videos/home-hero-video.mp4"
-            autoPlay
-            muted
-            loop
-            playsInline
+            src={asset("videos/home-hero-video.mp4")}
             preload="auto"
           />
         </div>

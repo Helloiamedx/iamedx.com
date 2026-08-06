@@ -233,46 +233,57 @@ export const contactCta = {
   label: "Contact",
 } as const;
 
-/** External social — update when the profile URL is final */
-export const linkedInHref = "https://www.linkedin.com/in/iamedx";
+/** External social / office — Facebook & TikTok use site until profiles are ready */
+export const linkedInHref = "https://www.linkedin.com/in/edwardadvance/";
+export const facebookHref = "https://iamedx.com";
+export const tiktokHref = "https://iamedx.com";
+export const siteHref = "https://iamedx.com";
+
+export const officeInfo = {
+  eyebrow: "iamedx HQ",
+  address:
+    "No. 880 Longjin Avenue, Qianku Town, Cangnan County, Wenzhou City, Zhejiang Province, China",
+  mapsHref: "https://maps.app.goo.gl/5snACoZbxVXQ3NRdA",
+} as const;
+
+export const contactInfo = {
+  eyebrow: "Contact",
+  email: "hello@iamedx.com",
+  emailHref: "mailto:hello@iamedx.com",
+} as const;
+
+export const mobileNavLinks = [
+  { label: "Services", href: "/services" },
+  { label: "Projects", href: "/projects" },
+  { label: "Insights", href: "/insights" },
+  { label: "About", href: "/about" },
+] as const;
+
+export const mobileSocialLinks = [
+  { label: "LinkedIn", href: linkedInHref },
+  { label: "Facebook", href: facebookHref },
+  { label: "TikTok", href: tiktokHref },
+] as const;
+
+export const mobileContactCta = {
+  href: "/contact",
+  label: "Get in touch",
+} as const;
+
+/** Footer top-left positioning line */
+export const footerTagline =
+  "Driven by loyalty, transparency, and a commitment to exceed expectations, I help clients build highly tailored supply chain.";
 
 /**
- * Mobile bubble menu (no Home).
- * Colors from BubbleMenu defaults: about→green, projects→amber, blog→red,
- * former contact purple reused for Services; Contact uses brand blue.
+ * Footer menu columns — order drives the 4+4 top-right layout.
+ * Edit the source megas only; this list stays in sync.
  */
-export const mobileBubbleItems = [
-  {
-    label: "Services",
-    href: "/services",
-    rotation: -11,
-    hoverStyles: { bgColor: "#8b5cf6", textColor: "#ffffff" },
-  },
-  {
-    label: "Projects",
-    href: "/projects",
-    rotation: 9,
-    hoverStyles: { bgColor: "#f59e0b", textColor: "#ffffff" },
-  },
-  {
-    label: "Insights",
-    href: "/insights",
-    rotation: -7,
-    hoverStyles: { bgColor: "#ef4444", textColor: "#ffffff" },
-  },
-  {
-    label: "About",
-    href: "/about",
-    rotation: 12,
-    hoverStyles: { bgColor: "#10b981", textColor: "#ffffff" },
-  },
-  {
-    label: "Contact",
-    href: "/contact",
-    rotation: -8,
-    hoverStyles: { bgColor: "#0076dd", textColor: "#ffffff" },
-  },
-] as const;
+export const footerLinkColumns = [
+  ...servicesMega,
+  ...projectsMega,
+  ...insightsMega,
+  ...aboutMega,
+];
 
 export function findServiceTopic(slug: string) {
   for (const column of servicesMega) {

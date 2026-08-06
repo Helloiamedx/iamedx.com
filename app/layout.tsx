@@ -8,11 +8,12 @@ const favicon = asset("/brand/favicon.svg");
 
 export const metadata: Metadata = {
   title: {
-    default: "iamedx",
-    template: "%s · iamedx",
+    default:
+      "Edward Xu | End-to-End Product Development & Manufacturing Partner",
+    template: "%s · Edward Xu",
   },
   description:
-    "End-to-end product manufacturing partner — projects, services, and insights.",
+    "Driven by loyalty, transparency, and a commitment to exceed expectations, I help clients build highly tailored supply chains in China.",
   icons: {
     icon: [{ url: favicon, type: "image/svg+xml", sizes: "any" }],
     apple: [{ url: favicon, type: "image/svg+xml" }],
