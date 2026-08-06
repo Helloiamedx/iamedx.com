@@ -297,26 +297,42 @@ p {
   --footer-contact-radius: var(--footer-panel-radius);
   --footer-video-radius: 12px;
   /* Min space between link columns when L/R flush (space-between) */
-  --footer-link-col-gap-min: 1.5rem;
+  --footer-link-col-gap-min: 1.15rem;
   position: relative;
+  isolation: isolate;
+  overflow: hidden;
   background: var(--footer-bg);
   border-top: none;
-  /* Equal inset on all four sides (matches shell gutter) */
-  padding: var(--shell-gutter);
+  /*
+   * Same inset model as the header shell:
+   * top/bottom = --shell-gutter; left/right come from the shell width
+   * (avoids padding + centered shell stacking extra side space).
+   */
+  padding: var(--shell-gutter) 0;
   color: var(--footer-ink);
   font-size: 0.875rem;
 }
 
+.site-footer__rays {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
 .site-footer__shell {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: clamp(2rem, 3.5vw, 2.75rem);
-  /* Footer already pads by --shell-gutter — don't inset twice */
-  width: min(var(--shell-max), 100%);
+  /* Match header .shell — L/R align with the nav bar */
+  width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
+  margin-inline: auto;
 }
 
 .site-footer .shell.site-footer__shell {
-  width: min(var(--shell-max), 100%);
+  width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
 }
 
 .site-footer__top-band,
@@ -329,13 +345,13 @@ p {
 }
 
 .site-footer__top-band {
-  /* Left flush left · right flush right · link cluster centered in the middle */
+  /* Desktop 3-col: media grows · links + contact hug · equal tight gaps */
   display: grid;
-  grid-template-columns: max-content minmax(0, 1fr) max-content;
+  grid-template-columns: minmax(0, 1fr) max-content max-content;
   grid-template-areas: "tl tr tm";
-  column-gap: clamp(1.25rem, 2.5vw, 2.25rem);
+  column-gap: 10px;
   row-gap: clamp(1.5rem, 3vw, 2.25rem);
-  /* Stretch L/R panels to equal height; links stay top-aligned */
+  /* Three panels stretch to equal height; tops share one baseline */
   align-items: stretch;
   width: 100%;
 }
@@ -344,7 +360,7 @@ p {
   margin-top: 0;
 }
 
-/* Shared dark card chrome for left panel + contact */
+/* Shared dark card chrome — media / links / contact */
 .site-footer__panel,
 .footer-contact {
   box-sizing: border-box;
@@ -372,58 +388,76 @@ p {
   align-items: baseline;
 }
 
-.site-footer__tl {
-  grid-area: tl;
-  justify-self: start;
-  align-self: stretch;
+/* Grid slots — wrappers only; beam + panel fill height */
+.site-footer__tl,
+.site-footer__tr,
+.site-footer__tm {
   display: flex;
   flex-direction: column;
-  /* Text hugs top pad · video hugs bottom pad · middle gap flexes */
-  justify-content: space-between;
-  align-items: stretch;
-  gap: 1.1rem;
-  height: 100%;
-  /* Compact so 3-col survives common laptop widths */
-  width: 14.5rem;
+  align-self: stretch;
   min-width: 0;
-  max-width: 100%;
+  height: 100%;
+}
+
+.site-footer__tl {
+  grid-area: tl;
+  justify-self: stretch;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
 }
 
 .site-footer__tr {
   grid-area: tr;
   justify-self: stretch;
-  align-self: start;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  min-width: 0;
+  width: max-content;
+  max-width: 100%;
 }
 
 .site-footer__tm {
   grid-area: tm;
-  justify-self: end;
-  align-self: stretch;
-  display: flex;
-  flex-direction: column;
+  justify-self: stretch;
   width: 14.5rem;
   max-width: 100%;
-  min-width: 0;
-  height: 100%;
 }
 
-/* Contact fills the stretched right panel */
-.site-footer__tm .footer-contact-beam {
+/* BorderBeam shells — fill slot, stretch panel child */
+.footer-panel-beam,
+.footer-contact-beam {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
+  width: 100%;
   min-height: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.footer-panel-beam > *,
+.footer-contact-beam > * {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Left: text top · video bottom · middle gap flexes */
+.site-footer__panel--media {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 1.1rem;
   height: 100%;
 }
 
-.site-footer__tm .footer-contact-beam > * {
-  flex: 1 1 auto;
-  min-height: 0;
+/* Center: links nest in shared pad; box width = content + pad */
+.site-footer__panel--links {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: max-content;
+  max-width: 100%;
+  height: 100%;
 }
 
 .site-footer__tm .footer-contact {
@@ -459,8 +493,8 @@ p {
   max-width: none;
   width: 100%;
   flex: 0 0 auto;
-  /* Match footer link titles (0.75rem / 600), ~1.5× then −1px */
-  font-size: 0.9375rem; /* 15px */
+  /* Same size as “Get in touch” */
+  font-size: 0.75rem;
   font-weight: 600;
   line-height: 1.25;
   letter-spacing: 0.01em;
@@ -486,8 +520,8 @@ p {
 .site-footer__menu-grid {
   display: grid;
   grid-template-columns: repeat(4, max-content);
-  column-gap: 2.25rem;
-  row-gap: 1.35rem;
+  column-gap: 2rem;
+  row-gap: 1.15rem;
   justify-content: start;
   width: max-content;
   max-width: 100%;
@@ -495,14 +529,7 @@ p {
   padding: 0;
 }
 
-/* Mid-slot contact form — BorderBeam frame + shared panel chrome */
-.footer-contact-beam {
-  width: 100%;
-  display: block;
-  margin: 0;
-  padding: 0;
-}
-
+/* Contact form width inside beam */
 .footer-contact {
   width: 100%;
 }
@@ -756,34 +783,28 @@ p {
     align-items: stretch;
   }
 
-  .site-footer__tl {
-    grid-area: tl;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+  .site-footer__tl,
+  .site-footer__tm {
     width: 100%;
     max-width: none;
     min-width: 0;
-    justify-self: stretch;
-    align-self: stretch;
-    height: auto;
-  }
-
-  .site-footer__tm {
-    grid-area: tm;
-    width: 100%;
-    max-width: none;
     justify-self: stretch;
     align-self: stretch;
   }
 
   .site-footer__tr {
     grid-area: tr;
-    justify-self: stretch;
-    align-items: stretch;
-    align-self: start;
     width: 100%;
+    max-width: none;
+    justify-self: stretch;
+    align-self: start;
     margin-top: clamp(0.5rem, 1.5vw, 1.15rem);
+  }
+
+  .site-footer__panel--links {
+    align-items: stretch;
+    width: 100%;
+    max-width: none;
   }
 
   /* Row 2: col width = longest link; L flush · R flush · equal gaps (min enforced) */
@@ -795,7 +816,7 @@ p {
     justify-content: space-between;
     justify-items: start;
     column-gap: var(--footer-link-col-gap-min);
-    row-gap: 1.35rem;
+    row-gap: 1.15rem;
     padding-top: 0;
   }
 
@@ -848,27 +869,8 @@ p {
     gap: 1rem;
   }
 
-  /* Keep stacked tagline+video panel */
-  .site-footer__tl {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: stretch;
-    gap: 1.1rem;
-    grid-area: tl;
-    width: 100%;
-    max-width: none;
-    min-width: 0;
-    justify-self: stretch;
-    align-self: start;
-    height: auto;
-  }
-
-  .site-footer__tagline,
-  .site-footer__video {
-    grid-area: unset;
-  }
-
+  /* Slot wrappers only — panel chrome lives on .site-footer__panel */
+  .site-footer__tl,
   .site-footer__tr,
   .site-footer__tm {
     width: 100%;
@@ -878,19 +880,17 @@ p {
     align-self: start;
     margin-top: 0;
     height: auto;
-    display: flex;
-    flex-direction: column;
   }
 
-  .site-footer__tr {
+  .site-footer__panel--links {
     align-items: stretch;
+    width: 100%;
   }
 
-  .site-footer__tm {
-    align-items: flex-start;
-  }
-
-  .site-footer__tm .footer-contact-beam,
+  .footer-panel-beam,
+  .footer-contact-beam,
+  .footer-panel-beam > *,
+  .footer-contact-beam > *,
   .site-footer__tm .footer-contact {
     height: auto;
     flex: none;
@@ -919,7 +919,7 @@ p {
     justify-content: space-between;
     justify-items: start;
     column-gap: var(--footer-link-col-gap-min);
-    row-gap: 1.35rem;
+    row-gap: 1.15rem;
   }
 
   .footer-scroll-col {
@@ -959,7 +959,7 @@ p {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     justify-content: start;
     column-gap: var(--footer-link-col-gap-min);
-    row-gap: 1.35rem;
+    row-gap: 1.15rem;
   }
 
   .footer-scroll-col {
@@ -1297,8 +1297,8 @@ p {
 
 .mega-columns {
   /* Fixed gap between every top-level group — columns hug their text */
-  --mega-gap: 4rem;
-  --mega-dense-gap: 1.5rem;
+  --mega-gap: 2.75rem;
+  --mega-dense-gap: 1.25rem;
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
