@@ -135,23 +135,31 @@
 }
 
 html {
-  height: 100%;
-  /* Kill rubber-band past page ends (mobile 漏底 under black footer) */
+  /* Avoid height:100% — with mobile Chrome + flex body it can leave a blank
+     scroll band past the footer when the URL bar resizes the viewport. */
+  min-height: 100%;
+  background: #000;
   overscroll-behavior: none;
+  overscroll-behavior-y: none;
 }
 
 body {
   margin: 0;
   min-height: 100%;
-  min-height: 100dvh;
+  /* svh — stable. 100dvh grows/shrinks with Chrome’s URL bar and leaves a
+     scrollable blank band under the black footer (reads as 白底). */
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
-  background: var(--background);
+  /* Black underpaint — matches footer; light fill lives on .site-main */
+  background: #000;
   color: var(--foreground);
   font-family: var(--font-sans);
   font-weight: 400;
   line-height: 1.5;
   overscroll-behavior: none;
+  overscroll-behavior-y: none;
+  overflow-x: clip;
 }
 
 /* Grow between header and footer so the footer sits on the viewport bottom */
@@ -159,6 +167,8 @@ body {
   flex: 1 1 auto;
   width: 100%;
   min-height: 0;
+  /* Paint the light page fill here — not on html — so bottom overscroll stays black */
+  background: var(--background);
 }
 
 a {
@@ -487,7 +497,9 @@ p {
   --footer-link: #d2d2d7;
   position: relative;
   isolation: isolate;
-  overflow: visible;
+  /* Clip descendants — overflow:visible was letting sparks/glare extend
+     document scroll height past the black stage (mobile 漏白底). */
+  overflow: clip;
   margin-top: auto;
   flex-shrink: 0;
   background: var(--footer-bg);
@@ -1782,10 +1794,11 @@ p {
 
 .hero {
   position: relative;
+  /* Prefer svh so mobile Chrome URL-bar show/hide doesn’t add end-of-page blank */
+  height: 100vh;
   height: 100svh;
-  height: 100dvh;
+  min-height: 100vh;
   min-height: 100svh;
-  min-height: 100dvh;
   margin-top: calc(-1 * var(--header-bar-h));
   display: grid;
   align-items: center;
@@ -1998,10 +2011,10 @@ p {
 /* —— Projects index —— */
 .projects-cover {
   position: relative;
+  height: 100vh;
   height: 100svh;
-  height: 100dvh;
+  min-height: 100vh;
   min-height: 100svh;
-  min-height: 100dvh;
   margin-top: calc(-1 * var(--header-bar-h));
   display: flex;
   align-items: flex-end;
@@ -2548,10 +2561,10 @@ p {
  */
 .project-case-hero {
   position: relative;
+  height: 100vh;
   height: 100svh;
-  height: 100dvh;
+  min-height: 100vh;
   min-height: 100svh;
-  min-height: 100dvh;
   margin-top: calc(-1 * var(--header-bar-h));
   overflow: hidden;
   background: #0a0a0a;
@@ -2650,10 +2663,10 @@ p {
 /* —— Legacy case cover (unused) —— */
 .case-cover {
   position: relative;
+  height: 100vh;
   height: 100svh;
-  height: 100dvh;
+  min-height: 100vh;
   min-height: 100svh;
-  min-height: 100dvh;
   margin-top: calc(-1 * var(--header-bar-h));
   display: flex;
   align-items: center;

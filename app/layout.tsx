@@ -39,7 +39,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           type="image/svg+xml"
         />
       </head>
-      <body className="min-h-full min-h-dvh flex flex-col">
+      <body className="min-h-full flex flex-col">
         <SmoothScroll>
           <Header />
           <div className="site-main">{children}</div>
