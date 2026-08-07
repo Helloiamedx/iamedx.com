@@ -1,0 +1,10 @@
+/* Condensed footer knockout — unique name avoids local Manuka override */
+@font-face {
+  font-family: "Manuka Footer";
+  src:
+    url("https://assets.iamedx.com/fonts/Manuka-Black.otf") format("opentype"),
+    url("/fonts/Manuka-Black.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}

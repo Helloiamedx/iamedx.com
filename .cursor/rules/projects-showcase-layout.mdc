@@ -1,0 +1,69 @@
+---
+description: Projects index showcase layout — featured lead + equal two-column grid with shared meta bar
+globs: app/projects/**/*.{tsx,ts,css}, components/Project*.tsx, content/projects.ts, content/caseCopy.ts, app/globals.css
+alwaysApply: false
+---
+
+# Projects showcase layout
+
+## Case detail first screen (`/projects/[slug]`)
+
+Default opening stack (before body copy / gallery):
+
+1. **Hero video** — **full viewport** (`100dvh`), pulled under the sticky header (`margin-top: -header`). Prefer **Vimeo background embed** (`heroVimeoId` / `heroVimeoHash`; default demo `1172594711` / `3452b6dd22`). Autoplay muted loop, no chrome.
+2. **Nav at rest** — clear / no frost (`is-over-clear` + difference), same as home hero — video must sit behind the bar.
+3. **Meta** — **inside** the video frame, near the bottom (shell-aligned). Same three slots as the featured lead: **title left** · **tagline center** · **tags right**. Type is white + `mix-blend-mode: difference` (same invert language as Projects hero roll / clear header).
+
+## Case detail copy stack (after hero) — ALWAYS these four
+
+White band, Apple label black (`#1d1d1f`). Same shell width as the in-video meta. **No border / frame.**
+
+Every project detail copy area is **only** this sequence (order fixed):
+
+1. **Background** — left label **`Background`**. Right: headline + body. Fields: `statementHeadline`, `overview`.
+2. **Challenges** — left `Challenges`. Right: headline + body. Fields: `challengesHeadline`, `challengesBody`.
+3. **Execution** — left `Execution`. Right: headline + body. Fields: `executionHeadline`, `executionBody`.
+4. **Impact** — left `Impact`. Right: headline + body. Fields: `impactHeadline`, `impactBody`.
+
+Each chapter uses the same layout:
+
+1. **Left — big label:** uppercase, **left-aligned**.
+2. **Right — copy group:** container flush to shell right (`justify-self: end`); text itself **left-aligned** LTR. Headline uppercase + Regular body.
+
+Built via `getCaseCopySections` + `ProjectCaseCopy`. Missing fields get short placeholder copy so the four chapters always render.
+
+**Images:** do **not** invent a global image pattern. Wait for per-project direction on how images insert / weave between these chapters.
+
+## Cover ratios
+
+1. **Featured lead (first)** — `1920 × 1080` (exact 16:9).
+2. **Two-column cards** — `3000 × 1687` (~16:9; use `aspect-ratio: 3000 / 1687`).
+
+## Featured lead meta (full width)
+
+Further-style single row: **title left** · **tagline center** · **tags right** (` · ` separators).
+
+## Two-column card meta (match reference)
+
+Under the image:
+
+```
+TITLE (left, bold/heavy)          TAGS (right, light, comma-separated)
+Tagline under the title (left)
+```
+
+Not a three-column horizontal bar. Title and tags share the top baseline; copy sits under the title.
+
+These fields feed the filter system later — keep as structured data.
+
+## Page arrangement (`/projects`)
+
+1. **First project** — full width of the menu/`shell`.
+2. **Everything after** — **two equal-width columns**. Same meta stack on every card.
+
+## Do not
+
+- Return to irregular masonry / auto-fill multi-column grids for the showcase
+- Mix the featured three-column meta into two-column cards (or vice versa)
+- Skip or reorder Background → Challenges → Execution → Impact on case pages
+- Invent case-page image layouts until the user specifies them per project

@@ -69,7 +69,7 @@ Upload new files to the R2 bucket that backs `assets.iamedx.com` (same path layo
 - **Services / prices:** edit `content/services.ts`
 - **Projects:** edit `content/projects.ts`, upload images to R2 under `projects/`
 - **Insights:** add `content/insights/your-slug.mdx` with `title`, `date`, `excerpt`, and `tags` frontmatter  
-  Tags must match the Insights menu (e.g. `Manufacturing Processes`, `China Manufacturing`). Example:
+  Tags must match the Insights menu (e.g. `Manufacturing`, `Quality Control`). Example:
 
 ```mdx
 ---
@@ -77,7 +77,7 @@ title: Notes from a first production run
 date: 2025-11-12
 excerpt: What usually breaks between sample and mass production.
 tags:
-  - Manufacturing Processes
+  - Manufacturing
   - Quality Control
 ---
 ```

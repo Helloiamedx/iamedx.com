@@ -28,13 +28,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <head>
         <link
           rel="preload"
-          href="/brand/iamedxlogo-white.svg"
+          href="/brand/edxlogo-white.svg"
           as="image"
           type="image/svg+xml"
         />
         <link
           rel="preload"
-          href="/brand/iamedxlogo-black.svg"
+          href="/brand/edxlogo-black.svg"
           as="image"
           type="image/svg+xml"
         />

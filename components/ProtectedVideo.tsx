@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentPropsWithoutRef } from "react";
+import { forwardRef, type ComponentPropsWithoutRef } from "react";
 
 type ProtectedVideoProps = Omit<
   ComponentPropsWithoutRef<"video">,
@@ -11,25 +11,31 @@ type ProtectedVideoProps = Omit<
  * Autoplay-friendly video with soft download lock:
  * no right-click save, no download control, no PiP / remote playback.
  */
-export function ProtectedVideo({
-  autoPlay = true,
-  muted = true,
-  loop = true,
-  playsInline = true,
-  ...props
-}: ProtectedVideoProps) {
-  return (
-    <video
-      {...props}
-      autoPlay={autoPlay}
-      muted={muted}
-      loop={loop}
-      playsInline={playsInline}
-      controlsList="nodownload noplaybackrate"
-      disablePictureInPicture
-      disableRemotePlayback
-      onContextMenu={(event) => event.preventDefault()}
-      draggable={false}
-    />
-  );
-}
+export const ProtectedVideo = forwardRef<HTMLVideoElement, ProtectedVideoProps>(
+  function ProtectedVideo(
+    {
+      autoPlay = true,
+      muted = true,
+      loop = true,
+      playsInline = true,
+      ...props
+    },
+    ref,
+  ) {
+    return (
+      <video
+        ref={ref}
+        {...props}
+        autoPlay={autoPlay}
+        muted={muted}
+        loop={loop}
+        playsInline={playsInline}
+        controlsList="nodownload noplaybackrate"
+        disablePictureInPicture
+        disableRemotePlayback
+        onContextMenu={(event) => event.preventDefault()}
+        draggable={false}
+      />
+    );
+  },
+);

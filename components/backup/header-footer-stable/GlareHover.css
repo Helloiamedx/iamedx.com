@@ -1,0 +1,100 @@
+.glare-hover {
+  width: var(--gh-width);
+  height: var(--gh-height);
+  background: var(--gh-bg);
+  border-radius: var(--gh-br);
+  border: 1px solid var(--gh-border);
+  overflow: hidden;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  backdrop-filter: saturate(200%) blur(48px);
+  -webkit-backdrop-filter: saturate(200%) blur(48px);
+}
+
+/* Solid brand CTAs stay punchy on frosted chrome */
+.glare-hover.nav-contact-glare,
+.glare-hover.hero-cta--contact {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* Hero: fill lives on GlareHover; child SpecularButton stays transparent so
+   wipe sits BETWEEN fill and label (nav Contact already does this). */
+.glare-hover.hero-cta-glare {
+  border: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  overflow: hidden;
+  border-radius: 999px;
+}
+
+.glare-hover.hero-cta-glare::before {
+  border-radius: inherit;
+}
+
+.glare-hover.hero-cta-glare .specular-button,
+.glare-hover.hero-cta-glare a.specular-button.hero-cta {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Label above glare wipe; rim canvas stays under the label too */
+.glare-hover .specular-button__label {
+  position: relative;
+  z-index: 2;
+}
+
+.glare-hover .specular-button__fx {
+  z-index: 0;
+}
+
+.glare-hover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    var(--gh-angle),
+    hsla(0, 0%, 0%, 0) 60%,
+    var(--gh-rgba) 70%,
+    hsla(0, 0%, 0%, 0),
+    hsla(0, 0%, 0%, 0) 100%
+  );
+  transition: background-position var(--gh-duration) ease;
+  background-size:
+    var(--gh-size) var(--gh-size),
+    100% 100%;
+  background-repeat: no-repeat;
+  background-position:
+    -100% -100%,
+    0 0;
+  pointer-events: none;
+}
+
+.glare-hover:hover {
+  cursor: pointer;
+}
+
+.glare-hover:hover::before {
+  background-position:
+    100% 100%,
+    0 0;
+}
+
+.glare-hover--play-once::before {
+  transition: none;
+}
+
+.glare-hover--play-once:hover::before {
+  transition: background-position var(--gh-duration) ease;
+  background-position:
+    100% 100%,
+    0 0;
+}
+
+.glare-hover > * {
+  position: relative;
+  z-index: 2;
+}

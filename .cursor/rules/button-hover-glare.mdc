@@ -1,0 +1,34 @@
+---
+description: Universal CTA hover glare — wipe sits between button fill and label
+alwaysApply: true
+---
+
+# Button hover glare (universal)
+
+All interactive CTAs / pills that use a hover “擦亮” wipe must follow this stack.
+This is a site-wide convention — do not invent a different hover highlight.
+
+## Required stack (bottom → top)
+
+1. **Button fill** — solid or translucent background on the outer shell (`GlareHover` / equivalent)
+2. **Glare wipe** — the moving highlight layer (`::before` or equivalent), clipped to the pill with `overflow: hidden` + matching `border-radius`
+3. **Label / icon** — text stays above the wipe (`z-index` above the glare)
+
+Never put an opaque (or mostly opaque) fill on the child that sits above the glare — that buries the wipe (especially on dark buttons like View services).
+
+## Pattern
+
+```tsx
+<GlareHover background="{fill}" borderRadius="999px" glareColor="#ffffff" …>
+  {/* child background must be transparent */}
+  <Link or SpecularButton tintOpacity={0} />
+</GlareHover>
+```
+
+## Checklist
+
+- Hover wipe is visible on dark and light fills
+- Wipe is masked to capsule/pill — not a raw rectangle
+- Specular / rim idle effects (if any) pause on hover so only the glare wipe shows
+- Nav Contact, hero CTAs, and future buttons share this same hover language
+- Wipe duration uses shared `GLARE_WIPE_MS` from `GlareHover.tsx` (do not invent a faster local duration)

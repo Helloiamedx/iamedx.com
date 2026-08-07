@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
         hostname: "assets.iamedx.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "cdn.prod.website-files.com",
+        pathname: "/**",
+      },
     ],
   },
 };

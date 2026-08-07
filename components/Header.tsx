@@ -28,6 +28,8 @@ const CLOSE_DELAY_MS = 180;
 const CLOSE_ANIMATION_MS = 480;
 /* Curtain: 480ms + last-column stagger 210ms — keep frost off until done */
 const MOBILE_CURTAIN_MS = 700;
+/* Mega frost height tween is 480ms — pills land after the sheet is mostly on */
+const CTA_PILL_AFTER_FROST_MS = 360;
 
 function canHoverFine() {
   return (
@@ -44,7 +46,10 @@ export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   /* Stays true through open + close curtain so frost doesn't fight the strips */
   const [mobileSurface, setMobileSurface] = useState(false);
-  const [atHero, setAtHero] = useState(pathname === "/");
+  /* Top of page: clear chrome on every route (same scroll gate as the home hero) */
+  const [atTop, setAtTop] = useState(true);
+  /* Colored contact pills — delayed until after frost when mega/mobile opens */
+  const [ctaPills, setCtaPills] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clearPanelTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const headerRef = useRef<HTMLElement>(null);
@@ -54,14 +59,9 @@ export function Header() {
   const menuId = useId();
 
   useEffect(() => {
-    if (pathname !== "/") {
-      setAtHero(false);
-      return;
-    }
-
     function onScroll() {
-      // Any downward scroll leaves the clear-over-video chrome immediately.
-      setAtHero(window.scrollY <= 0);
+      // Any downward scroll leaves the at-top chrome immediately.
+      setAtTop(window.scrollY <= 0);
     }
 
     onScroll();
@@ -85,6 +85,31 @@ export function Header() {
 
     return () => clearTimeout(timer);
   }, [mobileOpen]);
+
+  useLayoutEffect(() => {
+    const expanded = Boolean(openKey) || mobileOpen || mobileSurface;
+    const clearChrome = !expanded && atTop;
+
+    if (clearChrome) {
+      /* Layout phase: drop pills before paint so ghost never shares a frame
+         with brand fills (difference blend → wrong capsule colors). */
+      setCtaPills(false);
+      return;
+    }
+
+    /* Already on frosted chrome (scrolled) — pills can show immediately */
+    if (!openKey && !mobileOpen && !mobileSurface) {
+      setCtaPills(true);
+      return;
+    }
+
+    /* Mega / mobile: frost first, then color pills */
+    const timer = setTimeout(() => {
+      setCtaPills(true);
+    }, CTA_PILL_AFTER_FROST_MS);
+
+    return () => clearTimeout(timer);
+  }, [atTop, openKey, mobileOpen, mobileSurface]);
 
   function clearCloseTimer() {
     if (closeTimer.current) {
@@ -301,8 +326,8 @@ export function Header() {
   const isPanelOpen = Boolean(openKey);
   const panelItem = primaryNav.find((item) => item.label === panelKey && item.mega);
   const isExpanded = isPanelOpen || mobileOpen || mobileSurface;
-  /* Homepage over hero (not scrolled past / not expanded): clear chrome */
-  const overMedia = pathname === "/" && !isExpanded && atHero;
+  /* Every page at top: fully clear bar; contrast via mix-blend-mode:difference */
+  const overClear = !isExpanded && atTop;
 
   return (
     <>
@@ -317,15 +342,15 @@ export function Header() {
 
       <header
         ref={headerRef}
-        className={`site-header${isExpanded ? " is-expanded" : ""}${overMedia ? " is-over-media" : ""}${mobileSurface ? " is-mobile-surface" : ""}`}
+        className={`site-header${isExpanded ? " is-expanded" : ""}${overClear ? " is-over-clear" : ""}${mobileSurface ? " is-mobile-surface" : ""}`}
         onMouseLeave={scheduleCloseFromHover}
       >
         <div className="shell site-header__bar">
           <Link href="/" className="site-logo" aria-label="iamedx home">
             <Image
-              src="/brand/iamedxlogo-white.svg"
+              src="/brand/edxlogo-white.svg"
               alt=""
-              width={92}
+              width={135}
               height={32}
               priority
               unoptimized
@@ -333,9 +358,9 @@ export function Header() {
               aria-hidden="true"
             />
             <Image
-              src="/brand/iamedxlogo-black.svg"
+              src="/brand/edxlogo-black.svg"
               alt="iamedx"
-              width={92}
+              width={135}
               height={32}
               priority
               unoptimized
@@ -366,74 +391,6 @@ export function Header() {
           </nav>
 
           <div className="site-header__actions">
-            <ClickSpark>
-              <GlareHover
-                width="auto"
-                height="auto"
-                background="#25D366"
-                borderRadius="999px"
-                borderColor="#25D366"
-                glareColor="#ffffff"
-                glareOpacity={0.55}
-                transitionDuration={GLARE_WIPE_MS}
-                className="nav-contact-glare nav-contact-glare--whatsapp"
-              >
-                <a
-                  href={whatsAppCta.href}
-                  className="nav-contact nav-contact--with-icon"
-                  target={whatsAppPhone ? "_blank" : undefined}
-                  rel={whatsAppPhone ? "noopener noreferrer" : undefined}
-                  onMouseEnter={scheduleCloseFromHover}
-                >
-                  <WhatsAppIcon className="nav-contact__icon" />
-                  {whatsAppCta.label}
-                </a>
-              </GlareHover>
-            </ClickSpark>
-            <ClickSpark>
-              <GlareHover
-                width="auto"
-                height="auto"
-                background="#07C160"
-                borderRadius="999px"
-                borderColor="#07C160"
-                glareColor="#ffffff"
-                glareOpacity={0.55}
-                transitionDuration={GLARE_WIPE_MS}
-                className="nav-contact-glare nav-contact-glare--wechat"
-              >
-                <a
-                  href={weChatCta.href}
-                  className="nav-contact nav-contact--with-icon"
-                  onMouseEnter={scheduleCloseFromHover}
-                >
-                  <WeChatIcon className="nav-contact__icon" />
-                  {weChatCta.label}
-                </a>
-              </GlareHover>
-            </ClickSpark>
-            <ClickSpark>
-              <GlareHover
-                width="auto"
-                height="auto"
-                background="#0076dd"
-                borderRadius="999px"
-                borderColor="#0076dd"
-                glareColor="#ffffff"
-                glareOpacity={0.55}
-                transitionDuration={GLARE_WIPE_MS}
-                className="nav-contact-glare"
-              >
-                <Link
-                  href={contactCta.href}
-                  className="nav-contact nav-contact--with-icon"
-                  onMouseEnter={scheduleCloseFromHover}
-                >
-                  <EmailIcon className="nav-contact__icon" />
-                  {contactCta.label}
-                </Link>
-              </GlareHover>
-            </ClickSpark>
             <button
               type="button"
               className={`nav-menu-toggle${mobileOpen ? " is-open" : ""}`}
@@ -473,23 +430,33 @@ export function Header() {
                 data-cols={panelItem.mega.length}
                 key={panelKey ?? "empty"}
               >
-                {panelItem.mega.map((column) => (
-                  <section
-                    key={column.id}
-                    className={`mega-column${column.links.length > 10 ? " mega-column--dense" : ""}`}
-                  >
-                    <h2>{column.description || column.title}</h2>
-                    <ul>
-                      {column.links.map((link) => (
-                        <li key={link.slug}>
-                          <Link href={link.href} onClick={closeMenu}>
-                            {link.label}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
-                ))}
+                {panelItem.mega.map((column) => {
+                  const heading = (column.description || column.title).trim();
+                  return (
+                    <section
+                      key={column.id}
+                      className={[
+                        "mega-column",
+                        heading ? "" : "mega-column--plain",
+                        column.links.length > 10 ? "mega-column--dense" : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                    >
+                      {/* No heading → links sit on the Services description baseline */}
+                      {heading ? <h2>{heading}</h2> : null}
+                      <ul>
+                        {column.links.map((link) => (
+                          <li key={link.slug}>
+                            <Link href={link.href} onClick={closeMenu}>
+                              {link.label}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+                  );
+                })}
               </div>
             ) : null}
           </div>
@@ -515,6 +482,82 @@ export function Header() {
           </div>
         </div>
       </header>
+
+      {/* Sibling raft: ghost (difference) at rest; colored pills after frost.
+          Never combine is-ghost + is-pills — difference blend on brand fills
+          flashes the wrong capsule colors for a frame before pills clear. */}
+      <div
+        className={`site-header-cta${overClear ? " is-ghost" : ""}${ctaPills && !overClear ? " is-pills" : ""}`}
+        onMouseEnter={scheduleCloseFromHover}
+      >
+        <div className="site-header-cta__inner">
+          <ClickSpark>
+            <GlareHover
+              width="auto"
+              height="auto"
+              background="#25D366"
+              borderRadius="999px"
+              borderColor="#25D366"
+              glareColor="#ffffff"
+              glareOpacity={0.55}
+              transitionDuration={GLARE_WIPE_MS}
+              className="nav-contact-glare nav-contact-glare--whatsapp"
+            >
+              <a
+                href={whatsAppCta.href}
+                className="nav-contact nav-contact--with-icon"
+                target={whatsAppPhone ? "_blank" : undefined}
+                rel={whatsAppPhone ? "noopener noreferrer" : undefined}
+              >
+                <WhatsAppIcon className="nav-contact__icon" />
+                <span className="nav-contact__label">{whatsAppCta.label}</span>
+              </a>
+            </GlareHover>
+          </ClickSpark>
+          <ClickSpark>
+            <GlareHover
+              width="auto"
+              height="auto"
+              background="#07C160"
+              borderRadius="999px"
+              borderColor="#07C160"
+              glareColor="#ffffff"
+              glareOpacity={0.55}
+              transitionDuration={GLARE_WIPE_MS}
+              className="nav-contact-glare nav-contact-glare--wechat"
+            >
+              <a
+                href={weChatCta.href}
+                className="nav-contact nav-contact--with-icon"
+              >
+                <WeChatIcon className="nav-contact__icon" />
+                <span className="nav-contact__label">{weChatCta.label}</span>
+              </a>
+            </GlareHover>
+          </ClickSpark>
+          <ClickSpark>
+            <GlareHover
+              width="auto"
+              height="auto"
+              background="#0076dd"
+              borderRadius="999px"
+              borderColor="#0076dd"
+              glareColor="#ffffff"
+              glareOpacity={0.55}
+              transitionDuration={GLARE_WIPE_MS}
+              className="nav-contact-glare"
+            >
+              <Link
+                href={contactCta.href}
+                className="nav-contact nav-contact--with-icon"
+              >
+                <EmailIcon className="nav-contact__icon" />
+                <span className="nav-contact__label">{contactCta.label}</span>
+              </Link>
+            </GlareHover>
+          </ClickSpark>
+        </div>
+      </div>
     </>
   );
 }

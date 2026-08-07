@@ -86,28 +86,28 @@
   --ring: #0076dd;
   --line: rgba(11, 11, 11, 0.12);
   --font-sans: "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  /* Content shell — ramp up, hard-cap at 1280px */
+  /* Content shell — wider on laptop; sides ~half the previous inset */
   --shell-max: 56rem; /* 896 */
-  --shell-gutter: clamp(1.15rem, 2.8vw, 2.5rem);
+  --shell-gutter: clamp(0.575rem, 1.4vw, 1.25rem);
   --header-bar-h: 3.5rem;
 }
 
 @media (min-width: 1100px) {
   :root {
-    --shell-max: 60rem; /* 960 */
+    --shell-max: 64rem; /* 1024 */
   }
 }
 
 @media (min-width: 1200px) {
   :root {
-    --shell-max: 68rem; /* 1088 */
+    --shell-max: 76rem; /* 1216 */
   }
 }
 
-/* Exact 1280px cap — applies as soon as the viewport can host it */
+/* MacBook / laptop: raise cap so leftover side inset ≈ gutter (~25px), not ~50px+ */
 @media (min-width: 1280px) {
   :root {
-    --shell-max: 1280px;
+    --shell-max: 1400px;
   }
 }
 
@@ -237,11 +237,228 @@ p {
     -webkit-backdrop-filter 360ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Homepage over hero video: fully clear so media shows through */
-.site-header.is-over-media {
+/* All pages at top of scroll: fully clear — same gate as the home hero */
+.site-header.is-over-clear {
   background: transparent;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
+  /*
+   * Blend MUST live on this sticky/z-index root (Further uses fixed + difference
+   * on the nav layer itself). Child-level difference is trapped inside the
+   * stacking context and only sees an empty backdrop → white chrome vanishes.
+   * Contact pills are a sibling raft so they stay solid brand colors.
+   */
+  mix-blend-mode: difference;
+}
+
+.site-header.is-over-clear .site-nav__link,
+.site-header.is-over-clear .site-nav__item.is-open .site-nav__link,
+.site-header.is-over-clear .site-nav__link:hover,
+.site-header.is-over-clear .nav-menu-toggle {
+  color: #fff;
+}
+
+.site-header.is-over-clear .site-logo__img--white {
+  opacity: 1;
+}
+
+.site-header.is-over-clear .site-logo__img--black {
+  opacity: 0;
+}
+
+/* Contact raft — outside blended header; ghost uses its own difference */
+.site-header-cta {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 60;
+  height: var(--header-bar-h);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.site-header-cta__inner {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
+  margin-inline: auto;
+  pointer-events: none;
+}
+
+.site-header-cta__inner > * {
+  pointer-events: auto;
+}
+
+/* Clear top: text+icon only, same difference contrast as menu */
+.site-header-cta.is-ghost {
+  mix-blend-mode: difference;
+}
+
+.site-header-cta.is-ghost .nav-contact-glare.glare-hover,
+.site-header-cta:not(.is-pills) .nav-contact-glare.glare-hover {
+  background: transparent !important;
+  border-color: transparent !important;
+  /* Transparent border still eats 1px — drop it so text can sit flush */
+  border-width: 0;
+  /* Keep pill radius while fill fades out — avoids a rectangular flash */
+  overflow: visible;
+}
+
+/* Ghost: kill glare wipe — use L→R underline instead */
+.site-header-cta:not(.is-pills) .nav-contact-glare.glare-hover::before {
+  content: none;
+  display: none;
+}
+
+.site-header-cta.is-ghost .nav-contact {
+  color: #fff;
+}
+
+/*
+ * Ghost underline under the label only (not the icon) —
+ * currentColor + parent mix-blend:difference for invert contrast.
+ */
+.site-header-cta:not(.is-pills) .nav-contact__label {
+  position: relative;
+}
+
+.site-header-cta:not(.is-pills) .nav-contact__label::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.08em;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.site-header-cta:not(.is-pills) .nav-contact:hover .nav-contact__label::after {
+  transform: scaleX(1);
+}
+
+/*
+ * Ghost / pre-pill: no pill padding — right edge aligns to shell like menu text.
+ * Keep a little start padding between items; last item is fully flush right.
+ */
+.site-header-cta:not(.is-pills) .nav-contact,
+.site-header-cta:not(.is-pills) .nav-contact--with-icon {
+  padding-inline: 0.35rem 0;
+}
+
+.site-header-cta:not(.is-pills) .site-header-cta__inner > *:first-child .nav-contact {
+  padding-inline-start: 0;
+}
+
+@media (min-width: 900px) {
+  .site-header-cta:not(.is-pills) .nav-contact:not(.nav-contact--block) {
+    padding-inline: 0.35rem 0;
+  }
+
+  .site-header-cta:not(.is-pills)
+    .site-header-cta__inner
+    > *:first-child
+    .nav-contact:not(.nav-contact--block) {
+    padding-inline-start: 0;
+  }
+}
+
+/* Frost is on, pills not yet — match nav ink so labels stay readable */
+.site-header-cta:not(.is-ghost):not(.is-pills) .nav-contact {
+  color: #1d1d1f;
+}
+
+/*
+ * Pill chrome: animate ONLY while .is-pills is on (enter / stay).
+ * On exit → ghost, snap fill/padding off. A 320ms green→transparent fade
+ * under mix-blend-mode:difference reads as a wrong-colored capsule flash.
+ */
+.site-header-cta .nav-contact-glare.glare-hover {
+  border-radius: 999px;
+  transition: none;
+}
+
+.site-header-cta .nav-contact {
+  transition: none;
+}
+
+.site-header-cta.is-pills .nav-contact-glare.glare-hover {
+  background: #0076dd !important;
+  border-color: #0076dd !important;
+  border-width: 1px;
+  overflow: hidden;
+  transition:
+    background-color 320ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.site-header-cta.is-pills .nav-contact {
+  transition:
+    color 320ms cubic-bezier(0.4, 0, 0.2, 1),
+    padding 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.site-header-cta.is-pills .site-header-cta__inner > *:nth-child(1) .nav-contact-glare {
+  transition-delay: 0ms;
+}
+
+.site-header-cta.is-pills .site-header-cta__inner > *:nth-child(2) .nav-contact-glare {
+  transition-delay: 55ms;
+}
+
+.site-header-cta.is-pills .site-header-cta__inner > *:nth-child(3) .nav-contact-glare {
+  transition-delay: 110ms;
+}
+
+.site-header-cta.is-pills .nav-contact-glare.glare-hover::before {
+  display: block;
+  content: "";
+}
+
+.site-header-cta.is-pills .nav-contact__label::after {
+  content: none;
+  display: none;
+}
+
+.site-header-cta.is-pills .nav-contact-glare--whatsapp.glare-hover {
+  background: #25d366 !important;
+  border-color: #25d366 !important;
+}
+
+.site-header-cta.is-pills .nav-contact-glare--wechat.glare-hover {
+  background: #07c160 !important;
+  border-color: #07c160 !important;
+}
+
+.site-header-cta.is-pills .nav-contact {
+  color: #fff;
+}
+
+.site-header-cta.is-pills .nav-contact--with-icon {
+  padding-inline: 0.65rem 0.8rem;
+}
+
+@media (min-width: 900px) {
+  .site-header-cta.is-pills .nav-contact:not(.nav-contact--block) {
+    padding: 0.4rem 1.05rem;
+  }
+
+  .site-header-cta.is-pills .nav-contact--with-icon:not(.nav-contact--block) {
+    padding-inline: 0.65rem 0.8rem;
+  }
+}
+
+@media (max-width: 899px) {
+  .site-header-cta {
+    display: none;
+  }
 }
 
 /* Desktop mega open: frost lives on .mega-panel; bar stays clear above it */
@@ -291,11 +508,12 @@ p {
 /* Full viewport width — videos run edge to edge */
 .site-footer__stage {
   position: relative;
+  isolation: isolate;
   width: 100%;
   margin: 0;
   border-radius: 0;
   overflow: hidden;
-  background: transparent;
+  background: #000;
   /* Height from content + wordmark pad — no 78vh void that grows on narrow */
   min-height: 0;
   display: flex;
@@ -317,11 +535,14 @@ p {
 .footer-video-fill {
   position: absolute;
   left: var(--footer-wordmark-x, 0px);
-  bottom: 0;
+  /* 1px overscan — Safari SVG masks leave a hairline above the glyphs */
+  bottom: -1px;
   top: auto;
   width: var(--footer-wordmark-w, 100%);
-  height: var(--footer-wordmark-h, 0px);
+  height: calc(var(--footer-wordmark-h, 0px) + 2px);
   overflow: hidden;
+  /* Must stay dark: white placeholder showed as a Safari seam above HELLOIAMEDX */
+  background: #000;
 }
 
 .footer-video-fill__media {
@@ -331,28 +552,59 @@ p {
   object-fit: cover;
   object-position: top center;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 480ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.footer-video-fill.is-ready .footer-video-fill__media {
+  opacity: 1;
 }
 
 /*
  * Middle layer: above black plate / video, below shell copy.
- * No CSS mask — beams run full stage height to the footer bottom.
+ * Isolated blend group — screen on the plate, letter shapes punched out so
+ * Safari can’t let beams composite over the HELLOIAMEDX video glyphs.
+ * filter stays on the inner canvas wrapper (same-el filter+mix-blend breaks Safari).
  */
-.site-footer__rays {
+.site-footer__rays-stack {
   position: absolute;
   inset: 0;
-  z-index: 3;
+  z-index: 2;
   width: 100%;
   height: 100%;
   pointer-events: none;
   overflow: hidden;
-  filter: brightness(1.35) contrast(1.08);
+  isolation: isolate;
   mix-blend-mode: screen;
+}
+
+.site-footer__rays {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.site-footer__rays .light-rays-container {
+  filter: brightness(1.35) contrast(1.08);
 }
 
 .site-footer__rays .light-rays-container,
 .site-footer__rays .light-rays-container canvas {
   width: 100%;
   height: 100%;
+}
+
+.footer-wordmark__rays-cutout {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  mix-blend-mode: destination-out;
 }
 
 /*
@@ -394,7 +646,8 @@ p {
   width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
   margin-inline: auto;
   /* Fixed top pad — does not grow as the viewport shrinks */
-  padding: 2.75rem 0 calc(var(--footer-wordmark-h, 12rem) + 1.15rem);
+  /* Bottom: wordmark height + tight gap so legal/social/payments sit closer to HELLOIAMEDX */
+  padding: 2.75rem 0 calc(var(--footer-wordmark-h, 12rem) + 0.4rem);
   /* More air above & below the mid row (assist + nav) */
   gap: clamp(2.75rem, 6vw, 4.25rem);
   overflow: visible;
@@ -444,7 +697,7 @@ p {
   grid-template-columns: repeat(4, max-content);
   align-items: start;
   justify-content: end;
-  column-gap: clamp(1.25rem, 2.5cqi, 2.75rem);
+  column-gap: clamp(1.75rem, 3.4cqi, 3.5rem);
   row-gap: 1.25rem;
   margin: 0;
   /* Pack from the shell’s right edge, then grow left toward center */
@@ -558,21 +811,21 @@ p {
   gap: 0.45rem;
 }
 
-/* Smaller CTA pills than header — scoped to footer assist only */
+/* Footer assist CTAs — slightly under header pills, but readable */
 .site-footer__assist-actions .nav-contact:not(.nav-contact--block) {
-  min-height: 1.45rem;
-  padding: 0.2rem 0.65rem;
-  font-size: 0.6875rem;
-  gap: 0.28rem;
+  min-height: 1.6rem;
+  padding: 0.28rem 0.8rem;
+  font-size: 0.75rem;
+  gap: 0.32rem;
 }
 
 .site-footer__assist-actions .nav-contact--with-icon {
-  padding-inline: 0.5rem 0.65rem;
+  padding-inline: 0.6rem 0.8rem;
 }
 
 .site-footer__assist-actions .nav-contact__icon {
-  width: 0.8rem;
-  height: 0.8rem;
+  width: 0.9rem;
+  height: 0.9rem;
 }
 
 /* Legal · social (center) · payments — immediately above HELLOIAMEDX */
@@ -601,7 +854,7 @@ p {
   font-weight: 400;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--footer-muted);
+  color: #fff;
   line-height: 1.35;
   white-space: nowrap;
 }
@@ -630,7 +883,7 @@ p {
   font-weight: 400;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--footer-muted);
+  color: #fff;
   text-decoration: none;
   line-height: 1.35;
   padding-bottom: 0.12rem;
@@ -677,7 +930,7 @@ p {
 }
 
 .site-footer__social-link:hover {
-  color: var(--footer-muted);
+  color: #fff;
 }
 
 .site-footer__social-link:hover::after {
@@ -692,7 +945,7 @@ p {
   font-weight: 400;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--footer-muted);
+  color: #fff;
   line-height: 1.35;
 }
 
@@ -700,10 +953,10 @@ p {
 
 /* Mid: 4 → 2×2 nav when shell < 1200 — frees room for assist
  *
- * RULE: whenever the footer nav collapses from 4 cols → 2×2,
- * swap Services/Projects vertically so Projects sits above Services:
- *   Projects | Insights
- *   Services | About
+ * DOM order is already few → many (About · Projects · Insights · Services),
+ * so the 2×2 reads naturally:
+ *   About    | Projects
+ *   Insights | Services
  */
 @container footer-shell (max-width: 1200px) {
   .site-footer__nav {
@@ -714,24 +967,7 @@ p {
     max-width: 100%;
     margin-left: auto;
     row-gap: 1.1rem;
-    column-gap: clamp(2.625rem, 4.5cqi, 4.125rem);
-  }
-
-  /* 2×2: Projects | Insights / Services | About */
-  .site-footer__nav-col:nth-child(2) {
-    order: 1; /* Projects → top-left */
-  }
-
-  .site-footer__nav-col:nth-child(3) {
-    order: 2; /* Insights → top-right */
-  }
-
-  .site-footer__nav-col:nth-child(1) {
-    order: 3; /* Services → bottom-left */
-  }
-
-  .site-footer__nav-col:nth-child(4) {
-    order: 4; /* About → bottom-right */
+    column-gap: clamp(3.25rem, 5.5cqi, 5rem);
   }
 }
 
@@ -839,19 +1075,13 @@ p {
   gap: 0.45rem;
 }
 
-@media (max-width: 899px) {
-  .site-header__actions .click-spark {
-    display: none;
-  }
-}
-
 .site-nav {
   display: none;
   align-items: center;
   justify-content: center;
   gap: 0.05rem;
   font-size: 0.875rem;
-  font-weight: 400;
+  font-weight: 500; /* Medium — clearer over difference blend */
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -861,6 +1091,7 @@ p {
   align-items: center;
   padding: 0.4rem 0.75rem;
   color: #1d1d1f; /* Apple secondary black */
+  font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   transition: color 360ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -869,15 +1100,6 @@ p {
 .site-nav__item.is-open .site-nav__link,
 .site-nav__link:hover {
   color: #000; /* full black on hover */
-}
-
-.site-header.is-over-media .site-nav__link {
-  color: #fff;
-}
-
-.site-header.is-over-media .site-nav__item.is-open .site-nav__link,
-.site-header.is-over-media .site-nav__link:hover {
-  color: #fff;
 }
 
 .nav-contact-glare.glare-hover {
@@ -976,6 +1198,30 @@ p {
     padding: 0.4rem 1.05rem;
     font-size: 0.875rem;
   }
+
+  /*
+   * Must follow the general desktop .nav-contact padding rule above —
+   * otherwise ghost CTAs keep pill inset and look off the right edge.
+   */
+  .site-header-cta:not(.is-pills) .nav-contact:not(.nav-contact--block),
+  .site-header-cta:not(.is-pills) .nav-contact--with-icon:not(.nav-contact--block) {
+    padding: 0.28rem 0 0.28rem 0.35rem;
+  }
+
+  .site-header-cta:not(.is-pills)
+    .site-header-cta__inner
+    > *:first-child
+    .nav-contact:not(.nav-contact--block) {
+    padding-left: 0;
+  }
+
+  .site-header-cta.is-pills .nav-contact:not(.nav-contact--block) {
+    padding: 0.4rem 1.05rem;
+  }
+
+  .site-header-cta.is-pills .nav-contact--with-icon:not(.nav-contact--block) {
+    padding-inline: 0.65rem 0.8rem;
+  }
 }
 
 .site-logo {
@@ -1004,15 +1250,6 @@ p {
   opacity: 1;
 }
 
-/* Any time we leave clear-over-video chrome (scroll OR mega/mobile open), logos crossfade */
-.site-header.is-over-media .site-logo__img--white {
-  opacity: 1;
-}
-
-.site-header.is-over-media .site-logo__img--black {
-  opacity: 0;
-}
-
 .site-logo img {
   height: 1.35rem;
   width: auto;
@@ -1036,10 +1273,6 @@ p {
   text-transform: uppercase;
   color: #1d1d1f;
   transition: color 360ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.site-header.is-over-media .nav-menu-toggle {
-  color: #fff;
 }
 
 .nav-menu-toggle__label {
@@ -1100,7 +1333,8 @@ p {
 }
 
 .mega-panel__track {
-  padding: calc(var(--header-bar-h) + 2rem) var(--shell-gutter) 2.75rem 0;
+  /* Tight under the bar so plain menus (no description) don’t look like a vacant header row */
+  padding: calc(var(--header-bar-h) + 0.55rem) var(--shell-gutter) 1.25rem 0;
   box-sizing: border-box;
 }
 
@@ -1139,6 +1373,12 @@ p {
   width: max-content;
   min-width: 0;
   box-sizing: border-box;
+}
+
+/* Projects / Insights / About: no description row — first link is the top edge */
+.mega-column--plain > ul {
+  margin-top: 0;
+  padding-top: 0;
 }
 
 .mega-column--dense {
@@ -1633,12 +1873,17 @@ p {
   display: flex;
   justify-content: center;
   width: 100%;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-.hero-headline__fold-text {
+.hero-headline__fold-text,
+.hero-headline .fold-text {
   width: 100%;
   max-width: 100%;
   text-align: center;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .hero-headline__line {
@@ -1750,6 +1995,407 @@ p {
   border-color: rgba(255, 255, 255, 0.55);
 }
 
+/* —— Projects index —— */
+.projects-cover {
+  position: relative;
+  height: 100svh;
+  height: 100dvh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  margin-top: calc(-1 * var(--header-bar-h));
+  display: flex;
+  align-items: flex-end;
+  color: #1d1d1f;
+  overflow: hidden;
+  background: #fff;
+}
+
+.projects-cover__media {
+  position: absolute;
+  inset: 0;
+}
+
+.projects-cover__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* Soft white wash so doodle hero stays visible but type stays readable */
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.35) 42%,
+    rgba(255, 255, 255, 0.88) 78%,
+    rgba(255, 255, 255, 0.96) 100%
+  );
+  pointer-events: none;
+}
+
+.projects-cover__image {
+  object-fit: cover;
+  object-position: center;
+}
+
+.projects-cover__content {
+  position: relative;
+  z-index: 1;
+  width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
+  margin: 0 auto;
+  /* Sit lower in the viewport — was floating mid-bottom */
+  padding: 0 0 clamp(1.25rem, 3.5vh, 2rem);
+}
+
+.projects-cover__title {
+  margin: 0 0 0.85rem;
+  font-size: clamp(2rem, 5.5vw, 3.25rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  color: #1d1d1f;
+  text-transform: none;
+}
+
+.projects-cover__blurb {
+  margin: 0;
+  max-width: min(72ch, 100%);
+  width: 100%;
+  font-size: clamp(0.875rem, 0.7rem + 0.55vw, 1.05rem);
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+  color: rgba(29, 29, 31, 0.78);
+  text-wrap: pretty;
+}
+
+.projects-body {
+  padding-top: clamp(2.5rem, 5vw, 3.75rem);
+}
+
+.projects-page {
+  background: #fff;
+}
+
+/* Further-style full-width lead — shell width via .section parent */
+.project-featured {
+  /* Space before the two-column row */
+  margin: 0 0 clamp(1.75rem, 3vw, 2.5rem);
+}
+
+.project-featured__link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.project-featured__media {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 1920 / 1080;
+  background: #e4e4e1;
+}
+
+.project-featured__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Shared: image → meta distance (featured + two-column) */
+.project-window__meta {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.35rem 1rem;
+  margin-top: 0.75rem;
+  padding-inline: 0.05rem;
+}
+
+.project-window__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: clamp(1.05rem, 0.95rem + 0.45vw, 1.35rem);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.project-window__tagline {
+  margin: 0;
+  justify-self: center;
+  text-align: center;
+  max-width: 36ch;
+  font-family: var(--font-sans);
+  font-size: clamp(0.8125rem, 0.75rem + 0.25vw, 0.9375rem);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  color: rgba(29, 29, 31, 0.72);
+}
+
+.project-window__categories {
+  margin: 0;
+  justify-self: end;
+  text-align: right;
+  font-family: var(--font-sans);
+  font-size: clamp(0.625rem, 0.58rem + 0.2vw, 0.75rem);
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  line-height: 1.35;
+  text-transform: uppercase;
+  color: rgba(29, 29, 31, 0.55);
+}
+
+.project-window__meta--compact {
+  gap: 0.55rem 0.75rem;
+  margin-top: 0.7rem;
+}
+
+.project-window__meta--compact .project-window__title {
+  font-size: clamp(0.8125rem, 0.75rem + 0.28vw, 1rem);
+}
+
+.project-window__meta--compact .project-window__tagline {
+  font-size: clamp(0.6875rem, 0.64rem + 0.18vw, 0.8125rem);
+  max-width: 28ch;
+}
+
+.project-window__meta--compact .project-window__categories {
+  font-size: clamp(0.5625rem, 0.52rem + 0.15vw, 0.6875rem);
+  letter-spacing: 0.06em;
+}
+
+/*
+ * Two-column card meta (reference layout):
+ *   TITLE ........................ TAGS
+ *   Tagline under the title
+ */
+.project-window__meta--stack {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "title cats"
+    "tagline tagline";
+  align-items: baseline;
+  column-gap: 1rem;
+  row-gap: 0.35rem;
+  /* margin-top inherited from .project-window__meta (0.75rem) */
+  padding-inline: 0.05rem;
+}
+
+.project-window__meta--stack .project-window__title {
+  grid-area: title;
+  font-size: clamp(0.9375rem, 0.85rem + 0.35vw, 1.125rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.project-window__meta--stack .project-window__categories {
+  grid-area: cats;
+  justify-self: end;
+  text-align: right;
+  font-size: clamp(0.5625rem, 0.52rem + 0.15vw, 0.6875rem);
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.project-window__meta--stack .project-window__tagline {
+  grid-area: tagline;
+  justify-self: start;
+  text-align: left;
+  max-width: 42ch;
+  font-size: clamp(0.75rem, 0.7rem + 0.2vw, 0.875rem);
+  font-weight: 500;
+  color: rgba(29, 29, 31, 0.72);
+}
+
+@media (max-width: 800px) {
+  .project-window__meta {
+    grid-template-columns: 1fr;
+    gap: 0.45rem;
+  }
+
+  .project-window__tagline,
+  .project-window__categories {
+    justify-self: start;
+    text-align: left;
+    max-width: none;
+  }
+
+  .project-window__meta--stack {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "title"
+      "tagline"
+      "cats";
+  }
+
+  .project-window__meta--stack .project-window__categories {
+    justify-self: start;
+    text-align: left;
+    white-space: normal;
+  }
+}
+
+.project-involvement {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: clamp(1.75rem, 3.5vw, 2.75rem);
+  text-align: left;
+}
+
+.project-involvement__heading {
+  margin: 0 0 clamp(1rem, 2vw, 1.35rem);
+  font-family: var(--font-sans);
+  font-size: clamp(1.55rem, 1.3rem + 0.9vw, 2.15rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+.project-involvement__ip {
+  margin: 0 0 0.85rem;
+  font-size: 0.875rem;
+}
+
+.project-involvement__ip a {
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+/* Sized by the filter track; blurb is 65% of that width */
+.project-involvement__folder {
+  display: grid;
+  grid-template-columns: max-content;
+  justify-content: start;
+  justify-items: start;
+  max-width: 100%;
+}
+
+.project-involvement__track {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 0.15rem;
+  padding: 0.28rem;
+  border-radius: 999px;
+  background: #e5e5ea;
+  max-width: 100%;
+}
+
+.project-involvement__pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 1.05rem;
+  border-radius: 999px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #1d1d1f;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background 220ms ease,
+    color 220ms ease;
+}
+
+.project-involvement__pill:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.project-involvement__pill.is-active {
+  background: #1d1d1f;
+  color: #fff;
+}
+
+.project-involvement__pill.is-active:hover {
+  background: #1d1d1f;
+  color: #fff;
+}
+
+@media (max-width: 700px) {
+  .project-involvement__folder {
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+  }
+
+  .project-involvement__track {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+    scrollbar-width: none;
+    justify-content: flex-start;
+  }
+
+  .project-involvement__track::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Equal two-column showcase (after featured lead) — not .project-grid (home) */
+.project-showcase {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1.1rem, 2vw, 1.6rem) clamp(1rem, 2.5vw, 1.75rem);
+}
+
+@media (max-width: 700px) {
+  .project-showcase {
+    grid-template-columns: 1fr;
+  }
+}
+
+.project-showcase__item {
+  min-width: 0;
+}
+
+.project-showcase__link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.project-showcase__media {
+  position: relative;
+  overflow: hidden;
+  background: #e4e4e1;
+  width: 100%;
+  aspect-ratio: 3000 / 1687;
+}
+
+.project-showcase__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.projects-related {
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--line);
+}
+
+.projects-related__title {
+  margin: 0 0 clamp(1.25rem, 2.5vw, 1.75rem);
+  font-size: clamp(1.5rem, 2.8vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+/* Legacy uniform grid (home / elsewhere) */
 .page-cover {
   min-height: 48vh;
   display: grid;
@@ -1770,28 +2416,6 @@ p {
   color: #fff;
   font-size: clamp(2rem, 5vw, 3.5rem);
   max-width: 14ch;
-}
-
-.project-filter {
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto;
-  padding-bottom: 1.25rem;
-  margin-bottom: 1.5rem;
-  border-bottom: 1px solid var(--line);
-}
-
-.project-filter a {
-  padding: 0.55rem 0.9rem;
-  border: 1px solid var(--line);
-  white-space: nowrap;
-  font-weight: 500;
-}
-
-.project-filter a.is-active {
-  background: var(--ink);
-  color: #fff;
-  border-color: var(--ink);
 }
 
 .project-grid {
@@ -1834,6 +2458,321 @@ p {
   display: grid;
   gap: 1.5rem;
   max-width: 40rem;
+}
+
+.project-detail {
+  background: #fff;
+}
+
+.project-case-copy {
+  background: #fff;
+}
+
+.project-case-copy .project-case-statement + .project-case-statement {
+  padding-top: 0;
+}
+
+/* —— Case statement (title left · copy block right, text LTR left-aligned) —— */
+.project-case-statement {
+  background: #fff;
+  color: #1d1d1f;
+  padding: clamp(2.5rem, 6vw, 4.5rem) 0;
+}
+
+.project-case-statement__frame {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.35fr);
+  align-items: start;
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
+  margin: 0 auto;
+}
+
+.project-case-statement__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: clamp(1.05rem, 0.95rem + 0.45vw, 1.35rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  text-align: left;
+  color: #1d1d1f;
+}
+
+.project-case-statement__copy {
+  text-align: left;
+  max-width: 42rem;
+  justify-self: end;
+  width: 100%;
+}
+
+.project-case-statement__headline {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: clamp(1rem, 0.9rem + 0.4vw, 1.1875rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.25;
+  text-transform: uppercase;
+  color: #1d1d1f;
+  text-wrap: pretty;
+}
+
+.project-case-statement__overview {
+  margin: clamp(0.75rem, 1.5vw, 1rem) 0 0;
+  font-family: var(--font-sans);
+  font-size: clamp(1rem, 0.9rem + 0.35vw, 1.125rem);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+  color: #1d1d1f;
+  text-wrap: pretty;
+}
+
+@media (max-width: 800px) {
+  .project-case-statement__frame {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .project-case-statement__copy {
+    justify-self: stretch;
+    max-width: none;
+  }
+}
+
+/*
+ * Full-viewport case hero — pulls under the sticky header so clear/difference
+ * chrome reads the video (no frosted plate at rest).
+ */
+.project-case-hero {
+  position: relative;
+  height: 100svh;
+  height: 100dvh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  margin-top: calc(-1 * var(--header-bar-h));
+  overflow: hidden;
+  background: #0a0a0a;
+  color: #fff;
+}
+
+.project-case-hero__media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Cover the viewport (16:9 Vimeo scaled like object-fit: cover) */
+.project-case-hero__video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100vw;
+  height: 56.25vw; /* 9/16 of width */
+  min-height: 100%;
+  min-width: 177.78vh; /* 16/9 of height */
+  border: 0;
+  transform: translate(-50%, -50%);
+}
+
+/* Meta inside the frame, near the bottom — difference invert like hero roll */
+.project-case-hero__meta {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  bottom: clamp(0.75rem, 1.8vh, 1.25rem);
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.35rem 1rem;
+  width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
+  padding-inline: 0.05rem;
+  mix-blend-mode: difference;
+  pointer-events: none;
+}
+
+.project-case-hero__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: clamp(1.05rem, 0.95rem + 0.45vw, 1.35rem);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.project-case-hero__tagline {
+  margin: 0;
+  justify-self: center;
+  text-align: center;
+  max-width: 36ch;
+  font-family: var(--font-sans);
+  font-size: clamp(0.8125rem, 0.75rem + 0.25vw, 0.9375rem);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  color: #fff;
+}
+
+.project-case-hero__categories {
+  margin: 0;
+  justify-self: end;
+  text-align: right;
+  font-family: var(--font-sans);
+  font-size: clamp(0.625rem, 0.58rem + 0.2vw, 0.75rem);
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  line-height: 1.35;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+@media (max-width: 800px) {
+  .project-case-hero__meta {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+    bottom: clamp(0.65rem, 1.5vh, 1rem);
+  }
+
+  .project-case-hero__tagline,
+  .project-case-hero__categories {
+    justify-self: start;
+    text-align: left;
+    max-width: none;
+  }
+}
+
+/* —— Legacy case cover (unused) —— */
+.case-cover {
+  position: relative;
+  height: 100svh;
+  height: 100dvh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  margin-top: calc(-1 * var(--header-bar-h));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  overflow: hidden;
+  background: #0a0a0a;
+}
+
+.case-cover__media {
+  position: absolute;
+  inset: 0;
+}
+
+.case-cover__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.28) 0%,
+    rgba(0, 0, 0, 0.22) 38%,
+    rgba(0, 0, 0, 0.45) 72%,
+    rgba(0, 0, 0, 0.62) 100%
+  );
+  pointer-events: none;
+}
+
+.case-cover__image {
+  object-fit: cover;
+  object-position: center;
+}
+
+.case-cover__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: min(52rem, calc(100% - var(--shell-gutter) * 2));
+  margin: 0 auto;
+  padding: calc(var(--header-bar-h) + 1rem) 0 8vh;
+}
+
+.case-cover__title {
+  margin: 0 0 clamp(1.25rem, 3.5vh, 2.25rem);
+  font-family: var(--font-sans);
+  font-size: clamp(0.8125rem, 0.7rem + 0.4vw, 1rem);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: #fff;
+}
+
+.case-cover__headline {
+  margin: 0;
+  max-width: 22ch;
+  font-family: var(--font-sans);
+  font-size: clamp(1.65rem, 1.1rem + 2.8vw, 3.25rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  text-transform: uppercase;
+  text-wrap: balance;
+  color: #fff;
+}
+
+.case-cover__sub {
+  margin: clamp(0.85rem, 2vh, 1.35rem) 0 0;
+  font-family: var(--font-sans);
+  font-size: clamp(0.75rem, 0.68rem + 0.3vw, 0.875rem);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: lowercase;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.case-cover__cta {
+  margin-top: clamp(2.5rem, 8vh, 5.5rem);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: 0.55rem 1.35rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition:
+    background-color 220ms ease,
+    border-color 220ms ease,
+    color 220ms ease;
+}
+
+.case-cover__cta:hover {
+  background: #fff;
+  border-color: #fff;
+  color: #1d1d1f;
+}
+
+.case-study-placeholder {
+  padding-top: clamp(2.5rem, 5vw, 3.75rem);
+  padding-bottom: clamp(3rem, 8vw, 5rem);
+}
+
+.case-study-placeholder__note {
+  margin: 0;
+  max-width: 36rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--muted);
 }
 
 .back-link {

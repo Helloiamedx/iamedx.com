@@ -6,17 +6,17 @@ alwaysApply: false
 
 # Footer link columns (2×2 collapse)
 
+Column order is **few → many**: About · Projects · Insights · Services.
+
 When the footer nav collapses from **4 columns to 2×2** (shell width &lt; 1200px):
 
 1. Keep the 2×2 as a **tight block on the right** (not `space-between` across full width).
-2. **Swap Services / Projects vertically** so the grid is:
+2. Keep DOM order (no `order` swaps) so the grid is:
 
 ```
-Projects | Insights
-Services | About
+About    | Projects
+Insights | Services
 ```
-
-Wide (4-col) order stays: Services · Projects · Insights · About.
 
 # Mid row: assist vs links
 

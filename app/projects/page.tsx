@@ -1,22 +1,30 @@
 import type { Metadata } from "next";
+import { ProjectFeaturedLead } from "@/components/ProjectFeaturedLead";
 import { ProjectFilter } from "@/components/ProjectFilter";
-import { ProjectGrid } from "@/components/ProjectGrid";
+import { ProjectMasonry } from "@/components/ProjectMasonry";
+import { ProjectsHeroRoll } from "@/components/ProjectsHeroRoll";
 import { projectIps } from "@/content/nav";
-import { filterProjects, materials, type Material } from "@/content/projects";
+import {
+  filterProjects,
+  getRelatedProjects,
+  involvementFilters,
+  projectsFeaturedLead,
+  type Involvement,
+} from "@/content/projects";
 
 export const metadata: Metadata = {
   title: "Projects",
   description:
-    "Product projects by IP and material — wood, metal, resin, fabric, leather, and paper.",
+    "Selected projects showcasing challenges, solutions, and value created throughout the manufacturing journey.",
 };
 
 type ProjectsPageProps = {
-  searchParams: Promise<{ material?: string; ip?: string }>;
+  searchParams: Promise<{ involvement?: string; ip?: string }>;
 };
 
-const materialIds = materials
+const involvementIds = involvementFilters
   .map((item) => item.id)
-  .filter((id): id is Material => id !== "all");
+  .filter((id): id is Involvement => id !== "all");
 
 const ipSlugs = projectIps.map((label) =>
   label
@@ -25,8 +33,8 @@ const ipSlugs = projectIps.map((label) =>
     .replace(/(^-|-$)/g, ""),
 );
 
-function isMaterial(value?: string): value is Material {
-  return !!value && materialIds.includes(value as Material);
+function isInvolvement(value?: string): value is Involvement {
+  return !!value && involvementIds.includes(value as Involvement);
 }
 
 function isIp(value?: string): value is string {
@@ -35,44 +43,46 @@ function isIp(value?: string): value is string {
 
 export default async function ProjectsPage({ searchParams }: ProjectsPageProps) {
   const params = await searchParams;
-  const activeMaterial: Material | "all" = isMaterial(params.material)
-    ? params.material
+  const activeInvolvement: Involvement | "all" = isInvolvement(
+    params.involvement,
+  )
+    ? params.involvement
     : "all";
   const activeIp = isIp(params.ip) ? params.ip : null;
-  const projects = filterProjects({
-    material: activeMaterial,
-    ip: activeIp,
-  });
 
-  const ipLabel = activeIp
-    ? projectIps.find(
-        (label) =>
-          label
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/(^-|-$)/g, "") === activeIp,
-      )
-    : null;
+  const showFeaturedLead = activeInvolvement === "all" && !activeIp;
+
+  const listed = filterProjects({
+    involvement: activeInvolvement,
+    ip: activeIp,
+  }).filter((p) => !(showFeaturedLead && p.slug === projectsFeaturedLead.slug));
+
+  const related = getRelatedProjects(
+    [
+      ...listed.map((p) => p.slug),
+      ...(showFeaturedLead ? [projectsFeaturedLead.slug] : []),
+    ],
+    5,
+  );
 
   return (
-    <main>
-      <section className="page-cover page-cover--projects">
-        <div className="page-cover__content">
-          <p className="eyebrow">Projects</p>
-          <h1>
-            {ipLabel
-              ? ipLabel
-              : activeMaterial !== "all"
-                ? materials.find((item) => item.id === activeMaterial)?.label
-                : "Products brought through the line."}
-          </h1>
-        </div>
+    <main className="projects-page">
+      <ProjectsHeroRoll />
+
+      <section className="section projects-body">
+        <ProjectFilter active={activeInvolvement} activeIp={activeIp} />
+        {showFeaturedLead ? (
+          <ProjectFeaturedLead project={projectsFeaturedLead} />
+        ) : null}
+        <ProjectMasonry projects={listed} />
       </section>
 
-      <section className="section">
-        <ProjectFilter active={activeMaterial} activeIp={activeIp} />
-        <ProjectGrid projects={projects} />
-      </section>
+      {related.length > 0 ? (
+        <section className="section projects-related">
+          <h2 className="projects-related__title">Related</h2>
+          <ProjectMasonry projects={related} />
+        </section>
+      ) : null}
     </main>
   );
 }

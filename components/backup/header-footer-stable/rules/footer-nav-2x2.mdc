@@ -1,0 +1,24 @@
+---
+description: Footer nav 4-col → 2×2 layout rules
+globs: "{app/globals.css,components/Footer.tsx,content/nav.ts}"
+alwaysApply: false
+---
+
+# Footer link columns (2×2 collapse)
+
+When the footer nav collapses from **4 columns to 2×2** (shell width &lt; 1200px):
+
+1. Keep the 2×2 as a **tight block on the right** (not `space-between` across full width).
+2. **Swap Services / Projects vertically** so the grid is:
+
+```
+Projects | Insights
+Services | About
+```
+
+Wide (4-col) order stays: Services · Projects · Insights · About.
+
+# Mid row: assist vs links
+
+- Keep a **fixed column-gap** (2.5rem) between Looking for assistance and the link block.
+- Prefer assist width `--footer-assist-fixed-w` (23rem); when space is tight, **assist shrinks** (`flex-shrink: 1`) and **links do not** (`flex-shrink: 0`).

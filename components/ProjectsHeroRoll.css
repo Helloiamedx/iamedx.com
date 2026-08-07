@@ -1,0 +1,255 @@
+.projects-cover--roll {
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: #050506;
+}
+
+.projects-hero-roll {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.projects-hero-roll__stage {
+  position: absolute;
+  inset: 0;
+  /* Long, eased bottom dissolve — short ramps read as a hard cut on shadows */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 68%,
+    rgba(0, 0, 0, 0.92) 78%,
+    rgba(0, 0, 0, 0.62) 86%,
+    rgba(0, 0, 0, 0.28) 93%,
+    rgba(0, 0, 0, 0.08) 97%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 68%,
+    rgba(0, 0, 0, 0.92) 78%,
+    rgba(0, 0, 0, 0.62) 86%,
+    rgba(0, 0, 0, 0.28) 93%,
+    rgba(0, 0, 0, 0.08) 97%,
+    transparent 100%
+  );
+}
+
+.projects-hero-roll__stage.is-ready {
+  opacity: 1;
+}
+
+.projects-hero-roll__frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  border-radius: 2px;
+  overflow: visible;
+  background: transparent;
+  pointer-events: none;
+  will-change: transform;
+  animation-name: projects-hero-roll-up;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+.projects-hero-roll__frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Full image — scale via width only, never crop */
+  object-fit: contain;
+  object-position: center;
+  opacity: 1;
+  vertical-align: top;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Depth tiers: layered shadow + air perspective (size unchanged) */
+.projects-hero-roll__frame--far {
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.28),
+    0 1px 0 rgba(255, 255, 255, 0.02) inset;
+}
+
+.projects-hero-roll__frame--far img {
+  filter: brightness(0.7) contrast(0.9) saturate(0.92) blur(1px);
+}
+
+.projects-hero-roll__frame--mid {
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.42),
+    0 1px 0 rgba(255, 255, 255, 0.04) inset;
+}
+
+.projects-hero-roll__frame--mid img {
+  filter: brightness(0.88) contrast(0.96);
+}
+
+.projects-hero-roll__frame--near {
+  box-shadow:
+    0 28px 64px rgba(0, 0, 0, 0.62),
+    0 10px 24px rgba(0, 0, 0, 0.28),
+    0 1px 0 rgba(255, 255, 255, 0.06) inset;
+}
+
+.projects-hero-roll__frame--near img {
+  filter: brightness(1.03) contrast(1.04) saturate(1.02);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .projects-hero-roll__frame--far img {
+    filter: brightness(0.72) contrast(0.9) saturate(0.92);
+  }
+}
+
+@keyframes projects-hero-roll-up {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(var(--roll-drift, 0px), var(--roll-travel, -200vh), 0);
+  }
+}
+
+.projects-hero-roll__frame--static {
+  animation: none;
+  width: min(22vw, 280px);
+  will-change: auto;
+}
+
+.projects-hero-roll__frame--s0 { left: 2%; top: 12%; width: min(24vw, 300px); z-index: 3; }
+.projects-hero-roll__frame--s1 { left: 28%; top: 8%; width: min(18vw, 220px); z-index: 2; }
+.projects-hero-roll__frame--s2 { left: 48%; top: 22%; width: min(20vw, 260px); z-index: 4; }
+.projects-hero-roll__frame--s3 { left: 70%; top: 10%; width: min(22vw, 280px); z-index: 2; }
+.projects-hero-roll__frame--s4 { left: 8%; top: 48%; width: min(16vw, 200px); z-index: 1; }
+.projects-hero-roll__frame--s5 { left: 38%; top: 52%; width: min(19vw, 240px); z-index: 3; }
+.projects-hero-roll__frame--s6 { left: 62%; top: 44%; width: min(17vw, 210px); z-index: 2; }
+.projects-hero-roll__frame--s7 { right: 0; left: auto; top: 58%; width: min(23vw, 290px); z-index: 3; }
+
+.projects-hero-roll__veil {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(5, 5, 6, 0.28) 0%,
+      rgba(5, 5, 6, 0.06) 14%,
+      rgba(5, 5, 6, 0.04) 52%,
+      rgba(5, 5, 6, 0.18) 68%,
+      rgba(5, 5, 6, 0.48) 82%,
+      rgba(5, 5, 6, 0.78) 92%,
+      rgba(5, 5, 6, 0.96) 100%
+    ),
+    radial-gradient(
+      ellipse 72% 60% at 50% 48%,
+      rgba(5, 5, 6, 0) 0%,
+      rgba(5, 5, 6, 0.4) 100%
+    );
+  /* Clear the copy zone so difference can read the images underneath */
+  -webkit-mask-image: radial-gradient(
+    ellipse 58% 36% at 50% 48%,
+    transparent 0%,
+    transparent 42%,
+    #000 78%
+  );
+  mask-image: radial-gradient(
+    ellipse 58% 36% at 50% 48%,
+    transparent 0%,
+    transparent 42%,
+    #000 78%
+  );
+}
+
+.projects-hero-roll__grain {
+  position: absolute;
+  inset: 0;
+  z-index: 11;
+  pointer-events: none;
+  opacity: 0.16;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  -webkit-mask-image: radial-gradient(
+    ellipse 58% 36% at 50% 48%,
+    transparent 0%,
+    transparent 42%,
+    #000 78%
+  );
+  mask-image: radial-gradient(
+    ellipse 58% 36% at 50% 48%,
+    transparent 0%,
+    transparent 42%,
+    #000 78%
+  );
+}
+
+.projects-hero-roll__copy {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--header-bar-h) + 0.5rem) var(--shell-gutter) 2rem;
+  text-align: center;
+  pointer-events: none;
+  /*
+   * Same invert contrast as the clear header — white type differences
+   * against whatever art sits behind it.
+   */
+  mix-blend-mode: difference;
+}
+
+.projects-hero-roll__line {
+  margin: 0;
+  max-width: min(28ch, 100%);
+  min-height: 1.2em;
+  font-family: var(--font-sans);
+  font-size: clamp(1.65rem, 1.1rem + 2.4vw, 3rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0.008em;
+  word-spacing: 0.04em;
+  color: #fff;
+  text-wrap: balance;
+  opacity: 0;
+  transform: translateY(0.35rem);
+  transition:
+    opacity 520ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 520ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.projects-hero-roll__line.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 700px) {
+  .projects-hero-roll__line {
+    max-width: 16ch;
+    font-size: clamp(1.35rem, 1rem + 2.2vw, 1.85rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .projects-hero-roll__frame {
+    animation: none !important;
+  }
+
+  .projects-hero-roll__line {
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+}

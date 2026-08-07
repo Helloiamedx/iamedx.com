@@ -40,30 +40,14 @@ function serviceTopicLink(label: string): MegaLink {
   };
 }
 
-function projectIpLink(label: string): MegaLink {
-  const slug = slugify(label);
+function projectInvolvementLink(
+  id: "all" | "end-to-end" | "contribution" | "specialized",
+  label: string,
+): MegaLink {
   return {
     label,
-    slug,
-    href: `/projects?ip=${slug}`,
-  };
-}
-
-function projectMaterialLink(label: string): MegaLink {
-  const slug = slugify(label);
-  return {
-    label,
-    slug,
-    href: `/projects?material=${slug}`,
-  };
-}
-
-function insightTagLink(label: string): MegaLink {
-  const slug = slugify(label);
-  return {
-    label,
-    slug,
-    href: `/insights?tag=${slug}`,
+    slug: id,
+    href: id === "all" ? "/projects" : `/projects?involvement=${id}`,
   };
 }
 
@@ -90,6 +74,7 @@ export const projectIps = [
   "Dead Space",
 ] as const;
 
+/** @deprecated Materials explore removed from mega — kept for legacy filters */
 export const projectMaterialLabels = [
   "Wood",
   "Metal",
@@ -102,21 +87,16 @@ export const projectMaterialLabels = [
 /** Canonical insight tags used in mega menu + MDX frontmatter */
 export const insightTagGroups = [
   {
-    id: "manufacturing-insights",
-    title: "Manufacturing Insights",
+    id: "manufacturing-market-insights",
+    title: "Manufacturing & Market",
     tags: [
-      "Manufacturing Processes",
-      "Product Development",
       "Quality Control",
-    ],
-  },
-  {
-    id: "supply-chain-business-insights",
-    title: "Supply Chain & Business Insights",
-    tags: [
-      "China Manufacturing",
+      "Manufacturing",
+      "Product Development",
       "Brand & Product Strategy",
       "Market Perspective",
+      "Supply Chain Operations",
+      "Factory Partnerships",
     ],
   },
 ] as const;
@@ -129,18 +109,18 @@ export const insightTags: InsightTag[] = insightTagGroups.flatMap((group) =>
   })),
 );
 
+/** Projects mega — same involvement filters as /projects pills (no column title) */
 export const projectsMega: MegaColumn[] = [
   {
-    id: "explore-by-ip",
-    title: "Explore projects by IP",
+    id: "project-involvement",
+    title: "",
     description: "",
-    links: projectIps.map(projectIpLink),
-  },
-  {
-    id: "explore-by-material",
-    title: "Explore projects by material",
-    description: "",
-    links: projectMaterialLabels.map(projectMaterialLink),
+    links: [
+      projectInvolvementLink("all", "All Projects"),
+      projectInvolvementLink("end-to-end", "End-to-End Projects"),
+      projectInvolvementLink("contribution", "Project Contribution"),
+      projectInvolvementLink("specialized", "Specialized Services"),
+    ],
   },
 ];
 
@@ -202,7 +182,7 @@ function aboutSectionLink(label: string): MegaLink {
 export const aboutMega: MegaColumn[] = [
   {
     id: "get-to-know-edward",
-    title: "Get to Know Edward",
+    title: "",
     description: "",
     links: [
       "Who I Am",
@@ -213,12 +193,19 @@ export const aboutMega: MegaColumn[] = [
   },
 ];
 
-export const insightsMega: MegaColumn[] = insightTagGroups.map((group) => ({
-  id: group.id,
-  title: group.title,
-  description: "",
-  links: group.tags.map(insightTagLink),
-}));
+/** Insights mega — flat list, no group headings */
+export const insightsMega: MegaColumn[] = [
+  {
+    id: "manufacturing-market-insights",
+    title: "",
+    description: "",
+    links: insightTags.map((tag) => ({
+      label: tag.label,
+      slug: tag.slug,
+      href: `/insights?tag=${tag.slug}`,
+    })),
+  },
+];
 
 export const primaryNav: NavItem[] = [
   { href: "/services", label: "Services", mega: servicesMega },
@@ -308,34 +295,9 @@ export type FooterNavColumn = {
 };
 
 /**
- * Footer link columns — mirrors header mega “description / title” rows
- * (Services: 3 descriptions · Projects: 2 explore titles · Insights: 2 groups · About: 4 links).
+ * Footer link columns — few → many (About · Projects · Insights · Services).
  */
 export const footerNavColumns: FooterNavColumn[] = [
-  {
-    id: "services",
-    label: "Services",
-    links: servicesMega.map((column) => ({
-      label: column.description || column.title,
-      href: "/services",
-    })),
-  },
-  {
-    id: "projects",
-    label: "Projects",
-    links: projectsMega.map((column) => ({
-      label: column.title,
-      href: "/projects",
-    })),
-  },
-  {
-    id: "insights",
-    label: "Insights",
-    links: insightsMega.map((column) => ({
-      label: column.title,
-      href: "/insights",
-    })),
-  },
   {
     id: "about",
     label: "About",
@@ -343,6 +305,37 @@ export const footerNavColumns: FooterNavColumn[] = [
       label: link.label,
       href: link.href,
     })) ?? [],
+  },
+  {
+    id: "projects",
+    label: "Projects",
+    links: projectsMega.flatMap((column) =>
+      column.links.map((link) => ({
+        label: link.label,
+        href: link.href,
+      })),
+    ),
+  },
+  {
+    id: "insights",
+    label: "Insights",
+    links: insightsMega.flatMap((column) =>
+      column.links.map((link) => ({
+        label: link.label,
+        href: link.href,
+      })),
+    ),
+  },
+  {
+    id: "services",
+    label: "Services",
+    links:
+      servicesMega
+        .find((column) => column.id === "work-with-me")
+        ?.links.map((link) => ({
+          label: link.label,
+          href: link.href,
+        })) ?? [],
   },
 ];
 

@@ -1,0 +1,18 @@
+.shell {
+  width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
+  margin-inline: auto;
+}
+
+.section {
+  width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
+  margin: 0 auto;
+  padding: 4rem 0;
+}
+
+.section__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
