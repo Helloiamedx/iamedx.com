@@ -229,7 +229,28 @@ export const primaryNav: NavItem[] = [
 
 export const contactCta = {
   href: "/contact",
-  label: "Contact",
+  label: "Email",
+} as const;
+
+/**
+ * WhatsApp click-to-chat. Digits only with country code (no + / spaces).
+ * Example: "8613812345678" → https://wa.me/8613812345678
+ */
+export const whatsAppPhone = "";
+
+export const whatsAppCta = {
+  href: whatsAppPhone ? `https://wa.me/${whatsAppPhone}` : "/contact",
+  label: "WhatsApp",
+} as const;
+
+/** WeChat ID — when set, button can deep-link; empty falls back to contact. */
+export const weChatId = "";
+
+export const weChatCta = {
+  href: weChatId
+    ? `https://www.wechat.com/` // placeholder until QR / ID flow is wired
+    : "/contact",
+  label: "WeChat",
 } as const;
 
 /** External social / office — Facebook & TikTok use site until profiles are ready */
@@ -264,18 +285,110 @@ export const mobileSocialLinks = [
   { label: "TikTok", href: tiktokHref },
 ] as const;
 
-export const mobileContactCta = {
-  href: "/contact",
-  label: "Get in touch",
-} as const;
+/** Footer content layer (reference layout) */
+export const footerLeadCopy =
+  "I create products and experiences that drive remarkable change through radical collaboration.";
 
-/** Footer top-left positioning line */
+/** Block above the thanks rule */
+export const footerAssistTitle = "Looking for assistance?";
+
+export const footerAssistCopy =
+  "Whether you need support with product development, supplier management, quality control, or any other aspect of manufacturing, I’m here to provide the assistance you need.";
+
+/** Large mid-footer line — rendered uppercase via CSS */
+export const footerThanksLine = "Thanks for your trust";
+
+/** Bottom-right note above HELLOIAMEDX */
+export const footerPaymentsNote = "Personal Payments Accepted";
+
+export type FooterNavColumn = {
+  id: string;
+  label: string;
+  links: { label: string; href: string }[];
+};
+
+/**
+ * Footer link columns — mirrors header mega “description / title” rows
+ * (Services: 3 descriptions · Projects: 2 explore titles · Insights: 2 groups · About: 4 links).
+ */
+export const footerNavColumns: FooterNavColumn[] = [
+  {
+    id: "services",
+    label: "Services",
+    links: servicesMega.map((column) => ({
+      label: column.description || column.title,
+      href: "/services",
+    })),
+  },
+  {
+    id: "projects",
+    label: "Projects",
+    links: projectsMega.map((column) => ({
+      label: column.title,
+      href: "/projects",
+    })),
+  },
+  {
+    id: "insights",
+    label: "Insights",
+    links: insightsMega.map((column) => ({
+      label: column.title,
+      href: "/insights",
+    })),
+  },
+  {
+    id: "about",
+    label: "About",
+    links: aboutMega[0]?.links.map((link) => ({
+      label: link.label,
+      href: link.href,
+    })) ?? [],
+  },
+];
+
+/**
+ * Portrait marquee placeholders — swap `src` when real vertical clips arrive.
+ * Paths resolve via `asset()`.
+ */
+export const footerMarqueeVideos = [
+  {
+    id: "demo-1",
+    src: "videos/Turning Ideas Into Products.mp4",
+    label: "Turning ideas into products",
+  },
+  {
+    id: "demo-2",
+    src: "videos/Turning Ideas Into Products.mp4",
+    label: "Turning ideas into products",
+  },
+  {
+    id: "demo-3",
+    src: "videos/Turning Ideas Into Products.mp4",
+    label: "Turning ideas into products",
+  },
+  {
+    id: "demo-4",
+    src: "videos/Turning Ideas Into Products.mp4",
+    label: "Turning ideas into products",
+  },
+  {
+    id: "demo-5",
+    src: "videos/Turning Ideas Into Products.mp4",
+    label: "Turning ideas into products",
+  },
+  {
+    id: "demo-6",
+    src: "videos/Turning Ideas Into Products.mp4",
+    label: "Turning ideas into products",
+  },
+] as const;
+
+/** @deprecated Legacy tagline — kept for backups only */
 export const footerTagline =
   "Driven by loyalty, transparency, and a commitment to exceed expectations, I help clients build highly tailored supply chain.";
 
 /**
- * Footer menu columns — order drives the 4+4 top-right layout.
- * Edit the source megas only; this list stays in sync.
+ * @deprecated Legacy mega columns for old footer scroll layout.
  */
 export const footerLinkColumns = [
   ...servicesMega,

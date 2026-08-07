@@ -4,13 +4,17 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ClickSpark } from "@/components/ClickSpark";
+import { EmailIcon, WeChatIcon, WhatsAppIcon } from "@/components/ContactChannelIcons";
 import { GlareHover, GLARE_WIPE_MS } from "@/components/GlareHover";
 import {
+  contactCta,
   contactInfo,
-  mobileContactCta,
   mobileNavLinks,
   mobileSocialLinks,
   officeInfo,
+  weChatCta,
+  whatsAppCta,
+  whatsAppPhone,
 } from "@/content/nav";
 
 type MobileBubbleNavProps = {
@@ -157,6 +161,52 @@ export function MobileBubbleNav({ open, onNavigate }: MobileBubbleNavProps) {
           <GlareHover
             width="auto"
             height="auto"
+            background="#25D366"
+            borderRadius="999px"
+            borderColor="#25D366"
+            glareColor="#ffffff"
+            glareOpacity={0.55}
+            transitionDuration={GLARE_WIPE_MS}
+            className="nav-contact-glare--whatsapp"
+          >
+            <a
+              href={whatsAppCta.href}
+              className="mobile-menu__cta-btn mobile-menu__cta-btn--with-icon"
+              target={whatsAppPhone ? "_blank" : undefined}
+              rel={whatsAppPhone ? "noopener noreferrer" : undefined}
+              onClick={onNavigate}
+            >
+              <WhatsAppIcon className="nav-contact__icon" />
+              {whatsAppCta.label}
+            </a>
+          </GlareHover>
+        </ClickSpark>
+        <ClickSpark>
+          <GlareHover
+            width="auto"
+            height="auto"
+            background="#07C160"
+            borderRadius="999px"
+            borderColor="#07C160"
+            glareColor="#ffffff"
+            glareOpacity={0.55}
+            transitionDuration={GLARE_WIPE_MS}
+            className="nav-contact-glare--wechat"
+          >
+            <a
+              href={weChatCta.href}
+              className="mobile-menu__cta-btn mobile-menu__cta-btn--with-icon"
+              onClick={onNavigate}
+            >
+              <WeChatIcon className="nav-contact__icon" />
+              {weChatCta.label}
+            </a>
+          </GlareHover>
+        </ClickSpark>
+        <ClickSpark>
+          <GlareHover
+            width="auto"
+            height="auto"
             background="#0076dd"
             borderRadius="999px"
             borderColor="#0076dd"
@@ -165,11 +215,12 @@ export function MobileBubbleNav({ open, onNavigate }: MobileBubbleNavProps) {
             transitionDuration={GLARE_WIPE_MS}
           >
             <Link
-              href={mobileContactCta.href}
-              className="mobile-menu__cta-btn"
+              href={contactCta.href}
+              className="mobile-menu__cta-btn mobile-menu__cta-btn--with-icon"
               onClick={onNavigate}
             >
-              {mobileContactCta.label}
+              <EmailIcon className="nav-contact__icon" />
+              {contactCta.label}
             </Link>
           </GlareHover>
         </ClickSpark>

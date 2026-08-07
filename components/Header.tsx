@@ -12,10 +12,17 @@ import {
   type CSSProperties,
 } from "react";
 import { ClickSpark } from "@/components/ClickSpark";
+import { EmailIcon, WeChatIcon, WhatsAppIcon } from "@/components/ContactChannelIcons";
 import { GlareHover, GLARE_WIPE_MS } from "@/components/GlareHover";
 import { MobileBubbleNav } from "@/components/MobileBubbleNav";
-import { contactCta, primaryNav, type NavItem } from "@/content/nav";
-import { asset } from "@/lib/assets";
+import {
+  contactCta,
+  primaryNav,
+  weChatCta,
+  whatsAppCta,
+  whatsAppPhone,
+  type NavItem,
+} from "@/content/nav";
 
 const CLOSE_DELAY_MS = 180;
 const CLOSE_ANIMATION_MS = 480;
@@ -316,7 +323,7 @@ export function Header() {
         <div className="shell site-header__bar">
           <Link href="/" className="site-logo" aria-label="iamedx home">
             <Image
-              src={asset("/brand/iamedxlogo-white.svg")}
+              src="/brand/iamedxlogo-white.svg"
               alt=""
               width={92}
               height={32}
@@ -326,7 +333,7 @@ export function Header() {
               aria-hidden="true"
             />
             <Image
-              src={asset("/brand/iamedxlogo-black.svg")}
+              src="/brand/iamedxlogo-black.svg"
               alt="iamedx"
               width={92}
               height={32}
@@ -363,6 +370,52 @@ export function Header() {
               <GlareHover
                 width="auto"
                 height="auto"
+                background="#25D366"
+                borderRadius="999px"
+                borderColor="#25D366"
+                glareColor="#ffffff"
+                glareOpacity={0.55}
+                transitionDuration={GLARE_WIPE_MS}
+                className="nav-contact-glare nav-contact-glare--whatsapp"
+              >
+                <a
+                  href={whatsAppCta.href}
+                  className="nav-contact nav-contact--with-icon"
+                  target={whatsAppPhone ? "_blank" : undefined}
+                  rel={whatsAppPhone ? "noopener noreferrer" : undefined}
+                  onMouseEnter={scheduleCloseFromHover}
+                >
+                  <WhatsAppIcon className="nav-contact__icon" />
+                  {whatsAppCta.label}
+                </a>
+              </GlareHover>
+            </ClickSpark>
+            <ClickSpark>
+              <GlareHover
+                width="auto"
+                height="auto"
+                background="#07C160"
+                borderRadius="999px"
+                borderColor="#07C160"
+                glareColor="#ffffff"
+                glareOpacity={0.55}
+                transitionDuration={GLARE_WIPE_MS}
+                className="nav-contact-glare nav-contact-glare--wechat"
+              >
+                <a
+                  href={weChatCta.href}
+                  className="nav-contact nav-contact--with-icon"
+                  onMouseEnter={scheduleCloseFromHover}
+                >
+                  <WeChatIcon className="nav-contact__icon" />
+                  {weChatCta.label}
+                </a>
+              </GlareHover>
+            </ClickSpark>
+            <ClickSpark>
+              <GlareHover
+                width="auto"
+                height="auto"
                 background="#0076dd"
                 borderRadius="999px"
                 borderColor="#0076dd"
@@ -373,9 +426,10 @@ export function Header() {
               >
                 <Link
                   href={contactCta.href}
-                  className="nav-contact"
+                  className="nav-contact nav-contact--with-icon"
                   onMouseEnter={scheduleCloseFromHover}
                 >
+                  <EmailIcon className="nav-contact__icon" />
                   {contactCta.label}
                 </Link>
               </GlareHover>
@@ -424,8 +478,7 @@ export function Header() {
                     key={column.id}
                     className={`mega-column${column.links.length > 10 ? " mega-column--dense" : ""}`}
                   >
-                    <h2>{column.title}</h2>
-                    {column.description ? <p>{column.description}</p> : null}
+                    <h2>{column.description || column.title}</h2>
                     <ul>
                       {column.links.map((link) => (
                         <li key={link.slug}>

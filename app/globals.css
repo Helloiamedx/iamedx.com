@@ -55,6 +55,17 @@
   font-display: swap;
 }
 
+/* Condensed footer knockout — unique name avoids local Manuka override */
+@font-face {
+  font-family: "Manuka Footer";
+  src:
+    url("https://assets.iamedx.com/fonts/Manuka-Black.otf") format("opentype"),
+    url("/fonts/Manuka-Black.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --background: #efefed;
   --foreground: #111111;
@@ -75,69 +86,28 @@
   --ring: #0076dd;
   --line: rgba(11, 11, 11, 0.12);
   --font-sans: "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  /* Fluid content shell: denser steps so laptops/desktops stay wide without a hard lock */
-  --shell-max: 63rem; /* 1008 — default / small laptop */
+  /* Content shell — ramp up, hard-cap at 1280px */
+  --shell-max: 56rem; /* 896 */
   --shell-gutter: clamp(1.15rem, 2.8vw, 2.5rem);
   --header-bar-h: 3.5rem;
 }
 
 @media (min-width: 1100px) {
   :root {
-    --shell-max: 66rem; /* 1056 */
+    --shell-max: 60rem; /* 960 */
   }
 }
 
 @media (min-width: 1200px) {
   :root {
-    --shell-max: 70rem; /* 1120 */
+    --shell-max: 68rem; /* 1088 */
   }
 }
 
+/* Exact 1280px cap — applies as soon as the viewport can host it */
 @media (min-width: 1280px) {
   :root {
-    --shell-max: 74rem; /* 1184 — 13" MacBook */
-  }
-}
-
-@media (min-width: 1366px) {
-  :root {
-    --shell-max: 78rem; /* 1248 — common Windows laptop */
-  }
-}
-
-@media (min-width: 1440px) {
-  :root {
-    --shell-max: 82rem; /* 1312 */
-  }
-}
-
-@media (min-width: 1512px) {
-  :root {
-    --shell-max: 88rem; /* 1408 — 14" MacBook Pro */
-  }
-}
-
-@media (min-width: 1600px) {
-  :root {
-    --shell-max: 92rem; /* 1472 */
-  }
-}
-
-@media (min-width: 1728px) {
-  :root {
-    --shell-max: 100rem; /* 1600 — 16" MacBook Pro */
-  }
-}
-
-@media (min-width: 1920px) {
-  :root {
-    --shell-max: 110rem; /* 1760 — Full HD+ */
-  }
-}
-
-@media (min-width: 2200px) {
-  :root {
-    --shell-max: 120rem; /* 1920 — ultra-wide / high-res */
+    --shell-max: 1280px;
   }
 }
 
@@ -164,13 +134,31 @@
   box-sizing: border-box;
 }
 
+html {
+  height: 100%;
+  /* Kill rubber-band past page ends (mobile 漏底 under black footer) */
+  overscroll-behavior: none;
+}
+
 body {
   margin: 0;
+  min-height: 100%;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
   font-weight: 400;
   line-height: 1.5;
+  overscroll-behavior: none;
+}
+
+/* Grow between header and footer so the footer sits on the viewport bottom */
+.site-main {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
 }
 
 a {
@@ -273,773 +261,553 @@ p {
   min-height: var(--header-bar-h);
 }
 
-.site-footer__inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  min-height: var(--header-bar-h);
-}
 
-/* Full-bleed Apple-style dark — 2×2 shell: TL / TR / BL / BR */
+/* ===== Site footer (full-bleed video + shell-aligned copy) ===== */
 .site-footer {
   --footer-bg: #000;
   --footer-ink: #f5f5f7;
   --footer-muted: #a1a1a6;
   --footer-link: #d2d2d7;
-  --footer-rule: rgba(255, 255, 255, 0.14);
-  --footer-scroll-h: 5.25rem;
-  /* Shared panel chrome — left (tagline+video) & right (get in touch) */
-  --footer-panel-radius: 16px;
-  --footer-panel-pad: 1rem;
-  --footer-panel-pad-x: 1.05rem;
-  --footer-panel-bg: rgba(36, 36, 38, 0.54);
-  --footer-panel-border: rgba(255, 255, 255, 0.14);
-  --footer-contact-radius: var(--footer-panel-radius);
-  --footer-video-radius: 12px;
-  /* Min space between link columns when L/R flush (space-between) */
-  --footer-link-col-gap-min: 1.15rem;
   position: relative;
   isolation: isolate;
-  overflow: hidden;
+  overflow: visible;
+  margin-top: auto;
+  flex-shrink: 0;
   background: var(--footer-bg);
-  border-top: none;
-  /*
-   * Same inset model as the header shell:
-   * top/bottom = --shell-gutter; left/right come from the shell width
-   * (avoids padding + centered shell stacking extra side space).
-   */
-  padding: var(--shell-gutter) 0;
   color: var(--footer-ink);
   font-size: 0.875rem;
+  /* No pad — rays / stage start at the footer’s top edge */
+  padding: 0;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-.site-footer__rays {
+.site-footer input,
+.site-footer textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Full viewport width — videos run edge to edge */
+.site-footer__stage {
+  position: relative;
+  width: 100%;
+  margin: 0;
+  border-radius: 0;
+  overflow: hidden;
+  background: transparent;
+  /* Height from content + wordmark pad — no 78vh void that grows on narrow */
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.site-footer__marquee {
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  /* Slight lift so beams read clearer through frost */
-  filter: brightness(1.35) contrast(1.08);
-  /* Keep glow strongest at the bottom so it reads as light through card bases */
-  -webkit-mask-image: linear-gradient(
-    to top,
-    #000 0%,
-    #000 48%,
-    rgba(0, 0, 0, 0.7) 78%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to top,
-    #000 0%,
-    #000 48%,
-    rgba(0, 0, 0, 0.7) 78%,
-    transparent 100%
-  );
+  overflow: hidden;
 }
 
-.site-footer__shell {
-  position: relative;
+/*
+ * Exact HELLOIAMEDX box: same L/R as shell, same height as glyphs, bottom-aligned.
+ * object-fit cover + top = fill that box without oversized bleed.
+ */
+.footer-video-fill {
+  position: absolute;
+  left: var(--footer-wordmark-x, 0px);
+  bottom: 0;
+  top: auto;
+  width: var(--footer-wordmark-w, 100%);
+  height: var(--footer-wordmark-h, 0px);
+  overflow: hidden;
+}
+
+.footer-video-fill__media {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  pointer-events: none;
+}
+
+/*
+ * Middle layer: above black plate / video, below shell copy.
+ * No CSS mask — beams run full stage height to the footer bottom.
+ */
+.site-footer__rays {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  filter: brightness(1.35) contrast(1.08);
+  mix-blend-mode: screen;
+}
+
+.site-footer__rays .light-rays-container,
+.site-footer__rays .light-rays-container canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/*
+ * Full-bleed black plate; HELLOIAMEDX is an SVG mask hole.
+ * Letters sit on the stage bottom edge (wordY = stageH − wordH).
+ */
+.footer-wordmark {
+  position: absolute;
+  inset: 0;
   z-index: 1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  background: transparent;
+}
+
+.footer-wordmark__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  vertical-align: bottom;
+}
+
+/*
+ * Content stacks upward from HELLOIAMEDX:
+ * shell bottom pad = wordmark height + small gap; flex-end packs blocks above it.
+ */
+.site-footer__shell {
+  /* Wide enough for WhatsApp + WeChat + Email on one row */
+  --footer-assist-fixed-w: 23rem;
+  position: relative;
+  z-index: 4;
   display: flex;
   flex-direction: column;
-  gap: clamp(2rem, 3.5vw, 2.75rem);
-  /* Match header .shell — L/R align with the nav bar */
+  justify-content: flex-start;
+  flex: 0 1 auto;
+  box-sizing: border-box;
   width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
   margin-inline: auto;
+  /* Fixed top pad — does not grow as the viewport shrinks */
+  padding: 2.75rem 0 calc(var(--footer-wordmark-h, 12rem) + 1.15rem);
+  /* More air above & below the mid row (assist + nav) */
+  gap: clamp(2.75rem, 6vw, 4.25rem);
+  overflow: visible;
+  container-type: inline-size;
+  container-name: footer-shell;
 }
 
-.site-footer .shell.site-footer__shell {
-  width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
-}
-
-.site-footer__top-band,
-.site-footer__bottom-band {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: clamp(1.75rem, 4vw, 3.5rem);
-  width: 100%;
-}
-
-.site-footer__top-band {
-  /* Desktop 3-col: media grows · links + contact hug · equal tight gaps */
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) max-content max-content;
-  grid-template-areas: "tl tm tr";
-  column-gap: 10px;
-  row-gap: clamp(1.5rem, 3vw, 2.25rem);
-  /* Three panels stretch to equal height; tops share one baseline */
-  align-items: stretch;
-  width: 100%;
-}
-
-.site-footer__top-band > * {
-  margin-top: 0;
-}
-
-/* Shared frost glass — media / links / contact (lets LightRays show through) */
-.site-footer__panel,
-.footer-contact {
-  box-sizing: border-box;
+/*
+ * Row 1 — lead shrinks as shell narrows (cqi tracks shell width).
+ */
+.site-footer__lead {
   margin: 0;
-  padding: var(--footer-panel-pad) var(--footer-panel-pad-x);
-  border-radius: var(--footer-panel-radius);
-  border: 1px solid var(--footer-panel-border);
-  background: var(--footer-panel-bg);
-  backdrop-filter: saturate(160%) blur(22px);
-  -webkit-backdrop-filter: saturate(160%) blur(22px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-
-.site-footer__bottom {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  width: 100%;
-}
-
-.site-footer__rule {
-  width: 100%;
-  height: 1px;
-  background: var(--footer-rule);
-}
-
-.site-footer__bottom-band {
-  align-items: baseline;
-}
-
-/* Grid slots — wrappers only; beam + panel fill height */
-.site-footer__tl,
-.site-footer__tr,
-.site-footer__tm {
-  display: flex;
-  flex-direction: column;
-  align-self: stretch;
-  min-width: 0;
-  height: 100%;
-}
-
-.site-footer__tl {
-  grid-area: tl;
-  justify-self: stretch;
-  width: 100%;
-  min-width: 0;
-  max-width: none;
-}
-
-.site-footer__tr {
-  grid-area: tr;
-  justify-self: stretch;
-  width: max-content;
-  max-width: 100%;
-}
-
-.site-footer__tm {
-  grid-area: tm;
-  justify-self: stretch;
-  width: 14.5rem;
-  max-width: 100%;
-}
-
-/* BorderBeam shells — fill slot, stretch panel child */
-.footer-panel-beam,
-.footer-contact-beam {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  min-height: 0;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-.footer-panel-beam > *,
-.footer-contact-beam > * {
-  flex: 1 1 auto;
-  min-height: 0;
-}
-
-/* Left: text top · video bottom · middle gap flexes */
-.site-footer__panel--media {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: stretch;
-  gap: 1.1rem;
-  height: 100%;
-}
-
-/* Center: links nest in shared pad; box width = content + pad */
-.site-footer__panel--links {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  width: max-content;
-  max-width: 100%;
-  height: 100%;
-}
-
-.site-footer__tm .footer-contact {
-  flex: 1 1 auto;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.site-footer__tm .footer-contact__form {
-  flex: 1 1 auto;
-  min-height: 0;
-}
-
-.site-footer__tm .footer-contact__textarea {
-  flex: 1 1 auto;
-  min-height: 3.5rem;
-}
-
-.site-footer__bl {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.site-footer__br {
-  flex: 0 0 auto;
-  margin-left: auto;
-}
-
-.site-footer__tagline {
-  margin: 0;
-  padding: 0;
-  max-width: none;
-  width: 100%;
-  flex: 0 0 auto;
-  /* Same size as “Get in touch” */
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: 1.25;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
+  max-width: min(22ch, 100%);
+  font-family: var(--font-sans);
+  font-size: clamp(1.35rem, 0.55rem + 4.2cqi, 2.85rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
   color: var(--footer-ink);
+  text-wrap: balance;
 }
 
-.site-footer__video {
-  display: block;
+.site-footer__mid {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  /* Fixed gutter between assist and links — never collapse */
+  column-gap: 2.5rem;
+  row-gap: clamp(1rem, 2.5cqi, 2.5rem);
+  margin: 0;
   width: 100%;
-  height: auto;
-  flex: 0 0 auto;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
-  border: 0;
-  border-radius: var(--footer-video-radius);
-  background: #0a0a0a;
-  user-select: none;
-  -webkit-user-drag: none;
+  min-width: 0;
+  /* Shared measure so nav headings can optically match the assist title top */
+  --footer-assist-title-size: clamp(1.2rem, 0.4rem + 2.2cqi, 1.75rem);
 }
 
-/* Tight 4-col cluster — width from text; centered as one group in the middle rail */
-.site-footer__menu-grid {
+.site-footer__nav {
   display: grid;
   grid-template-columns: repeat(4, max-content);
-  column-gap: 2rem;
-  row-gap: 1.15rem;
-  justify-content: start;
+  align-items: start;
+  justify-content: end;
+  column-gap: clamp(1.25rem, 2.5cqi, 2.75rem);
+  row-gap: 1.25rem;
+  margin: 0;
+  /* Pack from the shell’s right edge, then grow left toward center */
+  margin-left: auto;
+  margin-right: 0;
+  /* Nudge down: large title ink sits lower in its line box than small caps */
+  padding-top: calc(var(--footer-assist-title-size) * 0.2);
+  /* Do not shrink — assist yields width first when space is tight */
+  flex: 0 0 auto;
   width: max-content;
   max-width: 100%;
-  margin: 0;
-  padding: 0;
+  text-align: left;
 }
 
-/* Contact form width inside beam */
-.footer-contact {
-  width: 100%;
-}
-
-.footer-contact__title {
-  margin: 0 0 0.55rem;
-  padding: 0;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--footer-ink);
-  line-height: 1.25;
-}
-
-.footer-contact__copy {
-  margin: 0 0 0.9rem;
-  font-size: 0.8125rem;
-  font-weight: 300;
-  line-height: 1.25;
-  color: #d2d2d7;
-}
-
-.footer-contact__form {
+.site-footer__nav-col {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 0.45rem;
+  gap: 0.55rem;
+  min-width: 0;
 }
 
-.footer-contact__label {
-  margin: 0.25rem 0 0;
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--footer-muted);
-}
-
-.footer-contact__input,
-.footer-contact__textarea {
-  width: 100%;
-  box-sizing: border-box;
+.site-footer__nav-heading {
   margin: 0;
-  padding: 0.65rem 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 0;
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--footer-ink);
-  font-family: inherit;
-  font-size: 0.8125rem;
-  font-weight: 300;
-  line-height: 1.4;
-  outline: none;
-  transition: border-color 160ms ease, background 160ms ease;
-}
-
-.footer-contact__input::placeholder,
-.footer-contact__textarea::placeholder {
-  color: rgba(245, 245, 247, 0.4);
-}
-
-.footer-contact__input:focus,
-.footer-contact__textarea:focus {
-  border-color: rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.07);
-}
-
-.footer-contact__textarea {
-  min-height: 5.5rem;
-  resize: vertical;
-}
-
-.footer-contact__submit {
-  margin-top: 0.45rem;
-  align-self: flex-end;
-}
-
-.footer-contact__submit .nav-contact {
-  border: 0;
-  cursor: pointer;
-  font: inherit;
-}
-
-/* Scroll columns — width from longest title/link; equal gaps between cols */
-.footer-scroll-col {
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: max-content;
-  max-width: none;
-  text-align: left;
-}
-
-.footer-scroll-col__title {
-  margin: 0 0 0.55rem;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 600;
-  letter-spacing: 0.01em;
-  color: var(--footer-ink);
-  line-height: 1.25;
-  text-align: left;
-  white-space: nowrap;
-  /* Always reserve 2 lines so scroll edge fades stay level across columns */
-  min-height: calc(1.25em * 2);
-}
-
-.footer-scroll-col__viewport {
-  height: var(--footer-scroll-h);
-  width: max-content;
-  max-width: none;
-  overflow-x: visible;
-  overflow-y: hidden;
-  text-align: left;
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    #000 16%,
-    #000 84%,
-    transparent 100%
-  );
-}
-
-.footer-scroll-col__track {
-  display: block;
-  width: max-content;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  will-change: transform;
-  backface-visibility: hidden;
-}
-
-.footer-scroll-col__item {
-  display: block;
-  width: max-content;
-  max-width: none;
-  margin: 0;
-  padding: 0;
-  text-align: left;
-}
-
-.footer-scroll-col__item + .footer-scroll-col__item {
-  margin-top: 0.2rem;
-}
-
-.site-footer .footer-scroll-col__item a {
-  display: block;
-  width: max-content;
-  max-width: none;
-  margin: 0;
-  padding: 0.1rem 0;
-  border: 0;
-  font-family: var(--font-sans);
-  font-size: 0.75rem;
-  font-weight: 300;
-  font-style: normal;
-  line-height: 1.35;
-  letter-spacing: 0.01em;
-  /* Explicit light ink — do not inherit page --foreground (#111) */
-  color: #d2d2d7;
-  text-align: left;
-  text-decoration: none;
-  text-transform: none;
-  white-space: nowrap;
-  transform: none;
-  transition: color 160ms ease;
-}
-
-.site-footer .footer-scroll-col__item a:hover {
-  color: #ffffff;
-}
-
-.site-footer__legal {
-  margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.35rem 0.5rem;
-  font-size: 0.6875rem;
-  font-weight: 400;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--footer-ink);
+  line-height: 1;
+}
+
+.site-footer__nav-col ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+  margin: 0;
+  padding: 0 0 0 0.15rem;
+  list-style: none;
+}
+
+.site-footer__nav a {
+  position: relative;
+  display: inline-block;
+  font-size: clamp(0.75rem, 0.2rem + 1.1cqi, 0.8125rem);
+  font-weight: 400;
+  color: var(--footer-muted);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  padding-bottom: 0.1rem;
+}
+
+.site-footer__nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.site-footer__nav a:hover {
+  color: var(--footer-muted);
+}
+
+.site-footer__nav a:hover::after {
+  transform: scaleX(1);
+}
+
+/*
+ * Row 2 left — prefers fixed width; shrinks only after the mid column-gap
+ * would otherwise be violated (links keep flex-shrink: 0).
+ */
+.site-footer__assist {
+  width: var(--footer-assist-fixed-w);
+  max-width: 100%;
+  margin: 0;
+  flex: 0 1 var(--footer-assist-fixed-w);
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.site-footer__assist-title {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-sans);
+  font-size: var(--footer-assist-title-size);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  color: var(--footer-ink);
+}
+
+.site-footer__assist-copy {
+  margin: 0 0 1.1rem;
+  font-family: var(--font-sans);
+  font-size: calc(clamp(0.8125rem, 0.2rem + 1.2cqi, 1rem) - 1px);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  color: var(--footer-muted);
+}
+
+.site-footer__assist-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+/* Smaller CTA pills than header — scoped to footer assist only */
+.site-footer__assist-actions .nav-contact:not(.nav-contact--block) {
+  min-height: 1.45rem;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.6875rem;
+  gap: 0.28rem;
+}
+
+.site-footer__assist-actions .nav-contact--with-icon {
+  padding-inline: 0.5rem 0.65rem;
+}
+
+.site-footer__assist-actions .nav-contact__icon {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+/* Legal · social (center) · payments — immediately above HELLOIAMEDX */
+.site-footer__bottom {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: clamp(0.35rem, 2cqi, 1rem);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.site-footer__legal {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  gap: 0.35rem;
+  margin: 0;
+  justify-self: start;
+  min-width: 0;
+  /* Shrinks with shell — never wraps to a second line */
+  font-size: clamp(0.4rem, 0.12rem + 1.6cqi, 0.6875rem);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--footer-muted);
+  line-height: 1.35;
+  white-space: nowrap;
 }
 
 .site-footer__legal-sep {
   opacity: 0.7;
-  text-transform: none;
 }
 
 .site-footer__social {
-  list-style: none;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: clamp(0.35rem, 1.5cqi, 1.25rem);
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  align-items: baseline;
-  column-gap: 1.1rem;
-  row-gap: 0.35rem;
+  list-style: none;
+  justify-self: center;
+  grid-column: 2;
+  min-width: 0;
 }
 
-.site-footer__social a {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.2rem;
-  font-size: 0.6875rem;
+.site-footer__social-link {
+  position: relative;
+  display: inline-block;
+  font-size: clamp(0.4rem, 0.12rem + 1.6cqi, 0.6875rem);
   font-weight: 400;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--footer-ink);
+  color: var(--footer-muted);
   text-decoration: none;
-  transition: color 180ms ease;
+  line-height: 1.35;
+  padding-bottom: 0.12rem;
+  white-space: nowrap;
 }
 
-.site-footer__social a:hover {
-  color: #fff;
+.site-footer__social-label {
+  position: relative;
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 0.15em;
+  padding-right: 0;
 }
 
 .site-footer__ext {
-  font-size: 0.85em;
-  line-height: 1;
-  translate: 0 -0.12em;
-  text-transform: none;
-  letter-spacing: 0;
+  position: static;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: flex-end;
+  color: currentColor;
+  opacity: 0.9;
+  line-height: 0;
+  height: 1em;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .footer-scroll-col__viewport {
-    overflow-y: auto;
-    mask-image: none;
+.site-footer__ext svg {
+  display: block;
+  width: 1em;
+  height: 1em;
+}
+
+/* Left → right underline on hover */
+.site-footer__social-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.site-footer__social-link:hover {
+  color: var(--footer-muted);
+}
+
+.site-footer__social-link:hover::after {
+  transform: scaleX(1);
+}
+
+.site-footer__payments {
+  margin: 0;
+  justify-self: end;
+  text-align: right;
+  font-size: clamp(0.5625rem, 0.15rem + 0.9cqi, 0.6875rem);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--footer-muted);
+  line-height: 1.35;
+}
+
+/* —— Footer shell breakpoints (container) —— */
+
+/* Mid: 4 → 2×2 nav when shell < 1200 — frees room for assist
+ *
+ * RULE: whenever the footer nav collapses from 4 cols → 2×2,
+ * swap Services/Projects vertically so Projects sits above Services:
+ *   Projects | Insights
+ *   Services | About
+ */
+@container footer-shell (max-width: 1200px) {
+  .site-footer__nav {
+    grid-template-columns: repeat(2, max-content);
+    /* Keep the 2×2 as one tight block on the right — not stretched apart */
+    justify-content: end;
+    width: max-content;
+    max-width: 100%;
+    margin-left: auto;
+    row-gap: 1.1rem;
+    column-gap: clamp(2.625rem, 4.5cqi, 4.125rem);
   }
 
-  .footer-scroll-col__item[aria-hidden="true"] {
+  /* 2×2: Projects | Insights / Services | About */
+  .site-footer__nav-col:nth-child(2) {
+    order: 1; /* Projects → top-left */
+  }
+
+  .site-footer__nav-col:nth-child(3) {
+    order: 2; /* Insights → top-right */
+  }
+
+  .site-footer__nav-col:nth-child(1) {
+    order: 3; /* Services → bottom-left */
+  }
+
+  .site-footer__nav-col:nth-child(4) {
+    order: 4; /* About → bottom-right */
+  }
+}
+
+/* Bottom: drop Personal Payments when cramped — legal | social stay one row */
+@container footer-shell (max-width: 42rem) {
+  .site-footer__payments {
     display: none;
   }
-}
 
-/* Meltdown: <1500 — left panel | contact, then links full width.
-   Keeps 14" MBP (~1512 CSS) on 3-col at full screen. */
-@media (max-width: 1499px) {
-  .site-footer__top-band {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    grid-template-areas:
-      "tl tm"
-      "tr tr";
-    column-gap: clamp(1.25rem, 3vw, 2rem);
-    row-gap: 1.1rem;
-    align-items: stretch;
-  }
-
-  .site-footer__tl,
-  .site-footer__tm {
-    width: 100%;
-    max-width: none;
-    min-width: 0;
-    justify-self: stretch;
-    align-self: stretch;
-  }
-
-  .site-footer__tr {
-    grid-area: tr;
-    width: 100%;
-    max-width: none;
-    justify-self: stretch;
-    align-self: start;
-    margin-top: clamp(0.5rem, 1.5vw, 1.15rem);
-  }
-
-  .site-footer__panel--links {
-    align-items: stretch;
-    width: 100%;
-    max-width: none;
-  }
-
-  /* Row 2: col width = longest link; L flush · R flush · equal gaps (min enforced) */
-  .site-footer__menu-grid {
-    display: grid;
-    width: 100%;
-    max-width: 100%;
-    grid-template-columns: repeat(4, max-content);
-    justify-content: space-between;
-    justify-items: start;
-    column-gap: var(--footer-link-col-gap-min);
-    row-gap: 1.15rem;
-    padding-top: 0;
-  }
-
-  .footer-scroll-col {
-    width: max-content;
-    max-width: none;
-    min-width: 0;
-  }
-
-  .footer-scroll-col__title {
-    white-space: nowrap;
-    max-width: none;
-  }
-
-  .footer-scroll-col__viewport,
-  .footer-scroll-col__track {
-    width: max-content;
-    max-width: none;
-  }
-
-  .footer-scroll-col__item {
-    width: max-content;
-    max-width: none;
-  }
-
-  .site-footer .footer-scroll-col__item a {
-    width: max-content;
-    max-width: none;
-    white-space: nowrap;
-    overflow-wrap: normal;
-  }
-}
-
-/* Narrow: video → contact → links → rule → legal/social */
-@media (max-width: 899px) {
-  .site-footer__top-band {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      "tl"
-      "tm"
-      "tr";
-    column-gap: 0;
-    row-gap: 1.75rem;
-  }
-
-  .site-footer__bottom-band {
-    flex-direction: row;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-
-  /* Slot wrappers only — panel chrome lives on .site-footer__panel */
-  .site-footer__tl,
-  .site-footer__tr,
-  .site-footer__tm {
-    width: 100%;
-    max-width: none;
-    min-width: 0;
-    justify-self: stretch;
-    align-self: start;
-    margin-top: 0;
-    height: auto;
-  }
-
-  .site-footer__panel--links {
-    align-items: stretch;
-    width: 100%;
-  }
-
-  .footer-panel-beam,
-  .footer-contact-beam,
-  .footer-panel-beam > *,
-  .footer-contact-beam > *,
-  .site-footer__tm .footer-contact {
-    height: auto;
-    flex: none;
-  }
-
-  .site-footer__tm .footer-contact__textarea {
-    flex: none;
-    min-height: 5.5rem;
-  }
-
-  .site-footer__br {
-    margin-left: auto;
-    flex: 0 0 auto;
+  .site-footer__bottom {
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
   .site-footer__social {
+    grid-column: 2;
+    justify-self: end;
     justify-content: flex-end;
-  }
-
-  /* Keep 4 cols — same L/R flush as meltdown (not equal 1fr) */
-  .site-footer__menu-grid {
-    display: grid;
-    width: 100%;
-    max-width: 100%;
-    grid-template-columns: repeat(4, max-content);
-    justify-content: space-between;
-    justify-items: start;
-    column-gap: var(--footer-link-col-gap-min);
-    row-gap: 1.15rem;
-  }
-
-  .footer-scroll-col {
-    width: max-content;
-    max-width: none;
-    min-width: 0;
-  }
-
-  .footer-scroll-col__title {
-    white-space: nowrap;
-    overflow-wrap: normal;
-    max-width: none;
-  }
-
-  .footer-scroll-col__viewport,
-  .footer-scroll-col__track {
-    width: max-content;
-    max-width: none;
-  }
-
-  .footer-scroll-col__item {
-    width: max-content;
-    max-width: none;
-  }
-
-  .site-footer .footer-scroll-col__item a {
-    width: max-content;
-    max-width: none;
-    white-space: nowrap;
-    overflow-wrap: normal;
+    gap: clamp(0.3rem, 1.2cqi, 0.85rem);
   }
 }
 
-/* <500: 2 equal cols (fill width); legal + social stacked, right-aligned */
-@media (max-width: 499px) {
-  .site-footer__menu-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    justify-content: start;
-    column-gap: var(--footer-link-col-gap-min);
-    row-gap: 1.15rem;
-  }
-
-  .footer-scroll-col {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-  }
-
-  .footer-scroll-col__title {
-    white-space: normal;
-    overflow-wrap: break-word;
-    word-break: normal;
-    max-width: 100%;
-  }
-
-  .footer-scroll-col__viewport,
-  .footer-scroll-col__track {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .footer-scroll-col__item {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .site-footer .footer-scroll-col__item a {
-    width: 100%;
-    max-width: 100%;
-    white-space: normal;
-    overflow-wrap: break-word;
-    word-break: normal;
-  }
-
-  .site-footer__bottom-band {
+/* Narrow / phone: stack mid + nav; bottom always legal left | social right */
+@container footer-shell (max-width: 32rem) {
+  .site-footer__mid {
     flex-direction: column;
-    align-items: flex-end;
-    justify-content: flex-start;
-    gap: 0.55rem;
-    text-align: right;
+    align-items: stretch;
+    /* More space between Looking for assistance and the link grid */
+    gap: 2.75rem;
   }
 
-  .site-footer__bl,
-  .site-footer__br {
+  .site-footer__assist {
+    flex: 0 0 auto;
+    width: var(--footer-assist-fixed-w);
+    max-width: 100%;
+  }
+
+  .site-footer__assist-actions {
+    flex-wrap: wrap;
+  }
+
+  .site-footer__nav {
+    /* Full shell width, left↔right columns — no overflow off-screen */
     margin-left: 0;
+    margin-right: 0;
     width: 100%;
-    display: flex;
-    justify-content: flex-end;
+    max-width: 100%;
+    justify-content: space-between;
+    column-gap: 1.25rem;
+    row-gap: 1.25rem;
+    padding-top: 0;
+    box-sizing: border-box;
+  }
+
+  .site-footer__payments {
+    display: none;
+  }
+
+  .site-footer__bottom {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    column-gap: 0.5rem;
   }
 
   .site-footer__legal {
-    justify-content: flex-end;
-    text-align: right;
+    display: flex;
+    justify-self: start;
+    font-size: clamp(0.375rem, 2.4cqi, 0.625rem);
+    letter-spacing: 0.03em;
   }
 
   .site-footer__social {
+    grid-column: 2;
+    justify-self: end;
     justify-content: flex-end;
+    flex-wrap: nowrap;
+    gap: clamp(0.25rem, 1.5cqi, 0.65rem);
+  }
+
+  .site-footer__social-link {
+    font-size: clamp(0.375rem, 2.4cqi, 0.625rem);
+    letter-spacing: 0.03em;
   }
 }
+
 
 .nav-scrim {
   position: fixed;
@@ -1113,10 +881,21 @@ p {
   -webkit-backdrop-filter: none;
 }
 
+.nav-contact-glare--whatsapp.glare-hover {
+  background: #25d366 !important;
+  border-color: #25d366 !important;
+}
+
+.nav-contact-glare--wechat.glare-hover {
+  background: #07c160 !important;
+  border-color: #07c160 !important;
+}
+
 .nav-contact {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.35rem;
   min-height: 1.65rem;
   padding: 0.28rem 0.75rem;
   border-radius: 980px;
@@ -1126,6 +905,25 @@ p {
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+.nav-contact--with-icon {
+  padding-inline: 0.65rem 0.8rem;
+}
+
+.nav-contact__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 0.95rem;
+  height: 0.95rem;
+  line-height: 0;
+}
+
+.nav-contact__icon svg {
+  display: block;
+  overflow: visible;
 }
 
 .nav-contact:hover {
@@ -1169,24 +967,6 @@ p {
     min-height: 2rem;
     padding: 0.4rem 1.05rem;
     font-size: 0.875rem;
-  }
-}
-
-/* Footer submit — must come after .nav-contact desktop rules or they win */
-.footer-contact__submit .nav-contact,
-.footer-contact__submit .nav-contact:not(.nav-contact--block) {
-  min-height: 1.5rem;
-  padding: 0.28rem 0.75rem;
-  font-size: 0.6875rem;
-  letter-spacing: 0.06em;
-}
-
-@media (min-width: 900px) {
-  .footer-contact__submit .nav-contact,
-  .footer-contact__submit .nav-contact:not(.nav-contact--block) {
-    min-height: 1.5rem;
-    padding: 0.28rem 0.75rem;
-    font-size: 0.6875rem;
   }
 }
 
@@ -1318,7 +1098,7 @@ p {
 
 .mega-columns {
   /* Fixed gap between every top-level group — columns hug their text */
-  --mega-gap: 2.75rem;
+  --mega-gap: 3.5rem;
   --mega-dense-gap: 1.25rem;
   display: flex;
   flex-direction: row;
@@ -1333,7 +1113,7 @@ p {
 /* iPad / small laptop: tighter gutters so three columns fit from the shell edge */
 @media (max-width: 1199px) {
   .mega-columns {
-    --mega-gap: clamp(1.35rem, 2.8vw, 2.5rem);
+    --mega-gap: clamp(1.6rem, 3.2vw, 3rem);
     --mega-dense-gap: 1rem;
   }
 
@@ -1658,12 +1438,17 @@ p {
 .mobile-menu__cta {
   margin-top: 2.35rem;
   padding-top: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
 }
 
 .mobile-menu__cta-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.4rem;
   min-height: 2.35rem;
   padding: 0.55rem 1.15rem;
   border-radius: 999px;
@@ -1674,6 +1459,15 @@ p {
   letter-spacing: 0.04em;
   text-decoration: none;
   text-transform: none;
+}
+
+.mobile-menu__cta-btn--with-icon {
+  padding-inline: 1rem 1.2rem;
+}
+
+.mobile-menu__cta-btn .nav-contact__icon {
+  width: 1.05rem;
+  height: 1.05rem;
 }
 
 .mobile-menu__cta-btn:hover,
@@ -1688,19 +1482,24 @@ p {
   -webkit-backdrop-filter: none;
 }
 
+.mobile-menu__cta .glare-hover.nav-contact-glare--whatsapp {
+  background: #25d366 !important;
+  border-color: #25d366 !important;
+}
+
+.mobile-menu__cta .glare-hover.nav-contact-glare--wechat {
+  background: #07c160 !important;
+  border-color: #07c160 !important;
+}
+
 .mobile-menu__cta .glare-hover,
 .mobile-menu__cta .click-spark {
   width: fit-content;
 }
 
 /*
- * Services mega — 3 columns, nowrap links, --mega-gap 4rem:
- *   intrinsic content ≈ 960–1000px.
- *
- * Centered nav: Services sits mid-viewport, so trigger-aligned mega needs
- * roughly viewport ≥ 2 × (content − half nav cluster) ≈ 1640px+, plus a
- * little right breathing room. 1320–1400 still clips (see 1324 repro).
- * Below that (≥900 desktop chrome): flush nav to the logo.
+ * Desktop chrome: nav links always flush to the logo (left).
+ * CTAs sit on the right — room for WhatsApp / WeChat / Email.
  */
 @media (min-width: 900px) {
   .site-header__bar {
@@ -1730,31 +1529,6 @@ p {
   .nav-menu-toggle,
   .mobile-nav {
     display: none !important;
-  }
-}
-
-/* Only true wide desktops: centered nav + trigger-aligned mega both clear */
-@media (min-width: 1680px) {
-  .site-header__bar {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-  }
-
-  .site-logo {
-    justify-self: start;
-  }
-
-  .site-nav {
-    justify-self: center;
-    margin-left: 0;
-    flex: initial;
-    min-width: initial;
-  }
-
-  .site-header__actions {
-    justify-self: end;
-    margin-left: 0;
   }
 }
 

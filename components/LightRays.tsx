@@ -43,13 +43,18 @@ function hexToRgb(hex: string): [number, number, number] {
     : [1, 1, 1];
 }
 
-function getAnchorAndDir(origin: RaysOrigin, w: number, h: number) {
+function getAnchorAndDir(
+  origin: RaysOrigin,
+  w: number,
+  h: number,
+  dpr = 1,
+) {
   const outside = 0.2;
   switch (origin) {
     case "top-left":
-      return { anchor: [0, -outside * h] as [number, number], dir: [0, 1] as [number, number] };
+      return { anchor: [0, 0] as [number, number], dir: [0, 1] as [number, number] };
     case "top-right":
-      return { anchor: [w, -outside * h] as [number, number], dir: [0, 1] as [number, number] };
+      return { anchor: [w, 0] as [number, number], dir: [0, 1] as [number, number] };
     case "left":
       return {
         anchor: [-outside * w, 0.5 * h] as [number, number],
@@ -76,8 +81,9 @@ function getAnchorAndDir(origin: RaysOrigin, w: number, h: number) {
         dir: [0, -1] as [number, number],
       };
     default:
+      /* top-center: 35 CSS px above the top edge — softer tip at the frame */
       return {
-        anchor: [0.5 * w, -outside * h] as [number, number],
+        anchor: [0.5 * w, -35 * dpr] as [number, number],
         dir: [0, 1] as [number, number],
       };
   }
@@ -303,7 +309,7 @@ void main() {
 
         uniforms.iResolution.value = [w, h];
 
-        const { anchor, dir } = getAnchorAndDir(raysOrigin, w, h);
+        const { anchor, dir } = getAnchorAndDir(raysOrigin, w, h, dpr);
         uniforms.rayPos.value = anchor;
         uniforms.rayDir.value = dir;
       };
@@ -412,7 +418,12 @@ void main() {
 
     const { clientWidth: wCSS, clientHeight: hCSS } = containerRef.current;
     const dpr = renderer.dpr;
-    const { anchor, dir } = getAnchorAndDir(raysOrigin, wCSS * dpr, hCSS * dpr);
+    const { anchor, dir } = getAnchorAndDir(
+      raysOrigin,
+      wCSS * dpr,
+      hCSS * dpr,
+      dpr,
+    );
     u.rayPos.value = anchor;
     u.rayDir.value = dir;
   }, [

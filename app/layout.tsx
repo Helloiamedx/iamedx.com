@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import { SmoothScroll } from "@/components/SmoothScroll";
 import { asset } from "@/lib/assets";
 import "./globals.css";
 
@@ -24,10 +25,26 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">
-        <Header />
-        <div className="flex-1">{children}</div>
-        <Footer />
+      <head>
+        <link
+          rel="preload"
+          href="/brand/iamedxlogo-white.svg"
+          as="image"
+          type="image/svg+xml"
+        />
+        <link
+          rel="preload"
+          href="/brand/iamedxlogo-black.svg"
+          as="image"
+          type="image/svg+xml"
+        />
+      </head>
+      <body className="min-h-full min-h-dvh flex flex-col">
+        <SmoothScroll>
+          <Header />
+          <div className="site-main">{children}</div>
+          <Footer />
+        </SmoothScroll>
       </body>
     </html>
   );

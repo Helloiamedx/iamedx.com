@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type ReactNode,
 } from "react";
 import { motion, type HTMLMotionProps } from "motion/react";
 
@@ -46,6 +47,7 @@ export type DecryptedTextProps = {
   animateOn?: AnimateOn;
   clickMode?: ClickMode;
   onComplete?: () => void;
+  children?: ReactNode;
 } & Omit<HTMLMotionProps<"span">, "children">;
 
 export function DecryptedText({
@@ -62,6 +64,7 @@ export function DecryptedText({
   animateOn = "hover",
   clickMode = "once",
   onComplete,
+  children,
   ...props
 }: DecryptedTextProps) {
   const [displayText, setDisplayText] = useState(text);
@@ -338,13 +341,8 @@ export function DecryptedText({
 
   const triggerHoverDecrypt = useCallback(() => {
     if (isAnimating) return;
-
-    setRevealedIndices(new Set());
-    setIsDecrypted(false);
-    setDisplayText(text);
-    setDirection("forward");
-    setIsAnimating(true);
-  }, [isAnimating, text]);
+    triggerDecrypt();
+  }, [isAnimating, triggerDecrypt]);
 
   const resetToPlainText = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -436,6 +434,7 @@ export function DecryptedText({
           );
         })}
       </span>
+      {children}
     </motion.span>
   );
 }

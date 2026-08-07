@@ -17,7 +17,7 @@ export default function HomePage() {
           <ProtectedVideo
             className="hero__video"
             src={asset("videos/home-hero-video.mp4")}
-            preload="auto"
+            preload="metadata"
           />
         </div>
         <div className="hero__content">
