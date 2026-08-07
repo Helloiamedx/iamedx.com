@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRef } from "react";
 import {
   contactCta,
   footerAssistCopy,
@@ -23,6 +24,7 @@ import { FooterVideoMarquee } from "@/components/FooterVideoMarquee";
 import { FooterWordmark } from "@/components/FooterWordmark";
 import { GlareHover, GLARE_WIPE_MS } from "@/components/GlareHover";
 import { LightRays } from "@/components/LightRays";
+import VariableProximity from "@/components/VariableProximity";
 
 function ExternalArrow() {
   return (
@@ -42,6 +44,7 @@ function ExternalArrow() {
 
 export function Footer() {
   const year = new Date().getFullYear();
+  const shellRef = useRef<HTMLDivElement>(null);
 
   return (
     <footer className="site-footer">
@@ -71,8 +74,18 @@ export function Footer() {
           />
         </div>
 
-        <div className="site-footer__shell">
-          <h2 className="site-footer__lead">{footerLeadCopy}</h2>
+        <div className="site-footer__shell" ref={shellRef}>
+          <h2 className="site-footer__lead">
+            <VariableProximity
+              label={footerLeadCopy}
+              className="site-footer__lead-proximity"
+              fromFontVariationSettings="'wght' 600, 'opsz' 18"
+              toFontVariationSettings="'wght' 900, 'opsz' 40"
+              containerRef={shellRef}
+              radius={140}
+              falloff="linear"
+            />
+          </h2>
 
           <div className="site-footer__mid">
             <div className="site-footer__assist">

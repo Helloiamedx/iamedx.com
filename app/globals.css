@@ -407,7 +407,7 @@ p {
  */
 .site-footer__lead {
   margin: 0;
-  max-width: min(22ch, 100%);
+  max-width: min(30ch, 100%);
   font-family: var(--font-sans);
   font-size: clamp(1.35rem, 0.55rem + 4.2cqi, 2.85rem);
   font-weight: 700;
@@ -415,6 +415,14 @@ p {
   line-height: 1.12;
   color: var(--footer-ink);
   text-wrap: balance;
+}
+
+.site-footer__lead-proximity {
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+  color: inherit;
 }
 
 .site-footer__mid {
