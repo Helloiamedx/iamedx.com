@@ -90,6 +90,8 @@
   --shell-max: 56rem; /* 896 */
   --shell-gutter: clamp(0.575rem, 1.4vw, 1.25rem);
   --header-bar-h: 3.5rem;
+  /* Bar + iOS status/notch when viewport-fit=cover */
+  --header-offset: calc(var(--header-bar-h) + env(safe-area-inset-top, 0px));
 }
 
 @media (min-width: 1100px) {
@@ -229,6 +231,8 @@ p {
   position: sticky;
   top: 0;
   z-index: 50;
+  /* viewport-fit=cover: keep bar below the status bar / notch */
+  padding-top: env(safe-area-inset-top, 0px);
   background: var(--nav-frost-bg);
   backdrop-filter: var(--nav-frost-filter);
   -webkit-backdrop-filter: var(--nav-frost-filter);
@@ -273,7 +277,7 @@ p {
 /* Contact raft — outside blended header; ghost uses its own difference */
 .site-header-cta {
   position: fixed;
-  top: 0;
+  top: env(safe-area-inset-top, 0px);
   right: 0;
   left: 0;
   z-index: 60;
@@ -499,8 +503,8 @@ p {
   background: var(--footer-bg);
   color: var(--footer-ink);
   font-size: 0.875rem;
-  /* No pad — rays / stage start at the footer’s top edge */
-  padding: 0;
+  /* Extend black under HELLOIAMEDX into the iOS home-indicator / Safari gap */
+  padding: 0 0 env(safe-area-inset-bottom, 0px);
   -webkit-user-select: none;
   user-select: none;
 }
@@ -1347,7 +1351,7 @@ p {
 
 .mega-panel__track {
   /* Tight under the bar so plain menus (no description) don’t look like a vacant header row */
-  padding: calc(var(--header-bar-h) + 0.55rem) var(--shell-gutter) 1.25rem 0;
+  padding: calc(var(--header-offset) + 0.55rem) var(--shell-gutter) 1.25rem 0;
   box-sizing: border-box;
 }
 
@@ -1582,7 +1586,7 @@ p {
   display: flex;
   flex-direction: column;
   /* Clear the sticky bar, then sit content a bit lower in the panel */
-  padding: calc(var(--header-bar-h) + 2.75rem) 0
+  padding: calc(var(--header-offset) + 2.75rem) 0
     calc(1.75rem + env(safe-area-inset-bottom, 0px));
   overflow-x: hidden;
   overflow-y: auto;
@@ -1800,7 +1804,7 @@ p {
   height: 100svh;
   min-height: 100vh;
   min-height: 100svh;
-  margin-top: calc(-1 * var(--header-bar-h));
+  margin-top: calc(-1 * var(--header-offset));
   display: grid;
   align-items: center;
   color: #f7f7f7;
@@ -1862,7 +1866,7 @@ p {
     calc(100% - var(--hero-gutter) * 2)
   );
   margin: 0 auto;
-  padding: calc(var(--header-bar-h) + 2rem) 0 3.5rem;
+  padding: calc(var(--header-offset) + 2rem) 0 3.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2016,7 +2020,7 @@ p {
   height: 100svh;
   min-height: 100vh;
   min-height: 100svh;
-  margin-top: calc(-1 * var(--header-bar-h));
+  margin-top: calc(-1 * var(--header-offset));
   display: flex;
   align-items: flex-end;
   color: #1d1d1f;
@@ -2566,7 +2570,7 @@ p {
   height: 100svh;
   min-height: 100vh;
   min-height: 100svh;
-  margin-top: calc(-1 * var(--header-bar-h));
+  margin-top: calc(-1 * var(--header-offset));
   overflow: hidden;
   background: #0a0a0a;
   color: #fff;
@@ -2668,7 +2672,7 @@ p {
   height: 100svh;
   min-height: 100vh;
   min-height: 100svh;
-  margin-top: calc(-1 * var(--header-bar-h));
+  margin-top: calc(-1 * var(--header-offset));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2710,7 +2714,7 @@ p {
   text-align: center;
   width: min(52rem, calc(100% - var(--shell-gutter) * 2));
   margin: 0 auto;
-  padding: calc(var(--header-bar-h) + 1rem) 0 8vh;
+  padding: calc(var(--header-offset) + 1rem) 0 8vh;
 }
 
 .case-cover__title {

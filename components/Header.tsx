@@ -228,9 +228,8 @@ export function Header() {
     const track = trackRef.current;
     if (!panel) return;
 
-    const barH =
-      headerRef.current?.querySelector<HTMLElement>(".site-header__bar")
-        ?.offsetHeight ?? 56;
+    /* Full sticky header (bar + safe-area), so open tween covers the status bar */
+    const barH = headerRef.current?.offsetHeight ?? 56;
 
     if (openKey && track) {
       // Measure real content height so close can animate from pixels → 0.

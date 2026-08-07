@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/react";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { SmoothScroll } from "@/components/SmoothScroll";
@@ -20,6 +21,13 @@ export const metadata: Metadata = {
     apple: [{ url: favicon, type: "image/svg+xml" }],
     shortcut: favicon,
   },
+};
+
+/** Paint into iOS safe areas so the black footer can cover the home-indicator gap */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -45,6 +53,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <div className="site-main">{children}</div>
           <Footer />
         </SmoothScroll>
+        <Analytics />
       </body>
     </html>
   );

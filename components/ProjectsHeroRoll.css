@@ -213,7 +213,8 @@
 
 .projects-hero-roll__line {
   margin: 0;
-  max-width: min(28ch, 100%);
+  /* Wide enough for the longest hero line on one row when the shell allows */
+  max-width: min(42ch, 100%);
   min-height: 1.2em;
   font-family: var(--font-sans);
   font-size: clamp(1.65rem, 1.1rem + 2.4vw, 3rem);
@@ -237,8 +238,10 @@
 
 @media (max-width: 700px) {
   .projects-hero-roll__line {
-    max-width: 16ch;
-    font-size: clamp(1.35rem, 1rem + 2.2vw, 1.85rem);
+    /* Use the full copy width — 16ch was forcing tiny wrapped stacks */
+    max-width: 100%;
+    font-size: clamp(1.55rem, 1.05rem + 3.8vw, 2.15rem);
+    text-wrap: pretty;
   }
 }
 
