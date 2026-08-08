@@ -26,10 +26,16 @@ import {
 
 const CLOSE_DELAY_MS = 180;
 const CLOSE_ANIMATION_MS = 480;
+/* Hold dimming until mega height is ~halfway collapsed, then fade opacity */
+const SCRIM_FADE_DELAY_MS = Math.round(CLOSE_ANIMATION_MS * 0.5);
 /* Curtain: 480ms + last-column stagger 210ms — keep frost off until done */
 const MOBILE_CURTAIN_MS = 700;
 /* Mega frost height tween is 480ms — pills land after the sheet is mostly on */
 const CTA_PILL_AFTER_FROST_MS = 360;
+/* 320ms tween + 110ms reverse stagger — land after the last capsule settles */
+const CTA_PILL_OUT_MS = 450;
+
+type CtaMode = "ghost" | "pills" | "pills-out";
 
 function canHoverFine() {
   return (
@@ -48,17 +54,55 @@ export function Header() {
   const [mobileSurface, setMobileSurface] = useState(false);
   /* Top of page: clear chrome on every route (same scroll gate as the home hero) */
   const [atTop, setAtTop] = useState(true);
-  /* Colored contact pills — delayed until after frost when mega/mobile opens */
-  const [ctaPills, setCtaPills] = useState(false);
+  /*
+   * Contact CTA: ghost (text) ↔ pills (buttons) ↔ pills-out (shrink tween).
+   * Never apply is-ghost in the same frame as dropping is-pills — difference
+   * blend + brand fills flash. pills-out runs the shrink, then ghost.
+   */
+  const [ctaMode, setCtaMode] = useState<CtaMode>("ghost");
+  /* Scrim stays through first half of mega close, then opacity-fades out */
+  const [scrimOn, setScrimOn] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clearPanelTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrimFadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const ctaOutTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const ctaModeRef = useRef<CtaMode>("ghost");
+  ctaModeRef.current = ctaMode;
   const headerRef = useRef<HTMLElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const triggerRefs = useRef<Record<string, HTMLElement | null>>({});
+  /*
+   * Window reactivation (Cmd-Tab / leave fullscreen) synthesizes mouseenter for
+   * whatever sits under the cursor — that was auto-opening the mega. Only honor
+   * hover-open after a real pointermove in this foreground session.
+   */
+  const hoverOpenEnabled = useRef(true);
+  /*
+   * Apple-style: after a mega link click, keep the panel open until the
+   * destination URL commits (not on mousedown). Blocks hover-close mid-nav.
+   */
+  const navPendingRef = useRef(false);
+  const pendingHrefRef = useRef<string | null>(null);
   const menuId = useId();
 
+  function collapseMenus() {
+    clearCloseTimer();
+    setOpenKey(null);
+    setMobileOpen(false);
+    clearClearPanelTimer();
+    clearPanelTimer.current = setTimeout(() => {
+      setPanelKey(null);
+      clearPanelTimer.current = null;
+    }, CLOSE_ANIMATION_MS);
+  }
+
   useEffect(() => {
+    /* Soft navigations keep Header mounted — collapse when the route commits */
+    navPendingRef.current = false;
+    pendingHrefRef.current = null;
+    collapseMenus();
+
     function onScroll() {
       // Any downward scroll leaves the at-top chrome immediately.
       setAtTop(window.scrollY <= 0);
@@ -70,8 +114,34 @@ export function Header() {
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
+      clearClearPanelTimer();
     };
   }, [pathname]);
+
+  /* Query-only navigations (e.g. /projects?involvement=…) don't change pathname */
+  useEffect(() => {
+    if (!openKey && !mobileOpen) return;
+
+    const id = window.setInterval(() => {
+      if (!navPendingRef.current || !pendingHrefRef.current) return;
+      try {
+        const target = new URL(pendingHrefRef.current, window.location.href);
+        if (
+          window.location.pathname !== target.pathname ||
+          window.location.search !== target.search
+        ) {
+          return;
+        }
+      } catch {
+        return;
+      }
+      navPendingRef.current = false;
+      pendingHrefRef.current = null;
+      collapseMenus();
+    }, 50);
+
+    return () => window.clearInterval(id);
+  }, [openKey, mobileOpen, pathname]);
 
   useEffect(() => {
     if (mobileOpen) {
@@ -86,30 +156,99 @@ export function Header() {
     return () => clearTimeout(timer);
   }, [mobileOpen]);
 
+  useEffect(() => {
+    if (scrimFadeTimer.current) {
+      clearTimeout(scrimFadeTimer.current);
+      scrimFadeTimer.current = null;
+    }
+
+    if (openKey || mobileOpen) {
+      setScrimOn(true);
+      return;
+    }
+
+    /* Menu closing: keep dim until sheet is ~halfway up, then fade */
+    scrimFadeTimer.current = setTimeout(() => {
+      setScrimOn(false);
+      scrimFadeTimer.current = null;
+    }, SCRIM_FADE_DELAY_MS);
+
+    return () => {
+      if (scrimFadeTimer.current) {
+        clearTimeout(scrimFadeTimer.current);
+        scrimFadeTimer.current = null;
+      }
+    };
+  }, [openKey, mobileOpen]);
+
+  function clearCtaOutTimer() {
+    if (ctaOutTimer.current) {
+      clearTimeout(ctaOutTimer.current);
+      ctaOutTimer.current = null;
+    }
+  }
+
+  /** Animate pills → text, then land on ghost (safe with difference blend). */
+  function startCtaPillsOut() {
+    if (ctaModeRef.current === "ghost") return;
+    if (ctaModeRef.current === "pills-out") return;
+    clearCtaOutTimer();
+    setCtaMode("pills-out");
+    ctaOutTimer.current = setTimeout(() => {
+      setCtaMode("ghost");
+      ctaOutTimer.current = null;
+    }, CTA_PILL_OUT_MS);
+  }
+
   useLayoutEffect(() => {
-    const expanded = Boolean(openKey) || mobileOpen || mobileSurface;
-    const clearChrome = !expanded && atTop;
+    const megaOpen = Boolean(openKey);
+    const megaClosing = Boolean(panelKey) && !openKey;
+    const menuOpen = megaOpen || mobileOpen;
 
-    if (clearChrome) {
-      /* Layout phase: drop pills before paint so ghost never shares a frame
-         with brand fills (difference blend → wrong capsule colors). */
-      setCtaPills(false);
+    if (menuOpen) {
+      clearCtaOutTimer();
+      if (ctaModeRef.current === "pills") return;
+      if (ctaModeRef.current === "pills-out") {
+        setCtaMode("pills");
+        return;
+      }
+      /* From ghost: wait for frost, then grow into pills */
+      const timer = setTimeout(() => {
+        setCtaMode("pills");
+      }, CTA_PILL_AFTER_FROST_MS);
+      return () => clearTimeout(timer);
+    }
+
+    if (megaClosing) {
+      if (atTop) {
+        /* Hover dismiss at top — shrink while mega sheet still frosts */
+        startCtaPillsOut();
+      } else {
+        /* Scrolled: mega can close; colored pills stay as the resting chrome */
+        clearCtaOutTimer();
+        setCtaMode("pills");
+      }
       return;
     }
 
-    /* Already on frosted chrome (scrolled) — pills can show immediately */
-    if (!openKey && !mobileOpen && !mobileSurface) {
-      setCtaPills(true);
+    if (mobileSurface && atTop) {
+      startCtaPillsOut();
       return;
     }
 
-    /* Mega / mobile: frost first, then color pills */
-    const timer = setTimeout(() => {
-      setCtaPills(true);
-    }, CTA_PILL_AFTER_FROST_MS);
+    /* Idle: scrolled → pills; at top → shrink back to ghost text */
+    if (!atTop) {
+      clearCtaOutTimer();
+      setCtaMode("pills");
+      return;
+    }
 
-    return () => clearTimeout(timer);
-  }, [atTop, openKey, mobileOpen, mobileSurface]);
+    if (ctaModeRef.current === "pills") {
+      startCtaPillsOut();
+    } else if (ctaModeRef.current !== "pills-out") {
+      setCtaMode("ghost");
+    }
+  }, [atTop, openKey, panelKey, mobileOpen, mobileSurface]);
 
   function clearCloseTimer() {
     if (closeTimer.current) {
@@ -186,6 +325,8 @@ export function Header() {
   }
 
   function closeMenu() {
+    navPendingRef.current = false;
+    pendingHrefRef.current = null;
     clearCloseTimer();
     setOpenKey(null);
     // Keep panel content mounted until the close animation finishes.
@@ -204,13 +345,73 @@ export function Header() {
   /** Hover menus only — touch taps synthesize mouseleave and would flash-close. */
   function scheduleCloseFromHover() {
     if (!canHoverFine()) return;
+    /* Stay open while a clicked route is still loading */
+    if (navPendingRef.current) return;
     scheduleClose();
   }
 
   function openMenuFromHover(key: string) {
     if (!canHoverFine()) return;
+    if (!hoverOpenEnabled.current) return;
+    if (navPendingRef.current) return;
     openMenu(key);
   }
+
+  /** Clicked a menu link — close only once the destination is ready (or same URL). */
+  function onMenuNavigate(href: string) {
+    try {
+      const next = new URL(href, window.location.href);
+      if (
+        next.pathname === window.location.pathname &&
+        next.search === window.location.search
+      ) {
+        closeMenu();
+        setMobileOpen(false);
+        return;
+      }
+    } catch {
+      closeMenu();
+      setMobileOpen(false);
+      return;
+    }
+    navPendingRef.current = true;
+    pendingHrefRef.current = href;
+    clearCloseTimer();
+  }
+
+  useEffect(() => {
+    function suppressHoverOpen() {
+      hoverOpenEnabled.current = false;
+    }
+
+    function onVisibilityChange() {
+      if (document.visibilityState === "hidden") {
+        suppressHoverOpen();
+        closeMenu();
+        setMobileOpen(false);
+        return;
+      }
+      /* Becoming visible again — wait for a real pointermove before hover-open */
+      suppressHoverOpen();
+    }
+
+    function onWindowFocus() {
+      suppressHoverOpen();
+    }
+
+    function onPointerMove() {
+      hoverOpenEnabled.current = true;
+    }
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("focus", onWindowFocus);
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("focus", onWindowFocus);
+      window.removeEventListener("pointermove", onPointerMove);
+    };
+  }, []);
 
   useLayoutEffect(() => {
     if (!openKey) return;
@@ -276,7 +477,12 @@ export function Header() {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("resize", onResize);
       clearCloseTimer();
-      clearClearPanelTimer();
+      /*
+       * Do NOT clearClearPanelTimer here. closeMenu() sets openKey→null and
+       * schedules panelKey clear; this effect’s cleanup runs on that same
+       * openKey change and was cancelling the unmount — panelKey stuck forever,
+       * chrome stayed “expanded”, Contact never returned to ghost text.
+       */
     };
   }, [openKey]);
 
@@ -323,15 +529,17 @@ export function Header() {
   }, [mobileOpen]);
 
   const isPanelOpen = Boolean(openKey);
+  /* panelKey stays until height tween finishes — keep frost while collapsing */
+  const isPanelClosing = Boolean(panelKey) && !openKey;
   const panelItem = primaryNav.find((item) => item.label === panelKey && item.mega);
-  const isExpanded = isPanelOpen || mobileOpen || mobileSurface;
+  const isExpanded = isPanelOpen || isPanelClosing || mobileOpen || mobileSurface;
   /* Every page at top: fully clear bar; contrast via mix-blend-mode:difference */
   const overClear = !isExpanded && atTop;
 
   return (
     <>
       <div
-        className={`nav-scrim${isPanelOpen || mobileOpen ? " is-visible" : ""}`}
+        className={`nav-scrim${scrimOn ? " is-visible" : ""}${isPanelOpen || mobileOpen ? " is-interactive" : ""}`}
         aria-hidden="true"
         onClick={() => {
           closeMenu();
@@ -385,6 +593,7 @@ export function Header() {
                 }}
                 onClose={closeMenu}
                 onCloseSchedule={scheduleCloseFromHover}
+                onNavigate={() => onMenuNavigate(item.href)}
               />
             ))}
           </nav>
@@ -413,7 +622,7 @@ export function Header() {
 
         <div
           ref={panelRef}
-          className={`mega-panel${isPanelOpen ? " is-open" : ""}`}
+          className={`mega-panel${isPanelOpen ? " is-open" : ""}${isPanelClosing ? " is-closing" : ""}`}
           id={`${menuId}-desktop`}
           aria-hidden={!isPanelOpen}
           onMouseEnter={clearCloseTimer}
@@ -447,7 +656,10 @@ export function Header() {
                       <ul>
                         {column.links.map((link) => (
                           <li key={link.slug}>
-                            <Link href={link.href} onClick={closeMenu}>
+                            <Link
+                              href={link.href}
+                              onClick={() => onMenuNavigate(link.href)}
+                            >
                               {link.label}
                             </Link>
                           </li>
@@ -486,7 +698,7 @@ export function Header() {
           Never combine is-ghost + is-pills — difference blend on brand fills
           flashes the wrong capsule colors for a frame before pills clear. */}
       <div
-        className={`site-header-cta${overClear ? " is-ghost" : ""}${ctaPills && !overClear ? " is-pills" : ""}`}
+        className={`site-header-cta${ctaMode === "ghost" ? " is-ghost" : ""}${ctaMode === "pills" ? " is-pills" : ""}${ctaMode === "pills-out" ? " is-pills-out" : ""}`}
         onMouseEnter={scheduleCloseFromHover}
       >
         <div className="site-header-cta__inner">
@@ -570,6 +782,7 @@ type NavTriggerProps = {
   onOpenFromHover: () => void;
   onClose: () => void;
   onCloseSchedule: () => void;
+  onNavigate: () => void;
 };
 
 function NavTrigger({
@@ -581,6 +794,7 @@ function NavTrigger({
   onOpenFromHover,
   onClose,
   onCloseSchedule,
+  onNavigate,
 }: NavTriggerProps) {
   if (!item.mega) {
     return (
@@ -599,7 +813,6 @@ function NavTrigger({
       ref={triggerRef}
       className={`site-nav__item${isOpen ? " is-open" : ""}`}
       onMouseEnter={onOpenFromHover}
-      onFocus={onOpen}
     >
       <Link
         href={item.href}
@@ -607,8 +820,14 @@ function NavTrigger({
         aria-expanded={isOpen}
         aria-haspopup="true"
         aria-controls={`${menuId}-desktop`}
+        onFocus={(event) => {
+          /* Keyboard only — window restore / mouse click focus must not open mega */
+          if (event.currentTarget.matches(":focus-visible")) onOpen();
+        }}
         onClick={(event) => {
           if (canHoverFine()) {
+            /* Navigate; mega stays until the route commits (Apple-style) */
+            onNavigate();
             return;
           }
           event.preventDefault();

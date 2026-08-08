@@ -86,9 +86,9 @@
   --ring: #0076dd;
   --line: rgba(11, 11, 11, 0.12);
   --font-sans: "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  /* Content shell — wider on laptop; sides ~half the previous inset */
+  /* Content shell — laptop edges close, but not flush */
   --shell-max: 56rem; /* 896 */
-  --shell-gutter: clamp(0.575rem, 1.4vw, 1.25rem);
+  --shell-gutter: clamp(0.55rem, 1.25vw, 1.1rem);
   --header-bar-h: 3.5rem;
   /* Bar + iOS status/notch when viewport-fit=cover */
   --header-offset: calc(var(--header-bar-h) + env(safe-area-inset-top, 0px));
@@ -96,20 +96,20 @@
 
 @media (min-width: 1100px) {
   :root {
-    --shell-max: 64rem; /* 1024 */
+    --shell-max: 66rem; /* 1056 */
   }
 }
 
 @media (min-width: 1200px) {
   :root {
-    --shell-max: 76rem; /* 1216 */
+    --shell-max: 78rem; /* 1248 */
   }
 }
 
-/* MacBook / laptop: raise cap so leftover side inset ≈ gutter (~25px), not ~50px+ */
+/* MacBook / laptop: between prior 1400 and the too-wide 1480 */
 @media (min-width: 1280px) {
   :root {
-    --shell-max: 1400px;
+    --shell-max: 1440px;
   }
 }
 
@@ -226,7 +226,8 @@ p {
 }
 
 .site-header {
-  --nav-frost-bg: rgba(251, 251, 253, 0.86);
+  /* Slightly denser than 0.86 — mega/header over white bands was reading too see-through */
+  --nav-frost-bg: rgba(251, 251, 253, 0.94);
   --nav-frost-filter: saturate(200%) blur(48px);
   position: sticky;
   top: 0;
@@ -327,6 +328,17 @@ p {
 }
 
 /*
+ * Under difference blend, never tween brand fills (wrong capsule colors).
+ * Snap only after .is-pills-out has finished shrinking.
+ */
+.site-header-cta.is-ghost .nav-contact-glare.glare-hover,
+.site-header-cta.is-ghost .nav-contact {
+  transform: none;
+  transition: none !important;
+  transition-delay: 0ms !important;
+}
+
+/*
  * Ghost underline under the label only (not the icon) —
  * currentColor + parent mix-blend:difference for invert contrast.
  */
@@ -384,27 +396,23 @@ p {
 }
 
 /*
- * Pill chrome: animate ONLY while .is-pills is on (enter / stay).
- * On exit → ghost, snap fill/padding off. A 320ms green→transparent fade
- * under mix-blend-mode:difference reads as a wrong-colored capsule flash.
+ * Pill enter (.is-pills): fade brand fills in.
+ * Pill exit (.is-pills-out): SNAP fills off, then ease padding — never tween
+ * green/blue under mix-blend:difference (reads as a wrong mid-color flash).
  */
-.site-header-cta .nav-contact-glare.glare-hover {
-  border-radius: 999px;
-  transition: none;
-}
-
-.site-header-cta .nav-contact {
-  transition: none;
-}
-
 .site-header-cta.is-pills .nav-contact-glare.glare-hover {
+  border-radius: 999px;
+  transform-origin: right center;
   background: #0076dd !important;
   border-color: #0076dd !important;
   border-width: 1px;
   overflow: hidden;
+  transform: scale(1);
   transition:
     background-color 320ms cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 320ms cubic-bezier(0.4, 0, 0.2, 1);
+    border-color 320ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-width 320ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .site-header-cta.is-pills .nav-contact {
@@ -413,16 +421,83 @@ p {
     padding 320ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.site-header-cta.is-pills .site-header-cta__inner > *:nth-child(1) .nav-contact-glare {
+.site-header-cta.is-pills-out {
+  mix-blend-mode: difference;
+}
+
+.site-header-cta.is-pills-out .nav-contact-glare.glare-hover {
+  border-radius: 999px;
+  transform-origin: right center;
+  background: transparent !important;
+  border-color: transparent !important;
+  border-width: 0;
+  overflow: visible;
+  transform: scale(1);
+  /* No background/border-color tween — fills are gone on the first exit frame */
+  transition:
+    border-width 320ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.site-header-cta.is-pills-out .nav-contact-glare.glare-hover::before {
+  content: none;
+  display: none;
+}
+
+.site-header-cta.is-pills-out .nav-contact,
+.site-header-cta.is-pills-out .nav-contact--with-icon {
+  padding-inline: 0.35rem 0;
+  color: #fff;
+  transition: padding 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.site-header-cta.is-pills-out .site-header-cta__inner > *:first-child .nav-contact {
+  padding-inline-start: 0;
+}
+
+@media (min-width: 900px) {
+  .site-header-cta.is-pills-out .nav-contact:not(.nav-contact--block) {
+    padding-inline: 0.35rem 0;
+  }
+
+  .site-header-cta.is-pills-out
+    .site-header-cta__inner
+    > *:first-child
+    .nav-contact:not(.nav-contact--block) {
+    padding-inline-start: 0;
+  }
+}
+
+/* Enter: left → right */
+.site-header-cta.is-pills .site-header-cta__inner > *:nth-child(1) .nav-contact-glare,
+.site-header-cta.is-pills .site-header-cta__inner > *:nth-child(1) .nav-contact {
   transition-delay: 0ms;
 }
 
-.site-header-cta.is-pills .site-header-cta__inner > *:nth-child(2) .nav-contact-glare {
+.site-header-cta.is-pills .site-header-cta__inner > *:nth-child(2) .nav-contact-glare,
+.site-header-cta.is-pills .site-header-cta__inner > *:nth-child(2) .nav-contact {
   transition-delay: 55ms;
 }
 
-.site-header-cta.is-pills .site-header-cta__inner > *:nth-child(3) .nav-contact-glare {
+.site-header-cta.is-pills .site-header-cta__inner > *:nth-child(3) .nav-contact-glare,
+.site-header-cta.is-pills .site-header-cta__inner > *:nth-child(3) .nav-contact {
   transition-delay: 110ms;
+}
+
+/* Exit: reverse stagger, tuck toward the right */
+.site-header-cta.is-pills-out .site-header-cta__inner > *:nth-child(1) .nav-contact-glare,
+.site-header-cta.is-pills-out .site-header-cta__inner > *:nth-child(1) .nav-contact {
+  transition-delay: 110ms;
+}
+
+.site-header-cta.is-pills-out .site-header-cta__inner > *:nth-child(2) .nav-contact-glare,
+.site-header-cta.is-pills-out .site-header-cta__inner > *:nth-child(2) .nav-contact {
+  transition-delay: 55ms;
+}
+
+.site-header-cta.is-pills-out .site-header-cta__inner > *:nth-child(3) .nav-contact-glare,
+.site-header-cta.is-pills-out .site-header-cta__inner > *:nth-child(3) .nav-contact {
+  transition-delay: 0ms;
 }
 
 .site-header-cta.is-pills .nav-contact-glare.glare-hover::before {
@@ -469,8 +544,9 @@ p {
   }
 }
 
-/* Desktop mega open: frost lives on .mega-panel; bar stays clear above it */
-.site-header:has(.mega-panel.is-open) {
+/* Desktop mega open/closing: frost lives on .mega-panel; bar stays clear above it */
+.site-header:has(.mega-panel.is-open),
+.site-header:has(.mega-panel.is-closing) {
   background: transparent;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -707,7 +783,7 @@ p {
   grid-template-columns: repeat(4, max-content);
   align-items: start;
   justify-content: end;
-  column-gap: clamp(1.75rem, 3.4cqi, 3.5rem);
+  column-gap: clamp(2.15rem, 4cqi, 4.25rem);
   row-gap: 1.25rem;
   margin: 0;
   /* Pack from the shell’s right edge, then grow left toward center */
@@ -977,7 +1053,7 @@ p {
     max-width: 100%;
     margin-left: auto;
     row-gap: 1.1rem;
-    column-gap: clamp(3.25rem, 5.5cqi, 5rem);
+    column-gap: clamp(3.75rem, 6cqi, 5.75rem);
   }
 }
 
@@ -1070,14 +1146,16 @@ p {
   background: rgba(0, 0, 0, 0.42);
   opacity: 0;
   pointer-events: none;
-  /* Snap off on exit — fading rgba black reads as the Safari “半透明黑” flash */
-  transition: none;
+  /* Fade both ways — hold timing is gated in Header (halfway through mega close) */
+  transition: opacity 360ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-scrim.is-visible {
   opacity: 1;
+}
+
+.nav-scrim.is-interactive {
   pointer-events: auto;
-  transition: opacity 360ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .site-header__actions {
@@ -1333,20 +1411,34 @@ p {
   pointer-events: none;
   border: none;
   box-shadow: none;
-  /* Height only on exit — fading frosted opacity in Safari → 半透明黑 */
+  /* Height collapse on exit — keep frost opaque while height tweens (see .is-closing) */
   transition: height 480ms cubic-bezier(0.4, 0, 0.2, 1);
   will-change: height;
 }
 
-.mega-panel.is-open {
+/*
+ * Open + closing share frost. On exit we only tween height (sheet retreats
+ * upward). Snapping opacity/frost off with .is-open made close look instant.
+ * After height hits 0, classes drop and frost snaps off (avoids Safari fade flash).
+ */
+.mega-panel.is-open,
+.mega-panel.is-closing {
   opacity: 1;
-  pointer-events: auto;
   background: var(--nav-frost-bg);
   backdrop-filter: var(--nav-frost-filter);
   -webkit-backdrop-filter: var(--nav-frost-filter);
+}
+
+.mega-panel.is-open {
+  pointer-events: auto;
   transition:
     height 480ms cubic-bezier(0.4, 0, 0.2, 1),
     opacity 380ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mega-panel.is-closing {
+  pointer-events: none;
+  transition: height 480ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .mega-panel__track {

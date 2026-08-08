@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ServicePicker } from "@/components/ServicePicker";
+import { ServicesRoleBurst } from "@/components/ServicesRoleBurst";
 
 export const metadata: Metadata = {
   title: "Services",
@@ -17,6 +18,8 @@ const steps = [
 export default function ServicesPage() {
   return (
     <main>
+      <ServicesRoleBurst />
+
       <section className="section">
         <p className="eyebrow">Services</p>
         <h1>Choose the stages you need.</h1>
