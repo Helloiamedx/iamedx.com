@@ -7,14 +7,9 @@
   margin-top: calc(-1 * var(--header-offset));
   /* Clip huge near-camera labels here so the 3D field can keep preserve-3d */
   overflow: hidden;
-  color: #1d1d1f;
-  background:
-    radial-gradient(
-      ellipse 80% 70% at 50% 45%,
-      #ffffff 0%,
-      #f3f3f5 55%,
-      #ebebef 100%
-    );
+  /* Apple system off-white on flat black — no radial “glow” in the center */
+  color: #f5f5f7;
+  background: #000000;
 }
 
 .services-role-burst__field {
@@ -34,39 +29,23 @@
   left: 50%;
   margin: 0;
   font-family: var(--font-sans);
-  font-size: clamp(1.2rem, 0.85rem + 1.35vw, 1.7rem);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: clamp(0.78rem, 0.58rem + 0.7vw, 1.05rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
   line-height: 1.15;
-  color: rgba(29, 29, 31, 0.7);
+  /* Apple secondary gray — clearer than near-white on black */
+  color: rgba(161, 161, 166, 0.88);
   white-space: nowrap;
   transform-origin: center center;
-  transform-style: preserve-3d;
   backface-visibility: hidden;
-  will-change: transform, filter, opacity;
-  transform: translate3d(-50%, -50%, -720px);
-}
-
-.services-role-burst__veil {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  /* Soft feather over the copy zone so zooming roles dissolve underneath */
-  background: radial-gradient(
-    ellipse 48% 32% at 50% 48%,
-    rgba(255, 255, 255, 0.94) 0%,
-    rgba(255, 255, 255, 0.62) 42%,
-    rgba(255, 255, 255, 0.18) 68%,
-    rgba(255, 255, 255, 0) 100%
-  );
+  /* Size comes from perspective + translateZ only — never pre-scale */
+  transform: translate3d(-50%, -50%, -480px);
 }
 
 .services-role-burst__copy {
   position: absolute;
   inset: 0;
-  z-index: 3;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -77,45 +56,22 @@
 
 .services-role-burst__line {
   position: relative;
-  isolation: isolate;
   margin: 0;
-  max-width: min(22ch, 100%);
+  max-width: min(34ch, 100%);
   min-height: 1.2em;
   font-family: var(--font-sans);
   font-size: clamp(1.75rem, 1.05rem + 2.8vw, 3.25rem);
   font-weight: 700;
   line-height: 1.12;
   letter-spacing: -0.02em;
-  color: #1d1d1f;
+  text-transform: uppercase;
+  color: #f5f5f7;
   text-wrap: balance;
-  /* Soft white halo — feather so crossing role titles don’t hard-collide */
-  text-shadow:
-    0 0 12px rgba(255, 255, 255, 1),
-    0 0 28px rgba(255, 255, 255, 0.95),
-    0 0 52px rgba(255, 255, 255, 0.85),
-    0 0 80px rgba(255, 255, 255, 0.65);
   opacity: 0;
   transform: translateY(0.35rem);
   transition:
     opacity 520ms cubic-bezier(0.4, 0, 0.2, 1),
     transform 520ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.services-role-burst__line::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: -1.35em -2.1em;
-  border-radius: 50%;
-  background: radial-gradient(
-    ellipse 72% 68% at 50% 50%,
-    rgba(255, 255, 255, 0.96) 0%,
-    rgba(255, 255, 255, 0.72) 38%,
-    rgba(255, 255, 255, 0.2) 62%,
-    rgba(255, 255, 255, 0) 76%
-  );
-  filter: blur(22px);
-  pointer-events: none;
 }
 
 .services-role-burst__line.is-visible {
@@ -125,7 +81,7 @@
 
 @media (max-width: 700px) {
   .services-role-burst__label {
-    font-size: 0.95rem;
+    font-size: 0.72rem;
   }
 
   .services-role-burst__line {

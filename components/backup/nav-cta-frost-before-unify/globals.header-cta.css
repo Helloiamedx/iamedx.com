@@ -1,0 +1,267 @@
+.site-header-cta {
+  position: fixed;
+  top: env(safe-area-inset-top, 0px);
+  right: 0;
+  left: 0;
+  z-index: 60;
+  height: var(--header-bar-h);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.site-header-cta__inner {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
+  margin-inline: auto;
+  pointer-events: none;
+}
+
+.site-header-cta__inner > * {
+  pointer-events: auto;
+}
+
+/* Clear top: text+icon only, same difference contrast as menu */
+.site-header-cta.is-ghost {
+  mix-blend-mode: difference;
+}
+
+.site-header-cta.is-ghost .nav-contact-glare.glare-hover,
+.site-header-cta:not(.is-pills) .nav-contact-glare.glare-hover {
+  background: transparent !important;
+  border-color: transparent !important;
+  /* Transparent border still eats 1px — drop it so text can sit flush */
+  border-width: 0;
+  /* Keep pill radius while fill fades out — avoids a rectangular flash */
+  overflow: visible;
+}
+
+/* Ghost: kill glare wipe — use L→R underline instead */
+.site-header-cta:not(.is-pills) .nav-contact-glare.glare-hover::before {
+  content: none;
+  display: none;
+}
+
+.site-header-cta.is-ghost .nav-contact {
+  color: #fff;
+}
+
+/*
+ * Under difference blend, never tween brand fills (wrong capsule colors).
+ * Snap only after .is-pills-out has finished shrinking.
+ */
+.site-header-cta.is-ghost .nav-contact-glare.glare-hover,
+.site-header-cta.is-ghost .nav-contact {
+  transform: none;
+  transition: none !important;
+  transition-delay: 0ms !important;
+}
+
+/*
+ * Ghost underline under the label only (not the icon) —
+ * currentColor + parent mix-blend:difference for invert contrast.
+ */
+.site-header-cta:not(.is-pills) .nav-contact__label {
+  position: relative;
+}
+
+.site-header-cta:not(.is-pills) .nav-contact__label::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.08em;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.site-header-cta:not(.is-pills) .nav-contact:hover .nav-contact__label::after {
+  transform: scaleX(1);
+}
+
+/*
+ * Ghost / pre-pill: no pill padding — right edge aligns to shell like menu text.
+ * Keep a little start padding between items; last item is fully flush right.
+ */
+.site-header-cta:not(.is-pills) .nav-contact,
+.site-header-cta:not(.is-pills) .nav-contact--with-icon {
+  padding-inline: 0.35rem 0;
+}
+
+.site-header-cta:not(.is-pills) .site-header-cta__inner > *:first-child .nav-contact {
+  padding-inline-start: 0;
+}
+
+@media (min-width: 900px) {
+  .site-header-cta:not(.is-pills) .nav-contact:not(.nav-contact--block) {
+    padding-inline: 0.35rem 0;
+  }
+
+  .site-header-cta:not(.is-pills)
+    .site-header-cta__inner
+    > *:first-child
+    .nav-contact:not(.nav-contact--block) {
+    padding-inline-start: 0;
+  }
+}
+
+/*
+ * Frost on, pills not yet — match nav ink. Must NOT win during .is-pills-out
+ * (that mode is already #fff + difference; dark ink made labels vanish, then
+ * “pop” bright when landing on .is-ghost).
+ */
+.site-header-cta:not(.is-ghost):not(.is-pills):not(.is-pills-out) .nav-contact {
+  color: #1d1d1f;
+}
+
+/*
+ * Pill enter (.is-pills): fade brand fills in.
+ * Pill exit (.is-pills-out): SNAP fills off, then ease padding — never tween
+ * green/blue under mix-blend:difference (reads as a wrong mid-color flash).
+ */
+.site-header-cta.is-pills .nav-contact-glare.glare-hover {
+  border-radius: 999px;
+  transform-origin: right center;
+  background: #0076dd !important;
+  border-color: #0076dd !important;
+  border-width: 1px;
+  overflow: hidden;
+  transform: scale(1);
+  transition:
+    background-color 320ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 320ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-width 320ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.site-header-cta.is-pills .nav-contact {
+  transition:
+    color 320ms cubic-bezier(0.4, 0, 0.2, 1),
+    padding 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.site-header-cta.is-pills-out {
+  mix-blend-mode: difference;
+}
+
+.site-header-cta.is-pills-out .nav-contact-glare.glare-hover {
+  border-radius: 999px;
+  transform-origin: right center;
+  background: transparent !important;
+  border-color: transparent !important;
+  border-width: 0;
+  overflow: visible;
+  transform: scale(1);
+  /* No background/border-color tween — fills are gone on the first exit frame */
+  transition:
+    border-width 320ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.site-header-cta.is-pills-out .nav-contact-glare.glare-hover::before {
+  content: none;
+  display: none;
+}
+
+.site-header-cta.is-pills-out .nav-contact,
+.site-header-cta.is-pills-out .nav-contact--with-icon {
+  padding-inline: 0.35rem 0;
+  /* Keep ghost white through the whole shrink — no dark mid-frame */
+  color: #fff !important;
+  transition: padding 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.site-header-cta.is-pills-out .site-header-cta__inner > *:first-child .nav-contact {
+  padding-inline-start: 0;
+}
+
+@media (min-width: 900px) {
+  .site-header-cta.is-pills-out .nav-contact:not(.nav-contact--block) {
+    padding-inline: 0.35rem 0;
+  }
+
+  .site-header-cta.is-pills-out
+    .site-header-cta__inner
+    > *:first-child
+    .nav-contact:not(.nav-contact--block) {
+    padding-inline-start: 0;
+  }
+}
+
+/* Enter: left → right */
+.site-header-cta.is-pills .site-header-cta__inner > *:nth-child(1) .nav-contact-glare,
+.site-header-cta.is-pills .site-header-cta__inner > *:nth-child(1) .nav-contact {
+  transition-delay: 0ms;
+}
+
+.site-header-cta.is-pills .site-header-cta__inner > *:nth-child(2) .nav-contact-glare,
+.site-header-cta.is-pills .site-header-cta__inner > *:nth-child(2) .nav-contact {
+  transition-delay: 55ms;
+}
+
+.site-header-cta.is-pills .site-header-cta__inner > *:nth-child(3) .nav-contact-glare,
+.site-header-cta.is-pills .site-header-cta__inner > *:nth-child(3) .nav-contact {
+  transition-delay: 110ms;
+}
+
+/* Exit: reverse stagger, tuck toward the right */
+.site-header-cta.is-pills-out .site-header-cta__inner > *:nth-child(1) .nav-contact-glare,
+.site-header-cta.is-pills-out .site-header-cta__inner > *:nth-child(1) .nav-contact {
+  transition-delay: 110ms;
+}
+
+.site-header-cta.is-pills-out .site-header-cta__inner > *:nth-child(2) .nav-contact-glare,
+.site-header-cta.is-pills-out .site-header-cta__inner > *:nth-child(2) .nav-contact {
+  transition-delay: 55ms;
+}
+
+.site-header-cta.is-pills-out .site-header-cta__inner > *:nth-child(3) .nav-contact-glare,
+.site-header-cta.is-pills-out .site-header-cta__inner > *:nth-child(3) .nav-contact {
+  transition-delay: 0ms;
+}
+
+.site-header-cta.is-pills .nav-contact-glare.glare-hover::before {
+  display: block;
+  content: "";
+}
+
+.site-header-cta.is-pills .nav-contact__label::after {
+  content: none;
+  display: none;
+}
+
+.site-header-cta.is-pills .nav-contact-glare--whatsapp.glare-hover {
+  background: #25d366 !important;
+  border-color: #25d366 !important;
+}
+
+.site-header-cta.is-pills .nav-contact-glare--wechat.glare-hover {
+  background: #07c160 !important;
+  border-color: #07c160 !important;
+}
+
+.site-header-cta.is-pills .nav-contact {
+  color: #fff;
+}
+
+.site-header-cta.is-pills .nav-contact--with-icon {
+  padding-inline: 0.65rem 0.8rem;
+}
+
+@media (min-width: 900px) {
+  .site-header-cta.is-pills .nav-contact:not(.nav-contact--block) {
+    padding: 0.4rem 1.05rem;
+  }
+
+  .site-header-cta.is-pills .nav-contact--with-icon:not(.nav-contact--block) {
+    padding-inline: 0.65rem 0.8rem;
+  }
+}
+
