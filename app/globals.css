@@ -86,30 +86,32 @@
   --ring: #0076dd;
   --line: rgba(11, 11, 11, 0.12);
   --font-sans: "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  /* Content shell — laptop edges close, but not flush */
-  --shell-max: 56rem; /* 896 */
-  --shell-gutter: clamp(0.55rem, 1.25vw, 1.1rem);
-  --header-bar-h: 3.5rem;
+  /*
+   * Content shell — match Pentagram container rhythm on laptops:
+   * fluid to viewport minus outer gutters; hard cap only at very wide screens.
+   */
+  --shell-max: 1792px;
+  --shell-gutter: 12px;
+  --header-bar-h: 3.75rem;
   /* Bar + iOS status/notch when viewport-fit=cover */
   --header-offset: calc(var(--header-bar-h) + env(safe-area-inset-top, 0px));
 }
 
-@media (min-width: 1100px) {
+@media (min-width: 800px) {
   :root {
-    --shell-max: 66rem; /* 1056 */
+    --shell-gutter: 16px;
   }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1040px) {
   :root {
-    --shell-max: 78rem; /* 1248 */
+    --shell-gutter: 24px;
   }
 }
 
-/* MacBook / laptop: between prior 1400 and the too-wide 1480 */
-@media (min-width: 1280px) {
+@media (min-width: 1800px) {
   :root {
-    --shell-max: 1440px;
+    --shell-gutter: 32px;
   }
 }
 
@@ -229,6 +231,8 @@ p {
   /* Slightly denser than 0.86 — mega/header over white bands was reading too see-through */
   --nav-frost-bg: rgba(251, 251, 253, 0.94);
   --nav-frost-filter: saturate(200%) blur(48px);
+  /* Apple label ink on frost — not pure #000 (hover can go full black) */
+  --nav-ink: #1d1d1f;
   position: sticky;
   top: 0;
   z-index: 50;
@@ -240,8 +244,32 @@ p {
   border: none;
   box-shadow: none;
   outline: none;
-  /* Never tween backdrop-filter — Safari paints a dark translucent mid-frame */
-  transition: background-color 360ms cubic-bezier(0.4, 0, 0.2, 1);
+  /*
+   * Transform only — never tween background/frost. A 360ms bg fade after mega
+   * close read as a second “套底” pop on the bar.
+   * Also never tween backdrop-filter (Safari dark mid-frame).
+   */
+  transition: transform 380ms cubic-bezier(0.4, 0, 0.2, 1);
+  /*
+   * Do NOT set will-change:transform on the resting bar — it promotes a layer
+   * that breaks .mega-panel’s backdrop-filter (black / flat sheet on leave).
+   */
+}
+
+/*
+ * Scroll tuck / idle hide: whole bar (fill + logo + links) rolls up as one.
+ * Keep a frost-matched opaque fill during the transform — killing the fill
+ * made the底 vanish first while type still slid away. Live blur stays off
+ * (WebKit paints a black slab if backdrop-filter translates over white).
+ */
+.site-header.is-nav-hidden {
+  transform: translate3d(0, calc(-100% - 1px), 0);
+  pointer-events: none;
+  background: rgb(251, 251, 253);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  mix-blend-mode: normal;
+  transition: transform 380ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* All pages at top of scroll: fully clear — same gate as the home hero */
@@ -249,8 +277,8 @@ p {
   background: transparent;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  /* Snap clear — no backdrop tween (Safari dark mid-frame) */
-  transition: none;
+  /* Snap clear fill — keep hide/show transform tween */
+  transition: transform 380ms cubic-bezier(0.4, 0, 0.2, 1);
   /*
    * Blend MUST live on this sticky/z-index root (Further uses fixed + difference
    * on the nav layer itself). Child-level difference is trapped inside the
@@ -275,8 +303,19 @@ p {
   opacity: 0;
 }
 
+/* Hide must win over .is-over-clear’s difference blend */
+.site-header.is-over-clear.is-nav-hidden {
+  background: transparent;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  mix-blend-mode: normal;
+  transition: transform 380ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* Contact raft — outside blended header; ghost uses its own difference */
 .site-header-cta {
+  /* Sibling raft — mirror header ink token (not nested under .site-header) */
+  --nav-ink: #1d1d1f;
   position: fixed;
   top: env(safe-area-inset-top, 0px);
   right: 0;
@@ -286,6 +325,15 @@ p {
   display: flex;
   align-items: center;
   pointer-events: none;
+  transition: transform 380ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.site-header-cta.is-nav-hidden {
+  transform: translate3d(0, calc(-100% - env(safe-area-inset-top, 0px) - 1px), 0);
+  /* Keep in lockstep with .site-header tuck */
+  transition: transform 380ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* Difference over white → black flash while the raft slides away */
+  mix-blend-mode: normal !important;
 }
 
 .site-header-cta__inner {
@@ -396,7 +444,7 @@ p {
  * “pop” bright when landing on .is-ghost).
  */
 .site-header-cta:not(.is-ghost):not(.is-pills):not(.is-pills-out) .nav-contact {
-  color: #1d1d1f;
+  color: var(--nav-ink, #1d1d1f);
 }
 
 /*
@@ -525,9 +573,10 @@ p {
   border-color: #07c160 !important;
 }
 
-/* Ink matches primary nav on frost — fills stay brand */
+/* Same ink as .site-nav__link on frost — Apple #1d1d1f, not pure #000 */
 .site-header-cta.is-pills .nav-contact {
-  color: #1d1d1f;
+  color: var(--nav-ink, #1d1d1f);
+  font-weight: 500;
 }
 
 .site-header-cta.is-pills .nav-contact--with-icon {
@@ -551,18 +600,16 @@ p {
 }
 
 /*
- * Only while the mega is fully open does frost live solely on .mega-panel.
- * During .is-closing the header must already wear its resting frost (or stay
- * clear at top) — otherwise mega hits 0/bar, then header “套底” fades back in.
+ * Open + closing: frost lives on .mega-panel only — one sheet, one opacity.
+ * Stacking bar frost under the sheet made the ~50px band denser than the
+ * dropdown. Resting header frost returns only after is-closing ends.
  */
-.site-header:has(.mega-panel.is-open) {
+.site-header:has(.mega-panel.is-open),
+.site-header:has(.mega-panel.is-closing) {
   background: transparent;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-}
-
-/* Snap resting chrome the moment close starts — no 360ms background tween */
-.site-header:has(.mega-panel.is-closing) {
+  mix-blend-mode: normal;
   transition: none;
 }
 
@@ -580,32 +627,20 @@ p {
 /* ===== Site footer (full-bleed video + shell-aligned copy) ===== */
 .site-footer {
   --footer-bg: #000;
-  --footer-ink: #f5f5f7;
-  --footer-muted: #a1a1a6;
-  --footer-link: #d2d2d7;
+  --footer-ink: #fff;
+  --footer-muted: rgba(255, 255, 255, 0.62);
+  --footer-link: #fff;
   position: relative;
   isolation: isolate;
-  /* Clip descendants — overflow:visible was letting sparks/glare extend
-     document scroll height past the black stage (mobile 漏白底). */
   overflow: clip;
   margin-top: auto;
   flex-shrink: 0;
   background: var(--footer-bg);
   color: var(--footer-ink);
-  font-size: 0.875rem;
-  /* Extend black under HELLOIAMEDX into the iOS home-indicator / Safari gap */
+  font-size: 1.125rem;
   padding: 0 0 env(safe-area-inset-bottom, 0px);
-  -webkit-user-select: none;
-  user-select: none;
 }
 
-.site-footer input,
-.site-footer textarea {
-  -webkit-user-select: text;
-  user-select: text;
-}
-
-/* Full viewport width — videos run edge to edge */
 .site-footer__stage {
   position: relative;
   isolation: isolate;
@@ -614,390 +649,216 @@ p {
   border-radius: 0;
   overflow: hidden;
   background: #000;
-  /* Height from content + wordmark pad — no 78vh void that grows on narrow */
   min-height: 0;
   display: flex;
   flex-direction: column;
 }
 
-.site-footer__marquee {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-/*
- * Exact HELLOIAMEDX box: same L/R as shell, same height as glyphs, bottom-aligned.
- * object-fit cover + top = fill that box without oversized bleed.
- */
-.footer-video-fill {
-  position: absolute;
-  left: var(--footer-wordmark-x, 0px);
-  /* 1px overscan — Safari SVG masks leave a hairline above the glyphs */
-  bottom: -1px;
-  top: auto;
-  width: var(--footer-wordmark-w, 100%);
-  height: calc(var(--footer-wordmark-h, 0px) + 2px);
-  overflow: hidden;
-  /* Must stay dark: white placeholder showed as a Safari seam above HELLOIAMEDX */
-  background: #000;
-}
-
-.footer-video-fill__media {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top center;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 480ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.footer-video-fill.is-ready .footer-video-fill__media {
-  opacity: 1;
-}
-
-/*
- * Middle layer: above black plate / video, below shell copy.
- * Isolated blend group — screen on the plate, letter shapes punched out so
- * Safari can’t let beams composite over the HELLOIAMEDX video glyphs.
- * filter stays on the inner canvas wrapper (same-el filter+mix-blend breaks Safari).
- */
-.site-footer__rays-stack {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  overflow: hidden;
-  isolation: isolate;
-  mix-blend-mode: screen;
-}
-
-.site-footer__rays {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.site-footer__rays .light-rays-container {
-  filter: brightness(1.35) contrast(1.08);
-}
-
-.site-footer__rays .light-rays-container,
-.site-footer__rays .light-rays-container canvas {
-  width: 100%;
-  height: 100%;
-}
-
-.footer-wordmark__rays-cutout {
-  position: absolute;
-  inset: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  mix-blend-mode: destination-out;
-}
-
-/*
- * Full-bleed black plate; HELLOIAMEDX is an SVG mask hole.
- * Letters sit on the stage bottom edge (wordY = stageH − wordH).
- */
-.footer-wordmark {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  overflow: hidden;
-  background: transparent;
-}
-
-.footer-wordmark__svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  vertical-align: bottom;
-}
-
-/*
- * Content stacks upward from HELLOIAMEDX:
- * shell bottom pad = wordmark height + small gap; flex-end packs blocks above it.
- */
 .site-footer__shell {
-  /* Wide enough for WhatsApp + WeChat + Email on one row */
-  --footer-assist-fixed-w: 23rem;
   position: relative;
   z-index: 4;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  flex: 0 1 auto;
   box-sizing: border-box;
   width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
   margin-inline: auto;
-  /* Fixed top pad — does not grow as the viewport shrinks */
-  /* Bottom: wordmark height + tight gap so legal/social/payments sit closer to HELLOIAMEDX */
-  padding: 2.75rem 0 calc(var(--footer-wordmark-h, 12rem) + 0.4rem);
-  /* More air above & below the mid row (assist + nav) */
-  gap: clamp(2.75rem, 6vw, 4.25rem);
+  padding: clamp(2.5rem, 5vw, 3.5rem) 0 0;
+  gap: 0;
   overflow: visible;
-  container-type: inline-size;
-  container-name: footer-shell;
+}
+
+.site-footer__shell--bottom {
+  padding: 1.25rem 0 1.75rem;
 }
 
 /*
- * Row 1 — lead shrinks as shell narrows (cqi tracks shell width).
+ * Shared 2-col band so “Let me help you” / About labels share one left edge,
+ * and channel values / About copy share one right column edge.
  */
-.site-footer__lead {
-  margin: 0;
-  max-width: min(30ch, 100%);
-  font-family: var(--font-sans);
-  font-size: clamp(1.35rem, 0.55rem + 4.2cqi, 2.85rem);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.12;
-  color: var(--footer-ink);
-  text-wrap: balance;
-}
-
-.site-footer__lead-proximity {
-  font-size: inherit;
-  font-weight: inherit;
-  letter-spacing: inherit;
-  line-height: inherit;
-  color: inherit;
-}
-
-.site-footer__mid {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  /* Fixed gutter between assist and links — never collapse */
-  column-gap: 2.5rem;
-  row-gap: clamp(1rem, 2.5cqi, 2.5rem);
-  margin: 0;
-  width: 100%;
-  min-width: 0;
-  /* Shared measure so nav headings can optically match the assist title top */
-  --footer-assist-title-size: clamp(1.2rem, 0.4rem + 2.2cqi, 1.75rem);
-}
-
-.site-footer__nav {
+.site-footer__band {
+  --footer-band-label: minmax(7.5rem, 0.32fr);
   display: grid;
-  grid-template-columns: repeat(4, max-content);
+  grid-template-columns: var(--footer-band-label) minmax(0, 1fr);
+  column-gap: clamp(1.5rem, 4vw, 3rem);
   align-items: start;
-  justify-content: end;
-  column-gap: clamp(2.15rem, 4cqi, 4.25rem);
-  row-gap: 1.25rem;
-  margin: 0;
-  /* Pack from the shell’s right edge, then grow left toward center */
-  margin-left: auto;
-  margin-right: 0;
-  /* Nudge down: large title ink sits lower in its line box than small caps */
-  padding-top: calc(var(--footer-assist-title-size) * 0.2);
-  /* Do not shrink — assist yields width first when space is tight */
-  flex: 0 0 auto;
-  width: max-content;
-  max-width: 100%;
-  text-align: left;
+  padding: 0 0 1.85rem;
 }
 
-.site-footer__nav-col {
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-  min-width: 0;
+.site-footer__band--about {
+  /* Extra air before the large wordmark */
+  padding: 1.85rem 0 4.25rem;
 }
 
-.site-footer__nav-heading {
+.site-footer__band-label {
   margin: 0;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-family: var(--font-sans);
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.45;
   color: var(--footer-ink);
-  line-height: 1;
 }
 
-.site-footer__nav-col ul {
-  display: flex;
-  flex-direction: column;
-  gap: 0.22rem;
+.site-footer__channels {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  /* More air between channel name and value */
+  column-gap: clamp(4rem, 8vw, 6.5rem);
+  row-gap: 0.5rem;
   margin: 0;
-  padding: 0 0 0 0.15rem;
+  padding: 0;
   list-style: none;
-}
-
-.site-footer__nav a {
-  position: relative;
-  display: inline-block;
-  font-size: clamp(0.75rem, 0.2rem + 1.1cqi, 0.8125rem);
-  font-weight: 400;
-  color: var(--footer-muted);
-  text-decoration: none;
-  letter-spacing: -0.01em;
-  line-height: 1.3;
-  padding-bottom: 0.1rem;
-}
-
-.site-footer__nav a::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: 0;
+  justify-self: stretch;
   width: 100%;
-  height: 1px;
-  background: currentColor;
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
+  max-width: 36rem;
+  margin-left: auto;
 }
 
-.site-footer__nav a:hover {
-  color: var(--footer-muted);
+.site-footer__channel {
+  display: contents;
 }
 
-.site-footer__nav a:hover::after {
-  transform: scaleX(1);
-}
-
-/*
- * Row 2 left — prefers fixed width; shrinks only after the mid column-gap
- * would otherwise be violated (links keep flex-shrink: 0).
- */
-.site-footer__assist {
-  width: var(--footer-assist-fixed-w);
-  max-width: 100%;
-  margin: 0;
-  flex: 0 1 var(--footer-assist-fixed-w);
-  min-width: 0;
-  box-sizing: border-box;
-}
-
-.site-footer__assist-title {
-  margin: 0 0 0.75rem;
+.site-footer__channel-label {
   font-family: var(--font-sans);
-  font-size: var(--footer-assist-title-size);
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  line-height: 1;
+  font-size: 1.125rem;
+  font-weight: 400;
+  line-height: 1.45;
   color: var(--footer-ink);
 }
 
-.site-footer__assist-copy {
-  margin: 0 0 1.1rem;
+.site-footer__channel-value {
   font-family: var(--font-sans);
-  font-size: calc(clamp(0.8125rem, 0.2rem + 1.2cqi, 1rem) - 1px);
+  font-size: 1.125rem;
   font-weight: 400;
-  letter-spacing: -0.01em;
-  line-height: 1.35;
-  color: var(--footer-muted);
+  line-height: 1.45;
+  color: var(--footer-ink);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
 }
 
-.site-footer__assist-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.45rem;
+.site-footer__channel-value:hover {
+  opacity: 0.72;
 }
 
-/* Footer assist CTAs — slightly under header pills, but readable */
-.site-footer__assist-actions .nav-contact:not(.nav-contact--block) {
-  min-height: 1.6rem;
-  padding: 0.28rem 0.8rem;
-  font-size: 0.75rem;
-  gap: 0.32rem;
-  /* Match header frost pills — dark ink on brand fills */
-  color: #1d1d1f;
+.site-footer__rule {
+  margin: 0;
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.22);
 }
 
-.site-footer__assist-actions .nav-contact--with-icon {
-  padding-inline: 0.6rem 0.8rem;
+.site-footer__about-copy {
+  margin: 0;
+  max-width: 36rem;
+  margin-left: auto;
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: 1.125rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--footer-ink);
+  text-wrap: pretty;
 }
 
-.site-footer__assist-actions .nav-contact__icon {
-  width: 0.9rem;
-  height: 0.9rem;
+/* Full shell-width static wordmark — no video */
+.site-footer__brand {
+  box-sizing: border-box;
+  width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
+  margin: 0 auto;
+  padding: 0.75rem 0 0.25rem;
 }
 
-/* Legal · social (center) · payments — immediately above HELLOIAMEDX */
+.site-footer__brand-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Bottom — three separate zones: legal | Personal | social */
 .site-footer__bottom {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: baseline;
-  column-gap: clamp(0.35rem, 2cqi, 1rem);
+  column-gap: 1.5rem;
+  row-gap: 0.75rem;
   width: 100%;
   margin: 0;
   padding: 0;
-  position: relative;
-  z-index: 1;
 }
 
 .site-footer__legal {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: baseline;
   gap: 0.35rem;
   margin: 0;
   justify-self: start;
-  min-width: 0;
-  /* Shrinks with shell — never wraps to a second line */
-  font-size: clamp(0.4rem, 0.12rem + 1.6cqi, 0.6875rem);
+  text-align: left;
+  font-size: 1rem;
   font-weight: 400;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  color: var(--footer-muted);
+  line-height: 1.4;
+  transition: color 0.2s ease;
+}
+
+.site-footer__legal:hover {
   color: #fff;
-  line-height: 1.35;
-  white-space: nowrap;
 }
 
 .site-footer__legal-sep {
   opacity: 0.7;
 }
 
+.site-footer__payments {
+  margin: 0;
+  justify-self: center;
+  text-align: center;
+  grid-column: 2;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: var(--footer-muted);
+  line-height: 1.4;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.site-footer__payments:hover {
+  color: #fff;
+}
+
 .site-footer__social {
   display: flex;
-  flex-wrap: nowrap;
-  justify-content: center;
-  gap: clamp(0.35rem, 1.5cqi, 1.25rem);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.65rem 1.25rem;
   margin: 0;
   padding: 0;
   list-style: none;
-  justify-self: center;
-  grid-column: 2;
-  min-width: 0;
+  justify-self: end;
+  grid-column: 3;
 }
 
 .site-footer__social-link {
-  position: relative;
   display: inline-block;
-  font-size: clamp(0.4rem, 0.12rem + 1.6cqi, 0.6875rem);
+  font-size: 1rem;
   font-weight: 400;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #fff;
+  color: var(--footer-muted);
   text-decoration: none;
-  line-height: 1.35;
-  padding-bottom: 0.12rem;
-  white-space: nowrap;
+  line-height: 1.4;
+  transition: color 0.2s ease;
+}
+
+.site-footer__social-link:hover {
+  color: #fff;
 }
 
 .site-footer__social-label {
   position: relative;
   display: inline-flex;
   align-items: flex-end;
-  gap: 0.15em;
-  padding-right: 0;
+  gap: 0.2em;
+  line-height: 1;
 }
 
 .site-footer__ext {
@@ -1005,9 +866,12 @@ p {
   display: inline-flex;
   flex-shrink: 0;
   align-items: flex-end;
+  justify-content: center;
   color: currentColor;
   opacity: 0.9;
   line-height: 0;
+  /* Match cap-height of the social label */
+  width: 1em;
   height: 1em;
 }
 
@@ -1017,140 +881,52 @@ p {
   height: 1em;
 }
 
-/* Left → right underline on hover */
-.site-footer__social-link::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  height: 1px;
-  background: currentColor;
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.site-footer__social-link:hover {
-  color: #fff;
-}
-
-.site-footer__social-link:hover::after {
-  transform: scaleX(1);
-}
-
-.site-footer__payments {
-  margin: 0;
-  justify-self: end;
-  text-align: right;
-  font-size: clamp(0.5625rem, 0.15rem + 0.9cqi, 0.6875rem);
-  font-weight: 400;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #fff;
-  line-height: 1.35;
-}
-
-/* —— Footer shell breakpoints (container) —— */
-
-/* Mid: 4 → 2×2 nav when shell < 1200 — frees room for assist
- *
- * DOM order is already few → many (About · Projects · Insights · Services),
- * so the 2×2 reads naturally:
- *   About    | Projects
- *   Insights | Services
- */
-@container footer-shell (max-width: 1200px) {
-  .site-footer__nav {
-    grid-template-columns: repeat(2, max-content);
-    /* Keep the 2×2 as one tight block on the right — not stretched apart */
-    justify-content: end;
-    width: max-content;
-    max-width: 100%;
-    margin-left: auto;
-    row-gap: 1.1rem;
-    column-gap: clamp(3.75rem, 6cqi, 5.75rem);
-  }
-}
-
-/* Bottom: drop Personal Payments when cramped — legal | social stay one row */
-@container footer-shell (max-width: 42rem) {
-  .site-footer__payments {
-    display: none;
+/* Narrow: stack help / About / bottom — title sits farther above content */
+@media (max-width: 899px) {
+  .site-footer__band,
+  .site-footer__band--about {
+    grid-template-columns: 1fr;
+    /* Match Pentagram mobile: clear air under “Let Me…” / About */
+    row-gap: 1.75rem;
   }
 
-  .site-footer__bottom {
-    grid-template-columns: minmax(0, 1fr) auto;
+  .site-footer__band {
+    padding-bottom: 2.25rem;
   }
 
-  .site-footer__social {
-    grid-column: 2;
-    justify-self: end;
-    justify-content: flex-end;
-    gap: clamp(0.3rem, 1.2cqi, 0.85rem);
-  }
-}
-
-/* Narrow / phone: stack mid + nav; bottom always legal left | social right */
-@container footer-shell (max-width: 32rem) {
-  .site-footer__mid {
-    flex-direction: column;
-    align-items: stretch;
-    /* More space between Looking for assistance and the link grid */
-    gap: 2.75rem;
+  .site-footer__band--about {
+    padding: 2.25rem 0 3rem;
   }
 
-  .site-footer__assist {
-    flex: 0 0 auto;
-    width: var(--footer-assist-fixed-w);
-    max-width: 100%;
-  }
-
-  .site-footer__assist-actions {
-    flex-wrap: wrap;
-  }
-
-  .site-footer__nav {
-    /* Full shell width, left↔right columns — no overflow off-screen */
+  .site-footer__channels,
+  .site-footer__about-copy {
     margin-left: 0;
-    margin-right: 0;
-    width: 100%;
-    max-width: 100%;
-    justify-content: space-between;
-    column-gap: 1.25rem;
-    row-gap: 1.25rem;
-    padding-top: 0;
-    box-sizing: border-box;
+    max-width: none;
   }
 
-  .site-footer__payments {
-    display: none;
+  .site-footer__channels {
+    margin-left: 0;
+    /* More air between label col and value col */
+    column-gap: clamp(2.5rem, 12vw, 4rem);
   }
 
   .site-footer__bottom {
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: baseline;
-    column-gap: 0.5rem;
+    grid-template-columns: 1fr;
+    justify-items: start;
+    row-gap: 0.75rem;
   }
 
-  .site-footer__legal {
-    display: flex;
-    justify-self: start;
-    font-size: clamp(0.375rem, 2.4cqi, 0.625rem);
-    letter-spacing: 0.03em;
-  }
-
+  .site-footer__legal,
+  .site-footer__payments,
   .site-footer__social {
-    grid-column: 2;
-    justify-self: end;
-    justify-content: flex-end;
-    flex-wrap: nowrap;
-    gap: clamp(0.25rem, 1.5cqi, 0.65rem);
+    grid-column: 1;
+    justify-self: start;
+    text-align: left;
+    justify-content: flex-start;
   }
 
-  .site-footer__social-link {
-    font-size: clamp(0.375rem, 2.4cqi, 0.625rem);
-    letter-spacing: 0.03em;
+  .site-footer__payments {
+    white-space: normal;
   }
 }
 
@@ -1196,7 +972,7 @@ p {
   display: inline-flex;
   align-items: center;
   padding: 0.4rem 0.75rem;
-  color: #1d1d1f; /* Apple secondary black */
+  color: var(--nav-ink, #1d1d1f);
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1340,7 +1116,8 @@ p {
 
 .site-logo__img {
   grid-area: 1 / 1;
-  height: 1.35rem;
+  /* Edward Xu wordmark — keep compact in the header */
+  height: 0.88rem;
   width: auto;
   display: block;
   transition: opacity 360ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -1357,7 +1134,7 @@ p {
 }
 
 .site-logo img {
-  height: 1.35rem;
+  height: 0.88rem;
   width: auto;
 }
 
@@ -1433,9 +1210,8 @@ p {
 }
 
 /*
- * Open + closing share frost. On exit we tween height down to the nav bar
- * (not to 0) so the sheet never vanishes and then gets a second frost from
- * the header. After the tween, classes drop and the bar frost hands off.
+ * Open + closing: one frost sheet. Exit tweens height → nav bar height (not 0).
+ * Drop live blur on close only (Safari black slab while height moves).
  */
 .mega-panel.is-open,
 .mega-panel.is-closing {
@@ -1447,20 +1223,52 @@ p {
 
 .mega-panel.is-open {
   pointer-events: auto;
-  transition:
-    height 480ms cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 380ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* Height only — opacity fade made the hanging bar look cleared, then grown from 0 */
+  transition: height 480ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .mega-panel.is-closing {
   pointer-events: none;
+  /* Keep the same frost token as .is-open — one continuous sheet */
+  background: var(--nav-frost-bg);
+  backdrop-filter: var(--nav-frost-filter);
+  -webkit-backdrop-filter: var(--nav-frost-filter);
+  transition: height 480ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* First-screen: dissolve the barH strip so finishPanelClose doesn’t hard-cut it */
+.site-header.is-at-top .mega-panel.is-closing {
+  opacity: 0;
+  transition:
+    height 480ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 150ms linear 330ms;
+}
+
+/* Scrolled: keep the strip opaque — header underfill matches until classes drop */
+.site-header:not(.is-at-top) .mega-panel.is-closing {
+  opacity: 1;
   transition: height 480ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .mega-panel__track {
-  /* Tight under the bar so plain menus (no description) don’t look like a vacant header row */
-  padding: calc(var(--header-offset) + 0.55rem) var(--shell-gutter) 1.25rem 0;
+  /* Same 25px air under the bar and above the sheet bottom — all columns */
+  padding: calc(var(--header-offset) + 25px) var(--shell-gutter) 25px 0;
   box-sizing: border-box;
+}
+
+.mega-panel__body {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: max-content;
+  max-width: calc(100vw - var(--mega-align, 16px) - var(--shell-gutter));
+  margin-left: var(--mega-align, 16px);
+  box-sizing: border-box;
+}
+
+.mega-panel__body.has-preview {
+  gap: 25px;
 }
 
 .mega-columns {
@@ -1473,8 +1281,60 @@ p {
   align-items: flex-start;
   gap: var(--mega-gap);
   width: max-content;
-  max-width: calc(100vw - var(--mega-align, 16px) - var(--shell-gutter));
-  margin-left: var(--mega-align, 16px);
+  min-width: 0;
+  margin-left: 0;
+  max-width: none;
+}
+
+/* Services first-column only — 16:9 flash placeholder until real media */
+.mega-preview {
+  flex: 0 0 clamp(14rem, 22vw, 20rem);
+  width: clamp(14rem, 22vw, 20rem);
+  align-self: flex-start;
+}
+
+.mega-preview__frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 0.85rem;
+  overflow: hidden;
+  background: #e8e8ed;
+  isolation: isolate;
+}
+
+.mega-preview__slot {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 0.85rem;
+  box-sizing: border-box;
+  background:
+    linear-gradient(145deg, #f5f5f7 0%, #d2d2d7 48%, #e8e8ed 100%);
+  animation: mega-preview-flash 420ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mega-preview__label {
+  max-width: 100%;
+  text-align: center;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6e6e73;
+  line-height: 1.35;
+}
+
+@keyframes mega-preview-flash {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* iPad / small laptop: tighter gutters so three columns fit from the shell edge */
@@ -1871,37 +1731,53 @@ p {
 }
 
 /*
- * Desktop chrome: nav links always flush to the logo (left).
- * CTAs sit on the right — room for WhatsApp / WeChat / Email.
+ * Desktop chrome: logo left · primary nav · Contact raft on the right.
+ * Breakpoint unchanged: 900px.
  */
 @media (min-width: 900px) {
   .site-header__bar {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    gap: 0;
-  }
-
-  .site-logo {
-    flex: 0 0 auto;
+    gap: 1.25rem;
   }
 
   .site-nav {
     display: flex;
-    flex: 0 1 auto;
+    position: relative;
+    z-index: 1;
     justify-content: flex-start;
-    margin-left: clamp(0.85rem, 2.2vw, 2.25rem);
+    margin-left: 0;
+    flex: 0 0 auto;
     min-width: 0;
+  }
+
+  .site-logo {
+    position: relative;
+    left: auto;
+    transform: none;
+    z-index: 1;
+    order: 0;
   }
 
   .site-header__actions {
     flex: 0 0 auto;
     margin-left: auto;
+    position: relative;
+    z-index: 1;
   }
 
   .nav-menu-toggle,
   .mobile-nav {
     display: none !important;
+  }
+}
+
+/* Narrower laptop: slightly smaller 16:9 rail */
+@media (min-width: 900px) and (max-width: 1199px) {
+  .mega-preview {
+    flex-basis: clamp(12.5rem, 20vw, 16rem);
+    width: clamp(12.5rem, 20vw, 16rem);
   }
 }
 
@@ -3050,6 +2926,419 @@ p {
 .about__body,
 .prose {
   max-width: 40rem;
+}
+
+/* —— About page: temporary Pentagram-style case layout demo —— */
+.about-case-demo {
+  --about-media-w: 60%;
+  --about-panel-w: 40%;
+  color: #1a1a1a;
+  background: #fff;
+}
+
+.about-case-demo__hero {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  min-height: 100vh;
+  min-height: 100svh;
+  margin-top: calc(-1 * var(--header-offset));
+  overflow: hidden;
+  background: #0a0a0a;
+  color: #fff;
+}
+
+.about-case-demo__hero-media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.about-case-demo__hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.about-case-demo__hero-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.35) 0%,
+    rgba(0, 0, 0, 0.12) 42%,
+    rgba(0, 0, 0, 0.45) 100%
+  );
+}
+
+.about-case-demo__hero-copy {
+  position: absolute;
+  z-index: 1;
+  left: max(
+    var(--shell-gutter),
+    calc((100% - min(var(--shell-max), 100% - var(--shell-gutter) * 2)) / 2)
+  );
+  bottom: clamp(1rem, 2.5vh, 2rem);
+  width: min(36rem, calc(100% - var(--shell-gutter) * 2));
+  pointer-events: none;
+}
+
+.about-case-demo__eyebrow {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.about-case-demo__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: clamp(2.25rem, 1.6rem + 3.2vw, 3.25rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: #fff;
+}
+
+.about-case-demo__summary {
+  margin: clamp(1rem, 2vw, 1.5rem) 0 0;
+  max-width: 32rem;
+  font-family: var(--font-sans);
+  font-size: clamp(0.9375rem, 0.88rem + 0.25vw, 1.0625rem);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.92);
+  text-wrap: pretty;
+}
+
+.about-case-demo__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.85rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-case-demo__tag {
+  display: block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.3;
+  color: #fff;
+}
+
+.about-case-demo__body {
+  --about-push-ms: 900ms;
+  --about-push-ease: cubic-bezier(0.46, 0.03, 0.52, 0.96);
+  position: relative;
+  width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
+  margin: 0 auto;
+  padding: var(--shell-gutter) 0 4rem;
+  overflow-anchor: none;
+}
+
+.about-case-demo__columns {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  overflow-x: clip;
+  overflow-anchor: none;
+}
+
+.about-case-demo__media-col {
+  flex: 0 0 100%;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  transition:
+    flex-basis var(--about-push-ms) var(--about-push-ease),
+    width var(--about-push-ms) var(--about-push-ease),
+    max-width var(--about-push-ms) var(--about-push-ease);
+}
+
+.about-case-demo.is-about-open .about-case-demo__media-col {
+  flex-basis: var(--about-media-w);
+  width: var(--about-media-w);
+  max-width: var(--about-media-w);
+  /* Image ↔ copy gap = full shell padding */
+  padding-right: var(--shell-gutter);
+  box-sizing: border-box;
+}
+
+/*
+ * Portaled to document.body — fixed to the demo shell’s top-right.
+ * X tracks bodyRect.right (not media width); Y = header + gutter.
+ */
+.about-case-demo__about-btn {
+  position: fixed;
+  z-index: 200;
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.5rem 0.5rem 0.5rem 0.75rem;
+  border: 0;
+  border-radius: 4px;
+  background: rgba(232, 232, 232, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #1a1a1a;
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 500; /* Medium — one step above Regular */
+  line-height: 1.2;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transition: background 0.2s ease, opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.about-case-demo__about-btn.is-ready {
+  pointer-events: auto;
+  opacity: 1;
+  visibility: visible;
+}
+
+.about-case-demo__about-btn:hover {
+  background: rgba(232, 232, 232, 0.94);
+}
+
+.about-case-demo__about-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  font-size: 1.125rem;
+  line-height: 1;
+  transition: transform 0.45s cubic-bezier(0.46, 0.03, 0.52, 0.96);
+}
+
+.about-case-demo__about-btn.is-open .about-case-demo__about-icon {
+  transform: rotate(45deg);
+}
+
+.about-case-demo__media-stack {
+  display: flex;
+  flex-direction: column;
+  /* Row gap = browser/shell padding */
+  gap: var(--shell-gutter);
+}
+
+.about-case-demo__frame {
+  position: relative;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  background: #ececec;
+  /* Display-only — no lightbox */
+  pointer-events: none;
+  user-select: none;
+}
+
+.about-case-demo__img {
+  object-fit: cover;
+}
+
+.about-case-demo__pair {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--shell-gutter);
+}
+
+@media (min-width: 800px) {
+  .about-case-demo__pair {
+    grid-template-columns: 1fr 1fr;
+    /* Side-by-side pairs sit tighter than row gap */
+    gap: calc(var(--shell-gutter) * 0.35);
+  }
+}
+
+.about-case-demo__panel {
+  flex: 0 0 var(--about-panel-w);
+  width: var(--about-panel-w);
+  max-width: var(--about-panel-w);
+  margin-right: calc(-1 * var(--about-panel-w));
+  padding-left: 0;
+  box-sizing: border-box;
+  align-self: flex-start;
+  /* Flow with images so tops stay locked (no sticky drift) */
+  position: relative;
+  top: auto;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(1.5rem);
+  /*
+   * Closed: collapse so hidden copy doesn’t inflate the gallery height
+   * (button range was lasting far past the ~image stack).
+   */
+  height: 0;
+  min-height: 0;
+  overflow: hidden;
+  transition:
+    margin-right var(--about-push-ms) var(--about-push-ease),
+    opacity 0.45s ease,
+    transform var(--about-push-ms) var(--about-push-ease),
+    visibility 0s linear var(--about-push-ms);
+}
+
+.about-case-demo.is-about-open .about-case-demo__panel {
+  margin-right: 0;
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(0);
+  transition:
+    margin-right var(--about-push-ms) var(--about-push-ease),
+    opacity 0.4s ease 0.12s,
+    transform var(--about-push-ms) var(--about-push-ease),
+    visibility 0s linear 0s;
+}
+
+.about-case-demo__panel-inner {
+  width: 100%;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.about-case-demo__panel-close {
+  display: none;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  color: #767676;
+  cursor: pointer;
+}
+
+.about-case-demo__panel-copy {
+  font-family: var(--font-sans);
+  /* Match Pentagram case body (~14px) */
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #1a1a1a;
+}
+
+.about-case-demo__panel-copy p {
+  margin: 0 0 1.15rem;
+  text-wrap: pretty;
+}
+
+.about-case-demo__panel-copy strong {
+  font-weight: 600;
+}
+
+.about-case-demo__meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem 1rem;
+  margin: 2.5rem 0 0;
+}
+
+.about-case-demo__meta-block h3 {
+  margin: 0 0 0.25rem;
+  color: #767676;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
+.about-case-demo__meta-block ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-case-demo__meta-block li,
+.about-case-demo__meta-block p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.about-case-demo__meta-block + .about-case-demo__meta-block {
+  margin-top: 0;
+}
+
+.about-case-demo__meta-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+@media (max-width: 799px) {
+  .about-case-demo__columns {
+    overflow-x: visible;
+  }
+
+  .about-case-demo.is-about-open .about-case-demo__media-col {
+    flex-basis: 100%;
+    width: 100%;
+    max-width: 100%;
+    padding-right: 0;
+  }
+
+  .about-case-demo__panel {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    flex: none !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: 100% !important;
+    min-height: 100% !important;
+    margin-right: 0 !important;
+    padding-left: 0;
+    background: #fff;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    top: 0 !important;
+    transform: translateX(100%);
+  }
+
+  .about-case-demo.is-about-open .about-case-demo__panel {
+    transform: translateX(0);
+  }
+
+  .about-case-demo:not(.is-about-open) .about-case-demo__panel {
+    pointer-events: none;
+  }
+
+  .about-case-demo__panel-inner {
+    width: 100%;
+    min-height: 100%;
+    padding: calc(var(--header-offset) + 3.25rem) var(--shell-gutter) 3rem;
+  }
+
+  .about-case-demo__panel-close {
+    display: inline-block;
+  }
+
+  .about-case-demo__meta {
+    grid-template-columns: 1fr;
+  }
 }
 
 .about-section {

@@ -36,13 +36,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <head>
         <link
           rel="preload"
-          href="/brand/edxlogo-white.svg"
+          href={asset("/brand/iamedwardxu-logo-white.svg")}
           as="image"
           type="image/svg+xml"
         />
         <link
           rel="preload"
-          href="/brand/edxlogo-black.svg"
+          href={asset("/brand/iamedwardxu-logo-black.svg")}
           as="image"
           type="image/svg+xml"
         />

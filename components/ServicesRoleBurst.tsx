@@ -101,6 +101,14 @@ export function ServicesRoleBurst() {
     const field = fieldRef.current;
     if (!field || reduced || servicesRoleLabels.length === 0) return;
 
+    /*
+     * Mobile Safari often flattens translateZ even with careful CSS. On coarse
+     * pointers, drive size with scale as well so the field still “runs”.
+     */
+    const flatMotion =
+      window.matchMedia("(pointer: coarse)").matches ||
+      window.matchMedia("(max-width: 700px)").matches;
+
     const labels: HTMLSpanElement[] = [];
     const particles: Particle[] = [];
     const zoneStamp = ZONES.map(() => 0);
@@ -138,9 +146,13 @@ export function ServicesRoleBurst() {
       const clarity = clamp(t / 0.18);
       const emerge = t < 0.05 ? t / 0.05 : 1;
       const opacity = emerge * (0.5 + clarity * 0.5);
+      /* Cap at 1 so glyphs stay sharp if Z is flattened and scale carries the grow */
+      const scale = flatMotion ? lerp(0.4, 1, t) : 1;
 
       p.el.style.zIndex = String(Math.floor(t * 100));
-      p.el.style.transform = `translate3d(-50%, -50%, ${z.toFixed(1)}px)`;
+      p.el.style.transform = flatMotion
+        ? `translate3d(-50%, -50%, ${z.toFixed(1)}px) scale(${scale.toFixed(3)})`
+        : `translate3d(-50%, -50%, ${z.toFixed(1)}px)`;
       p.el.style.opacity = String(opacity);
       /* Apple secondary gray (#a1a1a6) — mid gray, not near-white */
       p.el.style.color = `rgba(161, 161, 166, ${(0.55 + clarity * 0.4).toFixed(3)})`;

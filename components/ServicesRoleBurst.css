@@ -5,11 +5,11 @@
   min-height: 100vh;
   min-height: 100svh;
   margin-top: calc(-1 * var(--header-offset));
-  /* Clip huge near-camera labels here so the 3D field can keep preserve-3d */
-  overflow: hidden;
   /* Apple system off-white on flat black — no radial “glow” in the center */
   color: #f5f5f7;
   background: #000000;
+  /* Don’t clip here — overflow on an ancestor flattens translateZ in Mobile Safari */
+  overflow: visible;
 }
 
 .services-role-burst__field {
@@ -17,8 +17,13 @@
   inset: 0;
   z-index: 1;
   pointer-events: none;
+  /* perspective + overflow on the SAME node so WebKit keeps 3D + clips */
+  overflow: hidden;
+  -webkit-perspective: 720px;
   perspective: 720px;
+  -webkit-perspective-origin: 50% 48%;
   perspective-origin: 50% 48%;
+  -webkit-transform-style: preserve-3d;
   transform-style: preserve-3d;
 }
 
@@ -37,8 +42,11 @@
   color: rgba(161, 161, 166, 0.88);
   white-space: nowrap;
   transform-origin: center center;
+  -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
+  will-change: transform, opacity;
   /* Size comes from perspective + translateZ only — never pre-scale */
+  -webkit-transform: translate3d(-50%, -50%, -480px);
   transform: translate3d(-50%, -50%, -480px);
 }
 

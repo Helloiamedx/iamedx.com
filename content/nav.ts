@@ -223,20 +223,19 @@ export const contactCta = {
  * WhatsApp click-to-chat. Digits only with country code (no + / spaces).
  * Example: "8613812345678" → https://wa.me/8613812345678
  */
-export const whatsAppPhone = "";
+export const whatsAppPhone = "2332616010";
+export const whatsAppDisplay = "(233) 261-6010";
 
 export const whatsAppCta = {
-  href: whatsAppPhone ? `https://wa.me/${whatsAppPhone}` : "/contact",
+  href: `https://wa.me/${whatsAppPhone}`,
   label: "WhatsApp",
 } as const;
 
-/** WeChat ID — when set, button can deep-link; empty falls back to contact. */
-export const weChatId = "";
+/** WeChat ID */
+export const weChatId = "Helloiamedx";
 
 export const weChatCta = {
-  href: weChatId
-    ? `https://www.wechat.com/` // placeholder until QR / ID flow is wired
-    : "/contact",
+  href: "/contact",
   label: "WeChat",
 } as const;
 
@@ -255,9 +254,55 @@ export const officeInfo = {
 
 export const contactInfo = {
   eyebrow: "Contact",
-  email: "hello@iamedx.com",
-  emailHref: "mailto:hello@iamedx.com",
+  email: "hi@iamedx.com",
+  emailHref: "mailto:hi@iamedx.com",
 } as const;
+
+/** Phone — E.164 digits without + */
+export const phoneNumber = "8618867760045";
+export const phoneDisplay = "(086)18867760045";
+
+export const phoneCta = {
+  href: `tel:+${phoneNumber}`,
+  label: "Phone",
+} as const;
+
+/** Footer — Pentagram-style inquiry row */
+export const footerHelpTitle = "Let Me Help You";
+
+/** Footer contact channels: label column + value column */
+export const footerChannels = [
+  {
+    label: "WhatsApp",
+    value: whatsAppDisplay,
+    href: whatsAppCta.href,
+    external: true,
+  },
+  {
+    label: "WeChat",
+    value: weChatId,
+    href: weChatCta.href,
+    external: false,
+  },
+  {
+    label: "Email",
+    value: contactInfo.email,
+    href: contactInfo.emailHref,
+    external: false,
+  },
+  {
+    label: "Phone",
+    value: phoneDisplay,
+    href: phoneCta.href,
+    external: false,
+  },
+] as const;
+
+/**
+ * Footer About — same line as the old lead / “I create…” copy.
+ */
+export const footerAboutCopy =
+  "I create products and experiences that drive remarkable change through radical collaboration.";
 
 export const mobileNavLinks = [
   { label: "Services", href: "/services" },

@@ -1,40 +1,57 @@
 ---
-description: Projects index showcase layout — featured lead + equal two-column grid with shared meta bar
-globs: app/projects/**/*.{tsx,ts,css}, components/Project*.tsx, content/projects.ts, content/caseCopy.ts, app/globals.css
+description: Projects index showcase + case detail template (Pentagram-style AboutCaseDemo)
+globs: app/projects/**/*.{tsx,ts,css}, app/about/**/*.{tsx,ts}, components/Project*.tsx, components/AboutCaseDemo.tsx, content/projects.ts, content/caseCopy.ts, app/globals.css
 alwaysApply: false
 ---
 
-# Projects showcase layout
+# Projects layout
 
-## Case detail first screen (`/projects/[slug]`)
+## Case detail template (`/projects/[slug]`) — STANDARD
 
-Default opening stack (before body copy / gallery):
+Living reference: [`components/AboutCaseDemo.tsx`](components/AboutCaseDemo.tsx) + `.about-case-demo*` in [`app/globals.css`](app/globals.css) (currently demoed on `/about`).
 
-1. **Hero video** — **full viewport** (`100dvh`), pulled under the sticky header (`margin-top: -header`). Prefer **Vimeo background embed** (`heroVimeoId` / `heroVimeoHash`; default demo `1172594711` / `3452b6dd22`). Autoplay muted loop, no chrome.
-2. **Nav at rest** — clear / no frost (`is-over-clear` + difference), same as home hero — video must sit behind the bar.
-3. **Meta** — **inside** the video frame, near the bottom (shell-aligned). Same three slots as the featured lead: **title left** · **tagline center** · **tags right**. Type is white + `mix-blend-mode: difference` (same invert language as Projects hero roll / clear header).
+This is the **only** case-detail pattern. Do not revive the old always-on Background / Challenges / Execution / Impact chapter stack on detail pages.
 
-## Case detail copy stack (after hero) — ALWAYS these four
+### 1. Full-viewport video hero
 
-White band, Apple label black (`#1d1d1f`). Same shell width as the in-video meta. **No border / frame.**
+- Height `100svh` / `100vh`, pulled under sticky header (`margin-top: -header-offset`).
+- Full-bleed media (site video / ProtectedVideo or project hero source).
+- Overlay copy **bottom-left**, shell-aligned: eyebrow (optional) · title · short summary · tags.
+- Nav at rest: clear / over-clear on the video (same as home).
 
-Every project detail copy area is **only** this sequence (order fixed):
+### 2. Image gallery (content band)
 
-1. **Background** — left label **`Background`**. Right: headline + body. Fields: `statementHeadline`, `overview`.
-2. **Challenges** — left `Challenges`. Right: headline + body. Fields: `challengesHeadline`, `challengesBody`.
-3. **Execution** — left `Execution`. Right: headline + body. Fields: `executionHeadline`, `executionBody`.
-4. **Impact** — left `Impact`. Right: headline + body. Fields: `impactHeadline`, `impactBody`.
+- Shell width: `min(var(--shell-max), calc(100% - var(--shell-gutter) * 2))` — **do not invent local outer padding**.
+- Vertical stack of full-width frames + 2-up pairs.
+- Row gap between blocks = `--shell-gutter`.
+- Pair (side-by-side) gap tighter: `calc(var(--shell-gutter) * 0.35)` from `800px` up.
+- Images are **display-only** (no lightbox) unless a project explicitly asks otherwise.
 
-Each chapter uses the same layout:
+### 3. “About the project” control
 
-1. **Left — big label:** uppercase, **left-aligned**.
-2. **Right — copy group:** container flush to shell right (`justify-self: end`); text itself **left-aligned** LTR. Headline uppercase + Regular body.
+- Shell-fixed (portaled), **not** parented inside the media column — open-push must not move X.
+- Activity band = real media stack (and when open, taller of media vs copy). Never over the video; release at content bottom.
+- Travels with content top → docks at `header-offset + shell-gutter` → clamps at content bottom.
+- Font weight **Medium (500)**.
+- Desktop scroll uses **Lenis** (`lenis.scrollTo`, `immediate: true`); `window.scrollTo` alone is not enough.
 
-Built via `getCaseCopySections` + `ProjectCaseCopy`. Missing fields get short placeholder copy so the four chapters always render.
+### 4. About panel (toggle)
 
-**Images:** do **not** invent a global image pattern. Wait for per-project direction on how images insert / weave between these chapters.
+- Closed: images full width; panel collapsed (`height: 0`) so hidden copy does **not** inflate gallery height.
+- Open: media ~60% / panel ~40%; media gets `padding-right: var(--shell-gutter)` (image↔copy gap).
+- Panel slides in; media width eases (push, not hard snap).
+- Copy + meta flow with images (**no sticky drift**) so tops stay aligned.
+- On open: jump so **copy line 1** is under the header (Lenis immediate scroll).
+- Mobile: full-screen overlay panel + body scroll lock; keep a Close control.
 
-## Cover ratios
+### 5. Copy / type
+
+- Body ~14px (`0.875rem`), site sans, comfortable line-height.
+- Structure: project narrative blocks + meta (Client / Sector / Discipline / Partners / team as data allows).
+
+---
+
+## Cover ratios (index)
 
 1. **Featured lead (first)** — `1920 × 1080` (exact 16:9).
 2. **Two-column cards** — `3000 × 1687` (~16:9; use `aspect-ratio: 3000 / 1687`).
@@ -65,5 +82,7 @@ These fields feed the filter system later — keep as structured data.
 
 - Return to irregular masonry / auto-fill multi-column grids for the showcase
 - Mix the featured three-column meta into two-column cards (or vice versa)
-- Skip or reorder Background → Challenges → Execution → Impact on case pages
-- Invent case-page image layouts until the user specifies them per project
+- Use the old four-chapter (Background → Challenges → Execution → Impact) stack as the case detail template
+- Parent the About button inside the media column (it will slide left on open)
+- Leave closed About copy in normal flow (it inflates height and breaks the button band)
+- Change site `--shell-gutter` / outer shell padding for local “tweaks” on the case template

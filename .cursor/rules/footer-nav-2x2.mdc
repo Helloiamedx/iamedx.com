@@ -1,24 +1,17 @@
 ---
-description: Footer nav 4-col → 2×2 layout rules
-globs: "{app/globals.css,components/Footer.tsx,content/nav.ts}"
+description: Site footer — Pentagram-style inquiry / About / wordmark (no video)
+globs: components/Footer.tsx, content/nav.ts, app/globals.css
 alwaysApply: false
 ---
 
-# Footer link columns (2×2 collapse)
+# Site footer
 
-Column order is **few → many**: About · Projects · Insights · Services.
+Reference layout (Pentagram-style), black plate:
 
-When the footer nav collapses from **4 columns to 2×2** (shell width &lt; 1200px):
+1. **Help row** — left label `Let me help you`; right text links in order: WhatsApp · WeChat · Email · Phone (underlined, not colored pills).
+2. **Hairline rule**
+3. **About** — left label `About`; right blurb from `footerAboutCopy` in `content/nav.ts`
+4. **Brand wordmark** — `iamedwardxu-logo-white.svg`, shell width, **static** (no video, no LightRays, no mask cutouts)
+5. **Bottom** — social left · Privacy / © right
 
-1. Keep the 2×2 as a **tight block on the right** (not `space-between` across full width).
-2. Keep DOM order (no `order` swaps) so the grid is:
-
-```
-About    | Projects
-Insights | Services
-```
-
-# Mid row: assist vs links
-
-- Keep a **fixed column-gap** (2.5rem) between Looking for assistance and the link block.
-- Prefer assist width `--footer-assist-fixed-w` (23rem); when space is tight, **assist shrinks** (`flex-shrink: 1`) and **links do not** (`flex-shrink: 0`).
+Do not restore HELLOIAMEDX video marquee, FooterWordmark letter mask, or the old 4-column footer nav / assist CTA pills unless the user asks.

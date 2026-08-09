@@ -22,6 +22,7 @@ const KEYWORDS = [
   { word: "Practical", color: "#5CFF6A" },
   { word: "Result-Driven", color: "#FF8A3C" },
   { word: "Accountable", color: "#B794FF" },
+  { word: "Proactive", color: "#4D9FFF" },
 ] as const;
 
 /* ~2px smaller than the original clamp */

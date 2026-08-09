@@ -11,6 +11,7 @@ import {
   useState,
   type CSSProperties,
 } from "react";
+import { flushSync } from "react-dom";
 import { ClickSpark } from "@/components/ClickSpark";
 import { EmailIcon, WeChatIcon, WhatsAppIcon } from "@/components/ContactChannelIcons";
 import { GlareHover, GLARE_WIPE_MS } from "@/components/GlareHover";
@@ -23,6 +24,7 @@ import {
   whatsAppPhone,
   type NavItem,
 } from "@/content/nav";
+import { asset } from "@/lib/assets";
 
 const CLOSE_DELAY_MS = 180;
 const CLOSE_ANIMATION_MS = 480;
@@ -37,6 +39,17 @@ const MOBILE_CURTAIN_MS = 700;
 const CTA_PILL_AFTER_FROST_MS = 64;
 /* 320ms tween + 110ms reverse stagger — land after the last capsule settles */
 const CTA_PILL_OUT_MS = 450;
+/*
+ * Leave top → frost shows and MUST hold for NAV_FROST_INTRO_MS (distance
+ * cannot cut that short). After the intro, further down-scroll tucks now.
+ * Scroll-up reveals with a longer idle peek.
+ */
+const NAV_HIDE_AFTER_Y = 8;
+/** First leave from top: frost + bar stay at least this long */
+const NAV_FROST_INTRO_MS = 1500;
+/** After scroll-up peek: time to reach the bar with the pointer */
+const NAV_HIDE_IDLE_MS = 2500;
+const NAV_SCROLL_DELTA = 2;
 
 type CtaMode = "ghost" | "pills" | "pills-out";
 
@@ -57,6 +70,8 @@ export function Header() {
   const [mobileSurface, setMobileSurface] = useState(false);
   /* Top of page: clear chrome on every route (same scroll gate as the home hero) */
   const [atTop, setAtTop] = useState(true);
+  /* Whole bar + Contact raft slide away while reading down-page */
+  const [navHidden, setNavHidden] = useState(false);
   /*
    * Contact CTA: ghost (text) ↔ pills (buttons) ↔ pills-out (shrink tween).
    * Never apply is-ghost in the same frame as dropping is-pills — difference
@@ -65,12 +80,27 @@ export function Header() {
   const [ctaMode, setCtaMode] = useState<CtaMode>("ghost");
   /* Scrim stays through first half of mega close, then opacity-fades out */
   const [scrimOn, setScrimOn] = useState(false);
+  /* Mega right-rail preview — slug of hovered link (media assets TBD) */
+  const [previewSlug, setPreviewSlug] = useState<string | null>(null);
+  const [previewLabel, setPreviewLabel] = useState("");
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clearPanelTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrimFadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const ctaOutTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const ctaModeRef = useRef<CtaMode>("ghost");
   ctaModeRef.current = ctaMode;
+  const lastScrollY = useRef(0);
+  const leftTopAt = useRef<number | null>(null);
+  const navHiddenRef = useRef(false);
+  const navLockedRef = useRef(false);
+  /**
+   * After a scroll-up peek is shown (and later tucked), ignore further up-scroll
+   * reveals until the reader scrolls down again — otherwise continuous up-scroll
+   * re-opens the bar every frame after hide.
+   */
+  const peekConsumedRef = useRef(false);
+  const navHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -89,16 +119,71 @@ export function Header() {
   const pendingHrefRef = useRef<string | null>(null);
   const menuId = useId();
 
+  function clearNavHideTimer() {
+    if (!navHideTimer.current) return;
+    clearTimeout(navHideTimer.current);
+    navHideTimer.current = null;
+  }
+
+  /** Live :hover — avoids enter/leave count getting stuck at 1 */
+  function isChromeHovered() {
+    const header = headerRef.current;
+    const cta = ctaRef.current;
+    return Boolean(
+      (header && header.matches(":hover")) || (cta && cta.matches(":hover")),
+    );
+  }
+
+  function hideNav() {
+    clearNavHideTimer();
+    if (navHiddenRef.current || navLockedRef.current) return;
+    if (isChromeHovered()) return;
+    navHiddenRef.current = true;
+    setNavHidden(true);
+  }
+
+  function scheduleHideWhenIdle(delayMs = NAV_HIDE_IDLE_MS, restart = true) {
+    /* Scroll-up peek: don’t keep resetting the clock on every wheel tick */
+    if (!restart && navHideTimer.current) return;
+    clearNavHideTimer();
+    if (navHiddenRef.current || navLockedRef.current) return;
+    if (isChromeHovered()) return;
+    if (window.scrollY <= NAV_HIDE_AFTER_Y) return;
+    navHideTimer.current = setTimeout(() => {
+      navHideTimer.current = null;
+      hideNav();
+    }, delayMs);
+  }
+
+  function onChromePointerEnter() {
+    clearNavHideTimer();
+  }
+
+  function onChromePointerLeave() {
+    /* Leave header ↔ CTA: the other node may still be :hover */
+    requestAnimationFrame(() => {
+      if (isChromeHovered() || navLockedRef.current) return;
+      scheduleHideWhenIdle();
+    });
+  }
+
   function finishPanelClose() {
-    const panel = panelRef.current;
-    if (panel) {
-      panel.style.transition = "none";
-      panel.style.height = "0px";
-      void panel.offsetHeight;
-      panel.style.transition = "";
-    }
-    setPanelKey(null);
     clearPanelTimer.current = null;
+    /*
+     * Handoff BEFORE collapsing height. Old order zeroed height while the bar
+     * was still transparent (is-closing), then frost landed next frame → empty
+     * flash + “套底” pop. Drop is-closing first so resting frost/clear paints
+     * in the same frame the sheet stops covering the bar.
+     */
+    flushSync(() => {
+      setPanelKey(null);
+    });
+    const panel = panelRef.current;
+    if (!panel) return;
+    panel.style.transition = "none";
+    panel.style.height = "0px";
+    void panel.offsetHeight;
+    panel.style.transition = "";
   }
 
   function collapseMenus() {
@@ -114,21 +199,116 @@ export function Header() {
     navPendingRef.current = false;
     pendingHrefRef.current = null;
     collapseMenus();
+    navHiddenRef.current = false;
+    setNavHidden(false);
+    leftTopAt.current = null;
+    peekConsumedRef.current = false;
+    clearNavHideTimer();
+    lastScrollY.current = window.scrollY;
+    setAtTop(window.scrollY <= 0);
+    return () => clearClearPanelTimer();
+  }, [pathname]);
 
-    function onScroll() {
-      // Any downward scroll leaves the at-top chrome immediately.
-      setAtTop(window.scrollY <= 0);
+  useEffect(() => {
+    function revealNav() {
+      clearNavHideTimer();
+      if (!navHiddenRef.current) return;
+      navHiddenRef.current = false;
+      setNavHidden(false);
     }
 
+    function onScroll() {
+      const y = Math.max(0, window.scrollY);
+      const delta = y - lastScrollY.current;
+      lastScrollY.current = y;
+      setAtTop(y <= 0);
+
+      /* Back at / near top — clear chrome, reset frost intro + peek */
+      if (navLockedRef.current || y <= NAV_HIDE_AFTER_Y) {
+        leftTopAt.current = null;
+        peekConsumedRef.current = false;
+        revealNav();
+        return;
+      }
+
+      if (leftTopAt.current === null) {
+        leftTopAt.current = performance.now();
+      }
+
+      /* Pointer on the bar — keep it while they use it */
+      if (isChromeHovered()) {
+        clearNavHideTimer();
+        return;
+      }
+
+      /*
+       * Scroll up → one peek only. After it idles away, keep scrolling up
+       * must NOT pull the bar back (reader is just traveling toward the top).
+       */
+      if (delta < -NAV_SCROLL_DELTA) {
+        if (navHiddenRef.current) {
+          if (peekConsumedRef.current) return;
+          navHiddenRef.current = false;
+          setNavHidden(false);
+          peekConsumedRef.current = true;
+          scheduleHideWhenIdle(NAV_HIDE_IDLE_MS, true);
+        } else {
+          scheduleHideWhenIdle(NAV_HIDE_IDLE_MS, false);
+        }
+        return;
+      }
+
+      const introElapsed = performance.now() - (leftTopAt.current ?? performance.now());
+      const introDone = introElapsed >= NAV_FROST_INTRO_MS;
+
+      /* During frost intro: never tuck early, no matter how far they scroll */
+      if (!introDone) {
+        if (!navHiddenRef.current && !navHideTimer.current) {
+          scheduleHideWhenIdle(Math.max(200, NAV_FROST_INTRO_MS - introElapsed));
+        }
+        return;
+      }
+
+      /* Intro finished + still scrolling down → tuck; allow a future up-peek */
+      if (delta > NAV_SCROLL_DELTA) {
+        peekConsumedRef.current = false;
+        hideNav();
+        return;
+      }
+
+      /* Intro finished, stopped mid-page with chrome up → idle tuck */
+      if (!navHiddenRef.current && !navHideTimer.current) {
+        scheduleHideWhenIdle(NAV_HIDE_IDLE_MS, false);
+      }
+    }
+
+    lastScrollY.current = window.scrollY;
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
     return () => {
+      clearNavHideTimer();
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
-      clearClearPanelTimer();
     };
-  }, [pathname]);
+  }, []);
+
+  useEffect(() => {
+    const menuUp = Boolean(openKey || panelKey || mobileOpen || mobileSurface);
+    if (menuUp) {
+      clearNavHideTimer();
+      navHiddenRef.current = false;
+      setNavHidden(false);
+      return;
+    }
+    /*
+     * Leave-while-mega-closing used to call scheduleHideWhileStillLocked → no-op,
+     * then never re-armed after panelKey cleared. Resume idle hide here.
+     */
+    if (window.scrollY > NAV_HIDE_AFTER_Y && !isChromeHovered()) {
+      scheduleHideWhenIdle();
+    }
+  }, [openKey, panelKey, mobileOpen, mobileSurface]);
 
   /* Query-only navigations (e.g. /projects?involvement=…) don't change pathname */
   useEffect(() => {
@@ -301,12 +481,15 @@ export function Header() {
     const minLeft = Math.max(0, Math.round(shellLeft - panelLeft));
 
     /*
-     * If trigger-align would clip columns past the right gutter (common on
-     * iPad-width when nav is centered), pull left — down to the shell edge.
+     * If trigger-align would clip the body (columns + preview) past the right
+     * gutter, pull left — down to the shell edge.
      */
+    const body = track?.querySelector<HTMLElement>(".mega-panel__body");
     const cols = track?.querySelector<HTMLElement>(".mega-columns");
     let contentWidth = 0;
-    if (cols) {
+    if (body) {
+      contentWidth = body.getBoundingClientRect().width;
+    } else if (cols) {
       const pieces = Array.from(cols.children) as HTMLElement[];
       const gap = Number.parseFloat(getComputedStyle(cols).columnGap || getComputedStyle(cols).gap) || 0;
       contentWidth = pieces.reduce((sum, el, index) => {
@@ -442,23 +625,30 @@ export function Header() {
     const barH = headerRef.current?.offsetHeight ?? 56;
 
     if (openKey && track) {
-      // Measure real content height so close can animate from pixels → 0.
       // Track padding already includes the bar, so scrollHeight is the full frost surface.
       const height = track.scrollHeight;
-      if (panel.style.height === "0px" || panel.style.height === "") {
-        // Start at bar height so the frosted sheet already covers the nav (no hole / seam).
+      const current = panel.style.height;
+      /*
+       * Always open from the hanging bar height (e.g. 50 → full), never from 0.
+       * Snap the “from” value with transition disabled — otherwise the height
+       * tween runs 0 → full and looks like the resting frost was stripped first.
+       */
+      if (current === "0px" || current === "" || current === "0") {
+        panel.style.transition = "none";
         panel.style.height = `${barH}px`;
         void panel.offsetHeight;
+        panel.style.transition = "";
       }
       panel.style.height = `${height}px`;
       return;
     }
 
     /*
-     * Closing: collapse to the nav bar height — not to 0.
-     * Going to 0 killed the mega frost completely, then the header re-applied
-     * its own frost (“套底”). Stopping at barH keeps one continuous sheet;
-     * when is-closing ends, header frost (or clear-at-top) takes over in place.
+     * Closing: retract the sheet to the nav bar height — not to 0.
+     * Going to 0 killed the frost under the links, then the resting bar fill
+     * popped back in (still within frost-intro / visible-chrome time). Stopping
+     * at barH keeps one continuous surface; when is-closing ends, clear-at-top
+     * or resting frost takes over in place.
      */
     if (panelKey) {
       const current = panel.getBoundingClientRect().height;
@@ -546,12 +736,39 @@ export function Header() {
   /* panelKey stays until height tween finishes — keep frost while collapsing */
   const isPanelClosing = Boolean(panelKey) && !openKey;
   const panelItem = primaryNav.find((item) => item.label === panelKey && item.mega);
+
+  /* Flash preview only for Services → first column (“Work With Me”) */
+  const servicesPreviewColumn =
+    panelKey === "Services" ? panelItem?.mega?.[0] : undefined;
+  const showMegaPreview = Boolean(servicesPreviewColumn?.links.length);
+
+  useEffect(() => {
+    if (panelKey !== "Services") {
+      setPreviewSlug(null);
+      setPreviewLabel("");
+      return;
+    }
+    const first = primaryNav
+      .find((entry) => entry.label === "Services")
+      ?.mega?.[0]?.links[0];
+    if (!first) {
+      setPreviewSlug(null);
+      setPreviewLabel("");
+      return;
+    }
+    setPreviewSlug(first.slug);
+    setPreviewLabel(first.label);
+  }, [panelKey]);
   const isExpanded = isPanelOpen || isPanelClosing || mobileOpen || mobileSurface;
   /*
-   * At-top clear applies during close too. If isPanelClosing blocked overClear,
-   * the bar would take frost mid-close and read as a second “套底”.
+   * No difference blend on the bar while mega is open or closing — that was
+   * painting a second composite (“复色”) onto the menu chrome mid-retract.
    */
-  const overClear = atTop && !isPanelOpen && !mobileOpen && !mobileSurface;
+  const overClear =
+    atTop && !isPanelOpen && !isPanelClosing && !mobileOpen && !mobileSurface;
+  /* Keep chrome pinned while any menu surface is up */
+  navLockedRef.current = isExpanded || navPendingRef.current;
+  const chromeHidden = navHidden && !isExpanded;
 
   return (
     <>
@@ -566,26 +783,30 @@ export function Header() {
 
       <header
         ref={headerRef}
-        className={`site-header${isExpanded ? " is-expanded" : ""}${overClear ? " is-over-clear" : ""}${mobileSurface ? " is-mobile-surface" : ""}`}
-        onMouseLeave={scheduleCloseFromHover}
+        className={`site-header${atTop ? " is-at-top" : ""}${isExpanded ? " is-expanded" : ""}${overClear ? " is-over-clear" : ""}${mobileSurface ? " is-mobile-surface" : ""}${chromeHidden ? " is-nav-hidden" : ""}`}
+        onMouseEnter={onChromePointerEnter}
+        onMouseLeave={() => {
+          onChromePointerLeave();
+          scheduleCloseFromHover();
+        }}
       >
         <div className="shell site-header__bar">
-          <Link href="/" className="site-logo" aria-label="iamedx home">
+          <Link href="/" className="site-logo" aria-label="Edward Xu home">
             <Image
-              src="/brand/edxlogo-white.svg"
+              src={asset("/brand/iamedwardxu-logo-white.svg")}
               alt=""
-              width={135}
-              height={32}
+              width={200}
+              height={24}
               priority
               unoptimized
               className="site-logo__img site-logo__img--white"
               aria-hidden="true"
             />
             <Image
-              src="/brand/edxlogo-black.svg"
-              alt="iamedx"
-              width={135}
-              height={32}
+              src={asset("/brand/iamedwardxu-logo-black.svg")}
+              alt="Edward Xu"
+              width={200}
+              height={24}
               priority
               unoptimized
               className="site-logo__img site-logo__img--black"
@@ -651,40 +872,75 @@ export function Header() {
           >
             {panelItem?.mega ? (
               <div
-                className="mega-columns"
+                className={`mega-panel__body${showMegaPreview ? " has-preview" : ""}`}
                 data-cols={panelItem.mega.length}
                 key={panelKey ?? "empty"}
               >
-                {panelItem.mega.map((column) => {
-                  const heading = (column.description || column.title).trim();
-                  return (
-                    <section
-                      key={column.id}
-                      className={[
-                        "mega-column",
-                        heading ? "" : "mega-column--plain",
-                        column.links.length > 10 ? "mega-column--dense" : "",
-                      ]
-                        .filter(Boolean)
-                        .join(" ")}
-                    >
-                      {/* No heading → links sit on the Services description baseline */}
-                      {heading ? <h2>{heading}</h2> : null}
-                      <ul>
-                        {column.links.map((link) => (
-                          <li key={link.slug}>
-                            <Link
-                              href={link.href}
-                              onClick={() => onMenuNavigate(link.href)}
-                            >
-                              {link.label}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </section>
-                  );
-                })}
+                <div className="mega-columns">
+                  {panelItem.mega.map((column, columnIndex) => {
+                    const heading = (column.description || column.title).trim();
+                    const previewColumn =
+                      panelKey === "Services" && columnIndex === 0;
+                    return (
+                      <section
+                        key={column.id}
+                        className={[
+                          "mega-column",
+                          heading ? "" : "mega-column--plain",
+                          column.links.length > 10 ? "mega-column--dense" : "",
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}
+                      >
+                        {/* No heading → links sit on the Services description baseline */}
+                        {heading ? <h2>{heading}</h2> : null}
+                        <ul>
+                          {column.links.map((link) => (
+                            <li key={link.slug}>
+                              <Link
+                                href={link.href}
+                                onClick={() => onMenuNavigate(link.href)}
+                                onMouseEnter={
+                                  previewColumn
+                                    ? () => {
+                                        setPreviewSlug(link.slug);
+                                        setPreviewLabel(link.label);
+                                      }
+                                    : undefined
+                                }
+                                onFocus={
+                                  previewColumn
+                                    ? () => {
+                                        setPreviewSlug(link.slug);
+                                        setPreviewLabel(link.label);
+                                      }
+                                    : undefined
+                                }
+                              >
+                                {link.label}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </section>
+                    );
+                  })}
+                </div>
+
+                {/* Services col-1 only — 16:9 flash placeholders until real media */}
+                {showMegaPreview ? (
+                  <aside className="mega-preview" aria-hidden="true">
+                    <div className="mega-preview__frame">
+                      <div
+                        key={previewSlug ?? "idle"}
+                        className="mega-preview__slot"
+                        data-preview={previewSlug ?? ""}
+                      >
+                        <span className="mega-preview__label">{previewLabel}</span>
+                      </div>
+                    </div>
+                  </aside>
+                ) : null}
               </div>
             ) : null}
           </div>
@@ -715,8 +971,13 @@ export function Header() {
           Never combine is-ghost + is-pills — difference blend on brand fills
           flashes the wrong capsule colors for a frame before pills clear. */}
       <div
-        className={`site-header-cta${ctaMode === "ghost" ? " is-ghost" : ""}${ctaMode === "pills" ? " is-pills" : ""}${ctaMode === "pills-out" ? " is-pills-out" : ""}`}
-        onMouseEnter={scheduleCloseFromHover}
+        ref={ctaRef}
+        className={`site-header-cta${ctaMode === "ghost" ? " is-ghost" : ""}${ctaMode === "pills" ? " is-pills" : ""}${ctaMode === "pills-out" ? " is-pills-out" : ""}${chromeHidden ? " is-nav-hidden" : ""}`}
+        onMouseEnter={() => {
+          onChromePointerEnter();
+          scheduleCloseFromHover();
+        }}
+        onMouseLeave={onChromePointerLeave}
       >
         <div className="site-header-cta__inner">
           <ClickSpark>
