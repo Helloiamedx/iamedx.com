@@ -15,6 +15,10 @@ type MobileBubbleNavProps = {
   onNavigate: () => void;
 };
 
+/* Curtain: 480ms + last-column stagger 210ms — text waits until plate is full */
+const MOBILE_CONTENT_DELAY_S = 0.72;
+const MOBILE_META_DELAY_S = 0.9;
+
 function ExternalArrow() {
   return (
     <span className="mobile-menu__external-icon" aria-hidden="true">
@@ -49,24 +53,25 @@ export function MobileBubbleNav({ open, onNavigate }: MobileBubbleNavProps) {
     gsap.killTweensOf(targets);
 
     if (open) {
-      gsap.set(links, { y: 22, autoAlpha: 0 });
-      gsap.set(blocks, { y: 18, autoAlpha: 0 });
+      /* Start hidden — curtain paints first, then content eases in */
+      gsap.set(links, { y: 28, autoAlpha: 0 });
+      gsap.set(blocks, { y: 22, autoAlpha: 0 });
 
       gsap.to(links, {
         y: 0,
         autoAlpha: 1,
-        duration: 0.48,
-        stagger: 0.055,
+        duration: 0.55,
+        stagger: 0.06,
         ease: "power3.out",
-        delay: 0.38,
+        delay: MOBILE_CONTENT_DELAY_S,
       });
       gsap.to(blocks, {
         y: 0,
         autoAlpha: 1,
-        duration: 0.42,
-        stagger: 0.07,
+        duration: 0.5,
+        stagger: 0.08,
         ease: "power3.out",
-        delay: 0.56,
+        delay: MOBILE_META_DELAY_S,
       });
       return;
     }

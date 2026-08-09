@@ -1559,6 +1559,7 @@ p {
   position: relative;
   z-index: 1;
   height: 100%;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   /* Clear the sticky bar, then sit content a bit lower in the panel */
@@ -1567,16 +1568,25 @@ p {
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 .mobile-menu {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  flex: 0 0 auto;
   width: 100%;
-  min-height: 100%;
+  /* Grow with content so the panel can scroll past one viewport */
+  min-height: min-content;
   color: var(--mobile-ink);
   gap: 0;
+}
+
+/* Hidden until curtain lands — GSAP then fades/slides content in */
+.mobile-menu [data-mobile-anim] {
+  opacity: 0;
+  visibility: hidden;
 }
 
 .mobile-menu__nav {
@@ -2959,7 +2969,7 @@ body.is-mobile-menu-open .about-case-demo__about-pin {
   );
 }
 
-/* Title + summary + tags share one column = 40% viewport */
+/* Title + summary + tags share one column = 40% viewport (desktop) */
 .about-case-demo__hero-copy {
   position: absolute;
   z-index: 1;
@@ -2971,6 +2981,14 @@ body.is-mobile-menu-open .about-case-demo__about-pin {
   width: 40vw;
   max-width: 40vw;
   pointer-events: none;
+}
+
+/* Phone: use the full shell width — no 40vw column */
+@media (max-width: 799px) {
+  .about-case-demo__hero-copy {
+    width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
+    max-width: none;
+  }
 }
 
 .about-case-demo__title {
@@ -3060,7 +3078,7 @@ body.is-mobile-menu-open .about-case-demo__about-pin {
 
 /*
  * Portaled to document.body — centered X; Y from JS, clamped to the
- * image/copy content box (prefer ~30px above the viewport bottom).
+ * image/copy content box (prefer ~14px above the viewport bottom).
  * Fill + glare wipe on GlareHover; button face stays transparent.
  */
 .about-case-demo__about-pin {

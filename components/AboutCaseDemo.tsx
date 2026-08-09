@@ -196,7 +196,7 @@ export function AboutCaseDemo() {
   }, []);
 
   /*
-   * Center-X, prefer ~30px above the viewport bottom.
+   * Center-X, prefer ~14px above the viewport bottom.
    * Top: clamp to contentTop + inset (gap under first frames, then stop).
    * Bottom: cap by footer only (gap above footer).
    * Hero: hide once media top clears the pin slot — no loose hysteresis
@@ -218,7 +218,7 @@ export function AboutCaseDemo() {
           ? Math.max(mediaRect.bottom, panelRect.bottom)
           : mediaRect.bottom;
       const viewH = window.visualViewport?.height ?? window.innerHeight;
-      const pinBottom = 30;
+      const pinBottom = 14;
       const btnH = pinRef.current?.offsetHeight || 44;
       const preferredTop = viewH - pinBottom - btnH;
       const inset = Math.max(readShellGutter(), 32);

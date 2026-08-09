@@ -361,7 +361,8 @@ export function Header() {
       scrimFadeTimer.current = null;
     }
 
-    if (openKey || mobileOpen) {
+    /* Desktop mega only — mobile curtain is opaque; a black scrim flashes first */
+    if (openKey) {
       setScrimOn(true);
       return;
     }
@@ -378,7 +379,7 @@ export function Header() {
         scrimFadeTimer.current = null;
       }
     };
-  }, [openKey, mobileOpen]);
+  }, [openKey]);
 
   function clearCtaOutTimer() {
     if (ctaOutTimer.current) {
@@ -706,7 +707,6 @@ export function Header() {
       document.body.style.position = "";
       document.body.style.inset = "";
       document.body.style.width = "";
-      document.body.style.touchAction = "";
       document.body.style.paddingRight = "";
       return;
     }
@@ -717,12 +717,20 @@ export function Header() {
     document.body.style.position = "fixed";
     document.body.style.inset = `-${scrollY}px 0 0 0`;
     document.body.style.width = "100%";
-    document.body.style.touchAction = "none";
+    /* Do not set touch-action:none on body — it blocks pan-y inside the menu */
     if (scrollbar > 0) {
       document.body.style.paddingRight = `${scrollbar}px`;
     }
 
     const preventTouch = (event: TouchEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) {
+        event.preventDefault();
+        return;
+      }
+      /* Allow pan inside the menu scroller — block only the page behind */
+      const scroller = document.querySelector(".mobile-nav__inner");
+      if (scroller?.contains(target)) return;
       event.preventDefault();
     };
     document.addEventListener("touchmove", preventTouch, { passive: false });
@@ -733,7 +741,6 @@ export function Header() {
       document.body.style.position = "";
       document.body.style.inset = "";
       document.body.style.width = "";
-      document.body.style.touchAction = "";
       document.body.style.paddingRight = "";
       window.scrollTo(0, scrollY);
     };
@@ -780,11 +787,10 @@ export function Header() {
   return (
     <>
       <div
-        className={`nav-scrim${scrimOn ? " is-visible" : ""}${isPanelOpen || mobileOpen ? " is-interactive" : ""}`}
+        className={`nav-scrim${scrimOn ? " is-visible" : ""}${isPanelOpen ? " is-interactive" : ""}`}
         aria-hidden="true"
         onClick={() => {
           closeMenu();
-          setMobileOpen(false);
         }}
       />
 
