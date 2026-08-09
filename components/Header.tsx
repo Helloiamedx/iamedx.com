@@ -361,7 +361,8 @@ export function Header() {
       scrimFadeTimer.current = null;
     }
 
-    if (openKey || mobileOpen) {
+    /* Desktop mega only — mobile curtain is opaque; a black scrim flashes first */
+    if (openKey) {
       setScrimOn(true);
       return;
     }
@@ -378,7 +379,7 @@ export function Header() {
         scrimFadeTimer.current = null;
       }
     };
-  }, [openKey, mobileOpen]);
+  }, [openKey]);
 
   function clearCtaOutTimer() {
     if (ctaOutTimer.current) {
@@ -722,6 +723,7 @@ export function Header() {
       document.body.style.paddingRight = `${scrollbar}px`;
     }
 
+    /* One-screen menu — lock all page/menu pan */
     const preventTouch = (event: TouchEvent) => {
       event.preventDefault();
     };
@@ -780,11 +782,10 @@ export function Header() {
   return (
     <>
       <div
-        className={`nav-scrim${scrimOn ? " is-visible" : ""}${isPanelOpen || mobileOpen ? " is-interactive" : ""}`}
+        className={`nav-scrim${scrimOn ? " is-visible" : ""}${isPanelOpen ? " is-interactive" : ""}`}
         aria-hidden="true"
         onClick={() => {
           closeMenu();
-          setMobileOpen(false);
         }}
       />
 
