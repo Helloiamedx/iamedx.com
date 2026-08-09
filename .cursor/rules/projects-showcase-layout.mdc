@@ -8,7 +8,7 @@ alwaysApply: false
 
 ## Case detail template (`/projects/[slug]`) — STANDARD
 
-Living reference: [`components/AboutCaseDemo.tsx`](components/AboutCaseDemo.tsx) + `.about-case-demo*` in [`app/globals.css`](app/globals.css) (currently demoed on `/about`).
+Living reference: [`components/AboutCaseDemo.tsx`](components/AboutCaseDemo.tsx) + `.about-case-demo*` in [`app/globals.css`](app/globals.css) (mounted on `/projects/[slug]`; `/about` is bio-only).
 
 This is the **only** case-detail pattern. Do not revive the old always-on Background / Challenges / Execution / Impact chapter stack on detail pages.
 
@@ -46,7 +46,8 @@ This is the **only** case-detail pattern. Do not revive the old always-on Backgr
 
 ### 5. Copy / type
 
-- Body ~14px (`0.875rem`), site sans, comfortable line-height.
+- Apple-style hierarchy: titles `#1d1d1f` / body `#6e6e73`; title and body ~two steps above the old 14px stack (`1.375rem` / `1.125rem` desktop).
+- Separate heading + paragraph blocks with clear title→body gap (not `<strong>` + `<br>` in one `<p>`).
 - Structure: project narrative blocks + meta (Client / Sector / Discipline / Partners / team as data allows).
 
 ---

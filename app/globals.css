@@ -1709,7 +1709,7 @@ p {
 }
 
 /* Hide floating About while the mobile menu owns the screen */
-body.is-mobile-menu-open .about-case-demo__about-btn {
+body.is-mobile-menu-open .about-case-demo__about-pin {
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;
@@ -2959,6 +2959,7 @@ body.is-mobile-menu-open .about-case-demo__about-btn {
   );
 }
 
+/* Title + summary + tags share one column = 40% viewport */
 .about-case-demo__hero-copy {
   position: absolute;
   z-index: 1;
@@ -2967,24 +2968,15 @@ body.is-mobile-menu-open .about-case-demo__about-btn {
     calc((100% - min(var(--shell-max), 100% - var(--shell-gutter) * 2)) / 2)
   );
   bottom: clamp(1rem, 2.5vh, 2rem);
-  width: min(36rem, calc(100% - var(--shell-gutter) * 2));
+  width: 40vw;
+  max-width: 40vw;
   pointer-events: none;
-}
-
-.about-case-demo__eyebrow {
-  margin: 0 0 0.75rem;
-  font-family: var(--font-sans);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.72);
 }
 
 .about-case-demo__title {
   margin: 0;
   font-family: var(--font-sans);
-  font-size: clamp(2.25rem, 1.6rem + 3.2vw, 3.25rem);
+  font-size: clamp(2.75rem, 2rem + 3.6vw, 3.75rem);
   font-weight: 500;
   letter-spacing: -0.02em;
   line-height: 1.05;
@@ -2992,14 +2984,14 @@ body.is-mobile-menu-open .about-case-demo__about-btn {
 }
 
 .about-case-demo__summary {
-  margin: clamp(1rem, 2vw, 1.5rem) 0 0;
-  max-width: 32rem;
+  margin: clamp(0.7rem, 1.2vw, 0.95rem) 0 0;
+  max-width: none;
   font-family: var(--font-sans);
-  font-size: clamp(0.9375rem, 0.88rem + 0.25vw, 1.0625rem);
+  font-size: clamp(1.125rem, 1.05rem + 0.3vw, 1.25rem);
   font-weight: 400;
   letter-spacing: -0.01em;
-  line-height: 1.4;
-  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.28;
+  color: rgba(255, 255, 255, 0.78);
   text-wrap: pretty;
 }
 
@@ -3033,7 +3025,8 @@ body.is-mobile-menu-open .about-case-demo__about-btn {
   position: relative;
   width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
   margin: 0 auto;
-  padding: var(--shell-gutter) 0 4rem;
+  /* Room for About pill under last frame: gap + btn + gap above footer */
+  padding: var(--shell-gutter) 0 8rem;
   overflow-anchor: none;
 }
 
@@ -3066,42 +3059,53 @@ body.is-mobile-menu-open .about-case-demo__about-btn {
 }
 
 /*
- * Portaled to document.body — fixed to the demo shell’s top-right.
- * X tracks bodyRect.right (not media width); Y = header + gutter.
+ * Portaled to document.body — centered X; Y from JS, clamped to the
+ * image/copy content box (prefer ~30px above the viewport bottom).
+ * Fill + glare wipe on GlareHover; button face stays transparent.
  */
-.about-case-demo__about-btn {
+.about-case-demo__about-pin {
   position: fixed;
   z-index: 200;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  transform: translateX(-50%);
   pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  /* Instant hide — avoids a fade-in flash over the hero on scroll-back */
+  transition: none;
+}
+
+.about-case-demo__about-pin.is-ready {
+  pointer-events: auto;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.about-case-demo__about-glare.glare-hover {
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.about-case-demo__about-btn {
+  position: relative;
+  z-index: 2;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   margin: 0;
-  padding: 0.5rem 0.5rem 0.5rem 0.75rem;
+  padding: 0.5rem 0.85rem 0.5rem 1rem;
   border: 0;
-  border-radius: 4px;
-  background: rgba(232, 232, 232, 0.82);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  border-radius: 999px;
+  background: transparent;
   color: #1a1a1a;
   font-family: var(--font-sans);
   font-size: 0.9375rem;
   font-weight: 500; /* Medium — one step above Regular */
   line-height: 1.2;
   cursor: pointer;
-  opacity: 0;
-  visibility: hidden;
-  transition: background 0.2s ease, opacity 0.2s ease, visibility 0.2s ease;
-}
-
-.about-case-demo__about-btn.is-ready {
-  pointer-events: auto;
-  opacity: 1;
-  visibility: visible;
-}
-
-.about-case-demo__about-btn:hover {
-  background: rgba(232, 232, 232, 0.94);
 }
 
 .about-case-demo__about-icon {
@@ -3213,33 +3217,43 @@ body.is-mobile-menu-open .about-case-demo__about-btn {
 
 .about-case-demo__panel-copy {
   font-family: var(--font-sans);
-  /* Match Pentagram case body (~14px) */
-  font-size: 0.875rem;
-  line-height: 1.5;
-  color: #1a1a1a;
+  /* Was ~14px — two steps up; Apple-style ink / secondary gray */
+  font-size: 1.125rem;
+  line-height: 1.38;
+  color: #6e6e73;
+  letter-spacing: -0.01em;
+}
+
+.about-case-demo__panel-block {
+  margin: 0 0 2.25rem;
+}
+
+.about-case-demo__panel-block:last-child {
+  margin-bottom: 0;
+}
+
+.about-case-demo__panel-title {
+  margin: 0 0 0.85rem;
+  font-family: var(--font-sans);
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  line-height: 1.25;
+  color: #1d1d1f;
 }
 
 .about-case-demo__panel-copy p {
-  margin: 0 0 1.15rem;
+  margin: 0 0 1rem;
   text-wrap: pretty;
 }
 
-.about-case-demo__panel-copy strong {
-  font-weight: 600;
+.about-case-demo__panel-copy p:last-child {
+  margin-bottom: 0;
 }
 
 @media (max-width: 799px) {
   .about-case-demo__columns {
     overflow-x: visible;
-  }
-
-  /* Pentagram phone: bottom-center, clear of Safari URL / home bar */
-  .about-case-demo__about-btn {
-    top: auto !important;
-    right: auto !important;
-    left: 50%;
-    bottom: calc(3.35rem + env(safe-area-inset-bottom, 0px));
-    transform: translateX(-50%);
   }
 
   .about-case-demo.is-about-open .about-case-demo__media-col {
@@ -3302,29 +3316,66 @@ body.is-mobile-menu-open .about-case-demo__about-btn {
   }
 
   .about-case-demo__panel-copy {
-    font-size: 1rem;
-    line-height: 1.45;
+    /* Desktop 18px − 1px */
+    font-size: 17px;
+    line-height: 1.35;
   }
 
-  .about-case-demo__panel-copy p:first-child {
-    margin-top: 0;
+  .about-case-demo__panel-title {
+    /* Desktop 22px − 1px */
+    font-size: 21px;
+    margin-bottom: 1rem;
   }
+
+  .about-case-demo__panel-block {
+    margin-bottom: 2.5rem;
+  }
+}
+
+/* About bio page — Apple-style title / secondary body */
+.about-page__intro h1 {
+  margin: 0;
+  font-size: clamp(2.5rem, 2rem + 2.5vw, 3.5rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: #1d1d1f;
+}
+
+.about-page__intro .lede {
+  margin: 1.25rem 0 0;
+  max-width: 38rem;
+  font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.375rem);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 1.35;
+  color: #6e6e73;
 }
 
 .about-section {
   scroll-margin-top: 5rem;
-  padding-top: 2.5rem;
-  padding-bottom: 2.5rem;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
   border-top: 1px solid var(--line);
 }
 
 .about-section h2 {
-  font-size: clamp(1.5rem, 3vw, 2rem);
+  margin: 0 0 1rem;
+  font-size: clamp(1.75rem, 1.4rem + 1.5vw, 2.25rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  color: #1d1d1f;
 }
 
 .about-section p {
   max-width: 40rem;
   margin: 0;
+  font-size: clamp(1.125rem, 1rem + 0.4vw, 1.25rem);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.38;
+  color: #6e6e73;
 }
 
 .empty-state {

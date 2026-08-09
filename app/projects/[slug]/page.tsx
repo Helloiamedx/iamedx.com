@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ProjectCaseCopy } from "@/components/ProjectCaseCopy";
-import { ProjectCaseHero } from "@/components/ProjectCaseHero";
+import { AboutCaseDemo } from "@/components/AboutCaseDemo";
 import { getProjectBySlug, projects } from "@/content/projects";
 
 type ProjectPageProps = {
@@ -31,9 +30,8 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
 
   return (
     <main className="project-detail">
-      <ProjectCaseHero project={project} />
-      <ProjectCaseCopy project={project} />
-      {/* Images weave between chapters later — per project */}
+      {/* Living case-detail template — project-aware fields wired later */}
+      <AboutCaseDemo />
     </main>
   );
 }

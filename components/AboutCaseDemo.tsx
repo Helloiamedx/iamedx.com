@@ -4,8 +4,12 @@ import Image from "next/image";
 import { useLenis } from "lenis/react";
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { ClickSpark } from "@/components/ClickSpark";
+import { GlareHover, GLARE_WIPE_MS } from "@/components/GlareHover";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
 import { asset } from "@/lib/assets";
+
+const ABOUT_BTN_FILL = "rgba(232, 232, 232, 0.82)";
 
 const TAGS = [
   "Brand Identity",
@@ -140,18 +144,18 @@ function Frame({
 }
 
 /**
- * Temporary About-page demo of the Pentagram-style case layout:
+ * Living Pentagram-style case layout (mounted on `/projects/[slug]`):
  * video hero with left-stacked overlay, image weave, About panel toggle.
  */
 export function AboutCaseDemo() {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [btnReady, setBtnReady] = useState(false);
-  const [btnBox, setBtnBox] = useState({ top: 0, right: 0 });
+  const [btnTop, setBtnTop] = useState(0);
   const panelId = useId();
   const bodyRef = useRef<HTMLDivElement>(null);
   const mediaStackRef = useRef<HTMLDivElement>(null);
-  const btnRef = useRef<HTMLButtonElement>(null);
+  const pinRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLElement>(null);
   const panelInnerRef = useRef<HTMLDivElement>(null);
   const lenis = useLenis();
@@ -192,62 +196,61 @@ export function AboutCaseDemo() {
   }, []);
 
   /*
-   * Shell-fixed pin, clamped to the real media(/copy) band:
-   * - travels with content top (never over the video)
-   * - docks under header while mid-gallery
-   * - hits content bottom and leaves (same idea as the top dock)
-   * X from body right edge (open-push does not move it).
-   * Y band from media stack; when open, bottom = taller of media vs copy.
+   * Center-X, prefer ~30px above the viewport bottom.
+   * Top: clamp to contentTop + inset (gap under first frames, then stop).
+   * Bottom: cap by footer only (gap above footer).
+   * Hero: hide once media top clears the pin slot — no loose hysteresis
+   * that re-shows a flash over the video.
    */
   useEffect(() => {
-    const body = bodyRef.current;
     const media = mediaStackRef.current;
-    if (!body || !media) return;
+    const body = bodyRef.current;
+    if (!media) return;
 
     const sync = () => {
-      const header = readHeaderOffset();
-      const gutter = readShellGutter();
-      const bodyRect = body.getBoundingClientRect();
       const mediaRect = media.getBoundingClientRect();
       const panelRect = panelRef.current?.getBoundingClientRect();
-      const btnH = btnRef.current?.offsetHeight || 40;
       const mobile = isMobileAbout();
       const contentTop = mediaRect.top;
-      /* On mobile fullscreen open, ignore fixed panel height for the band */
+      /* When open on desktop, taller of media vs copy defines the box */
       const contentBottom =
         open && !mobile && panelRect && panelRect.height > 0
           ? Math.max(mediaRect.bottom, panelRect.bottom)
           : mediaRect.bottom;
-      const dockTop = header + gutter;
-      const maxTop = contentBottom - btnH;
-      /* Desktop: clamp in the media band. Phone position is CSS bottom-center. */
-      const top = Math.min(Math.max(contentTop, dockTop), maxTop);
-      /*
-       * Visible while the media band intersects the viewport.
-       * Slack covers 100vh vs innerHeight / DevTools zoom subpixels —
-       * without it, hero==100vh leaves contentTop === innerHeight and
-       * the button stays opacity:0 at scrollY=0 (esp. Chrome 100% DPR).
-       */
       const viewH = window.visualViewport?.height ?? window.innerHeight;
-      const slack = 4;
-      const inBand =
-        contentTop < viewH + slack && contentBottom > header - slack;
-      const nextReady = mobile
-        ? open || inBand
-        : maxTop >= dockTop &&
-          contentTop < viewH + slack &&
-          contentBottom > dockTop - slack;
-      const nextBox = {
-        top,
-        right: Math.max(0, window.innerWidth - bodyRect.right),
-      };
+      const pinBottom = 30;
+      const btnH = pinRef.current?.offsetHeight || 44;
+      const preferredTop = viewH - pinBottom - btnH;
+      const inset = Math.max(readShellGutter(), 32);
+      const minTop = contentTop + inset;
+      const footerEl = document.querySelector(".site-footer");
+      const footerTop =
+        footerEl?.getBoundingClientRect().top ?? Number.POSITIVE_INFINITY;
+      const maxTop = footerTop - inset - btnH;
+
+      /* Mobile open sheet: park at preferred bottom so Close stays reachable */
+      if (open && mobile) {
+        setBtnReady(true);
+        setBtnTop((prev) => (prev === preferredTop ? prev : preferredTop));
+        return;
+      }
+
+      const hasRoom = maxTop >= minTop;
+      /*
+       * Visible only while media has entered enough that the docked top
+       * (minTop) still sits at/above the preferred pin — not over the hero.
+       */
+      const nextReady =
+        hasRoom &&
+        contentTop < preferredTop &&
+        contentBottom > inset &&
+        minTop < viewH;
+      const top = nextReady
+        ? Math.min(Math.max(preferredTop, minTop), maxTop)
+        : preferredTop;
 
       setBtnReady((prev) => (prev === nextReady ? prev : nextReady));
-      setBtnBox((prev) =>
-        prev.top === nextBox.top && prev.right === nextBox.right
-          ? prev
-          : nextBox,
-      );
+      setBtnTop((prev) => (prev === top ? prev : top));
     };
 
     sync();
@@ -257,8 +260,8 @@ export function AboutCaseDemo() {
     vv?.addEventListener("resize", sync);
     vv?.addEventListener("scroll", sync);
     const ro = new ResizeObserver(sync);
-    ro.observe(body);
     ro.observe(media);
+    if (body) ro.observe(body);
     return () => {
       window.removeEventListener("scroll", sync);
       window.removeEventListener("resize", sync);
@@ -330,7 +333,6 @@ export function AboutCaseDemo() {
         </div>
 
         <div className="about-case-demo__hero-copy">
-          <p className="about-case-demo__eyebrow">Demo layout · not live content</p>
           <h1 className="about-case-demo__title">Univers</h1>
           <p className="about-case-demo__summary">
             Strategy, brand system, and website for the world’s most
@@ -348,21 +350,42 @@ export function AboutCaseDemo() {
 
       {mounted
         ? createPortal(
-            <button
-              ref={btnRef}
-              type="button"
-              className={`about-case-demo__about-btn${btnReady ? " is-ready" : ""}${open ? " is-open" : ""}`}
-              style={{ top: btnBox.top, right: btnBox.right }}
-              aria-expanded={open}
-              aria-controls={panelId}
-              tabIndex={btnReady ? 0 : -1}
-              onClick={toggleOpen}
+            <div
+              ref={pinRef}
+              className={`about-case-demo__about-pin${btnReady ? " is-ready" : ""}`}
+              style={{ top: btnTop }}
             >
-              <span>About the project</span>
-              <span className="about-case-demo__about-icon" aria-hidden="true">
-                +
-              </span>
-            </button>,
+              <ClickSpark>
+                <GlareHover
+                  width="auto"
+                  height="auto"
+                  background={ABOUT_BTN_FILL}
+                  borderRadius="999px"
+                  borderColor={ABOUT_BTN_FILL}
+                  glareColor="#ffffff"
+                  glareOpacity={0.55}
+                  transitionDuration={GLARE_WIPE_MS}
+                  className="about-case-demo__about-glare"
+                >
+                  <button
+                    type="button"
+                    className={`about-case-demo__about-btn${open ? " is-open" : ""}`}
+                    aria-expanded={open}
+                    aria-controls={panelId}
+                    tabIndex={btnReady ? 0 : -1}
+                    onClick={toggleOpen}
+                  >
+                    <span>About the project</span>
+                    <span
+                      className="about-case-demo__about-icon"
+                      aria-hidden="true"
+                    >
+                      +
+                    </span>
+                  </button>
+                </GlareHover>
+              </ClickSpark>
+            </div>,
             document.body,
           )
         : null}
@@ -406,104 +429,120 @@ export function AboutCaseDemo() {
               </button>
 
               <div className="about-case-demo__panel-copy">
-                <p>
-                  <strong>Unity Through Connection</strong>
-                  <br />
-                  Univers is a global platform designed to coordinate the systems
-                  required to reach net zero. Connecting people, data, hardware,
-                  and organisations, it enables governments and businesses to
-                  measure impact and act collectively on climate.
-                </p>
-                <p>
-                  As the climate crisis shifts from debate to implementation, the
-                  need for coordinated action has become clear. Univers was
-                  created to meet this challenge, building an ecosystem that helps
-                  business and government leaders measure, manage, and accelerate
-                  decarbonisation. Today it connects more than 365 million
-                  devices, manages 845GW of renewable energy, and supports a
-                  network of over 500 partners, including Microsoft, Starbucks,
-                  and HSBC.
-                </p>
-                <p>
-                  <strong>The Challenge</strong>
-                  <br />
-                  Formerly Envision Digital, the company partnered with Pentagram
-                  to create a future-facing brand that matched the scale of its
-                  ambition and the promise of its new name, Univers. The visual
-                  identity and digital experience were designed to communicate a
-                  highly complex decarbonisation platform in a clear, compelling,
-                  and scalable way.
-                </p>
-                <p>
-                  <strong>Strategy</strong>
-                  <br />
-                  At the heart of Univers is a simple principle: connection
-                  generates energy. Previously isolated technologies are brought
-                  together into a single ecosystem, where environmental and
-                  operational data can be monitored, analysed, and coordinated in
-                  real time.
-                </p>
-                <p>
-                  From individual devices to global infrastructure, Univers
-                  reframes decarbonisation as an interconnected network working
-                  toward a shared goal.
-                </p>
-                <p>
-                  <strong>Identity</strong>
-                  <br />
-                  The identity translates this principle into a graphic language
-                  inspired by the structure of the universe. At the micro scale,
-                  the dot represents data, precision, and the individual actor. At
-                  the macro scale, the universe symbolises collective impact and
-                  global possibility.
-                </p>
-                <p>
-                  Together these elements create a flexible design system that
-                  adapts seamlessly across software, hardware, communications, and
-                  immersive environments.
-                </p>
-                <p>
-                  <strong>Symbol and Wordmark</strong>
-                  <br />
-                  The symbol expresses coordination through motion. Eight spheres
-                  orbit before converging into a single gravitational form,
-                  illustrating how independent elements align around a common
-                  purpose.
-                </p>
-                <p>
-                  The geometric wordmark balances engineered precision with
-                  clarity. A bespoke ‘un’ ligature anchors the identity, embodying
-                  the act of joining, an idea central to the original brief.
-                </p>
-                <p>
-                  <strong>Visual System</strong>
-                  <br />
-                  The visual language extends across colour, imagery, and motion. A
-                  neutral base palette grounds the brand, while vibrant accents
-                  signal energy and discovery. Art direction celebrates the Earth
-                  as both subject and responsibility. Cinematic 3D imagery
-                  reinforces the principles of harmony and connection, pairing
-                  human presence with a sense of the infinite.
-                </p>
-                <p>
-                  <strong>Generative Design Tool</strong>
-                  <br />
-                  A bespoke generative tool enables the design team to continuously
-                  expand the system. Each sphere sits within its own orbit,
-                  creating a miniature solar system where elements move
-                  independently while remaining connected. The tool produces
-                  infinite compositions while maintaining a coherent visual
-                  language.
-                </p>
-                <p>
-                  <strong>Outcome</strong>
-                  <br />
-                  Univers positions decarbonisation as a coordinated effort rather
-                  than a collection of isolated actions. Through strategy,
-                  identity, and digital design, the project establishes a flexible
-                  framework for communicating one of the world&apos;s most
-                  ambitious climate technology platforms.
-                </p>
+                <section className="about-case-demo__panel-block">
+                  <h3 className="about-case-demo__panel-title">
+                    Unity Through Connection
+                  </h3>
+                  <p>
+                    Univers is a global platform designed to coordinate the
+                    systems required to reach net zero. Connecting people, data,
+                    hardware, and organisations, it enables governments and
+                    businesses to measure impact and act collectively on climate.
+                  </p>
+                  <p>
+                    As the climate crisis shifts from debate to implementation,
+                    the need for coordinated action has become clear. Univers was
+                    created to meet this challenge, building an ecosystem that
+                    helps business and government leaders measure, manage, and
+                    accelerate decarbonisation. Today it connects more than 365
+                    million devices, manages 845GW of renewable energy, and
+                    supports a network of over 500 partners, including Microsoft,
+                    Starbucks, and HSBC.
+                  </p>
+                </section>
+                <section className="about-case-demo__panel-block">
+                  <h3 className="about-case-demo__panel-title">The Challenge</h3>
+                  <p>
+                    Formerly Envision Digital, the company partnered with
+                    Pentagram to create a future-facing brand that matched the
+                    scale of its ambition and the promise of its new name,
+                    Univers. The visual identity and digital experience were
+                    designed to communicate a highly complex decarbonisation
+                    platform in a clear, compelling, and scalable way.
+                  </p>
+                </section>
+                <section className="about-case-demo__panel-block">
+                  <h3 className="about-case-demo__panel-title">Strategy</h3>
+                  <p>
+                    At the heart of Univers is a simple principle: connection
+                    generates energy. Previously isolated technologies are brought
+                    together into a single ecosystem, where environmental and
+                    operational data can be monitored, analysed, and coordinated
+                    in real time.
+                  </p>
+                  <p>
+                    From individual devices to global infrastructure, Univers
+                    reframes decarbonisation as an interconnected network working
+                    toward a shared goal.
+                  </p>
+                </section>
+                <section className="about-case-demo__panel-block">
+                  <h3 className="about-case-demo__panel-title">Identity</h3>
+                  <p>
+                    The identity translates this principle into a graphic language
+                    inspired by the structure of the universe. At the micro scale,
+                    the dot represents data, precision, and the individual actor.
+                    At the macro scale, the universe symbolises collective impact
+                    and global possibility.
+                  </p>
+                  <p>
+                    Together these elements create a flexible design system that
+                    adapts seamlessly across software, hardware, communications,
+                    and immersive environments.
+                  </p>
+                </section>
+                <section className="about-case-demo__panel-block">
+                  <h3 className="about-case-demo__panel-title">
+                    Symbol and Wordmark
+                  </h3>
+                  <p>
+                    The symbol expresses coordination through motion. Eight
+                    spheres orbit before converging into a single gravitational
+                    form, illustrating how independent elements align around a
+                    common purpose.
+                  </p>
+                  <p>
+                    The geometric wordmark balances engineered precision with
+                    clarity. A bespoke ‘un’ ligature anchors the identity,
+                    embodying the act of joining, an idea central to the original
+                    brief.
+                  </p>
+                </section>
+                <section className="about-case-demo__panel-block">
+                  <h3 className="about-case-demo__panel-title">Visual System</h3>
+                  <p>
+                    The visual language extends across colour, imagery, and
+                    motion. A neutral base palette grounds the brand, while
+                    vibrant accents signal energy and discovery. Art direction
+                    celebrates the Earth as both subject and responsibility.
+                    Cinematic 3D imagery reinforces the principles of harmony and
+                    connection, pairing human presence with a sense of the
+                    infinite.
+                  </p>
+                </section>
+                <section className="about-case-demo__panel-block">
+                  <h3 className="about-case-demo__panel-title">
+                    Generative Design Tool
+                  </h3>
+                  <p>
+                    A bespoke generative tool enables the design team to
+                    continuously expand the system. Each sphere sits within its
+                    own orbit, creating a miniature solar system where elements
+                    move independently while remaining connected. The tool
+                    produces infinite compositions while maintaining a coherent
+                    visual language.
+                  </p>
+                </section>
+                <section className="about-case-demo__panel-block">
+                  <h3 className="about-case-demo__panel-title">Outcome</h3>
+                  <p>
+                    Univers positions decarbonisation as a coordinated effort
+                    rather than a collection of isolated actions. Through
+                    strategy, identity, and digital design, the project
+                    establishes a flexible framework for communicating one of the
+                    world&apos;s most ambitious climate technology platforms.
+                  </p>
+                </section>
               </div>
             </div>
           </aside>

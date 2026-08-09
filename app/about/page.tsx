@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { AboutCaseDemo } from "@/components/AboutCaseDemo";
 
 export const metadata: Metadata = {
   title: "About",
@@ -32,8 +31,6 @@ const sections = [
 export default function AboutPage() {
   return (
     <main className="about-page">
-      <AboutCaseDemo />
-
       <section className="section about-page__intro">
         <p className="eyebrow">About</p>
         <h1>Get to Know Edward</h1>
