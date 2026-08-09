@@ -707,6 +707,7 @@ export function Header() {
       document.body.style.position = "";
       document.body.style.inset = "";
       document.body.style.width = "";
+      document.body.style.touchAction = "";
       document.body.style.paddingRight = "";
       return;
     }
@@ -717,20 +718,13 @@ export function Header() {
     document.body.style.position = "fixed";
     document.body.style.inset = `-${scrollY}px 0 0 0`;
     document.body.style.width = "100%";
-    /* Do not set touch-action:none on body — it blocks pan-y inside the menu */
+    document.body.style.touchAction = "none";
     if (scrollbar > 0) {
       document.body.style.paddingRight = `${scrollbar}px`;
     }
 
+    /* One-screen menu — lock all page/menu pan */
     const preventTouch = (event: TouchEvent) => {
-      const target = event.target;
-      if (!(target instanceof Node)) {
-        event.preventDefault();
-        return;
-      }
-      /* Allow pan inside the menu scroller — block only the page behind */
-      const scroller = document.querySelector(".mobile-nav__inner");
-      if (scroller?.contains(target)) return;
       event.preventDefault();
     };
     document.addEventListener("touchmove", preventTouch, { passive: false });
@@ -741,6 +735,7 @@ export function Header() {
       document.body.style.position = "";
       document.body.style.inset = "";
       document.body.style.width = "";
+      document.body.style.touchAction = "";
       document.body.style.paddingRight = "";
       window.scrollTo(0, scrollY);
     };
