@@ -3006,6 +3006,14 @@ body.is-mobile-menu-open .site-header-cta {
   pointer-events: none;
 }
 
+/* Phone: use the full shell width — no 40vw column */
+@media (max-width: 799px) {
+  .about-case-demo__hero-copy {
+    width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
+    max-width: none;
+  }
+}
+
 .about-case-demo__title {
   margin: 0;
   font-family: var(--font-sans);
