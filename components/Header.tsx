@@ -11,7 +11,7 @@ import {
   useState,
   type CSSProperties,
 } from "react";
-import { flushSync } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import { ClickSpark } from "@/components/ClickSpark";
 import { EmailIcon, WeChatIcon, WhatsAppIcon } from "@/components/ContactChannelIcons";
 import { GlareHover, GLARE_WIPE_MS } from "@/components/GlareHover";
@@ -66,6 +66,7 @@ export function Header() {
   const [panelKey, setPanelKey] = useState<string | null>(null);
   const [panelOffset, setPanelOffset] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobilePortalReady, setMobilePortalReady] = useState(false);
   /* Stays true through open + close curtain so frost doesn't fight the strips */
   const [mobileSurface, setMobileSurface] = useState(false);
   /* Top of page: clear chrome on every route (same scroll gate as the home hero) */
@@ -336,6 +337,10 @@ export function Header() {
   }, [openKey, mobileOpen, pathname]);
 
   useEffect(() => {
+    setMobilePortalReady(true);
+  }, []);
+
+  useEffect(() => {
     document.body.classList.toggle("is-mobile-menu-open", mobileOpen);
     return () => {
       document.body.classList.remove("is-mobile-menu-open");
@@ -361,7 +366,8 @@ export function Header() {
       scrimFadeTimer.current = null;
     }
 
-    if (openKey || mobileOpen) {
+    /* Desktop mega only — mobile curtain is opaque; a black scrim flashes first */
+    if (openKey) {
       setScrimOn(true);
       return;
     }
@@ -378,7 +384,7 @@ export function Header() {
         scrimFadeTimer.current = null;
       }
     };
-  }, [openKey, mobileOpen]);
+  }, [openKey]);
 
   function clearCtaOutTimer() {
     if (ctaOutTimer.current) {
@@ -704,7 +710,8 @@ export function Header() {
     if (!mobileOpen) {
       document.body.style.overflow = "";
       document.body.style.position = "";
-      document.body.style.inset = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
       document.body.style.width = "";
       document.body.style.touchAction = "";
       document.body.style.paddingRight = "";
@@ -715,13 +722,16 @@ export function Header() {
     const scrollbar = window.innerWidth - document.documentElement.clientWidth;
     document.body.style.overflow = "hidden";
     document.body.style.position = "fixed";
-    document.body.style.inset = `-${scrollY}px 0 0 0`;
+    /* top only — inset with bottom:0 stretches the body and flashes the footer */
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = "0";
     document.body.style.width = "100%";
     document.body.style.touchAction = "none";
     if (scrollbar > 0) {
       document.body.style.paddingRight = `${scrollbar}px`;
     }
 
+    /* One-screen menu — lock all page/menu pan */
     const preventTouch = (event: TouchEvent) => {
       event.preventDefault();
     };
@@ -731,7 +741,8 @@ export function Header() {
       document.removeEventListener("touchmove", preventTouch);
       document.body.style.overflow = "";
       document.body.style.position = "";
-      document.body.style.inset = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
       document.body.style.width = "";
       document.body.style.touchAction = "";
       document.body.style.paddingRight = "";
@@ -780,11 +791,10 @@ export function Header() {
   return (
     <>
       <div
-        className={`nav-scrim${scrimOn ? " is-visible" : ""}${isPanelOpen || mobileOpen ? " is-interactive" : ""}`}
+        className={`nav-scrim${scrimOn ? " is-visible" : ""}${isPanelOpen ? " is-interactive" : ""}`}
         aria-hidden="true"
         onClick={() => {
           closeMenu();
-          setMobileOpen(false);
         }}
       />
 
@@ -953,26 +963,33 @@ export function Header() {
           </div>
         </div>
 
-        <div
-          className={`mobile-nav${mobileOpen ? " is-open" : ""}`}
-          id={`${menuId}-mobile`}
-          aria-hidden={!mobileOpen}
-        >
-          {/* Vertical columns slide down left→right (~25% each) */}
-          <div className="mobile-nav__curtain" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-            <span />
-          </div>
-          <div className="shell mobile-nav__inner">
-            <MobileBubbleNav
-              open={mobileOpen}
-              onNavigate={() => setMobileOpen(false)}
-            />
-          </div>
-        </div>
       </header>
+
+      {/* Portal to body — header backdrop-filter must not trap position:fixed */}
+      {mobilePortalReady
+        ? createPortal(
+            <div
+              className={`mobile-nav${mobileOpen ? " is-open" : ""}${mobileSurface ? " is-surface" : ""}`}
+              id={`${menuId}-mobile`}
+              aria-hidden={!mobileOpen}
+            >
+              {/* Vertical columns slide down left→right (~25% each) */}
+              <div className="mobile-nav__curtain" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+                <span />
+              </div>
+              <div className="shell mobile-nav__inner">
+                <MobileBubbleNav
+                  open={mobileOpen}
+                  onNavigate={() => setMobileOpen(false)}
+                />
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
 
       {/* Sibling raft: ghost (difference) at rest; colored pills after frost.
           Never combine is-ghost + is-pills — difference blend on brand fills
