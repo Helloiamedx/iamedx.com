@@ -158,15 +158,24 @@ export function AboutCaseDemo() {
   const lenisRef = useRef(lenis);
   lenisRef.current = lenis;
 
+  const isMobileAbout = () =>
+    typeof window !== "undefined" &&
+    window.matchMedia("(max-width: 799px)").matches;
+
   const scrollCopyToStart = () => {
+    const panel = panelRef.current;
+    /* Mobile sheet scrolls itself — don’t move the page under it */
+    if (isMobileAbout()) {
+      panel?.scrollTo({ top: 0, behavior: "auto" });
+      panelInnerRef.current?.scrollTo({ top: 0, behavior: "auto" });
+      return;
+    }
     const body = bodyRef.current;
     if (!body) return;
     const offset = -(readHeaderOffset() + readShellGutter());
-    /* Prefer panel so copy line 1 lands under the header */
-    const target = panelRef.current ?? body;
+    const target = panel ?? body;
     const lenisNow = lenisRef.current;
     if (lenisNow) {
-      /* Desktop Lenis owns the scroll — window.scrollTo is ignored */
       lenisNow.scrollTo(target, { offset, immediate: true });
     } else {
       const y =
@@ -202,18 +211,32 @@ export function AboutCaseDemo() {
       const mediaRect = media.getBoundingClientRect();
       const panelRect = panelRef.current?.getBoundingClientRect();
       const btnH = btnRef.current?.offsetHeight || 40;
+      const mobile = isMobileAbout();
       const contentTop = mediaRect.top;
+      /* On mobile fullscreen open, ignore fixed panel height for the band */
       const contentBottom =
-        open && panelRect && panelRect.height > 0
+        open && !mobile && panelRect && panelRect.height > 0
           ? Math.max(mediaRect.bottom, panelRect.bottom)
           : mediaRect.bottom;
       const dockTop = header + gutter;
       const maxTop = contentBottom - btnH;
+      /* Desktop: clamp in the media band. Phone position is CSS bottom-center. */
       const top = Math.min(Math.max(contentTop, dockTop), maxTop);
-      const nextReady =
-        maxTop >= dockTop &&
-        contentTop < window.innerHeight &&
-        contentBottom > dockTop;
+      /*
+       * Visible while the media band intersects the viewport.
+       * Slack covers 100vh vs innerHeight / DevTools zoom subpixels —
+       * without it, hero==100vh leaves contentTop === innerHeight and
+       * the button stays opacity:0 at scrollY=0 (esp. Chrome 100% DPR).
+       */
+      const viewH = window.visualViewport?.height ?? window.innerHeight;
+      const slack = 4;
+      const inBand =
+        contentTop < viewH + slack && contentBottom > header - slack;
+      const nextReady = mobile
+        ? open || inBand
+        : maxTop >= dockTop &&
+          contentTop < viewH + slack &&
+          contentBottom > dockTop - slack;
       const nextBox = {
         top,
         right: Math.max(0, window.innerWidth - bodyRect.right),
@@ -230,12 +253,17 @@ export function AboutCaseDemo() {
     sync();
     window.addEventListener("scroll", sync, { passive: true });
     window.addEventListener("resize", sync);
+    const vv = window.visualViewport;
+    vv?.addEventListener("resize", sync);
+    vv?.addEventListener("scroll", sync);
     const ro = new ResizeObserver(sync);
     ro.observe(body);
     ro.observe(media);
     return () => {
       window.removeEventListener("scroll", sync);
       window.removeEventListener("resize", sync);
+      vv?.removeEventListener("resize", sync);
+      vv?.removeEventListener("scroll", sync);
       ro.disconnect();
     };
   }, [mounted, open]);
@@ -266,14 +294,27 @@ export function AboutCaseDemo() {
   }, [open]);
 
   useEffect(() => {
-    if (!open) return;
-    if (window.matchMedia("(max-width: 799px)").matches) {
-      const prev = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = prev;
-      };
-    }
+    if (!open || !isMobileAbout()) return;
+    const scrollY = window.scrollY;
+    const { body } = document;
+    const prev = {
+      overflow: body.style.overflow,
+      position: body.style.position,
+      top: body.style.top,
+      width: body.style.width,
+    };
+    body.style.overflow = "hidden";
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.width = "100%";
+    panelRef.current?.scrollTo({ top: 0, behavior: "auto" });
+    return () => {
+      body.style.overflow = prev.overflow;
+      body.style.position = prev.position;
+      body.style.top = prev.top;
+      body.style.width = prev.width;
+      window.scrollTo(0, scrollY);
+    };
   }, [open]);
 
   return (
@@ -363,167 +404,109 @@ export function AboutCaseDemo() {
               >
                 Close
               </button>
-              <div className="about-case-demo__panel-copy">
-              <p>
-                <strong>Unity Through Connection</strong>
-                <br />
-                Univers is a global platform designed to coordinate the systems
-                required to reach net zero. Connecting people, data, hardware,
-                and organisations, it enables governments and businesses to
-                measure impact and act collectively on climate.
-              </p>
-              <p>
-                As the climate crisis shifts from debate to implementation, the
-                need for coordinated action has become clear. Univers was
-                created to meet this challenge, building an ecosystem that helps
-                business and government leaders measure, manage, and accelerate
-                decarbonisation. Today it connects more than 365 million
-                devices, manages 845GW of renewable energy, and supports a
-                network of over 500 partners, including Microsoft, Starbucks,
-                and HSBC.
-              </p>
-              <p>
-                <strong>The Challenge</strong>
-                <br />
-                Formerly Envision Digital, the company partnered with Pentagram
-                to create a future-facing brand that matched the scale of its
-                ambition and the promise of its new name, Univers. The visual
-                identity and digital experience were designed to communicate a
-                highly complex decarbonisation platform in a clear, compelling,
-                and scalable way.
-              </p>
-              <p>
-                <strong>Strategy</strong>
-                <br />
-                At the heart of Univers is a simple principle: connection
-                generates energy. Previously isolated technologies are brought
-                together into a single ecosystem, where environmental and
-                operational data can be monitored, analysed, and coordinated in
-                real time.
-              </p>
-              <p>
-                From individual devices to global infrastructure, Univers
-                reframes decarbonisation as an interconnected network working
-                toward a shared goal.
-              </p>
-              <p>
-                <strong>Identity</strong>
-                <br />
-                The identity translates this principle into a graphic language
-                inspired by the structure of the universe. At the micro scale,
-                the dot represents data, precision, and the individual actor. At
-                the macro scale, the universe symbolises collective impact and
-                global possibility.
-              </p>
-              <p>
-                Together these elements create a flexible design system that
-                adapts seamlessly across software, hardware, communications, and
-                immersive environments.
-              </p>
-              <p>
-                <strong>Symbol and Wordmark</strong>
-                <br />
-                The symbol expresses coordination through motion. Eight spheres
-                orbit before converging into a single gravitational form,
-                illustrating how independent elements align around a common
-                purpose.
-              </p>
-              <p>
-                The geometric wordmark balances engineered precision with
-                clarity. A bespoke ‘un’ ligature anchors the identity, embodying
-                the act of joining, an idea central to the original brief.
-              </p>
-              <p>
-                <strong>Visual System</strong>
-                <br />
-                The visual language extends across colour, imagery, and motion. A
-                neutral base palette grounds the brand, while vibrant accents
-                signal energy and discovery. Art direction celebrates the Earth
-                as both subject and responsibility. Cinematic 3D imagery
-                reinforces the principles of harmony and connection, pairing
-                human presence with a sense of the infinite.
-              </p>
-              <p>
-                <strong>Generative Design Tool</strong>
-                <br />
-                A bespoke generative tool enables the design team to continuously
-                expand the system. Each sphere sits within its own orbit,
-                creating a miniature solar system where elements move
-                independently while remaining connected. The tool produces
-                infinite compositions while maintaining a coherent visual
-                language.
-              </p>
-              <p>
-                <strong>Outcome</strong>
-                <br />
-                Univers positions decarbonisation as a coordinated effort rather
-                than a collection of isolated actions. Through strategy,
-                identity, and digital design, the project establishes a flexible
-                framework for communicating one of the world&apos;s most
-                ambitious climate technology platforms.
-              </p>
 
-              <div className="about-case-demo__meta">
-                <div className="about-case-demo__meta-col">
-                  <div className="about-case-demo__meta-block">
-                    <h3>Client</h3>
-                    <p>Envision</p>
-                  </div>
-                  <div className="about-case-demo__meta-block">
-                    <h3>Sector</h3>
-                    <ul>
-                      <li>Technology</li>
-                      <li>Climate &amp; Sustainability</li>
-                    </ul>
-                  </div>
-                  <div className="about-case-demo__meta-block">
-                    <h3>Discipline</h3>
-                    <ul>
-                      <li>Brand Identity</li>
-                      <li>Motion Graphics &amp; Film</li>
-                      <li>Brand Strategy</li>
-                      <li>Verbal Identity</li>
-                    </ul>
-                  </div>
-                </div>
-                <div className="about-case-demo__meta-col">
-                  <div className="about-case-demo__meta-block">
-                    <h3>Office</h3>
-                  </div>
-                  <div className="about-case-demo__meta-block">
-                    <h3>Partners</h3>
-                    <ul>
-                      <li>Jody Hudson-Powell</li>
-                      <li>Luke Powell</li>
-                    </ul>
-                  </div>
-                  <div className="about-case-demo__meta-block">
-                    <h3>Project team</h3>
-                    <ul>
-                      <li>Ashley Johnson (brand narrative)</li>
-                      <li>Ceri Stock</li>
-                      <li>Stefan van Rijn</li>
-                      <li>Helena Postigo Matey</li>
-                      <li>Jonathan Quaade</li>
-                      <li>Harrie Yoo</li>
-                      <li>Luis Gutiérrez</li>
-                      <li>Matt Hill</li>
-                    </ul>
-                  </div>
-                  <div className="about-case-demo__meta-block">
-                    <h3>Collaborators</h3>
-                    <ul>
-                      <li>Jamie Rickett</li>
-                      <li>Harry Boyd</li>
-                      <li>Daniel Kozma</li>
-                      <li>Yurii Khomovskyi</li>
-                    </ul>
-                  </div>
-                </div>
+              <div className="about-case-demo__panel-copy">
+                <p>
+                  <strong>Unity Through Connection</strong>
+                  <br />
+                  Univers is a global platform designed to coordinate the systems
+                  required to reach net zero. Connecting people, data, hardware,
+                  and organisations, it enables governments and businesses to
+                  measure impact and act collectively on climate.
+                </p>
+                <p>
+                  As the climate crisis shifts from debate to implementation, the
+                  need for coordinated action has become clear. Univers was
+                  created to meet this challenge, building an ecosystem that helps
+                  business and government leaders measure, manage, and accelerate
+                  decarbonisation. Today it connects more than 365 million
+                  devices, manages 845GW of renewable energy, and supports a
+                  network of over 500 partners, including Microsoft, Starbucks,
+                  and HSBC.
+                </p>
+                <p>
+                  <strong>The Challenge</strong>
+                  <br />
+                  Formerly Envision Digital, the company partnered with Pentagram
+                  to create a future-facing brand that matched the scale of its
+                  ambition and the promise of its new name, Univers. The visual
+                  identity and digital experience were designed to communicate a
+                  highly complex decarbonisation platform in a clear, compelling,
+                  and scalable way.
+                </p>
+                <p>
+                  <strong>Strategy</strong>
+                  <br />
+                  At the heart of Univers is a simple principle: connection
+                  generates energy. Previously isolated technologies are brought
+                  together into a single ecosystem, where environmental and
+                  operational data can be monitored, analysed, and coordinated in
+                  real time.
+                </p>
+                <p>
+                  From individual devices to global infrastructure, Univers
+                  reframes decarbonisation as an interconnected network working
+                  toward a shared goal.
+                </p>
+                <p>
+                  <strong>Identity</strong>
+                  <br />
+                  The identity translates this principle into a graphic language
+                  inspired by the structure of the universe. At the micro scale,
+                  the dot represents data, precision, and the individual actor. At
+                  the macro scale, the universe symbolises collective impact and
+                  global possibility.
+                </p>
+                <p>
+                  Together these elements create a flexible design system that
+                  adapts seamlessly across software, hardware, communications, and
+                  immersive environments.
+                </p>
+                <p>
+                  <strong>Symbol and Wordmark</strong>
+                  <br />
+                  The symbol expresses coordination through motion. Eight spheres
+                  orbit before converging into a single gravitational form,
+                  illustrating how independent elements align around a common
+                  purpose.
+                </p>
+                <p>
+                  The geometric wordmark balances engineered precision with
+                  clarity. A bespoke ‘un’ ligature anchors the identity, embodying
+                  the act of joining, an idea central to the original brief.
+                </p>
+                <p>
+                  <strong>Visual System</strong>
+                  <br />
+                  The visual language extends across colour, imagery, and motion. A
+                  neutral base palette grounds the brand, while vibrant accents
+                  signal energy and discovery. Art direction celebrates the Earth
+                  as both subject and responsibility. Cinematic 3D imagery
+                  reinforces the principles of harmony and connection, pairing
+                  human presence with a sense of the infinite.
+                </p>
+                <p>
+                  <strong>Generative Design Tool</strong>
+                  <br />
+                  A bespoke generative tool enables the design team to continuously
+                  expand the system. Each sphere sits within its own orbit,
+                  creating a miniature solar system where elements move
+                  independently while remaining connected. The tool produces
+                  infinite compositions while maintaining a coherent visual
+                  language.
+                </p>
+                <p>
+                  <strong>Outcome</strong>
+                  <br />
+                  Univers positions decarbonisation as a coordinated effort rather
+                  than a collection of isolated actions. Through strategy,
+                  identity, and digital design, the project establishes a flexible
+                  framework for communicating one of the world&apos;s most
+                  ambitious climate technology platforms.
+                </p>
               </div>
             </div>
-          </div>
-        </aside>
+          </aside>
         </div>
       </div>
     </div>

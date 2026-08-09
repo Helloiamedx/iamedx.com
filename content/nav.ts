@@ -246,7 +246,7 @@ export const tiktokHref = "https://iamedx.com";
 export const siteHref = "https://iamedx.com";
 
 export const officeInfo = {
-  eyebrow: "iamedx HQ",
+  eyebrow: "Edward Xu HQ",
   address:
     "No. 880 Longjin Avenue, Qianku Town, Cangnan County, Wenzhou City, Zhejiang Province, China",
   mapsHref: "https://maps.app.goo.gl/5snACoZbxVXQ3NRdA",

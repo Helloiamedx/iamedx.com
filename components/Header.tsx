@@ -336,6 +336,13 @@ export function Header() {
   }, [openKey, mobileOpen, pathname]);
 
   useEffect(() => {
+    document.body.classList.toggle("is-mobile-menu-open", mobileOpen);
+    return () => {
+      document.body.classList.remove("is-mobile-menu-open");
+    };
+  }, [mobileOpen]);
+
+  useEffect(() => {
     if (mobileOpen) {
       setMobileSurface(true);
       return;

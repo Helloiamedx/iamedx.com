@@ -955,6 +955,8 @@ p {
   align-items: center;
   justify-content: flex-end;
   gap: 0.45rem;
+  margin-left: auto;
+  flex: 0 0 auto;
 }
 
 .site-nav {
@@ -1142,24 +1144,28 @@ p {
   position: relative;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  min-width: 3.25rem;
+  justify-content: flex-end;
+  min-width: 0;
   min-height: 1.65rem;
   border: 0;
   background: transparent;
-  padding: 0.2rem 0.15rem;
+  /* Flush to shell right — no trailing pad that reads as off-right */
+  padding: 0.2rem 0;
+  margin: 0;
   cursor: pointer;
   font: inherit;
   font-size: 0.8125rem;
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  text-align: right;
   color: #1d1d1f;
   transition: color 360ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-menu-toggle__label {
-  display: inline-block;
+  display: block;
+  text-align: right;
   transition:
     opacity 280ms cubic-bezier(0.4, 0, 0.2, 1),
     transform 280ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -1172,8 +1178,10 @@ p {
 
 .nav-menu-toggle__label[data-label="close"] {
   position: absolute;
+  right: 0;
+  top: 50%;
   opacity: 0;
-  transform: translateY(6px);
+  transform: translateY(calc(-50% + 6px));
   pointer-events: none;
 }
 
@@ -1185,7 +1193,7 @@ p {
 
 .nav-menu-toggle.is-open .nav-menu-toggle__label[data-label="close"] {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(-50%);
   pointer-events: auto;
 }
 
@@ -1627,7 +1635,6 @@ p {
 }
 
 .mobile-menu__address,
-.mobile-menu__contact-links a,
 .mobile-menu__social a {
   color: var(--mobile-ink);
   text-decoration: none;
@@ -1637,22 +1644,15 @@ p {
 }
 
 .mobile-menu__address:hover,
-.mobile-menu__contact-links a:hover,
 .mobile-menu__social a:hover {
   opacity: 0.65;
 }
 
-.mobile-menu__contact-links,
 .mobile-menu__social {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.35rem;
-}
-
-.mobile-menu__social {
   flex-direction: row;
   flex-wrap: wrap;
+  align-items: flex-start;
   gap: 0.75rem 1.15rem;
 }
 
@@ -1668,66 +1668,51 @@ p {
   opacity: 0.7;
 }
 
-.mobile-menu__cta {
-  margin-top: 2.35rem;
-  padding-top: 0;
+/* Footer-style contact: label above value, stacked — no pills */
+.mobile-menu__channels {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-  align-items: center;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.mobile-menu__cta-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  min-height: 2.35rem;
-  padding: 0.55rem 1.15rem;
-  border-radius: 999px;
-  background: transparent;
-  color: #fff;
-  font-size: 0.875rem;
+.mobile-menu__channel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+}
+
+.mobile-menu__channel-label {
+  margin: 0;
+  font-size: 0.72rem;
   font-weight: 500;
-  letter-spacing: 0.04em;
-  text-decoration: none;
-  text-transform: none;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mobile-muted);
 }
 
-.mobile-menu__cta-btn--with-icon {
-  padding-inline: 1rem 1.2rem;
+.mobile-menu__channel-value {
+  color: var(--mobile-ink);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: 1.45;
 }
 
-.mobile-menu__cta-btn .nav-contact__icon {
-  width: 1.05rem;
-  height: 1.05rem;
+.mobile-menu__channel-value:hover {
+  opacity: 0.65;
 }
 
-.mobile-menu__cta-btn:hover,
-.mobile-menu__cta-btn:focus-visible {
-  outline: none;
-}
-
-.mobile-menu__cta .glare-hover {
-  background: #0076dd !important;
-  border-color: #0076dd !important;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-.mobile-menu__cta .glare-hover.nav-contact-glare--whatsapp {
-  background: #25d366 !important;
-  border-color: #25d366 !important;
-}
-
-.mobile-menu__cta .glare-hover.nav-contact-glare--wechat {
-  background: #07c160 !important;
-  border-color: #07c160 !important;
-}
-
-.mobile-menu__cta .glare-hover,
-.mobile-menu__cta .click-spark {
-  width: fit-content;
+/* Hide floating About while the mobile menu owns the screen */
+body.is-mobile-menu-open .about-case-demo__about-btn {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 /*
@@ -3158,16 +3143,9 @@ p {
 
 .about-case-demo__pair {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--shell-gutter);
-}
-
-@media (min-width: 800px) {
-  .about-case-demo__pair {
-    grid-template-columns: 1fr 1fr;
-    /* Side-by-side pairs sit tighter than row gap */
-    gap: calc(var(--shell-gutter) * 0.35);
-  }
+  /* Keep 2-up on phone — don’t collapse to a single column */
+  grid-template-columns: 1fr 1fr;
+  gap: calc(var(--shell-gutter) * 0.35);
 }
 
 .about-case-demo__panel {
@@ -3250,47 +3228,18 @@ p {
   font-weight: 600;
 }
 
-.about-case-demo__meta {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem 1rem;
-  margin: 2.5rem 0 0;
-}
-
-.about-case-demo__meta-block h3 {
-  margin: 0 0 0.25rem;
-  color: #767676;
-  font-family: var(--font-sans);
-  font-size: 0.8125rem;
-  font-weight: 400;
-}
-
-.about-case-demo__meta-block ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.about-case-demo__meta-block li,
-.about-case-demo__meta-block p {
-  margin: 0;
-  font-size: 0.875rem;
-  line-height: 1.4;
-}
-
-.about-case-demo__meta-block + .about-case-demo__meta-block {
-  margin-top: 0;
-}
-
-.about-case-demo__meta-col {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
 @media (max-width: 799px) {
   .about-case-demo__columns {
     overflow-x: visible;
+  }
+
+  /* Pentagram phone: bottom-center, clear of Safari URL / home bar */
+  .about-case-demo__about-btn {
+    top: auto !important;
+    right: auto !important;
+    left: 50%;
+    bottom: calc(3.35rem + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
   }
 
   .about-case-demo.is-about-open .about-case-demo__media-col {
@@ -3303,41 +3252,62 @@ p {
   .about-case-demo__panel {
     position: fixed;
     inset: 0;
-    z-index: 50;
+    /* Above site header — open sheet owns the full phone chrome */
+    z-index: 120;
     flex: none !important;
     width: 100% !important;
     max-width: none !important;
     height: 100% !important;
+    height: 100dvh !important;
     min-height: 100% !important;
+    min-height: 100dvh !important;
     margin-right: 0 !important;
     padding-left: 0;
     background: #fff;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
     top: 0 !important;
     transform: translateX(100%);
   }
 
+  /*
+   * Must beat desktop `.is-about-open { overflow: visible }` —
+   * otherwise the sheet can’t scroll and touch moves the page behind.
+   */
   .about-case-demo.is-about-open .about-case-demo__panel {
     transform: translateX(0);
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
   }
 
   .about-case-demo:not(.is-about-open) .about-case-demo__panel {
     pointer-events: none;
+    overflow: hidden !important;
   }
 
   .about-case-demo__panel-inner {
     width: 100%;
     min-height: 100%;
-    padding: calc(var(--header-offset) + 3.25rem) var(--shell-gutter) 3rem;
+    /*
+     * Full-bleed sheet: only notch safe-area on top (no header gap).
+     * Bottom pad clears the raised About toggle + browser chrome.
+     */
+    padding: calc(env(safe-area-inset-top, 0px) + 0.85rem) var(--shell-gutter)
+      calc(7.5rem + env(safe-area-inset-bottom, 0px));
   }
 
   .about-case-demo__panel-close {
-    display: inline-block;
+    display: none;
   }
 
-  .about-case-demo__meta {
-    grid-template-columns: 1fr;
+  .about-case-demo__panel-copy {
+    font-size: 1rem;
+    line-height: 1.45;
+  }
+
+  .about-case-demo__panel-copy p:first-child {
+    margin-top: 0;
   }
 }
 

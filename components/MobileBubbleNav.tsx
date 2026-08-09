@@ -3,18 +3,11 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
-import { ClickSpark } from "@/components/ClickSpark";
-import { EmailIcon, WeChatIcon, WhatsAppIcon } from "@/components/ContactChannelIcons";
-import { GlareHover, GLARE_WIPE_MS } from "@/components/GlareHover";
 import {
-  contactCta,
-  contactInfo,
+  footerChannels,
   mobileNavLinks,
   mobileSocialLinks,
   officeInfo,
-  weChatCta,
-  whatsAppCta,
-  whatsAppPhone,
 } from "@/content/nav";
 
 type MobileBubbleNavProps = {
@@ -51,17 +44,14 @@ export function MobileBubbleNav({ open, onNavigate }: MobileBubbleNavProps) {
     const blocks = Array.from(
       root.querySelectorAll<HTMLElement>("[data-mobile-anim='block']"),
     );
-    const cta = root.querySelector<HTMLElement>("[data-mobile-anim='cta']");
-    const targets = [...links, ...blocks, cta].filter(Boolean) as HTMLElement[];
+    const targets = [...links, ...blocks];
 
     gsap.killTweensOf(targets);
 
     if (open) {
       gsap.set(links, { y: 22, autoAlpha: 0 });
       gsap.set(blocks, { y: 18, autoAlpha: 0 });
-      if (cta) gsap.set(cta, { y: 16, autoAlpha: 0 });
 
-      // Wait for vertical columns to drop, then cascade content
       gsap.to(links, {
         y: 0,
         autoAlpha: 1,
@@ -78,15 +68,6 @@ export function MobileBubbleNav({ open, onNavigate }: MobileBubbleNavProps) {
         ease: "power3.out",
         delay: 0.56,
       });
-      if (cta) {
-        gsap.to(cta, {
-          y: 0,
-          autoAlpha: 1,
-          duration: 0.4,
-          ease: "power3.out",
-          delay: 0.74,
-        });
-      }
       return;
     }
 
@@ -132,10 +113,24 @@ export function MobileBubbleNav({ open, onNavigate }: MobileBubbleNavProps) {
         </div>
 
         <div className="mobile-menu__block" data-mobile-anim="block">
-          <p className="mobile-menu__eyebrow">{contactInfo.eyebrow}</p>
-          <div className="mobile-menu__contact-links">
-            <a href={contactInfo.emailHref}>{contactInfo.email}</a>
-          </div>
+          <p className="mobile-menu__eyebrow">Contact</p>
+          <ul className="mobile-menu__channels">
+            {footerChannels.map((row) => (
+              <li key={row.label} className="mobile-menu__channel">
+                <span className="mobile-menu__channel-label">{row.label}</span>
+                <a
+                  href={row.href}
+                  className="mobile-menu__channel-value"
+                  {...(row.external
+                    ? { target: "_blank", rel: "noopener noreferrer" }
+                    : {})}
+                  onClick={onNavigate}
+                >
+                  {row.value}
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
 
         <div className="mobile-menu__block" data-mobile-anim="block">
@@ -154,76 +149,6 @@ export function MobileBubbleNav({ open, onNavigate }: MobileBubbleNavProps) {
             ))}
           </div>
         </div>
-      </div>
-
-      <div className="mobile-menu__cta" data-mobile-anim="cta">
-        <ClickSpark>
-          <GlareHover
-            width="auto"
-            height="auto"
-            background="#25D366"
-            borderRadius="999px"
-            borderColor="#25D366"
-            glareColor="#ffffff"
-            glareOpacity={0.55}
-            transitionDuration={GLARE_WIPE_MS}
-            className="nav-contact-glare--whatsapp"
-          >
-            <a
-              href={whatsAppCta.href}
-              className="mobile-menu__cta-btn mobile-menu__cta-btn--with-icon"
-              target={whatsAppPhone ? "_blank" : undefined}
-              rel={whatsAppPhone ? "noopener noreferrer" : undefined}
-              onClick={onNavigate}
-            >
-              <WhatsAppIcon className="nav-contact__icon" />
-              {whatsAppCta.label}
-            </a>
-          </GlareHover>
-        </ClickSpark>
-        <ClickSpark>
-          <GlareHover
-            width="auto"
-            height="auto"
-            background="#07C160"
-            borderRadius="999px"
-            borderColor="#07C160"
-            glareColor="#ffffff"
-            glareOpacity={0.55}
-            transitionDuration={GLARE_WIPE_MS}
-            className="nav-contact-glare--wechat"
-          >
-            <a
-              href={weChatCta.href}
-              className="mobile-menu__cta-btn mobile-menu__cta-btn--with-icon"
-              onClick={onNavigate}
-            >
-              <WeChatIcon className="nav-contact__icon" />
-              {weChatCta.label}
-            </a>
-          </GlareHover>
-        </ClickSpark>
-        <ClickSpark>
-          <GlareHover
-            width="auto"
-            height="auto"
-            background="#0076dd"
-            borderRadius="999px"
-            borderColor="#0076dd"
-            glareColor="#ffffff"
-            glareOpacity={0.55}
-            transitionDuration={GLARE_WIPE_MS}
-          >
-            <Link
-              href={contactCta.href}
-              className="mobile-menu__cta-btn mobile-menu__cta-btn--with-icon"
-              onClick={onNavigate}
-            >
-              <EmailIcon className="nav-contact__icon" />
-              {contactCta.label}
-            </Link>
-          </GlareHover>
-        </ClickSpark>
       </div>
     </div>
   );
