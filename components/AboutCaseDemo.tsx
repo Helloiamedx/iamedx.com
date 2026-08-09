@@ -375,7 +375,7 @@ export function AboutCaseDemo() {
                     tabIndex={btnReady ? 0 : -1}
                     onClick={toggleOpen}
                   >
-                    <span>About the project</span>
+                    <span>About The Project</span>
                     <span
                       className="about-case-demo__about-icon"
                       aria-hidden="true"

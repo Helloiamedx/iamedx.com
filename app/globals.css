@@ -3237,9 +3237,23 @@ body.is-mobile-menu-open .about-case-demo__about-pin {
   font-family: var(--font-sans);
   font-size: 1.375rem;
   font-weight: 600;
-  letter-spacing: -0.022em;
+  letter-spacing: 0.04em;
   line-height: 1.25;
+  text-transform: uppercase;
   color: #1d1d1f;
+}
+
+/*
+ * Desktop: optical top align with first media frame.
+ * Box tops already match; pull caps up through half-leading / ascent.
+ */
+@media (min-width: 800px) {
+  .about-case-demo__panel-copy
+    > .about-case-demo__panel-block:first-child
+    .about-case-demo__panel-title {
+    line-height: 1;
+    margin-top: -0.18em;
+  }
 }
 
 .about-case-demo__panel-copy p {
