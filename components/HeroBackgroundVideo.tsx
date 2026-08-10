@@ -33,7 +33,6 @@ export function HeroBackgroundVideo() {
       className="hero__video"
       src={src}
       preload="metadata"
-      fetchPriority="low"
     />
   );
 }

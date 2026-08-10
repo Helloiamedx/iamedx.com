@@ -370,7 +370,6 @@ export function ProjectCaseDemo() {
             className="project-case-demo__hero-video"
             src={asset("videos/home-hero-video.mp4")}
             preload="metadata"
-            fetchPriority="low"
           />
           <div className="project-case-demo__hero-scrim" />
         </div>
