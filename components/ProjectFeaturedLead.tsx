@@ -7,8 +7,6 @@ type ProjectFeaturedLeadProps = {
 };
 
 export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
-  const categories = project.categories.join(" · ");
-
   return (
     <article className="project-featured">
       <Link
@@ -28,7 +26,15 @@ export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
         <div className="project-window__meta">
           <h2 className="project-window__title">{project.title}</h2>
           <p className="project-window__tagline">{project.tagline}</p>
-          <p className="project-window__categories">{categories}</p>
+          {project.categories.length > 0 ? (
+            <ul className="project-window__chips project-window__chips--end" aria-label="Categories">
+              {project.categories.map((tag) => (
+                <li key={tag}>
+                  <span className="project-type-chip">{tag}</span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </div>
       </Link>
     </article>

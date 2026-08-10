@@ -18,7 +18,9 @@ export function ProjectFilter({ active, activeIp }: ProjectFilterProps) {
 
       {activeIp ? (
         <p className="project-involvement__ip">
-          <Link href="/projects">Clear IP filter</Link>
+          <Link href="/projects" scroll={false}>
+            Clear IP filter
+          </Link>
         </p>
       ) : null}
 
@@ -43,6 +45,7 @@ export function ProjectFilter({ active, activeIp }: ProjectFilterProps) {
               <Link
                 key={item.id}
                 href={href}
+                scroll={false}
                 role="listitem"
                 className={
                   isActive

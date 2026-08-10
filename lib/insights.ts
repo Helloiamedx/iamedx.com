@@ -159,3 +159,26 @@ export function getInsightTagLabels(tagSlugs: string[]) {
     .map((slug) => findInsightTag(slug)?.label ?? slug)
     .filter(Boolean);
 }
+
+/** Related strip: other insights, stable shuffle by seed, capped. */
+export function getRelatedInsights(
+  excludeSlugs: string[],
+  limit = 2,
+): InsightMeta[] {
+  const exclude = new Set(excludeSlugs);
+  const pool = getAllInsights().filter((insight) => !exclude.has(insight.slug));
+  const ranked = [...pool].sort((a, b) => {
+    const ha = hashSlug(a.slug);
+    const hb = hashSlug(b.slug);
+    return ha - hb;
+  });
+  return ranked.slice(0, limit);
+}
+
+function hashSlug(slug: string) {
+  let h = 0;
+  for (let i = 0; i < slug.length; i++) {
+    h = (h * 31 + slug.charCodeAt(i)) >>> 0;
+  }
+  return h;
+}

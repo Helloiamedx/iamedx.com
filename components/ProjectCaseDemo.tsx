@@ -5,11 +5,8 @@ import { useLenis } from "lenis/react";
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ClickSpark } from "@/components/ClickSpark";
-import { GlareHover, GLARE_WIPE_MS } from "@/components/GlareHover";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
 import { asset } from "@/lib/assets";
-
-const ABOUT_BTN_FILL = "rgba(232, 232, 232, 0.82)";
 
 const TAGS = [
   "Brand Identity",
@@ -120,6 +117,20 @@ function readShellGutter() {
   return readCssPx("--shell-gutter", 24);
 }
 
+/** Keep in sync with `--about-push-ms` in globals.css */
+function readAboutPushMs() {
+  if (typeof window === "undefined") return 900;
+  const raw = getComputedStyle(document.documentElement)
+    .getPropertyValue("--about-push-ms")
+    .trim();
+  const parsed = Number.parseFloat(raw);
+  return Number.isFinite(parsed) ? parsed : 900;
+}
+
+function easeInOutCubic(t: number) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
 function Frame({
   src,
   alt,
@@ -130,13 +141,13 @@ function Frame({
   ratio: string;
 }) {
   return (
-    <div className="about-case-demo__frame" style={{ paddingBottom: ratio }}>
+    <div className="project-case-demo__frame" style={{ paddingBottom: ratio }}>
       <Image
         src={src}
         alt={alt}
         fill
         sizes="(max-width: 800px) 100vw, 70vw"
-        className="about-case-demo__img"
+        className="project-case-demo__img"
         draggable={false}
       />
     </div>
@@ -145,9 +156,9 @@ function Frame({
 
 /**
  * Living Pentagram-style case layout (mounted on `/projects/[slug]`):
- * video hero with left-stacked overlay, image weave, About panel toggle.
+ * video hero with left-stacked overlay, image weave, case panel toggle.
  */
-export function AboutCaseDemo() {
+export function ProjectCaseDemo() {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [btnReady, setBtnReady] = useState(false);
@@ -162,15 +173,19 @@ export function AboutCaseDemo() {
   const lenisRef = useRef(lenis);
   lenisRef.current = lenis;
 
-  const isMobileAbout = () =>
+  const isMobilePanel = () =>
     typeof window !== "undefined" &&
     window.matchMedia("(max-width: 799px)").matches;
 
-  const scrollCopyToStart = () => {
+  const scrollCopyToStart = (opts?: { smooth?: boolean }) => {
     const panel = panelRef.current;
+    const reduceMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const smooth = Boolean(opts?.smooth) && !reduceMotion;
     /* Mobile sheet scrolls itself — don’t move the page under it */
-    if (isMobileAbout()) {
-      panel?.scrollTo({ top: 0, behavior: "auto" });
+    if (isMobilePanel()) {
+      panel?.scrollTo({ top: 0, behavior: smooth ? "smooth" : "auto" });
       panelInnerRef.current?.scrollTo({ top: 0, behavior: "auto" });
       return;
     }
@@ -180,11 +195,26 @@ export function AboutCaseDemo() {
     const target = panel ?? body;
     const lenisNow = lenisRef.current;
     if (lenisNow) {
-      lenisNow.scrollTo(target, { offset, immediate: true });
+      if (smooth) {
+        lenisNow.scrollTo(target, {
+          offset,
+          duration: readAboutPushMs() / 1000,
+          easing: easeInOutCubic,
+          onComplete: () => {
+            /* Layout push may drift the target a few px — lock final spot */
+            lenisNow.scrollTo(target, { offset, immediate: true });
+          },
+        });
+      } else {
+        lenisNow.scrollTo(target, { offset, immediate: true });
+      }
     } else {
       const y =
         window.scrollY + target.getBoundingClientRect().top + offset;
-      window.scrollTo({ top: Math.max(0, y), behavior: "auto" });
+      window.scrollTo({
+        top: Math.max(0, y),
+        behavior: smooth ? "smooth" : "auto",
+      });
     }
     panelInnerRef.current?.scrollTo({ top: 0, behavior: "auto" });
   };
@@ -198,7 +228,8 @@ export function AboutCaseDemo() {
   /*
    * Center-X, prefer ~30px above the viewport bottom.
    * Top: clamp to contentTop + inset (gap under first frames, then stop).
-   * Bottom: cap by footer only (gap above footer).
+   * Bottom: rest in the pad under the last frame — never on the images,
+   * never into Related / footer.
    * Hero: hide once media top clears the pin slot — no loose hysteresis
    * that re-shows a flash over the video.
    */
@@ -210,7 +241,7 @@ export function AboutCaseDemo() {
     const sync = () => {
       const mediaRect = media.getBoundingClientRect();
       const panelRect = panelRef.current?.getBoundingClientRect();
-      const mobile = isMobileAbout();
+      const mobile = isMobilePanel();
       const contentTop = mediaRect.top;
       /* When open on desktop, taller of media vs copy defines the box */
       const contentBottom =
@@ -223,10 +254,20 @@ export function AboutCaseDemo() {
       const preferredTop = viewH - pinBottom - btnH;
       const inset = Math.max(readShellGutter(), 32);
       const minTop = contentTop + inset;
+      const relatedEl = document.querySelector(".project-detail__related");
+      const relatedTop =
+        relatedEl?.getBoundingClientRect().top ?? Number.POSITIVE_INFINITY;
       const footerEl = document.querySelector(".site-footer");
       const footerTop =
         footerEl?.getBoundingClientRect().top ?? Number.POSITIVE_INFINITY;
-      const maxTop = footerTop - inset - btnH;
+      const bodyBottom =
+        body?.getBoundingClientRect().bottom ?? Number.POSITIVE_INFINITY;
+      /*
+       * Hard stop in the gap under the last frame (body pad / Related),
+       * not on the images — do not clamp to contentBottom.
+       */
+      const bandBottom = Math.min(relatedTop, footerTop, bodyBottom);
+      const maxTop = bandBottom - inset - btnH;
 
       /* Mobile open sheet: park at preferred bottom so Close stays reachable */
       if (open && mobile) {
@@ -272,32 +313,33 @@ export function AboutCaseDemo() {
   }, [mounted, open]);
 
   /*
-   * On open: jump to copy line 1. Layout width change can trigger scroll
-   * anchoring and undo a single scrollTo — disable anchoring and re-apply.
+   * On open: ease page to copy line 1 (same duration as the panel push).
+   * Disable scroll anchoring so width change doesn’t fight Lenis mid-tween.
    */
   useLayoutEffect(() => {
     if (!open) return;
     const root = document.documentElement;
     const prevAnchor = root.style.overflowAnchor;
     root.style.overflowAnchor = "none";
-    scrollCopyToStart();
-    let id2 = 0;
-    const id1 = requestAnimationFrame(() => {
-      scrollCopyToStart();
-      id2 = requestAnimationFrame(() => {
-        scrollCopyToStart();
-        root.style.overflowAnchor = prevAnchor;
+    let rafInner = 0;
+    const rafOuter = requestAnimationFrame(() => {
+      rafInner = requestAnimationFrame(() => {
+        scrollCopyToStart({ smooth: true });
       });
     });
+    const restoreId = window.setTimeout(() => {
+      root.style.overflowAnchor = prevAnchor;
+    }, readAboutPushMs() + 80);
     return () => {
-      cancelAnimationFrame(id1);
-      cancelAnimationFrame(id2);
+      cancelAnimationFrame(rafOuter);
+      cancelAnimationFrame(rafInner);
+      window.clearTimeout(restoreId);
       root.style.overflowAnchor = prevAnchor;
     };
   }, [open]);
 
   useEffect(() => {
-    if (!open || !isMobileAbout()) return;
+    if (!open || !isMobilePanel()) return;
     const scrollY = window.scrollY;
     const { body } = document;
     const prev = {
@@ -321,28 +363,28 @@ export function AboutCaseDemo() {
   }, [open]);
 
   return (
-    <div className={`about-case-demo${open ? " is-about-open" : ""}`}>
-      <section className="about-case-demo__hero" aria-label="Univers demo">
-        <div className="about-case-demo__hero-media" aria-hidden="true">
+    <div className={`project-case-demo${open ? " is-panel-open" : ""}`}>
+      <section className="project-case-demo__hero" aria-label="Univers demo">
+        <div className="project-case-demo__hero-media" aria-hidden="true">
           <ProtectedVideo
-            className="about-case-demo__hero-video"
+            className="project-case-demo__hero-video"
             src={asset("videos/home-hero-video.mp4")}
             preload="metadata"
             fetchPriority="low"
           />
-          <div className="about-case-demo__hero-scrim" />
+          <div className="project-case-demo__hero-scrim" />
         </div>
 
-        <div className="about-case-demo__hero-copy">
-          <h1 className="about-case-demo__title">Univers</h1>
-          <p className="about-case-demo__summary">
+        <div className="project-case-demo__hero-copy">
+          <h1 className="project-case-demo__title">Univers</h1>
+          <p className="project-case-demo__summary">
             Strategy, brand system, and website for the world’s most
             comprehensive decarbonisation platform.
           </p>
-          <ul className="about-case-demo__tags">
+          <ul className="project-case-demo__tags">
             {TAGS.map((tag) => (
               <li key={tag}>
-                <span className="about-case-demo__tag">{tag}</span>
+                <span className="project-case-demo__tag">{tag}</span>
               </li>
             ))}
           </ul>
@@ -353,24 +395,14 @@ export function AboutCaseDemo() {
         ? createPortal(
             <div
               ref={pinRef}
-              className={`about-case-demo__about-pin${btnReady ? " is-ready" : ""}`}
+              className={`project-case-demo__toggle-pin${btnReady ? " is-ready" : ""}`}
               style={{ top: btnTop }}
             >
               <ClickSpark>
-                <GlareHover
-                  width="auto"
-                  height="auto"
-                  background={ABOUT_BTN_FILL}
-                  borderRadius="999px"
-                  borderColor={ABOUT_BTN_FILL}
-                  glareColor="#ffffff"
-                  glareOpacity={0.55}
-                  transitionDuration={GLARE_WIPE_MS}
-                  className="about-case-demo__about-glare"
-                >
+                <div className="project-case-demo__toggle-glass">
                   <button
                     type="button"
-                    className={`about-case-demo__about-btn${open ? " is-open" : ""}`}
+                    className={`project-case-demo__toggle${open ? " is-open" : ""}`}
                     aria-expanded={open}
                     aria-controls={panelId}
                     tabIndex={btnReady ? 0 : -1}
@@ -378,34 +410,34 @@ export function AboutCaseDemo() {
                   >
                     <span>About The Project</span>
                     <span
-                      className="about-case-demo__about-icon"
+                      className="project-case-demo__toggle-icon"
                       aria-hidden="true"
                     >
                       +
                     </span>
                   </button>
-                </GlareHover>
+                </div>
               </ClickSpark>
             </div>,
             document.body,
           )
         : null}
 
-      <div ref={bodyRef} className="about-case-demo__body">
-        <div className="about-case-demo__columns">
-          <div className="about-case-demo__media-col">
-            <div ref={mediaStackRef} className="about-case-demo__media-stack">
+      <div ref={bodyRef} className="project-case-demo__body">
+        <div className="project-case-demo__columns">
+          <div className="project-case-demo__media-col">
+            <div ref={mediaStackRef} className="project-case-demo__media-stack">
               {MEDIA.map((item, index) => {
                 if (item.kind === "pair") {
                   return (
-                    <div key={`pair-${index}`} className="about-case-demo__pair">
+                    <div key={`pair-${index}`} className="project-case-demo__pair">
                       <Frame {...item.left} />
                       <Frame {...item.right} />
                     </div>
                   );
                 }
                 return (
-                  <div key={`full-${index}`} className="about-case-demo__full">
+                  <div key={`full-${index}`} className="project-case-demo__full">
                     <Frame {...item} />
                   </div>
                 );
@@ -416,22 +448,22 @@ export function AboutCaseDemo() {
           <aside
             ref={panelRef}
             id={panelId}
-            className="about-case-demo__panel"
+            className="project-case-demo__panel"
             aria-hidden={!open}
             {...(!open ? { inert: true } : {})}
           >
-            <div ref={panelInnerRef} className="about-case-demo__panel-inner">
+            <div ref={panelInnerRef} className="project-case-demo__panel-inner">
               <button
                 type="button"
-                className="about-case-demo__panel-close"
+                className="project-case-demo__panel-close"
                 onClick={() => setOpen(false)}
               >
                 Close
               </button>
 
-              <div className="about-case-demo__panel-copy">
-                <section className="about-case-demo__panel-block">
-                  <h3 className="about-case-demo__panel-title">
+              <div className="project-case-demo__panel-copy">
+                <section className="project-case-demo__panel-block">
+                  <h3 className="project-case-demo__panel-title">
                     Unity Through Connection
                   </h3>
                   <p>
@@ -451,8 +483,8 @@ export function AboutCaseDemo() {
                     Starbucks, and HSBC.
                   </p>
                 </section>
-                <section className="about-case-demo__panel-block">
-                  <h3 className="about-case-demo__panel-title">The Challenge</h3>
+                <section className="project-case-demo__panel-block">
+                  <h3 className="project-case-demo__panel-title">The Challenge</h3>
                   <p>
                     Formerly Envision Digital, the company partnered with
                     Pentagram to create a future-facing brand that matched the
@@ -462,8 +494,8 @@ export function AboutCaseDemo() {
                     platform in a clear, compelling, and scalable way.
                   </p>
                 </section>
-                <section className="about-case-demo__panel-block">
-                  <h3 className="about-case-demo__panel-title">Strategy</h3>
+                <section className="project-case-demo__panel-block">
+                  <h3 className="project-case-demo__panel-title">Strategy</h3>
                   <p>
                     At the heart of Univers is a simple principle: connection
                     generates energy. Previously isolated technologies are brought
@@ -477,8 +509,8 @@ export function AboutCaseDemo() {
                     toward a shared goal.
                   </p>
                 </section>
-                <section className="about-case-demo__panel-block">
-                  <h3 className="about-case-demo__panel-title">Identity</h3>
+                <section className="project-case-demo__panel-block">
+                  <h3 className="project-case-demo__panel-title">Identity</h3>
                   <p>
                     The identity translates this principle into a graphic language
                     inspired by the structure of the universe. At the micro scale,
@@ -492,8 +524,8 @@ export function AboutCaseDemo() {
                     and immersive environments.
                   </p>
                 </section>
-                <section className="about-case-demo__panel-block">
-                  <h3 className="about-case-demo__panel-title">
+                <section className="project-case-demo__panel-block">
+                  <h3 className="project-case-demo__panel-title">
                     Symbol and Wordmark
                   </h3>
                   <p>
@@ -509,8 +541,8 @@ export function AboutCaseDemo() {
                     brief.
                   </p>
                 </section>
-                <section className="about-case-demo__panel-block">
-                  <h3 className="about-case-demo__panel-title">Visual System</h3>
+                <section className="project-case-demo__panel-block">
+                  <h3 className="project-case-demo__panel-title">Visual System</h3>
                   <p>
                     The visual language extends across colour, imagery, and
                     motion. A neutral base palette grounds the brand, while
@@ -521,8 +553,8 @@ export function AboutCaseDemo() {
                     infinite.
                   </p>
                 </section>
-                <section className="about-case-demo__panel-block">
-                  <h3 className="about-case-demo__panel-title">
+                <section className="project-case-demo__panel-block">
+                  <h3 className="project-case-demo__panel-title">
                     Generative Design Tool
                   </h3>
                   <p>
@@ -534,8 +566,8 @@ export function AboutCaseDemo() {
                     visual language.
                   </p>
                 </section>
-                <section className="about-case-demo__panel-block">
-                  <h3 className="about-case-demo__panel-title">Outcome</h3>
+                <section className="project-case-demo__panel-block">
+                  <h3 className="project-case-demo__panel-title">Outcome</h3>
                   <p>
                     Univers positions decarbonisation as a coordinated effort
                     rather than a collection of isolated actions. Through

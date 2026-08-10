@@ -10,6 +10,7 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
 } from "react";
 import { createPortal, flushSync } from "react-dom";
 import { ClickSpark } from "@/components/ClickSpark";
@@ -28,6 +29,15 @@ import { asset } from "@/lib/assets";
 
 const CLOSE_DELAY_MS = 180;
 const CLOSE_ANIMATION_MS = 480;
+
+/** Avoid sticky :focus fill after mouse/touch click (keyboard still gets focus-visible). */
+function blurContactOnPointerDown(event: ReactPointerEvent<HTMLAnchorElement>) {
+  if (event.pointerType === "mouse" || event.pointerType === "touch") {
+    /* Defer blur so the click still fires */
+    const el = event.currentTarget;
+    requestAnimationFrame(() => el.blur());
+  }
+}
 /* Hold dimming until mega height is ~halfway collapsed, then fade opacity */
 const SCRIM_FADE_DELAY_MS = Math.round(CLOSE_ANIMATION_MS * 0.5);
 /* Curtain: 480ms + last-column stagger 210ms — keep frost off until done */
@@ -1048,6 +1058,7 @@ export function Header() {
                 className="nav-contact nav-contact--with-icon"
                 target={whatsAppPhone ? "_blank" : undefined}
                 rel={whatsAppPhone ? "noopener noreferrer" : undefined}
+                onPointerDown={blurContactOnPointerDown}
               >
                 <WhatsAppIcon className="nav-contact__icon" />
                 <span className="nav-contact__label">{whatsAppCta.label}</span>
@@ -1069,6 +1080,7 @@ export function Header() {
               <a
                 href={weChatCta.href}
                 className="nav-contact nav-contact--with-icon"
+                onPointerDown={blurContactOnPointerDown}
               >
                 <WeChatIcon className="nav-contact__icon" />
                 <span className="nav-contact__label">{weChatCta.label}</span>
@@ -1087,13 +1099,14 @@ export function Header() {
               transitionDuration={GLARE_WIPE_MS}
               className="nav-contact-glare"
             >
-              <Link
+              <a
                 href={contactCta.href}
                 className="nav-contact nav-contact--with-icon"
+                onPointerDown={blurContactOnPointerDown}
               >
                 <EmailIcon className="nav-contact__icon" />
                 <span className="nav-contact__label">{contactCta.label}</span>
-              </Link>
+              </a>
             </GlareHover>
           </ClickSpark>
         </div>

@@ -215,7 +215,7 @@ export const primaryNav: NavItem[] = [
 ];
 
 export const contactCta = {
-  href: "/contact",
+  href: "mailto:hi@iamedx.com",
   label: "Email",
 } as const;
 
@@ -223,8 +223,9 @@ export const contactCta = {
  * WhatsApp click-to-chat. Digits only with country code (no + / spaces).
  * Example: "8613812345678" → https://wa.me/8613812345678
  */
-export const whatsAppPhone = "2332616010";
-export const whatsAppDisplay = "(233) 261-6010";
+export const whatsAppPhone = "13322616010";
+/** NANP display with country code — +1 (NPA) NXX-XXXX */
+export const whatsAppDisplay = "+1 (332) 261-6010";
 
 export const whatsAppCta = {
   href: `https://wa.me/${whatsAppPhone}`,
@@ -260,7 +261,8 @@ export const contactInfo = {
 
 /** Phone — E.164 digits without + */
 export const phoneNumber = "8618867760045";
-export const phoneDisplay = "(086)18867760045";
+/** China mobile — +86 + 3-4-4 grouping */
+export const phoneDisplay = "(+86) 188 6776 0045";
 
 export const phoneCta = {
   href: `tel:+${phoneNumber}`,

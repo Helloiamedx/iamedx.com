@@ -57,6 +57,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           crossOrigin="anonymous"
           fetchPriority="high"
         />
+        <link
+          rel="preload"
+          href={asset("/fonts/SF-Pro-Display-Bold.woff2")}
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+          fetchPriority="high"
+        />
       </head>
       <body className="min-h-full flex flex-col">
         <SmoothScroll>

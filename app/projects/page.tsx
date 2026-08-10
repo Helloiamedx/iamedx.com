@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { FilterResults } from "@/components/FilterResults";
 import { ProjectFeaturedLead } from "@/components/ProjectFeaturedLead";
 import { ProjectFilter } from "@/components/ProjectFilter";
 import { ProjectMasonry } from "@/components/ProjectMasonry";
@@ -6,7 +7,6 @@ import { ProjectsHeroRoll } from "@/components/ProjectsHeroRoll";
 import { projectIps } from "@/content/nav";
 import {
   filterProjects,
-  getRelatedProjects,
   involvementFilters,
   projectsFeaturedLead,
   type Involvement,
@@ -50,39 +50,27 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
     : "all";
   const activeIp = isIp(params.ip) ? params.ip : null;
 
-  const showFeaturedLead = activeInvolvement === "all" && !activeIp;
-
+  /* Featured lead is fixed above the filter — never tied to filter results */
   const listed = filterProjects({
     involvement: activeInvolvement,
     ip: activeIp,
-  }).filter((p) => !(showFeaturedLead && p.slug === projectsFeaturedLead.slug));
+  }).filter((p) => p.slug !== projectsFeaturedLead.slug);
 
-  const related = getRelatedProjects(
-    [
-      ...listed.map((p) => p.slug),
-      ...(showFeaturedLead ? [projectsFeaturedLead.slug] : []),
-    ],
-    5,
-  );
+  const filterKey = activeIp
+    ? `${activeInvolvement}:${activeIp}`
+    : activeInvolvement;
 
   return (
     <main className="projects-page">
       <ProjectsHeroRoll />
 
       <section className="section projects-body">
+        <ProjectFeaturedLead project={projectsFeaturedLead} />
         <ProjectFilter active={activeInvolvement} activeIp={activeIp} />
-        {showFeaturedLead ? (
-          <ProjectFeaturedLead project={projectsFeaturedLead} />
-        ) : null}
-        <ProjectMasonry projects={listed} />
+        <FilterResults key={filterKey}>
+          <ProjectMasonry projects={listed} />
+        </FilterResults>
       </section>
-
-      {related.length > 0 ? (
-        <section className="section projects-related">
-          <h2 className="projects-related__title">Related</h2>
-          <ProjectMasonry projects={related} />
-        </section>
-      ) : null}
     </main>
   );
 }

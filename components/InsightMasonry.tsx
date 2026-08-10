@@ -10,18 +10,26 @@ import {
 type InsightMasonryProps = {
   insights: InsightMeta[];
   emptyLabel?: string;
+  /** `tri` = index filter (3-col, items stay 1/3). `related` = 2-col detail strip. */
+  layout?: "tri" | "related";
 };
 
 export function InsightMasonry({
   insights,
   emptyLabel = "No insights with this tag yet.",
+  layout = "tri",
 }: InsightMasonryProps) {
   if (insights.length === 0) {
     return <p className="empty-state">{emptyLabel}</p>;
   }
 
+  const listClass =
+    layout === "related"
+      ? "insight-showcase insight-showcase--related"
+      : "insight-showcase insight-showcase--tri";
+
   return (
-    <ul className="insight-showcase">
+    <ul className={listClass}>
       {insights.map((insight) => {
         /* Showcase cards carry a single Insights mega tag */
         const tagLabel = getInsightTagLabels(insight.tags).at(0) ?? null;

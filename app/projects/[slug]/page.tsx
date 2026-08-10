@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { AboutCaseDemo } from "@/components/AboutCaseDemo";
-import { getProjectBySlug, projects } from "@/content/projects";
+import { ProjectCaseDemo } from "@/components/ProjectCaseDemo";
+import { ProjectMasonry } from "@/components/ProjectMasonry";
+import {
+  getProjectBySlug,
+  getRelatedProjects,
+  projects,
+} from "@/content/projects";
 
 type ProjectPageProps = {
   params: Promise<{ slug: string }>;
@@ -28,10 +33,18 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   const project = getProjectBySlug(slug);
   if (!project) notFound();
 
+  const related = getRelatedProjects([project.slug], 2);
+
   return (
     <main className="project-detail">
       {/* Living case-detail template — project-aware fields wired later */}
-      <AboutCaseDemo key={slug} />
+      <ProjectCaseDemo key={slug} />
+      {related.length > 0 ? (
+        <section className="section projects-related project-detail__related">
+          <h2 className="projects-related__title">Related</h2>
+          <ProjectMasonry projects={related} />
+        </section>
+      ) : null}
     </main>
   );
 }

@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ClientLogoMarquee } from "@/components/ClientLogoMarquee";
+import { HeroBackgroundVideo } from "@/components/HeroBackgroundVideo";
 import { HeroHeadline } from "@/components/HeroHeadline";
-import { ProtectedVideo } from "@/components/ProtectedVideo";
 import { getFeaturedProjects } from "@/content/projects";
 import { getAllInsights } from "@/lib/insights";
-import { asset } from "@/lib/assets";
 
 export default function HomePage() {
   const featured = getFeaturedProjects(3);
@@ -14,16 +14,12 @@ export default function HomePage() {
     <main>
       <section className="hero">
         <div className="hero__media" aria-hidden="true">
-          <ProtectedVideo
-            className="hero__video"
-            src={asset("videos/home-hero-video.mp4")}
-            preload="metadata"
-            fetchPriority="low"
-          />
+          <HeroBackgroundVideo />
         </div>
         <div className="hero__content">
           <HeroHeadline />
         </div>
+        <ClientLogoMarquee />
       </section>
 
       <section className="section">

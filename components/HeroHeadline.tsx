@@ -135,8 +135,8 @@ export function HeroHeadline() {
     };
   }, [index]);
 
-  /* Fold-in entrance — wait until the random opening keyword is chosen. */
-  useEffect(() => {
+  /* Fold-in entrance — start immediately; never stall on fonts/CDN. */
+  useLayoutEffect(() => {
     if (!ready) return undefined;
 
     const root = rootRef.current;
@@ -151,50 +151,42 @@ export function HeroHeadline() {
     const reduceMotion =
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-    const play = () => {
+    if (reduceMotion) {
+      gsap.set(pieces, { opacity: 1, rotateX: 0 });
+      setComplete(true);
+      return undefined;
+    }
+
+    gsap.set(pieces, {
+      opacity: 0,
+      rotateX: -92,
+      transformOrigin: "50% 0%",
+      transformPerspective: 700,
+    });
+
+    const tween = gsap.to(pieces, {
+      opacity: 1,
+      rotateX: 0,
+      duration: 0.55,
+      stagger: 0.035,
+      ease: "power3.out",
+      onComplete: () => {
+        if (!cancelled) setComplete(true);
+      },
+    });
+
+    /* Floor if GSAP stalls — keep short so the hero never sits empty */
+    const safety = window.setTimeout(() => {
       if (cancelled) return;
-      if (reduceMotion) {
-        gsap.set(pieces, { opacity: 1, rotateX: 0 });
-        setComplete(true);
-        return;
-      }
+      tween.kill();
+      gsap.set(pieces, { opacity: 1, rotateX: 0 });
+      setComplete(true);
+    }, 900);
 
-      gsap.set(pieces, {
-        opacity: 0,
-        rotateX: -92,
-        transformOrigin: "50% 0%",
-        transformPerspective: 700,
-      });
-
-      gsap.to(pieces, {
-        opacity: 1,
-        rotateX: 0,
-        duration: 0.55,
-        stagger: 0.035,
-        ease: "power3.out",
-        onComplete: () => setComplete(true),
-      });
-    };
-
-    const wait = async () => {
-      if (document.fonts?.ready) {
-        try {
-          await document.fonts.ready;
-        } catch {
-          /* ignore */
-        }
-      }
-      await new Promise<void>((resolve) => {
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => resolve());
-        });
-      });
-      play();
-    };
-
-    void wait();
     return () => {
       cancelled = true;
+      window.clearTimeout(safety);
+      tween.kill();
       gsap.killTweensOf(pieces);
     };
   }, [ready]);

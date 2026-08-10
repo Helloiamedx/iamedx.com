@@ -1,6 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { Project } from "@/content/projects";
+import {
+  getInvolvementLabel,
+  type Project,
+} from "@/content/projects";
 
 type ProjectMasonryProps = {
   projects: Project[];
@@ -19,7 +22,7 @@ export function ProjectMasonry({
     <ul className="project-showcase">
       {projects.map((project) => {
         const tagline = project.tagline ?? project.summary;
-        const categories = project.tags.join(", ");
+        const tag = getInvolvementLabel(project.involvement);
 
         return (
           <li key={project.slug} className="project-showcase__item">
@@ -38,9 +41,11 @@ export function ProjectMasonry({
               </div>
               <div className="project-window__meta project-window__meta--stack">
                 <h3 className="project-window__title">{project.title}</h3>
-                {categories ? (
-                  <p className="project-window__categories">{categories}</p>
-                ) : null}
+                <ul className="project-window__chips" aria-label="Categories">
+                  <li>
+                    <span className="project-type-chip">{tag}</span>
+                  </li>
+                </ul>
                 <p className="project-window__tagline">{tagline}</p>
               </div>
             </Link>

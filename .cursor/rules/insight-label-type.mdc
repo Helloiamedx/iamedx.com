@@ -9,6 +9,7 @@ alwaysApply: false
 Shared tokens on `.insights-page` and `.insight-detail`:
 
 - `--insight-label-tracking: 0.08em` — date, article type, chips, filter pills, Insights eyebrow
+- `--insight-label-size: clamp(0.625rem, 0.58rem + 0.2vw, 0.75rem)` — same surfaces
 - `--insight-meta-gap: 1.75rem` — space between date and type on the detail header
 
-Do not invent a different letter-spacing for these uppercase micro-labels on one Insights surface and another. Change the token once; all consumers follow.
+Do not invent a different letter-spacing or font-size for these uppercase micro-labels on one Insights surface and another. Change the tokens once; all consumers follow.

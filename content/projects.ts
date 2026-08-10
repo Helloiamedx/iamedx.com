@@ -33,6 +33,18 @@ export const involvementFilters: {
   { id: "specialized", label: "Specialized Services" },
 ];
 
+/** Card chip + filter pill label for an involvement id */
+export function getInvolvementLabel(id: Involvement): string {
+  return (
+    involvementFilters.find((item) => item.id === id)?.label ?? id
+  );
+}
+
+/** Tags always mirror involvement — Brand / Travel chips are retired */
+export function involvementTags(id: Involvement): string[] {
+  return [getInvolvementLabel(id)];
+}
+
 export type Project = {
   slug: string;
   title: string;
@@ -40,8 +52,9 @@ export type Project = {
   /** IP franchise slugs, e.g. cyberpunk-2077 */
   ips: string[];
   /**
-   * Right-side category chips under the cover (filterable later).
-   * Featured lead: `A · B · C`. Two-column cards: `A, B, C`.
+   * Category chips under the cover — must match involvement filter labels:
+   * End-to-End Projects | Project Contribution | Specialized Services.
+   * Prefer `involvementTags(involvement)` when authoring.
    */
   tags: string[];
   summary: string;
@@ -100,7 +113,7 @@ export const projectsFeaturedLead: ProjectsFeaturedLead = {
   slug: "wimbledon",
   title: "Wimbledon",
   tagline: "Embodying the spirit of tennis\u2019 grandest stage",
-  categories: ["Brand", "Sports & Fitness", "Europe"],
+  categories: involvementTags("end-to-end"),
   coverImage:
     "https://cdn.prod.website-files.com/6849da698cb78e39e81215c3/6a4e1d09946021ea4d30670a_Artboard%201-100.jpg",
   coverWidth: 1920,
@@ -113,7 +126,7 @@ export const projects: Project[] = [
     title: "Wimbledon",
     materials: ["fabric", "paper"],
     ips: [],
-    tags: ["Brand", "Sports & Fitness", "Europe"],
+    tags: involvementTags("end-to-end"),
     summary: "Embodying the spirit of tennis\u2019 grandest stage",
     tagline: "Embodying the spirit of tennis\u2019 grandest stage",
     headline: "Embodying the spirit of tennis\u2019 grandest stage",
@@ -141,7 +154,7 @@ export const projects: Project[] = [
     title: "HSBC SVNS",
     materials: ["fabric", "paper"],
     ips: [],
-    tags: ["Brand", "Sports & Fitness", "Global"],
+    tags: involvementTags("end-to-end"),
     summary: "Transforming rugby into a global experience",
     tagline: "Transforming rugby into a global experience",
     headline: "Transforming rugby into a global festival experience",
@@ -191,7 +204,7 @@ export const projects: Project[] = [
     title: "Eurostar",
     materials: ["metal", "paper"],
     ips: [],
-    tags: ["Brand", "Travel", "Europe"],
+    tags: involvementTags("end-to-end"),
     summary: "High-speed journeys shaped into a tangible brand experience",
     tagline: "High-speed journeys shaped into a tangible brand experience",
     role: [
@@ -215,7 +228,7 @@ export const projects: Project[] = [
     title: "Walnut desk organizer",
     materials: ["wood"],
     ips: ["the-witcher"],
-    tags: ["Wood", "The Witcher"],
+    tags: involvementTags("end-to-end"),
     summary:
       "A modular walnut organizer developed from sketch through small-batch production.",
     role: [
@@ -238,7 +251,7 @@ export const projects: Project[] = [
     title: "Brushed steel tray",
     materials: ["metal"],
     ips: ["halo-guardians", "destiny"],
-    tags: ["Metal", "Halo", "Destiny"],
+    tags: involvementTags("contribution"),
     summary:
       "Precision metal tray with controlled surface finish for retail gift sets.",
     role: [
@@ -261,7 +274,7 @@ export const projects: Project[] = [
     title: "Folded paper mailer",
     materials: ["paper"],
     ips: ["starfield"],
-    tags: ["Paper", "Starfield"],
+    tags: involvementTags("specialized"),
     summary: "Structural paper mailer designed for unboxing and ship durability.",
     role: ["custom-packaging", "sample-development"],
     involvement: "specialized",
@@ -278,7 +291,7 @@ export const projects: Project[] = [
     title: "Cast resin coaster",
     materials: ["resin"],
     ips: ["cyberpunk-2077", "doom"],
-    tags: ["Resin", "Cyberpunk 2077"],
+    tags: involvementTags("end-to-end"),
     summary: "Pigmented resin coaster set with controlled pour and edge finishing.",
     role: [
       "product-development",
@@ -299,7 +312,7 @@ export const projects: Project[] = [
     title: "Woven carry pouch",
     materials: ["fabric"],
     ips: ["horizon-zero-dawn", "tomb-raider"],
-    tags: ["Fabric", "Horizon", "Tomb Raider"],
+    tags: involvementTags("end-to-end"),
     summary: "Durable fabric pouch with controlled stitch quality for travel SKUs.",
     role: [
       "product-development",
@@ -320,7 +333,7 @@ export const projects: Project[] = [
     title: "Tooled leather folio",
     materials: ["leather"],
     ips: ["the-elder-scrolls", "dragon-age"],
-    tags: ["Leather", "The Elder Scrolls"],
+    tags: involvementTags("contribution"),
     summary: "Small-batch leather folio with edge paint and hardware consistency.",
     role: [
       "factory-sourcing",
@@ -335,6 +348,155 @@ export const projects: Project[] = [
     featured: false,
     challenge: "Match leather grade and tooling depth across suppliers.",
     result: "Selected tannery partner and cleared pre-production sample set.",
+  },
+  /* —— Placeholder seeds for involvement filter density (swap when real work lands) —— */
+  {
+    slug: "anodized-phone-stand",
+    title: "Anodized phone stand",
+    materials: ["metal"],
+    ips: ["halo-guardians"],
+    tags: involvementTags("contribution"),
+    summary: "CNC stand with locked anodize color across three finish lots.",
+    tagline: "CNC stand with locked anodize color across three finish lots",
+    role: ["factory-sourcing", "sample-development"],
+    involvement: "contribution",
+    coverImage: "/projects/demo-landscape.svg",
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    year: 2025,
+    featured: true,
+    challenge: "Hold anodize hue between sample and volume without re-quoting finish.",
+    result: "Verified shop, locked color standard, cleared PP sample.",
+  },
+  {
+    slug: "injection-clip-set",
+    title: "Injection clip set",
+    materials: ["resin"],
+    ips: ["destiny"],
+    tags: involvementTags("contribution"),
+    summary: "Small clip family with shared tooling and consistent gate finish.",
+    tagline: "Shared tooling with consistent gate finish across SKUs",
+    role: ["factory-verification", "sample-development"],
+    involvement: "contribution",
+    coverImage: "/projects/demo-square.svg",
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    year: 2024,
+    featured: true,
+    challenge: "Keep clip snap force in range when cavity count increases.",
+    result: "Process window documented; first run passed pull tests.",
+  },
+  {
+    slug: "soft-touch-lid-insert",
+    title: "Soft-touch lid insert",
+    materials: ["fabric", "paper"],
+    ips: [],
+    tags: involvementTags("contribution"),
+    summary: "Lid insert with soft-touch wear check before holiday volume.",
+    tagline: "Soft-touch wear check before holiday volume",
+    role: ["sample-development", "production-management"],
+    involvement: "contribution",
+    coverImage: "/projects/demo-wide.svg",
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    year: 2025,
+    featured: false,
+    challenge: "Soft-touch looked premium on day one and scuffed by week two.",
+    result: "Finish stack revised; abrasion standard added to QC sheet.",
+  },
+  {
+    slug: "die-cut-sleeve-system",
+    title: "Die-cut sleeve system",
+    materials: ["paper"],
+    ips: ["starfield"],
+    tags: involvementTags("specialized"),
+    summary: "Structural sleeve for retail sets with transit crush resistance.",
+    tagline: "Retail sleeve with transit crush resistance",
+    role: ["custom-packaging"],
+    involvement: "specialized",
+    coverImage: "/projects/demo-wide.svg",
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    year: 2024,
+    featured: true,
+    challenge: "Reduce plastic while keeping corner protection on long-haul cartons.",
+    result: "Paper structure passed drop tests and replaced poly wrap.",
+  },
+  {
+    slug: "foam-fitment-kit",
+    title: "Foam fitment kit",
+    materials: ["fabric"],
+    ips: ["tomb-raider"],
+    tags: involvementTags("specialized"),
+    summary: "Custom foam kit for fragile gift sets across two carton sizes.",
+    tagline: "Custom foam kit across two carton sizes",
+    role: ["custom-packaging", "sample-development"],
+    involvement: "specialized",
+    coverImage: "/projects/demo-compact.svg",
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    year: 2025,
+    featured: true,
+    challenge: "One foam CAD had to flex for US and EU carton footprints.",
+    result: "Shared cut nest; both cartons cleared ISTA sample.",
+  },
+  {
+    slug: "label-and-stamp-pack",
+    title: "Label and stamp pack",
+    materials: ["paper"],
+    ips: [],
+    tags: involvementTags("specialized"),
+    summary: "Pad-print and label package for a three-SKU accessory launch.",
+    tagline: "Pad-print and label package for a three-SKU launch",
+    role: ["custom-packaging"],
+    involvement: "specialized",
+    coverImage: "/projects/demo-portrait.svg",
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    year: 2023,
+    featured: false,
+    challenge: "Logo sharpness drifted after heat and handling on dark finishes.",
+    result: "Ink and stamp sequence locked with reject photo library.",
+  },
+  {
+    slug: "travel-bottle-tray",
+    title: "Travel bottle tray",
+    materials: ["metal", "fabric"],
+    ips: ["horizon-zero-dawn"],
+    tags: involvementTags("end-to-end"),
+    summary: "End-to-end tray from sketch through first carton for a travel brand.",
+    tagline: "From sketch through first carton for a travel brand",
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "end-to-end",
+    coverImage: "/projects/demo-tall.svg",
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    year: 2025,
+    featured: true,
+    challenge: "Balance weight, felt lining, and MOQ without losing the gift feel.",
+    result: "Approved construction; first run shipped on the launch calendar.",
+  },
+  {
+    slug: "ceramic-sample-board",
+    title: "Ceramic sample board",
+    materials: ["resin"],
+    ips: ["cyberpunk-2077"],
+    tags: involvementTags("end-to-end"),
+    summary: "Finish board used to freeze glaze ranges before steel is cut.",
+    tagline: "Freeze glaze ranges before steel is cut",
+    role: ["product-development", "sample-development"],
+    involvement: "end-to-end",
+    coverImage: "/projects/demo-square.svg",
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    year: 2024,
+    featured: true,
+    challenge: "Marketing wanted three glazes; tooling could only protect two.",
+    result: "Board forced a dated freeze; two glazes shipped with clear QC.",
   },
 ];
 
@@ -398,9 +560,8 @@ export function filterProjectsByMaterial(material?: Material | "all" | null) {
 /** Full-bleed projects hero (legacy static cover) */
 export const projectsCoverImage = asset("/images/projects/project-hero.png");
 
-/** Homeroll pool on CDN — filenames use spaces around the dash */
-const HOMEROLL_IMAGE_COUNT = 12;
-const HOMEROLL_SLOT_COUNT = 23;
+/** Projects hero roll pool on CDN — projectsroll1.jpg … projectsroll22.jpg */
+const PROJECTS_ROLL_COUNT = 22;
 
 export type ProjectsHeroRollItem = {
   id: string;
@@ -411,25 +572,25 @@ export type ProjectsHeroRollItem = {
 
 /** Placeholder hrefs — swap when real project URLs land */
 export const projectsHeroRoll: ProjectsHeroRollItem[] = Array.from(
-  { length: HOMEROLL_SLOT_COUNT },
+  { length: PROJECTS_ROLL_COUNT },
   (_, index) => {
-    const imageNumber = (index % HOMEROLL_IMAGE_COUNT) + 1;
+    const imageNumber = index + 1;
     const slug = projects[index % projects.length]?.slug ?? "wimbledon";
     return {
-      id: `homeroll-${index + 1}`,
-      src: asset(`/images/projects/homeroll - ${imageNumber}.jpg`),
+      id: `projectsroll-${imageNumber}`,
+      src: asset(`/images/projects/projectsroll${imageNumber}.jpg`),
       href: `/projects/${slug}`,
-      alt: `Project highlight ${index + 1}`,
+      alt: `Project highlight ${imageNumber}`,
     };
   },
 );
 
-/** Cycling hero lines over the roll */
+/** Cycling hero lines over the roll — each entry is one or more display rows */
 export const projectsHeroLines = [
-  "Making Stories Tangible",
-  "Beyond Manufacturing. Creating Experiences.",
-  "From Concept to Production",
-  "Details Define Excellence",
-  "Your Vision. My Execution.",
-  "From First Sketch to Final Shipment",
+  ["Making Stories Tangible"],
+  ["Beyond Manufacturing", "Creating Experiences"],
+  ["From Concept to Production"],
+  ["Details Define Excellence"],
+  ["Your Vision", "My Execution"],
+  ["From First Sketch", "to Final Shipment"],
 ] as const;

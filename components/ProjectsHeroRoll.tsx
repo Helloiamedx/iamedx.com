@@ -39,15 +39,15 @@ const MAX_ACTIVE_BANS = 3;
 const LINE_HOLD_MS = 6500;
 const LINE_FADE_MS = 560;
 
-/** Base size, then shrink only 25–30% — never down to ~half */
+/** Base size, then shrink only 15–20% — never down to ~half */
 const BASE_WIDTH_FRAC = 0.34;
 const BASE_WIDTH_FRAC_MOBILE = 0.52;
-const SHRINK_MIN = 0.7; /* 30% smaller */
-const SHRINK_MAX = 0.75; /* 25% smaller */
+const SHRINK_MIN = 0.8; /* 20% smaller */
+const SHRINK_MAX = 0.85; /* 15% smaller */
 const WIDTH_MAX_PX = 440;
 const WIDTH_MIN_PX = 160;
 
-const SPEED_PX_PER_S = 44;
+const SPEED_PX_PER_S = 52;
 const SPEED_JITTER = 0.3;
 
 /** Spatial depth tiers — shadow / air / slight parallax (size stays fixed) */
@@ -102,6 +102,7 @@ type OpeningSlot = {
 const OPENING: OpeningSlot[] = [
   { id: "left", flush: "left", x: [0, 0], y: [0.3, 0.42], delayMs: 40 },
   { id: "right", flush: "right", x: [1, 1], y: [0.48, 0.6], delayMs: 100 },
+  /* Always projectsroll16 — sits under the cycling hero lines */
   { id: "center", flush: null, x: [0.4, 0.6], y: [0.36, 0.48], delayMs: 170 },
   /* Col 2 / col 4 — between edge and center */
   { id: "upper-left", flush: null, x: [0.18, 0.34], y: [0.04, 0.18], delayMs: 260 },
@@ -109,6 +110,24 @@ const OPENING: OpeningSlot[] = [
   { id: "lower-left", flush: null, x: [0.16, 0.32], y: [0.64, 0.78], delayMs: 430 },
   { id: "lower-right", flush: null, x: [0.68, 0.84], y: [0.66, 0.8], delayMs: 520 },
 ];
+
+/** First-act center frame under the headline — never randomize this away */
+const CENTER_OPENING_ROLL_ID = "projectsroll-16";
+
+function centerOpeningItem(): ProjectsHeroRollItem {
+  const item = projectsHeroRoll.find((entry) => entry.id === CENTER_OPENING_ROLL_ID);
+  if (!item) {
+    throw new Error(`Missing ${CENTER_OPENING_ROLL_ID} in projectsHeroRoll`);
+  }
+  return item;
+}
+
+function deckWithoutCenterOpening() {
+  return shuffle(
+    projectsHeroRoll.filter((entry) => entry.id !== CENTER_OPENING_ROLL_ID),
+  );
+}
+
 type OpeningPose = {
   x: number;
   y: number;
@@ -502,7 +521,7 @@ function hasHungryPocket(others: Rect[], stageW: number, stageH: number) {
 
 export function ProjectsHeroRoll() {
   const stageRef = useRef<HTMLDivElement>(null);
-  const deckRef = useRef<ProjectsHeroRollItem[]>(shuffle(projectsHeroRoll));
+  const deckRef = useRef<ProjectsHeroRollItem[]>(deckWithoutCenterOpening());
   const deckIndexRef = useRef(0);
   const floatersRef = useRef<Floater[]>([]);
   const openingPlanRef = useRef<Map<string, OpeningPose> | null>(null);
@@ -518,6 +537,7 @@ export function ProjectsHeroRoll() {
 
   function nextItem(): ProjectsHeroRollItem {
     if (deckIndexRef.current >= deckRef.current.length) {
+      /* After the reserved opening cycle, allow projectsroll16 back into rotation */
       deckRef.current = shuffle(projectsHeroRoll);
       deckIndexRef.current = 0;
     }
@@ -542,12 +562,14 @@ export function ProjectsHeroRoll() {
     flush: Floater["flush"];
     /** Opening frames stay put — no sideways drift into neighbors */
     lockPose?: boolean;
+    /** Pin a specific roll item (opening center = projectsroll16) */
+    item?: ProjectsHeroRollItem;
   }): number | false {
     const stage = stageRef.current;
     if (!stage) return false;
     if (floatersRef.current.length >= MAX_ON_SCREEN) return false;
 
-    const { x, y, width, flush, lockPose = false } = options;
+    const { x, y, width, flush, lockPose = false, item: pinned } = options;
     const height = width * 1.25;
     const travel = -(y + height + 80);
     const speed =
@@ -558,7 +580,7 @@ export function ProjectsHeroRoll() {
     const depth = pickDepth();
     const speedMul = DEPTH_SPEED[depth];
     const durationMsDepth = durationMs / speedMul;
-    const item = nextItem();
+    const item = pinned ?? nextItem();
     const key = `${uid}-${seqRef.current++}`;
     const style: CSSProperties = {
       left: `${x}px`,
@@ -609,6 +631,7 @@ export function ProjectsHeroRoll() {
       width: pose.width,
       flush: pose.flush,
       lockPose: true,
+      item: slot.id === "center" ? centerOpeningItem() : undefined,
     });
     if (durationMs) {
       banStrip(pose.x, pose.width);
@@ -828,7 +851,12 @@ export function ProjectsHeroRoll() {
           className={`projects-hero-roll__line${lineVisible ? " is-visible" : ""}`}
           aria-live="polite"
         >
-          {projectsHeroLines[lineIndex]}
+          {projectsHeroLines[lineIndex].map((row, rowIndex) => (
+            <span key={`${lineIndex}-${row}`} className="projects-hero-roll__line-row">
+              {rowIndex > 0 ? <br /> : null}
+              {row}
+            </span>
+          ))}
         </p>
       </div>
     </section>

@@ -1,0 +1,27 @@
+---
+description: Fixed featured leads on Projects / Insights index — never filter-driven
+globs: app/projects/**/*.{tsx,ts}, app/insights/**/*.{tsx,ts}, components/ProjectFeaturedLead.tsx, components/InsightsLead.tsx, content/projects.ts, lib/insights.ts
+alwaysApply: true
+---
+
+# Fixed featured leads (index pages)
+
+On `/projects` and `/insights`, the **first full-width featured item sits above the filter** and is **not** part of filter results.
+
+## Rules
+
+1. **Always visible** — changing involvement / IP / insight tag must not hide or swap the lead.
+2. **Above the filter** — layout order: Hero → Featured lead → Filter → filtered grid only.
+3. **Deduplicate** — exclude the lead’s slug from the masonry / grid under the filter so it never appears twice.
+4. **Do not change the lead** unless the user **explicitly** asks to replace which project or insight is featured.
+
+## Sources of truth
+
+- **Projects:** `projectsFeaturedLead` in `content/projects.ts` (currently Wimbledon). Only edit that object when the user says to switch the featured project.
+- **Insights:** featured lead is the fixed first insight on the index (same permanence — do not reassign from filter state).
+
+## Do not
+
+- Gate the lead behind `active === "all"` or empty search params
+- Move the lead inside `FilterResults`
+- Auto-pick a new lead from filter matches, sort order, or “most recent”

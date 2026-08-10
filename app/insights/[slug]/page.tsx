@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { InsightMasonry } from "@/components/InsightMasonry";
 import {
   INSIGHT_COVER_H,
   INSIGHT_COVER_W,
   getInsightBySlug,
   getInsightSlugs,
   getInsightTagLabels,
+  getRelatedInsights,
 } from "@/lib/insights";
 
 type InsightPageProps = {
@@ -48,6 +50,7 @@ export default async function InsightDetailPage({ params }: InsightPageProps) {
     .split(/\n{2,}/)
     .map((part) => part.trim())
     .filter(Boolean);
+  const related = getRelatedInsights([insight.slug], 2);
 
   return (
     <main className="insight-detail">
@@ -87,6 +90,15 @@ export default async function InsightDetailPage({ params }: InsightPageProps) {
             </article>
           ) : null}
         </div>
+
+        {related.length > 0 ? (
+          <section className="insights-related" aria-labelledby="insights-related-title">
+            <h2 id="insights-related-title" className="insights-related__title">
+              Related
+            </h2>
+            <InsightMasonry insights={related} layout="related" />
+          </section>
+        ) : null}
       </div>
     </main>
   );

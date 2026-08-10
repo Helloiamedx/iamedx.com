@@ -15,27 +15,9 @@
 .projects-hero-roll__stage {
   position: absolute;
   inset: 0;
-  /* Long, eased bottom dissolve — short ramps read as a hard cut on shadows */
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    #000 0%,
-    #000 68%,
-    rgba(0, 0, 0, 0.92) 78%,
-    rgba(0, 0, 0, 0.62) 86%,
-    rgba(0, 0, 0, 0.28) 93%,
-    rgba(0, 0, 0, 0.08) 97%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    #000 0%,
-    #000 68%,
-    rgba(0, 0, 0, 0.92) 78%,
-    rgba(0, 0, 0, 0.62) 86%,
-    rgba(0, 0, 0, 0.28) 93%,
-    rgba(0, 0, 0, 0.08) 97%,
-    transparent 100%
-  );
+  /* Single 2-stop dissolve — smoothest on wide / 8-bit panels */
+  -webkit-mask-image: linear-gradient(to bottom, #000 52%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 52%, transparent 100%);
 }
 
 .projects-hero-roll__stage.is-ready {
@@ -73,41 +55,37 @@
   border-radius: inherit;
 }
 
-/* Depth tiers: layered shadow + air perspective (size unchanged) */
+/*
+ * Depth: brightness / soft blur only — no box-shadow, no inset rim,
+ * nothing that draws a lit outline on the photo edge.
+ */
 .projects-hero-roll__frame--far {
-  box-shadow:
-    0 8px 22px rgba(0, 0, 0, 0.28),
-    0 1px 0 rgba(255, 255, 255, 0.02) inset;
+  box-shadow: none;
 }
 
 .projects-hero-roll__frame--far img {
-  filter: brightness(0.7) contrast(0.9) saturate(0.92) blur(1px);
+  filter: brightness(0.72) contrast(0.92) saturate(0.92) blur(1px);
 }
 
 .projects-hero-roll__frame--mid {
-  box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.42),
-    0 1px 0 rgba(255, 255, 255, 0.04) inset;
+  box-shadow: none;
 }
 
 .projects-hero-roll__frame--mid img {
-  filter: brightness(0.88) contrast(0.96);
+  filter: brightness(0.9) contrast(0.96);
 }
 
 .projects-hero-roll__frame--near {
-  box-shadow:
-    0 28px 64px rgba(0, 0, 0, 0.62),
-    0 10px 24px rgba(0, 0, 0, 0.28),
-    0 1px 0 rgba(255, 255, 255, 0.06) inset;
+  box-shadow: none;
 }
 
 .projects-hero-roll__frame--near img {
-  filter: brightness(1.03) contrast(1.04) saturate(1.02);
+  filter: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .projects-hero-roll__frame--far img {
-    filter: brightness(0.72) contrast(0.9) saturate(0.92);
+    filter: brightness(0.72) contrast(0.92) saturate(0.92);
   }
 }
 
@@ -137,38 +115,14 @@
 
 .projects-hero-roll__veil {
   position: absolute;
-  inset: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 10;
   pointer-events: none;
-  background:
-    linear-gradient(
-      180deg,
-      rgba(5, 5, 6, 0.28) 0%,
-      rgba(5, 5, 6, 0.06) 14%,
-      rgba(5, 5, 6, 0.04) 52%,
-      rgba(5, 5, 6, 0.18) 68%,
-      rgba(5, 5, 6, 0.48) 82%,
-      rgba(5, 5, 6, 0.78) 92%,
-      rgba(5, 5, 6, 0.96) 100%
-    ),
-    radial-gradient(
-      ellipse 72% 60% at 50% 48%,
-      rgba(5, 5, 6, 0) 0%,
-      rgba(5, 5, 6, 0.4) 100%
-    );
-  /* Clear the copy zone so difference can read the images underneath */
-  -webkit-mask-image: radial-gradient(
-    ellipse 58% 36% at 50% 48%,
-    transparent 0%,
-    transparent 42%,
-    #000 78%
-  );
-  mask-image: radial-gradient(
-    ellipse 58% 36% at 50% 48%,
-    transparent 0%,
-    transparent 42%,
-    #000 78%
-  );
+  /* Page seal only — 2 stops, long run into solid footer color */
+  height: min(36vh, 18rem);
+  background: linear-gradient(to top, #050506 0%, transparent 100%);
 }
 
 .projects-hero-roll__grain {
@@ -176,22 +130,12 @@
   inset: 0;
   z-index: 11;
   pointer-events: none;
-  opacity: 0.16;
-  mix-blend-mode: overlay;
+  opacity: 0.07;
+  mix-blend-mode: soft-light;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
   background-size: 180px 180px;
-  -webkit-mask-image: radial-gradient(
-    ellipse 58% 36% at 50% 48%,
-    transparent 0%,
-    transparent 42%,
-    #000 78%
-  );
-  mask-image: radial-gradient(
-    ellipse 58% 36% at 50% 48%,
-    transparent 0%,
-    transparent 42%,
-    #000 78%
-  );
+  -webkit-mask-image: linear-gradient(to bottom, #000 50%, transparent 82%);
+  mask-image: linear-gradient(to bottom, #000 50%, transparent 82%);
 }
 
 .projects-hero-roll__copy {
@@ -213,22 +157,24 @@
 
 .projects-hero-roll__line {
   margin: 0;
-  /* Wide enough for the longest hero line on one row when the shell allows */
-  max-width: min(42ch, 100%);
+  max-width: min(26ch, 100%);
   min-height: 1.2em;
   font-family: var(--font-sans);
   font-size: clamp(1.65rem, 1.1rem + 2.4vw, 3rem);
   font-weight: 700;
-  line-height: 1.15;
-  letter-spacing: 0.008em;
-  word-spacing: 0.04em;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
   color: #fff;
-  text-wrap: balance;
+  text-wrap: pretty;
   opacity: 0;
   transform: translateY(0.35rem);
   transition:
     opacity 520ms cubic-bezier(0.4, 0, 0.2, 1),
     transform 520ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.projects-hero-roll__line-row {
+  display: inline;
 }
 
 .projects-hero-roll__line.is-visible {
@@ -238,10 +184,8 @@
 
 @media (max-width: 700px) {
   .projects-hero-roll__line {
-    /* Use the full copy width — 16ch was forcing tiny wrapped stacks */
-    max-width: 100%;
+    max-width: min(20ch, 100%);
     font-size: clamp(1.55rem, 1.05rem + 3.8vw, 2.15rem);
-    text-wrap: pretty;
   }
 }
 

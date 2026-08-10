@@ -1,6 +1,6 @@
 ---
-description: Projects index showcase + case detail template (Pentagram-style AboutCaseDemo)
-globs: app/projects/**/*.{tsx,ts,css}, app/about/**/*.{tsx,ts}, components/Project*.tsx, components/AboutCaseDemo.tsx, content/projects.ts, content/caseCopy.ts, app/globals.css
+description: Projects index showcase + case detail template (Pentagram-style ProjectCaseDemo)
+globs: app/projects/**/*.{tsx,ts,css}, app/about/**/*.{tsx,ts}, components/Project*.tsx, components/ProjectCaseDemo.tsx, content/projects.ts, content/caseCopy.ts, app/globals.css
 alwaysApply: false
 ---
 
@@ -8,7 +8,7 @@ alwaysApply: false
 
 ## Case detail template (`/projects/[slug]`) — STANDARD
 
-Living reference: [`components/AboutCaseDemo.tsx`](components/AboutCaseDemo.tsx) + `.about-case-demo*` in [`app/globals.css`](app/globals.css) (mounted on `/projects/[slug]`; `/about` is bio-only).
+Living reference: [`components/ProjectCaseDemo.tsx`](components/ProjectCaseDemo.tsx) + `.project-case-demo*` in [`app/globals.css`](app/globals.css) (mounted on `/projects/[slug]`; `/about` is bio-only).
 
 This is the **only** case-detail pattern. Do not revive the old always-on Background / Challenges / Execution / Impact chapter stack on detail pages.
 
@@ -30,8 +30,8 @@ This is the **only** case-detail pattern. Do not revive the old always-on Backgr
 ### 3. “About the project” control
 
 - Shell-fixed (portaled), **not** parented inside the media column — open-push must not move X.
-- Activity band = real media stack (and when open, taller of media vs copy). Never over the video; release at content bottom.
-- Travels with content top → docks at `header-offset + shell-gutter` → clamps at content bottom.
+- Activity band = real media stack (and when open, taller of media vs copy). Never over the video; never into Related.
+- Travels with content top → docks near viewport bottom → clamps in the **gap under the last frame** (`min(relatedTop, bodyBottom, footerTop)`), not onto the images.
 - Font weight **Medium (500)**.
 - Desktop scroll uses **Lenis** (`lenis.scrollTo`, `immediate: true`); `window.scrollTo` alone is not enough.
 
@@ -44,9 +44,9 @@ This is the **only** case-detail pattern. Do not revive the old always-on Backgr
 - On open: jump so **copy line 1** is under the header (Lenis immediate scroll).
 - Mobile: full-screen overlay panel + body scroll lock; keep a Close control.
 
-### 5. Copy / type
+### 5. Copy / type (dark detail page)
 
-- Apple-style hierarchy: titles `#1d1d1f` / body `#6e6e73`; title and body ~two steps above the old 14px stack (`1.375rem` / `1.125rem` desktop).
+- Detail surfaces are black (`#000`). Titles and body copy both `#fff` (same white). Set color on `.project-case-demo__panel-copy p` — global `p { color: var(--muted) }` otherwise wins.
 - Separate heading + paragraph blocks with clear title→body gap (not `<strong>` + `<br>` in one `<p>`).
 - Structure: project narrative blocks + meta (Client / Sector / Discipline / Partners / team as data allows).
 
@@ -76,8 +76,10 @@ These fields feed the filter system later — keep as structured data.
 
 ## Page arrangement (`/projects`)
 
-1. **First project** — full width of the menu/`shell`.
-2. **Everything after** — **two equal-width columns**. Same meta stack on every card.
+1. **Hero**
+2. **Featured lead** — full width; **always above the filter**; never tied to filter results (see `fixed-featured-leads.mdc`). Change only when the user explicitly asks.
+3. **Filter** — centered involvement pills
+4. **Everything after** — **two equal-width columns** (filtered list, lead slug excluded). Same meta stack on every card.
 
 ## Do not
 

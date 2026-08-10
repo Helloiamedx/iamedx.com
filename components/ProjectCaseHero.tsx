@@ -1,4 +1,7 @@
-import type { Project } from "@/content/projects";
+import {
+  getInvolvementLabel,
+  type Project,
+} from "@/content/projects";
 
 type ProjectCaseHeroProps = {
   project: Project;
@@ -31,7 +34,7 @@ function vimeoBackgroundSrc(id: string, hash?: string) {
  */
 export function ProjectCaseHero({ project }: ProjectCaseHeroProps) {
   const tagline = project.tagline ?? project.summary;
-  const categories = project.tags.join(" · ");
+  const categories = getInvolvementLabel(project.involvement);
   const vimeoId = project.heroVimeoId ?? DEFAULT_VIMEO.id;
   const vimeoHash = project.heroVimeoHash ?? DEFAULT_VIMEO.hash;
   const embedSrc = vimeoBackgroundSrc(vimeoId, vimeoHash);
@@ -53,9 +56,7 @@ export function ProjectCaseHero({ project }: ProjectCaseHeroProps) {
       <div className="project-case-hero__meta">
         <h1 className="project-case-hero__title">{project.title}</h1>
         <p className="project-case-hero__tagline">{tagline}</p>
-        {categories ? (
-          <p className="project-case-hero__categories">{categories}</p>
-        ) : null}
+        <p className="project-case-hero__categories">{categories}</p>
       </div>
     </section>
   );
