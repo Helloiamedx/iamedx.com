@@ -2,6 +2,15 @@ import fs from "fs";
 import path from "path";
 import { findInsightTag, insightTags } from "@/content/nav";
 
+/** Temporary Pentagram covers until real insight photography lands */
+export const INSIGHT_PLACEHOLDER_COVERS = [
+  "https://pentagram-production.imgix.net/29028e04-d2be-4029-9ab2-cf9f91af8060/MW_DeBijloke_02.png?auto=compress%2Cformat&fit=min&fm=jpg&q=80&rect=0%2C0%2C3000%2C1688&w=1500&crop=1&dpr=2&fit=crop&h=844&s=a23c32369893c8d21fae1de7c12fff0c",
+  "https://pentagram-production.imgix.net/29028e04-d2be-4029-9ab2-cf9f91af8060/MW_DeBijloke_03.png?auto=compress%2Cformat&fit=min&fm=jpg&q=80&rect=0%2C0%2C3000%2C1687&w=1500&crop=1&dpr=2&fit=crop&h=844&s=4dc891bbba717d72d7b2994ca6305373",
+] as const;
+
+export const INSIGHT_COVER_W = 3000;
+export const INSIGHT_COVER_H = 1687;
+
 export type InsightMeta = {
   slug: string;
   title: string;
@@ -9,6 +18,8 @@ export type InsightMeta = {
   excerpt: string;
   /** Canonical tag slugs from frontmatter, matched to Insights mega menu */
   tags: string[];
+  /** Cover URL — falls back to rotating placeholders when omitted */
+  coverImage: string;
 };
 
 export type Insight = InsightMeta & {
@@ -63,7 +74,7 @@ function parseFrontmatter(raw: string): {
       continue;
     }
 
-    data[key] = value;
+    data[key] = value.replace(/^["']|["']$/g, "");
   }
 
   const tags = normalizeTags(tagValues);
@@ -83,10 +94,20 @@ function normalizeTags(values: string[]) {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
     const match =
-      known.get(value.toLowerCase()) ?? known.get(slug) ?? (findInsightTag(slug) ? slug : null);
+      known.get(value.toLowerCase()) ??
+      known.get(slug) ??
+      (findInsightTag(slug) ? slug : null);
     if (match && !resolved.includes(match)) resolved.push(match);
   }
   return resolved;
+}
+
+function placeholderCoverForSlug(slug: string) {
+  let hash = 0;
+  for (let i = 0; i < slug.length; i++) {
+    hash = (hash + slug.charCodeAt(i) * (i + 1)) % INSIGHT_PLACEHOLDER_COVERS.length;
+  }
+  return INSIGHT_PLACEHOLDER_COVERS[hash] ?? INSIGHT_PLACEHOLDER_COVERS[0];
 }
 
 export function getInsightSlugs() {
@@ -110,6 +131,7 @@ export function getInsightBySlug(slug: string): Insight | null {
     date: data.date ?? "",
     excerpt: data.excerpt ?? "",
     tags,
+    coverImage: data.coverImage || placeholderCoverForSlug(slug),
     content: body,
   };
 }

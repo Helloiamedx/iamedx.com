@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   title: {
     default:
       "Edward Xu | End-to-End Product Development & Manufacturing Partner",
-    template: "%s · Edward Xu",
+    template: "Edward Xu · %s",
   },
   description:
     "Driven by loyalty, transparency, and a commitment to exceed expectations, I help clients build highly tailored supply chains in China.",
@@ -34,17 +34,28 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className="h-full antialiased">
       <head>
+        {/* Chrome first — logos + menu weight before hero video competes for bandwidth */}
         <link
           rel="preload"
           href={asset("/brand/iamedwardxu-logo-white.svg")}
           as="image"
           type="image/svg+xml"
+          fetchPriority="high"
         />
         <link
           rel="preload"
           href={asset("/brand/iamedwardxu-logo-black.svg")}
           as="image"
           type="image/svg+xml"
+          fetchPriority="high"
+        />
+        <link
+          rel="preload"
+          href={asset("/fonts/SF-Pro-Display-Medium.woff2")}
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+          fetchPriority="high"
         />
       </head>
       <body className="min-h-full flex flex-col">

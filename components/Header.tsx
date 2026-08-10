@@ -340,6 +340,27 @@ export function Header() {
     setMobilePortalReady(true);
   }, []);
 
+  /* Prefer chrome (logo / menu) over hero video — gate video until a logo paints */
+  useEffect(() => {
+    const root = document.documentElement;
+    if (root.dataset.chromeReady === "1") return;
+
+    const markReady = () => {
+      if (root.dataset.chromeReady === "1") return;
+      root.dataset.chromeReady = "1";
+    };
+
+    /* Cached images may skip onLoad — still release the gate promptly */
+    const fallback = window.setTimeout(markReady, 900);
+    return () => window.clearTimeout(fallback);
+  }, []);
+
+  function onLogoReady() {
+    requestAnimationFrame(() => {
+      document.documentElement.dataset.chromeReady = "1";
+    });
+  }
+
   useEffect(() => {
     document.body.classList.toggle("is-mobile-menu-open", mobileOpen);
     return () => {
@@ -815,9 +836,12 @@ export function Header() {
               width={200}
               height={24}
               priority
+              fetchPriority="high"
               unoptimized
               className="site-logo__img site-logo__img--white"
               aria-hidden="true"
+              onLoad={onLogoReady}
+              onLoadingComplete={onLogoReady}
             />
             <Image
               src={asset("/brand/iamedwardxu-logo-black.svg")}
@@ -825,8 +849,11 @@ export function Header() {
               width={200}
               height={24}
               priority
+              fetchPriority="high"
               unoptimized
               className="site-logo__img site-logo__img--black"
+              onLoad={onLogoReady}
+              onLoadingComplete={onLogoReady}
             />
           </Link>
 

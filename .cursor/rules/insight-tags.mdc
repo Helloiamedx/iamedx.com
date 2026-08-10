@@ -1,0 +1,46 @@
+---
+description: Keep Insight tags synced across catalog, menu, filter, and MDX
+globs: content/insight-tags.json,content/insights/**/*.mdx,content/nav.ts,components/InsightFilter.tsx
+alwaysApply: false
+---
+
+# Insight tags sync
+
+## Single source of truth
+
+Edit **`content/insight-tags.json`** only — never maintain a parallel tag list.
+
+That file feeds:
+
+- Insights mega menu (`content/nav.ts` → `insightTags`)
+- Insights page filter (`InsightFilter`)
+- MDX tag normalization (`lib/insights.ts`)
+
+## When adding a tag
+
+1. Add the label to the right `groups[].tags` array in `content/insight-tags.json`
+2. Use that **exact** label in article frontmatter (`tags: - Label`)
+3. Run `npm run check:insight-tags`
+
+Menu + filter update automatically. Do not hardcode tags in JSX.
+
+## When removing or renaming a tag
+
+1. Remove/rename it in `content/insight-tags.json`
+2. Run `npm run check:insight-tags`
+3. **Must warn the user** if the script reports:
+   - articles with no valid tag left
+   - articles still using the old/unknown label
+4. Fix those MDX files (remap to another tag) or restore the catalog entry before finishing
+
+## Article frontmatter
+
+Prefer **one** tag per article (lead + showcase). Labels must match the catalog exactly.
+
+## Checks
+
+```bash
+npm run check:insight-tags
+```
+
+Exit code `1` = blocking (unknown tags or untagged articles). Unused catalog tags are warnings only.

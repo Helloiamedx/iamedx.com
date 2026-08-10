@@ -1,12 +1,41 @@
 "use client";
 
-import { ReactLenis } from "lenis/react";
+import { ReactLenis, useLenis } from "lenis/react";
+import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import "lenis/dist/lenis.css";
 
 type SmoothScrollProps = {
   children: ReactNode;
 };
+
+/** Native + document scroll to top — used when Lenis is not mounted (touch). */
+function NativeRouteScrollReset() {
+  const pathname = usePathname();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [pathname]);
+
+  return null;
+}
+
+/** Kill Lenis inertia and snap to top on every App Router navigation. */
+function LenisRouteScrollReset() {
+  const pathname = usePathname();
+  const lenis = useLenis();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    lenis?.scrollTo(0, { immediate: true });
+  }, [pathname, lenis]);
+
+  return null;
+}
 
 /**
  * Site-wide Lenis — weighted wheel on desktop only.
@@ -26,7 +55,12 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
   }, []);
 
   if (!desktopWheel) {
-    return children;
+    return (
+      <>
+        <NativeRouteScrollReset />
+        {children}
+      </>
+    );
   }
 
   return (
@@ -40,8 +74,11 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
         overscroll: false,
         autoRaf: true,
         respectReducedMotion: true,
+        /* Stop wheel lerp before Next resets scrollTop on <Link> navigations */
+        stopInertiaOnNavigate: true,
       }}
     >
+      <LenisRouteScrollReset />
       {children}
     </ReactLenis>
   );

@@ -1,3 +1,5 @@
+import insightTagData from "@/content/insight-tags.json";
+
 export type MegaLink = {
   label: string;
   slug: string;
@@ -84,22 +86,8 @@ export const projectMaterialLabels = [
   "Paper",
 ] as const;
 
-/** Canonical insight tags used in mega menu + MDX frontmatter */
-export const insightTagGroups = [
-  {
-    id: "manufacturing-market-insights",
-    title: "Manufacturing & Market",
-    tags: [
-      "Quality Control",
-      "Manufacturing",
-      "Product Development",
-      "Brand & Product Strategy",
-      "Market Perspective",
-      "Supply Chain Operations",
-      "Factory Partnerships",
-    ],
-  },
-] as const;
+/** Canonical insight tags used in mega menu + MDX frontmatter + filter */
+export const insightTagGroups = insightTagData.groups;
 
 export const insightTags: InsightTag[] = insightTagGroups.flatMap((group) =>
   group.tags.map((label) => ({
@@ -108,6 +96,18 @@ export const insightTags: InsightTag[] = insightTagGroups.flatMap((group) =>
     groupId: group.id,
   })),
 );
+
+/** Insights index — Further-style hero + manifesto band */
+export const insightsHero = {
+  eyebrow: "Insights",
+  headline: "Notes from the work",
+} as const;
+
+export const insightsManifesto = {
+  body: "I write from the floor between sample and carton — where specs meet operators, calendars, and quiet risk. These notes are for people building products in China who want fewer surprises and clearer decisions.",
+  support:
+    "Manufacturing, quality, and market perspective — from active launches.",
+} as const;
 
 /** Projects mega — same involvement filters as /projects pills (no column title) */
 export const projectsMega: MegaColumn[] = [

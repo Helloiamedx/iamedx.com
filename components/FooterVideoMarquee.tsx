@@ -37,7 +37,7 @@ export function FooterVideoMarquee() {
         ref={videoRef}
         className="footer-video-fill__media"
         src={asset(clip.src)}
-        preload="auto"
+        preload="none"
         aria-label={clip.label}
         style={{ objectFit: "cover", objectPosition: "top center" }}
         onLoadedData={markReady}

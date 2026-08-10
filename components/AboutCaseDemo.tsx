@@ -328,6 +328,7 @@ export function AboutCaseDemo() {
             className="about-case-demo__hero-video"
             src={asset("videos/home-hero-video.mp4")}
             preload="metadata"
+            fetchPriority="low"
           />
           <div className="about-case-demo__hero-scrim" />
         </div>

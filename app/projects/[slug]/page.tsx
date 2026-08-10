@@ -31,7 +31,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   return (
     <main className="project-detail">
       {/* Living case-detail template — project-aware fields wired later */}
-      <AboutCaseDemo />
+      <AboutCaseDemo key={slug} />
     </main>
   );
 }

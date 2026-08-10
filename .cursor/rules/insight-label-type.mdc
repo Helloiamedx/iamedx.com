@@ -1,0 +1,14 @@
+---
+description: Keep Insight label letter-spacing and meta gaps consistent
+globs: app/insights/**/*.tsx,app/globals.css,components/Insight*.tsx,components/Insights*.tsx
+alwaysApply: false
+---
+
+# Insight label typography
+
+Shared tokens on `.insights-page` and `.insight-detail`:
+
+- `--insight-label-tracking: 0.08em` — date, article type, chips, filter pills, Insights eyebrow
+- `--insight-meta-gap: 1.75rem` — space between date and type on the detail header
+
+Do not invent a different letter-spacing for these uppercase micro-labels on one Insights surface and another. Change the token once; all consumers follow.

@@ -18,6 +18,7 @@ export default function HomePage() {
             className="hero__video"
             src={asset("videos/home-hero-video.mp4")}
             preload="metadata"
+            fetchPriority="low"
           />
         </div>
         <div className="hero__content">
