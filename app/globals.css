@@ -92,7 +92,7 @@
    */
   --shell-max: 1792px;
   --shell-gutter: 12px;
-  --header-bar-h: 3.75rem;
+  --header-bar-h: 3.25rem;
   /* Bar + iOS status/notch when viewport-fit=cover */
   --header-offset: calc(var(--header-bar-h) + env(safe-area-inset-top, 0px));
 }
@@ -242,7 +242,8 @@ p {
   backdrop-filter: var(--nav-frost-filter);
   -webkit-backdrop-filter: var(--nav-frost-filter);
   border: none;
-  box-shadow: none;
+  /* Hairline under frost 套底 — not on clear top chrome */
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
   outline: none;
   /*
    * Transform only — never tween background/frost. A 360ms bg fade after mega
@@ -269,6 +270,7 @@ p {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   mix-blend-mode: normal;
+  box-shadow: none;
   transition: transform 380ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -277,6 +279,8 @@ p {
   background: transparent;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
+  /* No hairline on clear chrome — line belongs on frost 套底 only */
+  box-shadow: none;
   /* Snap clear fill — keep hide/show transform tween */
   transition: transform 380ms cubic-bezier(0.4, 0, 0.2, 1);
   /*
@@ -580,16 +584,16 @@ p {
 }
 
 .site-header-cta.is-pills .nav-contact--with-icon {
-  padding-inline: 0.65rem 0.8rem;
+  padding-inline: 0.55rem 0.7rem;
 }
 
 @media (min-width: 900px) {
   .site-header-cta.is-pills .nav-contact:not(.nav-contact--block) {
-    padding: 0.4rem 1.05rem;
+    padding: 0.32rem 0.9rem;
   }
 
   .site-header-cta.is-pills .nav-contact--with-icon:not(.nav-contact--block) {
-    padding-inline: 0.65rem 0.8rem;
+    padding-inline: 0.55rem 0.7rem;
   }
 }
 
@@ -610,6 +614,7 @@ p {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   mix-blend-mode: normal;
+  box-shadow: none;
   transition: none;
 }
 
@@ -964,7 +969,7 @@ p {
   align-items: center;
   justify-content: center;
   gap: 0.05rem;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 500; /* Medium — clearer over difference blend */
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -973,7 +978,7 @@ p {
 .site-nav__link {
   display: inline-flex;
   align-items: center;
-  padding: 0.4rem 0.75rem;
+  padding: 0.28rem 0.62rem;
   color: var(--nav-ink, #1d1d1f);
   font-weight: 500;
   letter-spacing: 0.06em;
@@ -1015,20 +1020,20 @@ p {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
-  min-height: 1.65rem;
-  padding: 0.28rem 0.75rem;
+  gap: 0.3rem;
+  min-height: 1.45rem;
+  padding: 0.22rem 0.65rem;
   border-radius: 980px;
   background: transparent;
   color: #fff;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .nav-contact--with-icon {
-  padding-inline: 0.65rem 0.8rem;
+  padding-inline: 0.55rem 0.7rem;
 }
 
 .nav-contact__icon {
@@ -1036,8 +1041,8 @@ p {
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: 0.95rem;
-  height: 0.95rem;
+  width: 0.85rem;
+  height: 0.85rem;
   line-height: 0;
 }
 
@@ -1113,9 +1118,9 @@ p {
 
 @media (min-width: 900px) {
   .nav-contact:not(.nav-contact--block) {
-    min-height: 2rem;
-    padding: 0.4rem 1.05rem;
-    font-size: 0.875rem;
+    min-height: 1.75rem;
+    padding: 0.32rem 0.9rem;
+    font-size: 0.8125rem;
   }
 
   /*
@@ -1124,7 +1129,7 @@ p {
    */
   .site-header-cta:not(.is-pills) .nav-contact:not(.nav-contact--block),
   .site-header-cta:not(.is-pills) .nav-contact--with-icon:not(.nav-contact--block) {
-    padding: 0.28rem 0 0.28rem 0.35rem;
+    padding: 0.22rem 0 0.22rem 0.3rem;
   }
 
   .site-header-cta:not(.is-pills)
@@ -1135,11 +1140,11 @@ p {
   }
 
   .site-header-cta.is-pills .nav-contact:not(.nav-contact--block) {
-    padding: 0.4rem 1.05rem;
+    padding: 0.32rem 0.9rem;
   }
 
   .site-header-cta.is-pills .nav-contact--with-icon:not(.nav-contact--block) {
-    padding-inline: 0.65rem 0.8rem;
+    padding-inline: 0.55rem 0.7rem;
   }
 }
 
@@ -1154,7 +1159,7 @@ p {
 .site-logo__img {
   grid-area: 1 / 1;
   /* Edward Xu wordmark — keep compact in the header */
-  height: 0.88rem;
+  height: 0.8rem;
   width: auto;
   display: block;
   transition: opacity 360ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -1171,7 +1176,7 @@ p {
 }
 
 .site-logo img {
-  height: 0.88rem;
+  height: 0.8rem;
   width: auto;
 }
 
@@ -1181,15 +1186,15 @@ p {
   align-items: center;
   justify-content: flex-end;
   min-width: 0;
-  min-height: 1.65rem;
+  min-height: 1.45rem;
   border: 0;
   background: transparent;
   /* Flush to shell right — no trailing pad that reads as off-right */
-  padding: 0.2rem 0;
+  padding: 0.15rem 0;
   margin: 0;
   cursor: pointer;
   font: inherit;
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -2175,27 +2180,54 @@ html[data-chrome-ready="1"] .hero__video {
   background: rgba(255, 255, 255, 0.12);
 }
 
+.projects-page .project-involvement__thumb {
+  background: #fff;
+}
+
 .projects-page .project-involvement__pill {
   color: rgba(255, 255, 255, 0.78);
 }
 
 .projects-page .project-involvement__pill:hover {
-  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  background: transparent;
 }
 
 .projects-page .project-involvement__pill.is-active {
-  background: #fff;
+  background: transparent;
   color: #0a0a0a;
 }
 
 .projects-page .project-involvement__pill.is-active:hover {
-  background: #fff;
+  background: transparent;
   color: #0a0a0a;
 }
 
-/* Further-style full-width lead — shell width via .section parent */
+@media (max-width: 860px) {
+  .projects-page .project-involvement__pill {
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.86);
+  }
+
+  .projects-page .project-involvement__pill:hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+  }
+
+  .projects-page .project-involvement__pill.is-active {
+    background: #fff;
+    color: #0a0a0a;
+  }
+
+  .projects-page .project-involvement__pill.is-active:hover {
+    background: #fff;
+    color: #0a0a0a;
+  }
+}
+
+/* Further-style full-width lead — overlay meta matches InsightsLead exactly */
 .project-featured {
-  /* Space before the two-column row */
+  /* Space before the filter / two-column row */
   margin: 0 0 clamp(1.75rem, 3vw, 2.5rem);
 }
 
@@ -2210,7 +2242,14 @@ html[data-chrome-ready="1"] .hero__video {
   overflow: hidden;
   width: 100%;
   aspect-ratio: 1920 / 1080;
-  background: #e4e4e1;
+  background: #1a1a1a;
+}
+
+.project-featured__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .project-featured__media img {
@@ -2220,7 +2259,88 @@ html[data-chrome-ready="1"] .hero__video {
   object-fit: cover;
 }
 
-/* Shared: image → meta distance (featured + two-column) */
+/* Short bottom fade only — cover is already light; don’t grey the whole frame */
+.project-featured__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 72%,
+    rgba(0, 0, 0, 0.22) 88%,
+    rgba(0, 0, 0, 0.48) 100%
+  );
+  pointer-events: none;
+}
+
+/* Same grid / padding / type as .insights-lead__meta */
+.project-featured__meta {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.35rem 1rem;
+  margin: 0;
+  padding: clamp(1rem, 2.4vw, 1.5rem) clamp(0.85rem, 1.5vw, 1.15rem)
+    clamp(0.45rem, 1vw, 0.65rem);
+}
+
+.project-featured__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: clamp(1.05rem, 0.95rem + 0.45vw, 1.35rem);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  text-transform: none;
+  color: #fff;
+}
+
+.project-featured__tagline {
+  margin: 0;
+  justify-self: center;
+  text-align: center;
+  max-width: 36ch;
+  font-family: var(--font-sans);
+  font-size: clamp(0.8125rem, 0.75rem + 0.25vw, 0.9375rem);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.project-featured__meta .project-type-chip {
+  justify-self: end;
+}
+
+.project-type-chip--on-media {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+@media (max-width: 700px) {
+  .project-featured__meta {
+    grid-template-columns: 1fr;
+    gap: 0.45rem;
+  }
+
+  .project-featured__tagline {
+    justify-self: start;
+    text-align: left;
+    max-width: none;
+  }
+
+  .project-featured__meta .project-type-chip {
+    justify-self: start;
+  }
+}
+
+/* Shared: image → meta distance (two-column cards) */
 .project-window__meta {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1fr);
@@ -2348,9 +2468,9 @@ html[data-chrome-ready="1"] .hero__video {
   font-family: var(--font-sans);
   font-size: clamp(0.5625rem, 0.52rem + 0.15vw, 0.6875rem);
   font-weight: 500;
-  letter-spacing: 0.06em;
+  letter-spacing: -0.01em;
   line-height: 1;
-  text-transform: uppercase;
+  text-transform: none; /* Chip fill labels — never all-caps */
   white-space: nowrap;
 }
 
@@ -2438,9 +2558,10 @@ html[data-chrome-ready="1"] .hero__video {
 }
 
 .project-involvement__track {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: center;
   gap: 0.15rem;
   padding: 0.28rem;
@@ -2449,7 +2570,31 @@ html[data-chrome-ready="1"] .hero__video {
   max-width: 100%;
 }
 
+/* Sliding active fill — iOS segmented thumb */
+.project-involvement__thumb {
+  position: absolute;
+  top: 0.28rem;
+  left: 0;
+  z-index: 0;
+  height: calc(100% - 0.56rem);
+  border-radius: 999px;
+  background: #1d1d1f;
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    transform 420ms cubic-bezier(0.32, 0.72, 0, 1),
+    width 420ms cubic-bezier(0.32, 0.72, 0, 1),
+    opacity 180ms ease;
+  will-change: transform, width;
+}
+
+.project-involvement__thumb.is-ready {
+  opacity: 1;
+}
+
 .project-involvement__pill {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2461,38 +2606,39 @@ html[data-chrome-ready="1"] .hero__video {
   color: #1d1d1f;
   text-decoration: none;
   white-space: nowrap;
-  transition:
-    background 220ms ease,
-    color 220ms ease;
+  background: transparent;
+  transition: color 220ms ease;
 }
 
 .project-involvement__pill:hover {
-  background: rgba(0, 0, 0, 0.04);
+  color: #000;
 }
 
 .project-involvement__pill.is-active {
-  background: #1d1d1f;
+  background: transparent;
   color: #fff;
 }
 
 .project-involvement__pill.is-active:hover {
-  background: #1d1d1f;
+  background: transparent;
   color: #fff;
 }
 
-/* Soft enter when filter results remount */
+/* Apple-style results enter: soft rise + fade (no hard dump) */
 .filter-results {
-  animation: filter-results-enter 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: filter-results-enter 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes filter-results-enter {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translate3d(0, 18px, 0) scale(0.985);
+    filter: blur(6px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
   }
 }
 
@@ -2500,26 +2646,66 @@ html[data-chrome-ready="1"] .hero__video {
   .filter-results {
     animation: none;
   }
+
+  .project-involvement__thumb {
+    transition: none;
+  }
 }
 
-@media (max-width: 700px) {
+/*
+ * Narrow: drop the unified capsule — individual buttons that wrap / stack.
+ * (Projects: 4 involvement pills; Insights: All + tags)
+ */
+@media (max-width: 860px) {
   .project-involvement__folder {
     grid-template-columns: minmax(0, 1fr);
     width: 100%;
+    max-width: 22rem;
   }
 
   .project-involvement__track {
     display: flex;
+    flex-direction: column;
+    align-items: stretch;
     flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    max-width: 100%;
-    scrollbar-width: none;
-    justify-content: flex-start;
+    gap: 0.45rem;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    width: 100%;
   }
 
-  .project-involvement__track::-webkit-scrollbar {
+  .project-involvement__thumb {
     display: none;
+  }
+
+  .project-involvement__pill {
+    width: 100%;
+    justify-content: center;
+    padding: 0.7rem 1.1rem;
+    border-radius: 999px;
+    background: #e5e5ea;
+    color: #1d1d1f;
+    white-space: normal;
+    text-align: center;
+    transition:
+      background 220ms ease,
+      color 220ms ease;
+  }
+
+  .project-involvement__pill:hover {
+    background: #dcdce0;
+    color: #000;
+  }
+
+  .project-involvement__pill.is-active {
+    background: #1d1d1f;
+    color: #fff;
+  }
+
+  .project-involvement__pill.is-active:hover {
+    background: #1d1d1f;
+    color: #fff;
   }
 }
 
@@ -3460,22 +3646,53 @@ html[data-chrome-ready="1"] .hero__video {
   background: rgba(255, 255, 255, 0.12);
 }
 
+.insights-page .insight-filter-bar .project-involvement__thumb {
+  background: #fff;
+}
+
 .insights-page .insight-filter-bar .project-involvement__pill {
   color: rgba(255, 255, 255, 0.78);
 }
 
 .insights-page .insight-filter-bar .project-involvement__pill:hover {
-  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  background: transparent;
 }
 
 .insights-page .insight-filter-bar .project-involvement__pill.is-active {
-  background: #fff;
+  background: transparent;
   color: #0a0a0a;
 }
 
 .insights-page .insight-filter-bar .project-involvement__pill.is-active:hover {
-  background: #fff;
+  background: transparent;
   color: #0a0a0a;
+}
+
+@media (max-width: 860px) {
+  .insights-page .insight-filter-bar .project-involvement__folder {
+    max-width: min(22rem, 100%);
+  }
+
+  .insights-page .insight-filter-bar .project-involvement__pill {
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.86);
+  }
+
+  .insights-page .insight-filter-bar .project-involvement__pill:hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+  }
+
+  .insights-page .insight-filter-bar .project-involvement__pill.is-active {
+    background: #fff;
+    color: #0a0a0a;
+  }
+
+  .insights-page .insight-filter-bar .project-involvement__pill.is-active:hover {
+    background: #fff;
+    color: #0a0a0a;
+  }
 }
 
 /*
@@ -3579,7 +3796,15 @@ html[data-chrome-ready="1"] .hero__video {
   border-color: rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.68);
-  letter-spacing: var(--insight-label-tracking, 0.08em);
+  letter-spacing: -0.01em;
+}
+
+/* Related strip lives on detail (black) — same chip fill as the index */
+.insight-detail .insight-chip {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.78);
+  letter-spacing: -0.01em;
 }
 
 .insight-chips {
@@ -3608,12 +3833,12 @@ html[data-chrome-ready="1"] .hero__video {
   background: rgba(29, 29, 31, 0.06);
   color: rgba(29, 29, 31, 0.62);
   font-family: var(--font-sans);
-  /* Same size + tracking as date / type on the detail header */
+  /* Same size as other micro labels — casing stays as authored (no uppercase) */
   font-size: var(--insight-label-size, 0.75rem);
   font-weight: 500;
-  letter-spacing: var(--insight-label-tracking, 0.08em);
+  letter-spacing: -0.01em;
   line-height: 1;
-  text-transform: uppercase;
+  text-transform: none;
   white-space: nowrap;
 }
 
@@ -3733,47 +3958,50 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video {
 .project-case-demo__title {
   margin: 0;
   font-family: var(--font-sans);
-  font-size: clamp(2.75rem, 2rem + 3.6vw, 3.75rem);
+  font-size: clamp(2.5rem, 1.85rem + 3.2vw, 3.5rem);
   font-weight: 500;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   line-height: 1.05;
   color: #fff;
+  text-wrap: balance;
 }
 
 .project-case-demo__summary {
-  margin: clamp(0.7rem, 1.2vw, 0.95rem) 0 0;
-  max-width: none;
+  margin: clamp(0.65rem, 1.1vw, 0.9rem) 0 0;
+  max-width: 28ch;
   font-family: var(--font-sans);
-  font-size: clamp(1.125rem, 1.05rem + 0.3vw, 1.25rem);
+  font-size: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
   font-weight: 400;
   letter-spacing: -0.01em;
-  line-height: 1.28;
-  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.82);
   text-wrap: pretty;
 }
 
 .project-case-demo__tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 0.85rem 0 0;
+  gap: 0.4rem;
+  margin: 1rem 0 0;
   padding: 0;
   list-style: none;
 }
 
 .project-case-demo__tag {
   display: block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.16);
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   font-family: var(--font-sans);
   font-size: 0.6875rem;
-  font-weight: 400;
-  letter-spacing: 0.01em;
-  line-height: 1.3;
-  color: #fff;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  text-transform: none; /* Filled type chips — never all-caps */
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .project-case-demo__body {
@@ -3875,6 +4103,21 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video {
     brightness(115%);
 }
 
+/*
+ * Adaptive contrast only (from adaptive-glass-button recipe).
+ * difference vs pixels behind — dark bg → lighter, light bg → darker.
+ * Do not restyle the established glass shell / click chrome.
+ */
+.project-case-demo__toggle-contrast {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, 0.12);
+  mix-blend-mode: difference;
+  pointer-events: none;
+  z-index: 1;
+}
+
 .project-case-demo__toggle {
   position: relative;
   z-index: 2;
@@ -3892,6 +4135,8 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video {
   font-weight: 500; /* Medium — one step above Regular */
   line-height: 1.2;
   cursor: pointer;
+  /* Label / icon auto-contrast against backdrop */
+  mix-blend-mode: difference;
 }
 
 .project-case-demo__toggle-icon {
@@ -3928,7 +4173,12 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video {
 }
 
 .project-case-demo__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .project-case-demo__pair {
@@ -3936,6 +4186,95 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video {
   /* Keep 2-up on phone — don’t collapse to a single column */
   grid-template-columns: 1fr 1fr;
   gap: calc(var(--shell-gutter) * 0.35);
+}
+
+.project-case-demo__row {
+  display: grid;
+  /* Keep N-up on phone — don’t stack */
+  gap: calc(var(--shell-gutter) * 0.35);
+}
+
+.project-case-demo__pair--video {
+  /* Vertical TikTok / unboxing clips — allow interaction for play pipeline */
+  pointer-events: auto;
+}
+
+.project-fallback-video {
+  position: relative;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  background: #141414;
+  user-select: none;
+}
+
+.project-fallback-video__media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.project-fallback-video.is-ready .project-fallback-video__media {
+  opacity: 1;
+}
+
+.project-fallback-video__cover {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  background: #141414;
+  color: rgba(255, 255, 255, 0.55);
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 1;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.project-fallback-video.is-ready .project-fallback-video__cover {
+  opacity: 0;
+}
+
+.project-fallback-video__spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  border-top-color: rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  animation: project-fallback-spin 0.7s linear infinite;
+}
+
+.project-fallback-video__label {
+  line-height: 1;
+}
+
+@keyframes project-fallback-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-fallback-video__spinner {
+    animation: none;
+    border-top-color: rgba(255, 255, 255, 0.45);
+  }
+
+  .project-fallback-video__media,
+  .project-fallback-video__cover {
+    transition: none;
+  }
 }
 
 .project-case-demo__panel {

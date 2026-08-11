@@ -38,7 +38,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   return (
     <main className="project-detail">
       {/* Living case-detail template — project-aware fields wired later */}
-      <ProjectCaseDemo key={slug} />
+      <ProjectCaseDemo key={slug} project={project} />
       {related.length > 0 ? (
         <section className="section projects-related project-detail__related">
           <h2 className="projects-related__title">Related</h2>

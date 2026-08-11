@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { FilterSegmentTrack } from "@/components/FilterSegmentTrack";
 import { insightTags, type InsightTag } from "@/content/nav";
 
 type InsightFilterProps = {
@@ -8,48 +8,24 @@ type InsightFilterProps = {
 };
 
 export function InsightFilter({ activeTag }: InsightFilterProps) {
+  const items = [
+    { id: "all", label: "All", href: "/insights" },
+    ...insightTags.map((tag) => ({
+      id: tag.slug,
+      label: tag.label,
+      href: `/insights?tag=${tag.slug}`,
+    })),
+  ];
+
   return (
     <div className="project-involvement insight-filter-bar">
       <h2 className="project-involvement__heading">The Latest Insight</h2>
       <div className="project-involvement__folder">
-        <div
-          className="project-involvement__track"
-          role="list"
-          aria-label="Filter by tag"
-        >
-          <Link
-            href="/insights"
-            scroll={false}
-            role="listitem"
-            className={
-              !activeTag
-                ? "project-involvement__pill is-active"
-                : "project-involvement__pill"
-            }
-            aria-current={!activeTag ? "page" : undefined}
-          >
-            All
-          </Link>
-          {insightTags.map((tag) => {
-            const isActive = activeTag?.slug === tag.slug;
-            return (
-              <Link
-                key={tag.slug}
-                href={`/insights?tag=${tag.slug}`}
-                scroll={false}
-                role="listitem"
-                className={
-                  isActive
-                    ? "project-involvement__pill is-active"
-                    : "project-involvement__pill"
-                }
-                aria-current={isActive ? "page" : undefined}
-              >
-                {tag.label}
-              </Link>
-            );
-          })}
-        </div>
+        <FilterSegmentTrack
+          items={items}
+          activeId={activeTag?.slug ?? "all"}
+          ariaLabel="Filter by tag"
+        />
       </div>
     </div>
   );

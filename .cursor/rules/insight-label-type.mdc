@@ -1,15 +1,30 @@
 ---
-description: Keep Insight label letter-spacing and meta gaps consistent
-globs: app/insights/**/*.tsx,app/globals.css,components/Insight*.tsx,components/Insights*.tsx
-alwaysApply: false
+description: Filled type chips never use all-caps; insight label tokens
+globs: app/insights/**/*.tsx, app/projects/**/*.tsx, app/globals.css, components/Insight*.tsx, components/Insights*.tsx, components/Project*.tsx
+alwaysApply: true
 ---
 
-# Insight label typography
+# Type chips / filled tags — no all-caps
 
-Shared tokens on `.insights-page` and `.insight-detail`:
+Any **project type** or **article type** label that sits on a chip fill（套底）must **not** use `text-transform: uppercase`.
 
-- `--insight-label-tracking: 0.08em` — date, article type, chips, filter pills, Insights eyebrow
-- `--insight-label-size: clamp(0.625rem, 0.58rem + 0.2vw, 0.75rem)` — same surfaces
-- `--insight-meta-gap: 1.75rem` — space between date and type on the detail header
+Applies to:
 
-Do not invent a different letter-spacing or font-size for these uppercase micro-labels on one Insights surface and another. Change the tokens once; all consumers follow.
+- `.insight-chip` / `.insight-chip--on-media`
+- `.project-type-chip` / `.project-type-chip--on-media`
+- `.project-case-demo__tag`
+- Any future filled type pill on covers or cards
+
+Show the authored label as-is (e.g. `End-to-End Projects`), with normal sentence/title casing — never CSS-forced ALL CAPS.
+
+On **dark surfaces** (`.insights-page`, `.insight-detail`, `.projects-page`), chip fill must use light-on-dark colors — default chip ink is for light backgrounds and will disappear on black.
+
+# Insight label tokens (size / tracking for non-chip microcopy)
+
+Shared tokens on `.insights-page` and `.insight-detail` for date / eyebrows / filter microcopy (not forced-uppercase chips):
+
+- `--insight-label-tracking: 0.08em`
+- `--insight-label-size: clamp(0.625rem, 0.58rem + 0.2vw, 0.75rem)`
+- `--insight-meta-gap: 1.75rem`
+
+Do not invent a different letter-spacing or font-size for those micro-labels on one Insights surface and another.

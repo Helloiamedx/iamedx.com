@@ -1,0 +1,28 @@
+---
+description: Project detail videos — primary URL first, loading cover, muted autoplay
+alwaysApply: true
+---
+
+# Project detail videos
+
+All case-page videos (pairs under the gallery, and any future project media videos) follow this stack. Use `ProjectFallbackVideo` + `ProtectedVideo` — do not invent a one-off player.
+
+## 1. Sources
+
+1. **Primary (原链接)** — if the user gives a TikTok / external original URL, wire it as `primary` first.
+2. **Fallback (备用)** — only when they provide a CDN / direct mp4. Do **not** invent or scrape a fallback.
+3. Until a fallback exists, keep `fallback` omitted / empty; the player stays on the primary and shows loading (or fails honestly) — do not silently swap to unrelated media.
+
+Playback requirements on the working source: **muted**, **autoplay**, **loop**, **no download** (`ProtectedVideo`).
+
+## 2. Cover before play
+
+- **Loading only** — spinner / “Loading” cover until the video can play, then fade out and play.
+- **Do not** extract a frame, generate a poster image, or invent a still from the video.
+
+## 3. Layout
+
+Closing unboxing / social clips sit as a **two-column pair** at the **bottom** of the media stack (`endVideoPair` on the project), left | right, same gutter language as image pairs.
+
+Full-width process clips go via `afterCoverVideo`. When `afterCoverStills` is set (e.g. frames 6–8 in one row), order is: cover still → stills row → process video → rest of gallery.
+---

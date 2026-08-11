@@ -17,7 +17,8 @@ function LogoTrack({ copy }: { copy: "a" | "b" }) {
             alt=""
             width={160}
             height={48}
-            loading="lazy"
+            /* Eager — lazy load changes widths mid-loop and makes -50% hitch */
+            loading="eager"
             decoding="async"
             draggable={false}
           />

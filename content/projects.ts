@@ -70,23 +70,75 @@ export type Project = {
   /** Intrinsic cover size — drives card aspect / relative scale */
   coverWidth: number;
   coverHeight: number;
+  /** Case detail first-screen still (replaces default hero video when set) */
+  heroImage?: string;
   /** Case detail first-screen Vimeo (falls back to default demo reel) */
   heroVimeoId?: string;
   heroVimeoHash?: string;
-  /** Case Background chapter — headline (uppercase, right column) */
+  /** Case Background chapter — headline (legacy / optional) */
   statementHeadline?: string;
   /** Case Background chapter — body paragraphs */
   overview?: string | string[];
-  /** Case Challenges chapter */
+  /** Case Challenge chapter */
   challengesHeadline?: string;
   challengesBody?: string | string[];
-  /** Case Execution chapter */
+  /** Case What I did chapter */
   executionHeadline?: string;
   executionBody?: string | string[];
-  /** Case Impact chapter */
+  /** Case Outcome chapter */
   impactHeadline?: string;
   impactBody?: string | string[];
   gallery?: string[];
+  /**
+   * Still(s) directly under the first gallery still (row 2).
+   * One item → full-width; multiple → equal columns in one row.
+   * Video (`afterCoverVideo`) follows as the next row.
+   */
+  afterCoverStills?: {
+    items: { src: string; alt: string }[];
+    /** CSS padding-bottom ratio per cell / full frame */
+    ratio?: string;
+  };
+  /** Extra still rows after `afterCoverStills`, before the process video. */
+  afterCoverExtraRows?: {
+    items: { src: string; alt: string }[];
+    ratio?: string;
+  }[];
+  /**
+   * Full-width video under the after-cover stills (or under cover if no stills).
+   * Prefer original URL as `primary`; CDN backup as `fallback` when provided.
+   */
+  afterCoverVideo?: {
+    primary: string;
+    fallback?: string;
+    alt: string;
+    /** CSS padding-bottom ratio; default 16:9 */
+    ratio?: string;
+  };
+  /** Full-width stills after the process video (each item = one row). */
+  afterVideoStills?: { src: string; alt: string; ratio?: string }[];
+  /**
+   * Multi-up stills after the process video (2–3 equal columns).
+   * `afterIndex` = how many `afterVideoStills` come before this row (default: all → end).
+   */
+  afterVideoRow?: {
+    items: { src: string; alt: string }[];
+    ratio?: string;
+    afterIndex?: number;
+  };
+  /** Still row just above the closing video pair (second-to-last). */
+  beforeEndRow?: {
+    items: { src: string; alt: string }[];
+    ratio?: string;
+  };
+  /**
+   * Optional closing two-up videos on the case page.
+   * Each side tries `primary` first; `fallback` only when the user supplies a CDN mp4.
+   */
+  endVideoPair?: {
+    left: { primary: string; fallback?: string; alt: string };
+    right: { primary: string; fallback?: string; alt: string };
+  };
   year: number;
   client?: string;
   featured: boolean;
@@ -109,18 +161,214 @@ export type ProjectsFeaturedLead = {
 export const SHOWCASE_COVER_W = 3000;
 export const SHOWCASE_COVER_H = 1687;
 
+/** Slug from project display name — keeps `/projects/[slug]` in sync with the title */
+export function projectSlugFromName(name: string) {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+/**
+ * CDN cover path follows the project folder name:
+ * `/images/projects/{Project Name}/{Project Name}.jpg`
+ */
+export function projectCoverFromName(
+  name: string,
+  fileName = `${name}.jpg`,
+) {
+  const folder = encodeURIComponent(name);
+  const file = encodeURIComponent(fileName);
+  return asset(`/images/projects/${folder}/${file}`);
+}
+
+/** 「第一个项目」— name drives title, slug, and cover URL */
+const FIRST_PROJECT_NAME = "Mass Effect Tali Companion Bundle";
+const FIRST_PROJECT_SLUG = projectSlugFromName(FIRST_PROJECT_NAME);
+const FIRST_PROJECT_COVER = projectCoverFromName(
+  FIRST_PROJECT_NAME,
+  "Mass Effect Tali Companion Bundle-hero.jpg",
+);
+const FIRST_PROJECT_HERO = projectCoverFromName(
+  FIRST_PROJECT_NAME,
+  "Mass Effect Tali.jpg",
+);
+const FIRST_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    {
+      src: projectCoverFromName(
+        FIRST_PROJECT_NAME,
+        "Mass Effect Tali Companion Bundle Mass Effect Tali Companion Bundle color1.jpg",
+      ),
+      alt: "Color 1",
+    },
+    {
+      src: projectCoverFromName(
+        FIRST_PROJECT_NAME,
+        "Mass Effect Tali Companion Bundle Mass Effect Tali Companion Bundle color2.jpg",
+      ),
+      alt: "Color 2",
+    },
+  ],
+  ratio: "100%",
+};
+const FIRST_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      {
+        src: projectCoverFromName(
+          FIRST_PROJECT_NAME,
+          "Mass Effect Tali Companion Bundle Mass Effect Tali Companion Bundle woodenbox2.jpg",
+        ),
+        alt: "Wooden box 2",
+      },
+      {
+        src: projectCoverFromName(
+          FIRST_PROJECT_NAME,
+          "Mass Effect Tali Companion Bundle Mass Effect Tali Companion Bundle woodenbox1.jpg",
+        ),
+        alt: "Wooden box 1",
+      },
+      {
+        src: projectCoverFromName(
+          FIRST_PROJECT_NAME,
+          "Mass Effect Tali Companion Bundle Mass Effect Tali Companion Bundle woodenbox4.jpg",
+        ),
+        alt: "Wooden box 4",
+      },
+    ],
+    ratio: "100%",
+  },
+];
+const FIRST_PROJECT_AFTER_COVER_VIDEO = {
+  primary: projectCoverFromName(FIRST_PROJECT_NAME, "Processing.mp4"),
+  alt: "Processing",
+  ratio: "56.25%",
+} as const;
+const FIRST_PROJECT_AFTER_VIDEO_STILLS = [
+  {
+    src: projectCoverFromName(
+      FIRST_PROJECT_NAME,
+      "Mass Effect Tali Companion Bundle overview.jpg",
+    ),
+    alt: "Overview",
+    ratio: "56.25%",
+  },
+];
+const FIRST_PROJECT_AFTER_VIDEO_ROW = {
+  items: [
+    {
+      src: projectCoverFromName(
+        FIRST_PROJECT_NAME,
+        "Mass Effect Tali Companion Bundle Mass Effect Tali Companion Bundle Statue3.jpg",
+      ),
+      alt: "Statue 3",
+    },
+    {
+      src: projectCoverFromName(
+        FIRST_PROJECT_NAME,
+        "Mass Effect Tali Companion Bundle Mass Effect Tali Companion Bundle Statue1.jpg",
+      ),
+      alt: "Statue 1",
+    },
+    {
+      src: projectCoverFromName(
+        FIRST_PROJECT_NAME,
+        "Mass Effect Tali Companion Bundle Mass Effect Tali Companion Bundle Statue2.jpg",
+      ),
+      alt: "Statue 2",
+    },
+  ],
+  ratio: "100%",
+  afterIndex: 1,
+};
+const FIRST_PROJECT_END_VIDEOS = {
+  left: {
+    primary:
+      "https://www.tiktok.com/@forever_normandy/video/7535653105963224333?is_from_webapp=1&sender_device=pc",
+    fallback: projectCoverFromName(
+      FIRST_PROJECT_NAME,
+      "Tali companion bundle unboxing.mp4",
+    ),
+    alt: "Tali companion bundle unboxing",
+  },
+  right: {
+    primary:
+      "https://www.tiktok.com/@forever_normandy/video/7539356566965718327?is_from_webapp=1&sender_device=pc",
+    fallback: projectCoverFromName(
+      FIRST_PROJECT_NAME,
+      "Garrus companion bundle unboxing.mp4",
+    ),
+    alt: "Garrus companion bundle unboxing",
+  },
+} as const;
+
 export const projectsFeaturedLead: ProjectsFeaturedLead = {
-  slug: "wimbledon",
-  title: "Wimbledon",
-  tagline: "Embodying the spirit of tennis\u2019 grandest stage",
+  slug: FIRST_PROJECT_SLUG,
+  title: FIRST_PROJECT_NAME,
+  tagline: "Found your home with Tali?",
   categories: involvementTags("end-to-end"),
-  coverImage:
-    "https://cdn.prod.website-files.com/6849da698cb78e39e81215c3/6a4e1d09946021ea4d30670a_Artboard%201-100.jpg",
+  coverImage: FIRST_PROJECT_COVER,
   coverWidth: 1920,
   coverHeight: 1080,
 };
 
 export const projects: Project[] = [
+  {
+    slug: FIRST_PROJECT_SLUG,
+    title: FIRST_PROJECT_NAME,
+    materials: ["wood", "resin", "metal", "paper"],
+    ips: ["mass-effect"],
+    tags: involvementTags("end-to-end"),
+    summary: "Found your home with Tali?",
+    tagline: "Found your home with Tali?",
+    headline: "Found your home with Tali?",
+    studySub: "study what i did",
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "end-to-end",
+    coverImage: FIRST_PROJECT_COVER,
+    coverWidth: 1920,
+    coverHeight: 1080,
+    heroImage: FIRST_PROJECT_HERO,
+    afterCoverStills: FIRST_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: FIRST_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    afterCoverVideo: FIRST_PROJECT_AFTER_COVER_VIDEO,
+    afterVideoStills: FIRST_PROJECT_AFTER_VIDEO_STILLS,
+    afterVideoRow: FIRST_PROJECT_AFTER_VIDEO_ROW,
+    endVideoPair: FIRST_PROJECT_END_VIDEOS,
+    overview: [
+      "This project was a character-themed collectible set based on the Mass Effect IP. It was designed to bring the character to life through several physical components and create a complete collectible experience. The set included a wooden display box, a resin sculpture, a metal necklace, and a themed letter. Different materials and manufacturing processes had to be brought together while keeping the overall look and quality consistent.",
+      "The set was developed around the Mass Effect character Tali’Zorah. The goal was to turn the original IP design into a product that could actually be manufactured at scale, combining woodworking, resin casting, metal accessories, and other production processes into one finished collectible set.",
+    ],
+    challengesBody: [
+      "The main challenges were around the surface finish of the wooden box and the structure of the sculpture.",
+      "The wooden box had several visual requirements. The client wanted it to look metallic even though the actual material was wood, so the surface finish had to create a convincing metal-like appearance.",
+      "Color consistency after laser engraving was another major issue. Because wood naturally contains moisture, the heat from laser engraving burns the surface and makes the engraved areas much darker, sometimes almost black, while the untouched areas keep the original wood color. This meant there was already a clear color difference before painting. The final finish had to hide this difference while still creating the metallic appearance the client wanted.",
+      "The client also did not want the engraved areas to look completely flat. They wanted more texture and depth. Since the engraving pattern and laser path had already been defined, we had to find a way to create the required texture within the existing design, while also controlling the density and direction of the pattern.",
+      "The sculpture had a different challenge: cost. Producing the whole sculpture as one piece would have made manufacturing much more expensive. We needed to find a structure that could reduce production cost without losing the detail and overall collectible quality of the sculpture.",
+    ],
+    executionBody: [
+      "I started by looking at the coating material itself and worked with the factory to test and adjust different aluminum silver pigments. After several rounds of testing, we found a formula that gave the surface the metallic appearance we wanted and added it to the coating process.",
+      "The aluminum pigment also had enough coverage to hide the dark areas created by laser engraving. At the same time, the metal particles created natural, uneven reflections across the surface. This not only solved the color difference between the engraved and non-engraved areas, but also gave the wooden box an aged-metal look. The final sample actually looked better than we originally expected.",
+      "For the texture inside the engraved areas, I contacted the laser equipment manufacturer and asked them to help modify the engraving program. We added several different filling patterns within the existing laser path and tested how each one looked. This allowed us to create the line and grain effect the client wanted while keeping the original design unchanged.",
+      "For the sculpture, I worked with the engineering team to break the original structure into several separately producible parts. We then tested the manufacturability of each part and the stability of the final assembly. The point was not simply to split the sculpture into pieces, but to make sure those pieces could be put back together securely without noticeably affecting the original appearance or details. Through this structural and assembly testing, we found a production method that reduced cost while keeping the final result intact.",
+    ],
+    impactBody: [
+      "The final result was quite different from most similar products on the market at the time. Although the main material was wood, the surface treatment gave it a convincing metal-like appearance. It moved away from the look of a traditional wooden box and allowed the client to achieve a much more premium finish at a relatively low manufacturing cost.",
+      "The product was also very competitive in price and sold quickly after launch. The result gave the client enough confidence to continue developing another two or three products using a similar approach.",
+    ],
+    year: 2024,
+    client: "Mass Effect",
+    featured: true,
+    challenge:
+      "Deliver a metal-like wooden box finish and a lower-cost sculpture structure without losing collectible quality.",
+    result:
+      "A premium metallic wood finish at competitive cost, with strong sell-through and follow-on SKUs.",
+  },
   {
     slug: "wimbledon",
     title: "Wimbledon",
@@ -143,7 +391,7 @@ export const projects: Project[] = [
     coverHeight: 1080,
     year: 2025,
     client: "Wimbledon",
-    featured: true,
+    featured: false,
     challenge:
       "Translate the Championships\u2019 heritage into tangible brand touchpoints.",
     result:

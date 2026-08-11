@@ -17,7 +17,7 @@ On `/projects` and `/insights`, the **first full-width featured item sits above 
 
 ## Sources of truth
 
-- **Projects:** `projectsFeaturedLead` in `content/projects.ts` (currently Wimbledon). Only edit that object when the user says to switch the featured project.
+- **Projects —「第一个项目」:** full-width lead above the filter = `projectsFeaturedLead`. Name drives **title**, **slug** (`projectSlugFromName`), and **cover URL** (`projectCoverFromName` → `/images/projects/{Name}/{Name}.jpg`). Currently **Mass Effect Tali Companion Bundle**. Only change when the user explicitly asks.
 - **Insights:** featured lead is the fixed first insight on the index (same permanence — do not reassign from filter state).
 
 ## Do not

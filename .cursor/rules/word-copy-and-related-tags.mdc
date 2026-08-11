@@ -1,0 +1,29 @@
+---
+description: Project/insight copy from Word — display polish, related tags bug
+alwaysApply: true
+---
+
+# Word → site copy
+
+Yes — the user may supply project (or insight) copy as a **Word `.docx`**. Read the file and map meaning into content. Do **not** paste Word casing blindly onto the site.
+
+## Expected Word layout (per project)
+
+1. **Project name** → `title`
+2. **Description** → tagline / summary
+3. **Project type** → involvement id (`end-to-end` / `contribution` / `specialized`)
+
+项目详情 body always: Background → Challenge → What I did → Outcome (English when both languages are present).
+
+## Display casing (mandatory — use judgment)
+
+Word may be all-lowercase for speed. **On the site, polish:**
+
+- **Titles:** Title Case — capitalize each major word (e.g. `Mass Effect Tali Companion Bundle`). Do **not** leave all-lowercase; do **not** force CSS `text-transform: uppercase` on project titles unless the design system already requires it for a specific label style.
+- **Taglines / short descriptions:** Sentence case (e.g. `Found your home with Tali?`).
+- **Involvement / article type chips (filled 套底):** never CSS `text-transform: uppercase` — show polished labels as written (`End-to-End Projects`, etc.).
+- Brand / character names keep correct proper nouns (Mass Effect, Tali, etc.).
+
+## Known bug — fixed
+
+Insight **Related** cards need visible type chips on the dark detail page — use `.insight-detail .insight-chip` light-on-dark styles (same idea as `.insights-page .insight-chip`). Do not leave default light-theme chip colors on `#000`.

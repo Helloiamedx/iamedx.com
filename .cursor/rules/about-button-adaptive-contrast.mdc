@@ -1,0 +1,13 @@
+---
+description: About button — only extract mix-blend difference for adaptive contrast
+alwaysApply: true
+---
+
+# About The Project button — adaptive contrast
+
+When adapting the case-detail **About The Project** control to light/dark media:
+
+1. **Do not** restyle the established glass shell, border, liquid `::after`, ClickSpark, open/close, or pin positioning.
+2. **Only** apply the adaptive **contrast** recipe: a translucent white layer + label/icon using `mix-blend-mode: difference` (see `.project-case-demo__toggle-contrast` and the toggle’s difference blend).
+3. Do **not** use luminance sampling, `is-on-light` theme swaps, or replace the button with the full adaptive-glass-button markup/styles.
+---

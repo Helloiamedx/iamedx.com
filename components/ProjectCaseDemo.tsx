@@ -1,27 +1,41 @@
 "use client";
 
-import Image from "next/image";
 import { useLenis } from "lenis/react";
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ClickSpark } from "@/components/ClickSpark";
+import { ProjectFallbackVideo } from "@/components/ProjectFallbackVideo";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
+import { getCaseCopySections } from "@/content/caseCopy";
+import type { Project } from "@/content/projects";
 import { asset } from "@/lib/assets";
-
-const TAGS = [
-  "Brand Identity",
-  "Motion Graphics & Film",
-  "Brand Strategy",
-  "Verbal Identity",
-  "Technology",
-  "Climate & Sustainability",
-] as const;
 
 type MediaItem =
   | { kind: "full"; src: string; alt: string; ratio: string }
-  | { kind: "pair"; left: { src: string; alt: string; ratio: string }; right: { src: string; alt: string; ratio: string } };
+  | {
+      kind: "pair";
+      left: { src: string; alt: string; ratio: string };
+      right: { src: string; alt: string; ratio: string };
+    }
+  | {
+      kind: "row";
+      items: { src: string; alt: string; ratio: string }[];
+    }
+  | {
+      kind: "video";
+      primary: string;
+      fallback?: string;
+      alt: string;
+      ratio: string;
+    }
+  | {
+      kind: "video-pair";
+      left: { primary: string; fallback?: string; alt: string };
+      right: { primary: string; fallback?: string; alt: string };
+      ratio?: string;
+    };
 
-const MEDIA: MediaItem[] = [
+const PLACEHOLDER_MEDIA: MediaItem[] = [
   {
     kind: "full",
     src: asset("/images/projects/homeroll - 1.jpg"),
@@ -142,11 +156,10 @@ function Frame({
 }) {
   return (
     <div className="project-case-demo__frame" style={{ paddingBottom: ratio }}>
-      <Image
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         src={src}
         alt={alt}
-        fill
-        sizes="(max-width: 800px) 100vw, 70vw"
         className="project-case-demo__img"
         draggable={false}
       />
@@ -158,7 +171,130 @@ function Frame({
  * Living Pentagram-style case layout (mounted on `/projects/[slug]`):
  * video hero with left-stacked overlay, image weave, case panel toggle.
  */
-export function ProjectCaseDemo() {
+type ProjectCaseDemoProps = {
+  project: Project;
+};
+
+export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
+  const copySections = getCaseCopySections(project);
+  const tags = project.tags.length > 0 ? project.tags : [project.involvement];
+  const stillRatio = project.afterCoverStills?.ratio ?? "56.25%";
+  const media: MediaItem[] = [
+    {
+      kind: "full",
+      src: project.coverImage,
+      alt: project.title,
+      ratio: "56.25%",
+    },
+    ...(project.afterCoverStills
+      ? project.afterCoverStills.items.length === 1
+        ? [
+            {
+              kind: "full" as const,
+              src: project.afterCoverStills.items[0].src,
+              alt: project.afterCoverStills.items[0].alt,
+              ratio: stillRatio,
+            },
+          ]
+        : [
+            {
+              kind: "row" as const,
+              items: project.afterCoverStills.items.map((item) => ({
+                src: item.src,
+                alt: item.alt,
+                ratio: stillRatio,
+              })),
+            },
+          ]
+      : []),
+    ...(project.afterCoverExtraRows?.map((row) => ({
+      kind: "row" as const,
+      items: row.items.map((item) => ({
+        src: item.src,
+        alt: item.alt,
+        ratio: row.ratio ?? "100%",
+      })),
+    })) ?? []),
+    ...(project.afterCoverVideo
+      ? [
+          {
+            kind: "video" as const,
+            primary: project.afterCoverVideo.primary,
+            fallback: project.afterCoverVideo.fallback,
+            alt: project.afterCoverVideo.alt,
+            ratio: project.afterCoverVideo.ratio ?? "56.25%",
+          },
+        ]
+      : []),
+    ...(() => {
+      const stills = project.afterVideoStills ?? [];
+      const row = project.afterVideoRow;
+      const split = Math.min(
+        Math.max(row?.afterIndex ?? stills.length, 0),
+        stills.length,
+      );
+      const rowRatio = row?.ratio ?? "100%";
+      const before = stills.slice(0, split).map((still) => ({
+        kind: "full" as const,
+        src: still.src,
+        alt: still.alt,
+        ratio: still.ratio ?? "56.25%",
+      }));
+      const mid = row
+        ? [
+            {
+              kind: "row" as const,
+              items: row.items.map((item) => ({
+                src: item.src,
+                alt: item.alt,
+                ratio: rowRatio,
+              })),
+            },
+          ]
+        : [];
+      const after = stills.slice(split).map((still) => ({
+        kind: "full" as const,
+        src: still.src,
+        alt: still.alt,
+        ratio: still.ratio ?? "56.25%",
+      }));
+      return [...before, ...mid, ...after];
+    })(),
+    /* Demo weave only when this project has no real after-cover gallery yet */
+    ...(!(
+      project.afterCoverStills ||
+      project.afterCoverExtraRows?.length ||
+      project.afterCoverVideo ||
+      project.afterVideoStills ||
+      project.afterVideoRow ||
+      project.beforeEndRow
+    )
+      ? PLACEHOLDER_MEDIA
+      : []),
+    ...(project.beforeEndRow
+      ? [
+          {
+            kind: "row" as const,
+            items: project.beforeEndRow.items.map((item) => ({
+              src: item.src,
+              alt: item.alt,
+              ratio: project.beforeEndRow!.ratio ?? "100%",
+            })),
+          },
+        ]
+      : []),
+    ...(project.endVideoPair
+      ? [
+          {
+            kind: "video-pair" as const,
+            left: project.endVideoPair.left,
+            right: project.endVideoPair.right,
+            ratio: "177.78%",
+          },
+        ]
+      : []),
+  ];
+
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [btnReady, setBtnReady] = useState(false);
@@ -364,24 +500,36 @@ export function ProjectCaseDemo() {
 
   return (
     <div className={`project-case-demo${open ? " is-panel-open" : ""}`}>
-      <section className="project-case-demo__hero" aria-label="Univers demo">
+      <section
+        className="project-case-demo__hero"
+        aria-label={project.title}
+      >
         <div className="project-case-demo__hero-media" aria-hidden="true">
-          <ProtectedVideo
-            className="project-case-demo__hero-video"
-            src={asset("videos/home-hero-video.mp4")}
-            preload="metadata"
-          />
+          {project.heroImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              className="project-case-demo__hero-video"
+              src={project.heroImage}
+              alt=""
+              draggable={false}
+            />
+          ) : (
+            <ProtectedVideo
+              className="project-case-demo__hero-video"
+              src={asset("videos/home-hero-video.mp4")}
+              preload="metadata"
+            />
+          )}
           <div className="project-case-demo__hero-scrim" />
         </div>
 
         <div className="project-case-demo__hero-copy">
-          <h1 className="project-case-demo__title">Univers</h1>
+          <h1 className="project-case-demo__title">{project.title}</h1>
           <p className="project-case-demo__summary">
-            Strategy, brand system, and website for the world’s most
-            comprehensive decarbonisation platform.
+            {project.tagline ?? project.summary}
           </p>
           <ul className="project-case-demo__tags">
-            {TAGS.map((tag) => (
+            {tags.map((tag) => (
               <li key={tag}>
                 <span className="project-case-demo__tag">{tag}</span>
               </li>
@@ -399,6 +547,11 @@ export function ProjectCaseDemo() {
             >
               <ClickSpark>
                 <div className="project-case-demo__toggle-glass">
+                  {/* Adaptive contrast only — mix-blend difference vs pixels behind */}
+                  <span
+                    className="project-case-demo__toggle-contrast"
+                    aria-hidden="true"
+                  />
                   <button
                     type="button"
                     className={`project-case-demo__toggle${open ? " is-open" : ""}`}
@@ -426,7 +579,63 @@ export function ProjectCaseDemo() {
         <div className="project-case-demo__columns">
           <div className="project-case-demo__media-col">
             <div ref={mediaStackRef} className="project-case-demo__media-stack">
-              {MEDIA.map((item, index) => {
+              {media.map((item, index) => {
+                if (item.kind === "video-pair") {
+                  return (
+                    <div
+                      key={`video-pair-${index}`}
+                      className="project-case-demo__pair project-case-demo__pair--video"
+                    >
+                      <ProjectFallbackVideo
+                        primarySrc={item.left.primary}
+                        fallbackSrc={item.left.fallback}
+                        alt={item.left.alt}
+                        ratio={item.ratio}
+                      />
+                      <ProjectFallbackVideo
+                        primarySrc={item.right.primary}
+                        fallbackSrc={item.right.fallback}
+                        alt={item.right.alt}
+                        ratio={item.ratio}
+                      />
+                    </div>
+                  );
+                }
+                if (item.kind === "video") {
+                  return (
+                    <div
+                      key={`video-${index}`}
+                      className="project-case-demo__full project-case-demo__full--video"
+                    >
+                      <ProjectFallbackVideo
+                        primarySrc={item.primary}
+                        fallbackSrc={item.fallback}
+                        alt={item.alt}
+                        ratio={item.ratio}
+                      />
+                    </div>
+                  );
+                }
+                if (item.kind === "row") {
+                  return (
+                    <div
+                      key={`row-${index}`}
+                      className="project-case-demo__row"
+                      style={{
+                        gridTemplateColumns: `repeat(${item.items.length}, 1fr)`,
+                      }}
+                    >
+                      {item.items.map((frame) => (
+                        <Frame
+                          key={frame.src}
+                          src={frame.src}
+                          alt={frame.alt}
+                          ratio={frame.ratio}
+                        />
+                      ))}
+                    </div>
+                  );
+                }
                 if (item.kind === "pair") {
                   return (
                     <div key={`pair-${index}`} className="project-case-demo__pair">
@@ -461,120 +670,19 @@ export function ProjectCaseDemo() {
               </button>
 
               <div className="project-case-demo__panel-copy">
-                <section className="project-case-demo__panel-block">
-                  <h3 className="project-case-demo__panel-title">
-                    Unity Through Connection
-                  </h3>
-                  <p>
-                    Univers is a global platform designed to coordinate the
-                    systems required to reach net zero. Connecting people, data,
-                    hardware, and organisations, it enables governments and
-                    businesses to measure impact and act collectively on climate.
-                  </p>
-                  <p>
-                    As the climate crisis shifts from debate to implementation,
-                    the need for coordinated action has become clear. Univers was
-                    created to meet this challenge, building an ecosystem that
-                    helps business and government leaders measure, manage, and
-                    accelerate decarbonisation. Today it connects more than 365
-                    million devices, manages 845GW of renewable energy, and
-                    supports a network of over 500 partners, including Microsoft,
-                    Starbucks, and HSBC.
-                  </p>
-                </section>
-                <section className="project-case-demo__panel-block">
-                  <h3 className="project-case-demo__panel-title">The Challenge</h3>
-                  <p>
-                    Formerly Envision Digital, the company partnered with
-                    Pentagram to create a future-facing brand that matched the
-                    scale of its ambition and the promise of its new name,
-                    Univers. The visual identity and digital experience were
-                    designed to communicate a highly complex decarbonisation
-                    platform in a clear, compelling, and scalable way.
-                  </p>
-                </section>
-                <section className="project-case-demo__panel-block">
-                  <h3 className="project-case-demo__panel-title">Strategy</h3>
-                  <p>
-                    At the heart of Univers is a simple principle: connection
-                    generates energy. Previously isolated technologies are brought
-                    together into a single ecosystem, where environmental and
-                    operational data can be monitored, analysed, and coordinated
-                    in real time.
-                  </p>
-                  <p>
-                    From individual devices to global infrastructure, Univers
-                    reframes decarbonisation as an interconnected network working
-                    toward a shared goal.
-                  </p>
-                </section>
-                <section className="project-case-demo__panel-block">
-                  <h3 className="project-case-demo__panel-title">Identity</h3>
-                  <p>
-                    The identity translates this principle into a graphic language
-                    inspired by the structure of the universe. At the micro scale,
-                    the dot represents data, precision, and the individual actor.
-                    At the macro scale, the universe symbolises collective impact
-                    and global possibility.
-                  </p>
-                  <p>
-                    Together these elements create a flexible design system that
-                    adapts seamlessly across software, hardware, communications,
-                    and immersive environments.
-                  </p>
-                </section>
-                <section className="project-case-demo__panel-block">
-                  <h3 className="project-case-demo__panel-title">
-                    Symbol and Wordmark
-                  </h3>
-                  <p>
-                    The symbol expresses coordination through motion. Eight
-                    spheres orbit before converging into a single gravitational
-                    form, illustrating how independent elements align around a
-                    common purpose.
-                  </p>
-                  <p>
-                    The geometric wordmark balances engineered precision with
-                    clarity. A bespoke ‘un’ ligature anchors the identity,
-                    embodying the act of joining, an idea central to the original
-                    brief.
-                  </p>
-                </section>
-                <section className="project-case-demo__panel-block">
-                  <h3 className="project-case-demo__panel-title">Visual System</h3>
-                  <p>
-                    The visual language extends across colour, imagery, and
-                    motion. A neutral base palette grounds the brand, while
-                    vibrant accents signal energy and discovery. Art direction
-                    celebrates the Earth as both subject and responsibility.
-                    Cinematic 3D imagery reinforces the principles of harmony and
-                    connection, pairing human presence with a sense of the
-                    infinite.
-                  </p>
-                </section>
-                <section className="project-case-demo__panel-block">
-                  <h3 className="project-case-demo__panel-title">
-                    Generative Design Tool
-                  </h3>
-                  <p>
-                    A bespoke generative tool enables the design team to
-                    continuously expand the system. Each sphere sits within its
-                    own orbit, creating a miniature solar system where elements
-                    move independently while remaining connected. The tool
-                    produces infinite compositions while maintaining a coherent
-                    visual language.
-                  </p>
-                </section>
-                <section className="project-case-demo__panel-block">
-                  <h3 className="project-case-demo__panel-title">Outcome</h3>
-                  <p>
-                    Univers positions decarbonisation as a coordinated effort
-                    rather than a collection of isolated actions. Through
-                    strategy, identity, and digital design, the project
-                    establishes a flexible framework for communicating one of the
-                    world&apos;s most ambitious climate technology platforms.
-                  </p>
-                </section>
+                {copySections.map((section) => (
+                  <section
+                    key={section.id}
+                    className="project-case-demo__panel-block"
+                  >
+                    <h3 className="project-case-demo__panel-title">
+                      {section.label}
+                    </h3>
+                    {section.body.map((paragraph, index) => (
+                      <p key={`${section.id}-${index}`}>{paragraph}</p>
+                    ))}
+                  </section>
+                ))}
               </div>
             </div>
           </aside>

@@ -1,0 +1,34 @@
+---
+description: Site vocabulary + project detail copy (four sections, fixed order)
+alwaysApply: true
+---
+
+# Vocabulary (Chinese ↔ site)
+
+| User says | Means |
+|-----------|--------|
+| **项目** | Project (`/projects`) |
+| **见解** | Insight (`/insights`) |
+| **第一个项目** | Full-width featured lead above the projects filter (`projectsFeaturedLead`) |
+| **项目详情** | Project detail **copy** (文案), not the whole page chrome |
+
+# 项目详情文案 — always these four, in order
+
+When the user supplies project detail copy (Word or chat), map it into the existing case detail UI (`ProjectCaseDemo` About panel / project-aware copy), **never invent a fifth chapter** and **never reorder**:
+
+1. **Background**
+2. **Challenge**
+3. **What I did**
+4. **Outcome**
+
+## Format rules
+
+- Fit the **already shipped** detail template (dark page, About The Project panel, title/body type styles) — do not revive the old always-on full-page chapter stack as a separate layout.
+- Section labels match the four names above (casing as the user writes; default display follows site conventions / lowercase labels when filling from Word).
+- Fill only what they provide; do not rewrite voice unless asked.
+
+## Do not
+
+- Swap section order
+- Rename these four without an explicit user request
+- Treat「项目详情」as layout/chrome work unless they also ask for UI changes

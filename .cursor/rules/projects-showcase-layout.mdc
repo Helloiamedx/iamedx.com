@@ -47,8 +47,9 @@ This is the **only** case-detail pattern. Do not revive the old always-on Backgr
 ### 5. Copy / type (dark detail page)
 
 - Detail surfaces are black (`#000`). Titles and body copy both `#fff` (same white). Set color on `.project-case-demo__panel-copy p` — global `p { color: var(--muted) }` otherwise wins.
+- **项目详情文案** always maps to four panel sections in order: **Background → Challenge → What I did → Outcome** (see `project-detail-copy.mdc`).
 - Separate heading + paragraph blocks with clear title→body gap (not `<strong>` + `<br>` in one `<p>`).
-- Structure: project narrative blocks + meta (Client / Sector / Discipline / Partners / team as data allows).
+- Structure: those four narrative blocks + meta (Client / Sector / Discipline / Partners / team as data allows).
 
 ---
 
@@ -57,9 +58,9 @@ This is the **only** case-detail pattern. Do not revive the old always-on Backgr
 1. **Featured lead (first)** — `1920 × 1080` (exact 16:9).
 2. **Two-column cards** — `3000 × 1687` (~16:9; use `aspect-ratio: 3000 / 1687`).
 
-## Featured lead meta (full width)
+## Featured lead meta (full width, on-image)
 
-Further-style single row: **title left** · **tagline center** · **tags right** (` · ` separators).
+Same as Insights lead: title left · tagline center · type chip right, overlaid on the cover with the same bottom scrim and padding as `.insights-lead__*`.
 
 ## Two-column card meta (match reference)
 
@@ -85,7 +86,7 @@ These fields feed the filter system later — keep as structured data.
 
 - Return to irregular masonry / auto-fill multi-column grids for the showcase
 - Mix the featured three-column meta into two-column cards (or vice versa)
-- Use the old four-chapter (Background → Challenges → Execution → Impact) stack as the case detail template
+- Use a different chapter set than Background → Challenge → What I did → Outcome for 项目详情文案
 - Parent the About button inside the media column (it will slide left on open)
 - Leave closed About copy in normal flow (it inflates height and breaks the button band)
 - Change site `--shell-gutter` / outer shell padding for local “tweaks” on the case template

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { FilterSegmentTrack } from "@/components/FilterSegmentTrack";
 import {
   involvementFilters,
   type Involvement,
@@ -12,6 +13,19 @@ type ProjectFilterProps = {
 };
 
 export function ProjectFilter({ active, activeIp }: ProjectFilterProps) {
+  const items = involvementFilters.map((item) => ({
+    id: item.id,
+    label: item.label,
+    href:
+      item.id === "all"
+        ? activeIp
+          ? `/projects?ip=${activeIp}`
+          : "/projects"
+        : activeIp
+          ? `/projects?involvement=${item.id}&ip=${activeIp}`
+          : `/projects?involvement=${item.id}`,
+  }));
+
   return (
     <div className="project-involvement">
       <h2 className="project-involvement__heading">Explore Featured Projects</h2>
@@ -25,40 +39,11 @@ export function ProjectFilter({ active, activeIp }: ProjectFilterProps) {
       ) : null}
 
       <div className="project-involvement__folder">
-        <div
-          className="project-involvement__track"
-          role="list"
-          aria-label="Filter by involvement"
-        >
-          {involvementFilters.map((item) => {
-            const href =
-              item.id === "all"
-                ? activeIp
-                  ? `/projects?ip=${activeIp}`
-                  : "/projects"
-                : activeIp
-                  ? `/projects?involvement=${item.id}&ip=${activeIp}`
-                  : `/projects?involvement=${item.id}`;
-            const isActive = active === item.id;
-
-            return (
-              <Link
-                key={item.id}
-                href={href}
-                scroll={false}
-                role="listitem"
-                className={
-                  isActive
-                    ? "project-involvement__pill is-active"
-                    : "project-involvement__pill"
-                }
-                aria-current={isActive ? "page" : undefined}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </div>
+        <FilterSegmentTrack
+          items={items}
+          activeId={active}
+          ariaLabel="Filter by involvement"
+        />
       </div>
     </div>
   );

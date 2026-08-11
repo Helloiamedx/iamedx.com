@@ -6,7 +6,12 @@ type ProjectFeaturedLeadProps = {
   project: ProjectsFeaturedLead;
 };
 
+/**
+ * Full-width「第一个项目」— same overlay meta / scrim / spacing as InsightsLead.
+ */
 export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
+  const typeLabel = project.categories.at(0) ?? null;
+
   return (
     <article className="project-featured">
       <Link
@@ -21,20 +26,24 @@ export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
             height={project.coverHeight}
             sizes="(max-width: 1400px) calc(100vw - 2 * var(--shell-gutter)), 1400px"
             priority
+            className="project-featured__image"
           />
-        </div>
-        <div className="project-window__meta">
-          <h2 className="project-window__title">{project.title}</h2>
-          <p className="project-window__tagline">{project.tagline}</p>
-          {project.categories.length > 0 ? (
-            <ul className="project-window__chips project-window__chips--end" aria-label="Categories">
-              {project.categories.map((tag) => (
-                <li key={tag}>
-                  <span className="project-type-chip">{tag}</span>
-                </li>
-              ))}
-            </ul>
-          ) : null}
+          <div className="project-featured__scrim" aria-hidden="true" />
+          <div className="project-featured__meta">
+            <h2 className="project-featured__title">{project.title}</h2>
+            {project.tagline ? (
+              <p className="project-featured__tagline">{project.tagline}</p>
+            ) : (
+              <span className="project-featured__tagline" aria-hidden="true" />
+            )}
+            {typeLabel ? (
+              <span className="project-type-chip project-type-chip--on-media">
+                {typeLabel}
+              </span>
+            ) : (
+              <span aria-hidden="true" />
+            )}
+          </div>
         </div>
       </Link>
     </article>

@@ -2,21 +2,16 @@ import type { Project } from "@/content/projects";
 
 export type CaseCopySectionId =
   | "background"
-  | "challenges"
-  | "execution"
-  | "impact";
+  | "challenge"
+  | "what-i-did"
+  | "outcome";
 
 export type CaseCopySection = {
   id: CaseCopySectionId;
-  /** Left column label */
+  /** Section label in the About panel */
   label: string;
-  headline: string;
   body: string[];
 };
-
-const PLACEHOLDER_BODY = [
-  "Placeholder copy for this chapter. Replace with the real narrative when the case is ready — keep the same left label / right headline + body layout.",
-];
 
 function asParagraphs(value?: string | string[]): string[] {
   if (!value) return [];
@@ -25,24 +20,18 @@ function asParagraphs(value?: string | string[]): string[] {
 }
 
 /**
- * Every case detail copy stack is always these four chapters.
- * Images weave between them later, per project.
+ * 项目详情文案 — always Background → Challenge → What I did → Outcome.
  */
 export function getCaseCopySections(project: Project): CaseCopySection[] {
   const backgroundBody = asParagraphs(project.overview);
-  const challengesBody = asParagraphs(project.challengesBody);
-  const executionBody = asParagraphs(project.executionBody);
-  const impactBody = asParagraphs(project.impactBody);
+  const challengeBody = asParagraphs(project.challengesBody);
+  const whatIDidBody = asParagraphs(project.executionBody);
+  const outcomeBody = asParagraphs(project.impactBody);
 
   return [
     {
       id: "background",
       label: "Background",
-      headline:
-        project.statementHeadline ??
-        project.headline ??
-        project.tagline ??
-        project.summary,
       body:
         backgroundBody.length > 0
           ? backgroundBody
@@ -52,44 +41,35 @@ export function getCaseCopySections(project: Project): CaseCopySection[] {
             ],
     },
     {
-      id: "challenges",
-      label: "Challenges",
-      headline:
-        project.challengesHeadline ??
-        "The hard problems that shaped the work",
+      id: "challenge",
+      label: "Challenge",
       body:
-        challengesBody.length > 0
-          ? challengesBody
+        challengeBody.length > 0
+          ? challengeBody
           : [
               project.challenge,
-              ...PLACEHOLDER_BODY,
+              "Placeholder challenge — the hard problems that shaped the work.",
             ],
     },
     {
-      id: "execution",
-      label: "Execution",
-      headline:
-        project.executionHeadline ??
-        "How the idea moved from brief to delivery",
+      id: "what-i-did",
+      label: "What I did",
       body:
-        executionBody.length > 0
-          ? executionBody
+        whatIDidBody.length > 0
+          ? whatIDidBody
           : [
-              "Placeholder execution notes — samples, suppliers, production decisions, and the path from concept to ship.",
-              ...PLACEHOLDER_BODY,
+              "Placeholder — samples, suppliers, production decisions, and the path from concept to ship.",
             ],
     },
     {
-      id: "impact",
-      label: "Impact",
-      headline:
-        project.impactHeadline ?? "What changed once it shipped",
+      id: "outcome",
+      label: "Outcome",
       body:
-        impactBody.length > 0
-          ? impactBody
+        outcomeBody.length > 0
+          ? outcomeBody
           : [
               project.result,
-              "Placeholder impact — outcomes, reach, and what the work unlocked for the brand.",
+              "Placeholder outcome — what changed once it shipped.",
             ],
     },
   ];

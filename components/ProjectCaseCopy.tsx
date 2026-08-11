@@ -18,7 +18,6 @@ function CaseCopyBlock({ section }: { section: CaseCopySection }) {
       <div className="project-case-statement__frame">
         <h2 className="project-case-statement__title">{section.label}</h2>
         <div className="project-case-statement__copy">
-          <p className="project-case-statement__headline">{section.headline}</p>
           {section.body.map((paragraph, index) => (
             <p
               key={`${section.id}-${index}`}
@@ -34,8 +33,7 @@ function CaseCopyBlock({ section }: { section: CaseCopySection }) {
 }
 
 /**
- * Fixed case-detail copy stack — always Background → Challenges → Execution → Impact.
- * Images insert between chapters later, per project.
+ * Fixed case-detail copy stack — Background → Challenge → What I did → Outcome.
  */
 export function ProjectCaseCopy({ project }: ProjectCaseCopyProps) {
   const sections = getCaseCopySections(project);
