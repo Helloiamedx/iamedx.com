@@ -992,6 +992,44 @@ p {
   padding-inline-start: 0;
 }
 
+/*
+ * iPad / touch: desktop chrome (≥900px) keeps text-sized nav hits (~25px).
+ * Stretch links to full bar height so the frosted band is tappable, not just glyphs.
+ */
+@media (hover: none), (pointer: coarse) {
+  .site-nav__link {
+    min-height: var(--header-bar-h);
+    box-sizing: border-box;
+    padding-block: 0;
+    padding-inline: 0.75rem;
+  }
+
+  .site-nav > :first-child.site-nav__link,
+  .site-nav > :first-child .site-nav__link {
+    padding-inline-start: 0.75rem;
+    margin-inline-start: -0.75rem;
+  }
+
+  .nav-menu-toggle {
+    min-height: var(--header-bar-h);
+    min-width: 2.75rem;
+    padding-inline: 0.5rem 0;
+    box-sizing: border-box;
+  }
+
+  .site-header-cta:not(.is-pills) .nav-contact,
+  .site-header-cta:not(.is-pills) .nav-contact--with-icon {
+    min-height: 2.75rem;
+    box-sizing: border-box;
+    padding-inline: 0.55rem;
+    align-items: center;
+  }
+
+  .mega-column a {
+    padding-block: 0.45rem;
+  }
+}
+
 .site-nav__item.is-open .site-nav__link,
 .site-nav__link:hover {
   color: #000; /* full black on hover */
@@ -2309,20 +2347,89 @@ html[data-chrome-ready="1"] .hero__video {
   color: #0a0a0a;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 800px) {
+  /*
+   * Mobile card/lead meta — shared rhythm sitewide:
+   * left copy capped; type chip on the right with air from the description.
+   */
+  .project-featured__meta,
+  .project-window__meta--stack,
+  .insights-lead__meta,
+  .insight-showcase__meta {
+    grid-template-columns: minmax(0, min(13.05rem, 55.8%)) auto;
+    justify-content: space-between;
+    column-gap: 1.25rem;
+    align-items: start;
+  }
+
+  /* Filter cards under images: chip flush to media right */
+  .project-window__meta--stack,
+  .insight-showcase__meta {
+    padding-inline: 0;
+  }
+
+  .project-featured__meta .project-type-chip,
+  .project-window__meta--stack .project-type-chip,
+  .insights-lead__meta .insight-chip,
+  .insight-showcase__meta > .insight-chip {
+    justify-self: end;
+    align-self: start;
+    min-height: 0;
+    font-size: 0.5625rem; /* −10% from 0.625rem */
+    padding: 0.2rem 0.45rem;
+    line-height: 1.15;
+  }
+
+  /*
+   * Fixed leads (不受筛选器影响): equal L/R inset; chip bottom-aligns with desc.
+   */
+  .project-featured__meta,
+  .insights-lead__meta {
+    padding-inline: 0.75rem;
+  }
+
+  .project-featured__meta .project-type-chip,
+  .project-featured__meta > :last-child,
+  .insights-lead__meta .insight-chip,
+  .insights-lead__meta > :last-child {
+    align-self: end;
+  }
+}
+
+@media (max-width: 800px) {
+  /* Left: title + desc (compact, capped); right: type chip */
   .project-featured__meta {
-    grid-template-columns: 1fr;
-    gap: 0.45rem;
+    grid-template-columns: minmax(0, min(13.05rem, 55.8%)) auto;
+    justify-content: space-between;
+    column-gap: 1.25rem;
+    grid-template-areas:
+      "title chip"
+      "tagline chip";
+    align-items: start;
+    row-gap: 0.12rem;
+    padding: 0.65rem 0.75rem 0.5rem;
+  }
+
+  .project-featured__title {
+    grid-area: title;
+    font-size: 0.8125rem;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
   }
 
   .project-featured__tagline {
+    grid-area: tagline;
     justify-self: start;
     text-align: left;
-    max-width: none;
+    max-width: 100%;
+    font-size: 0.6875rem;
+    line-height: 1.25;
   }
 
-  .project-featured__meta .project-type-chip {
-    justify-self: start;
+  .project-featured__meta > :last-child {
+    grid-area: chip;
+    justify-self: end;
+    align-self: end;
   }
 }
 
@@ -2488,19 +2595,38 @@ html[data-chrome-ready="1"] .hero__video {
     justify-content: flex-start;
   }
 
+  /* Showcase cards: copy left (compact, capped), type chip right */
   .project-window__meta--stack {
-    grid-template-columns: 1fr;
+    /* Re-assert after .project-window__meta { 1fr } in this same query */
+    grid-template-columns: minmax(0, min(13.05rem, 55.8%)) auto;
+    justify-content: space-between;
+    column-gap: 1.25rem;
     grid-template-areas:
-      "title"
-      "tagline"
-      "cats";
+      "title cats"
+      "tagline cats";
+    align-items: start;
+    row-gap: 0.12rem;
+    padding-inline: 0;
+  }
+
+  .project-window__meta--stack .project-window__title {
+    font-size: 0.8125rem;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+
+  .project-window__meta--stack .project-window__tagline {
+    font-size: 0.6875rem;
+    line-height: 1.25;
+    max-width: 100%;
   }
 
   .project-window__meta--stack .project-window__categories,
   .project-window__meta--stack .project-window__chips {
-    justify-self: start;
-    text-align: left;
-    white-space: normal;
+    justify-self: end;
+    align-self: start;
+    text-align: right;
+    white-space: nowrap;
   }
 }
 
@@ -3601,20 +3727,41 @@ html[data-chrome-ready="1"] .hero__video {
   color: rgba(255, 255, 255, 0.92);
 }
 
-@media (max-width: 700px) {
+@media (max-width: 800px) {
+  /* Lead: title + excerpt left (compact, capped); chip right */
   .insights-lead__meta {
-    grid-template-columns: 1fr;
-    gap: 0.45rem;
+    grid-template-columns: minmax(0, min(13.05rem, 55.8%)) auto;
+    justify-content: space-between;
+    column-gap: 1.25rem;
+    grid-template-areas:
+      "title chip"
+      "excerpt chip";
+    align-items: start;
+    row-gap: 0.12rem;
+    padding: 0.65rem 0.75rem 0.5rem;
+  }
+
+  .insights-lead__title {
+    grid-area: title;
+    font-size: 0.8125rem;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    text-transform: none;
   }
 
   .insights-lead__excerpt {
+    grid-area: excerpt;
     justify-self: start;
     text-align: left;
-    max-width: none;
+    max-width: 100%;
+    font-size: 0.6875rem;
+    line-height: 1.25;
   }
 
-  .insights-lead__meta .insight-chip {
-    justify-self: start;
+  .insights-lead__meta > :last-child {
+    grid-area: chip;
+    justify-self: end;
+    align-self: end;
   }
 }
 
@@ -3753,28 +3900,20 @@ html[data-chrome-ready="1"] .hero__video {
 
 .insight-showcase__meta {
   display: grid;
-  gap: 0.55rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "title chip"
+    "excerpt excerpt";
+  align-items: baseline;
+  column-gap: 0.75rem;
+  row-gap: 0.35rem;
   margin-top: 0.75rem;
   padding-inline: 0.05rem;
 }
 
-.insight-showcase__row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.75rem 1rem;
-}
-
-.insight-showcase__row > .insight-chip {
-  flex: 0 0 auto;
-  max-width: 40%;
-  white-space: normal;
-  text-align: right;
-}
-
 .insight-showcase__title {
+  grid-area: title;
   margin: 0;
-  flex: 1 1 auto;
   min-width: 0;
   font-family: var(--font-sans);
   font-size: clamp(0.9375rem, 0.85rem + 0.35vw, 1.125rem);
@@ -3784,7 +3923,17 @@ html[data-chrome-ready="1"] .hero__video {
   color: #fff;
 }
 
+.insight-showcase__meta > .insight-chip {
+  grid-area: chip;
+  justify-self: end;
+  align-self: start;
+  max-width: 40%;
+  white-space: normal;
+  text-align: right;
+}
+
 .insight-showcase__excerpt {
+  grid-area: excerpt;
   margin: 0;
   max-width: 42ch;
   font-family: var(--font-sans);
@@ -3793,6 +3942,37 @@ html[data-chrome-ready="1"] .hero__video {
   letter-spacing: -0.01em;
   line-height: 1.4;
   color: rgba(255, 255, 255, 0.62);
+}
+
+@media (max-width: 800px) {
+  /* Same as project cards: copy left (capped), chip right */
+  .insight-showcase__meta {
+    grid-template-columns: minmax(0, min(13.05rem, 55.8%)) auto;
+    justify-content: space-between;
+    column-gap: 1.25rem;
+    grid-template-areas:
+      "title chip"
+      "excerpt chip";
+    align-items: start;
+    row-gap: 0.12rem;
+    padding-inline: 0;
+  }
+
+  .insight-showcase__title {
+    font-size: 0.8125rem;
+    line-height: 1.2;
+  }
+
+  .insight-showcase__meta > .insight-chip {
+    max-width: none;
+    white-space: nowrap;
+  }
+
+  .insight-showcase__excerpt {
+    max-width: 100%;
+    font-size: 0.6875rem;
+    line-height: 1.25;
+  }
 }
 
 .insights-page .insight-chip {
@@ -3846,14 +4026,9 @@ html[data-chrome-ready="1"] .hero__video {
 }
 
 @media (max-width: 700px) {
-  .insight-showcase__row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
   .insight-chips {
     max-width: none;
-    justify-content: flex-start;
+    justify-content: flex-end;
   }
 }
 

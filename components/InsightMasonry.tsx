@@ -50,12 +50,12 @@ export function InsightMasonry({
                 />
               </div>
               <div className="insight-showcase__meta">
-                <div className="insight-showcase__row">
-                  <h3 className="insight-showcase__title">{insight.title}</h3>
-                  {tagLabel ? (
-                    <span className="insight-chip">{tagLabel}</span>
-                  ) : null}
-                </div>
+                <h3 className="insight-showcase__title">{insight.title}</h3>
+                {tagLabel ? (
+                  <span className="insight-chip">{tagLabel}</span>
+                ) : (
+                  <span aria-hidden="true" />
+                )}
                 {insight.excerpt ? (
                   <p className="insight-showcase__excerpt">{insight.excerpt}</p>
                 ) : null}
