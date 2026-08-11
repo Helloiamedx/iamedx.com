@@ -2259,20 +2259,6 @@ html[data-chrome-ready="1"] .hero__video {
   object-fit: cover;
 }
 
-/* Short bottom fade only — cover is already light; don’t grey the whole frame */
-.project-featured__scrim {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0) 72%,
-    rgba(0, 0, 0, 0.22) 88%,
-    rgba(0, 0, 0, 0.48) 100%
-  );
-  pointer-events: none;
-}
-
 /* Same grid / padding / type as .insights-lead__meta */
 .project-featured__meta {
   position: absolute;
@@ -2297,7 +2283,7 @@ html[data-chrome-ready="1"] .hero__video {
   letter-spacing: -0.015em;
   line-height: 1.2;
   text-transform: none;
-  color: #fff;
+  color: #0a0a0a;
 }
 
 .project-featured__tagline {
@@ -2310,17 +2296,17 @@ html[data-chrome-ready="1"] .hero__video {
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.35;
-  color: rgba(255, 255, 255, 0.86);
+  color: rgba(10, 10, 10, 0.72);
 }
 
 .project-featured__meta .project-type-chip {
   justify-self: end;
 }
 
-.project-type-chip--on-media {
-  border-color: rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.14);
-  color: rgba(255, 255, 255, 0.92);
+.project-featured__meta .project-type-chip--on-media {
+  border-color: rgba(10, 10, 10, 0.16);
+  background: rgba(10, 10, 10, 0.06);
+  color: #0a0a0a;
 }
 
 @media (max-width: 700px) {
@@ -2653,22 +2639,27 @@ html[data-chrome-ready="1"] .hero__video {
 }
 
 /*
- * Narrow: drop the unified capsule — individual buttons that wrap / stack.
+ * Narrow: drop the unified capsule — content-sized pills that wrap by
+ * available width (fit one row when possible; wrap aligned rows when not).
  * (Projects: 4 involvement pills; Insights: All + tags)
  */
 @media (max-width: 860px) {
   .project-involvement__folder {
     grid-template-columns: minmax(0, 1fr);
     width: 100%;
-    max-width: 22rem;
+    max-width: 100%;
+    justify-items: center;
   }
 
-  .project-involvement__track {
+  .project-involvement__track,
+  .projects-page .project-involvement__track,
+  .insights-page .insight-filter-bar .project-involvement__track {
     display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    flex-wrap: nowrap;
-    gap: 0.45rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
     padding: 0;
     border-radius: 0;
     background: transparent;
@@ -2680,13 +2671,16 @@ html[data-chrome-ready="1"] .hero__video {
   }
 
   .project-involvement__pill {
-    width: 100%;
+    width: auto;
+    flex: 0 0 auto;
     justify-content: center;
-    padding: 0.7rem 1.1rem;
+    padding: 0.4rem 0.75rem;
     border-radius: 999px;
     background: #e5e5ea;
     color: #1d1d1f;
-    white-space: normal;
+    font-size: 0.8125rem;
+    line-height: 1.2;
+    white-space: nowrap;
     text-align: center;
     transition:
       background 220ms ease,
@@ -3671,10 +3665,19 @@ html[data-chrome-ready="1"] .hero__video {
 
 @media (max-width: 860px) {
   .insights-page .insight-filter-bar .project-involvement__folder {
-    max-width: min(22rem, 100%);
+    max-width: 100%;
+    justify-items: center;
+  }
+
+  .insights-page .insight-filter-bar .project-involvement__track {
+    justify-content: center;
+    background: transparent;
   }
 
   .insights-page .insight-filter-bar .project-involvement__pill {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8125rem;
+    line-height: 1.2;
     background: rgba(255, 255, 255, 0.12);
     color: rgba(255, 255, 255, 0.86);
   }
@@ -3933,7 +3936,7 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video {
   );
 }
 
-/* Title + summary + tags share one column = 40% viewport */
+/* Title + summary + tags — left shell-aligned, generous width so long titles breathe */
 .project-case-demo__hero-copy {
   position: absolute;
   z-index: 1;
@@ -3942,12 +3945,12 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video {
     calc((100% - min(var(--shell-max), 100% - var(--shell-gutter) * 2)) / 2)
   );
   bottom: clamp(1rem, 2.5vh, 2rem);
-  width: 40vw;
-  max-width: 40vw;
+  width: min(72vw, 56rem);
+  max-width: min(72vw, 56rem);
   pointer-events: none;
 }
 
-/* Phone: use the full shell width — no 40vw column */
+/* Phone: use the full shell width — no narrow column */
 @media (max-width: 799px) {
   .project-case-demo__hero-copy {
     width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
@@ -3968,7 +3971,7 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video {
 
 .project-case-demo__summary {
   margin: clamp(0.65rem, 1.1vw, 0.9rem) 0 0;
-  max-width: 28ch;
+  max-width: min(52ch, 100%);
   font-family: var(--font-sans);
   font-size: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
   font-weight: 400;

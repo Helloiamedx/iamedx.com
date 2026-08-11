@@ -7,7 +7,7 @@ type ProjectFeaturedLeadProps = {
 };
 
 /**
- * Full-width「第一个项目」— same overlay meta / scrim / spacing as InsightsLead.
+ * Full-width「第一个项目」— overlay meta / spacing aligned with InsightsLead.
  */
 export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
   const typeLabel = project.categories.at(0) ?? null;
@@ -28,7 +28,6 @@ export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
             priority
             className="project-featured__image"
           />
-          <div className="project-featured__scrim" aria-hidden="true" />
           <div className="project-featured__meta">
             <h2 className="project-featured__title">{project.title}</h2>
             {project.tagline ? (

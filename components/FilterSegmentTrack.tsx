@@ -22,7 +22,7 @@ type FilterSegmentTrackProps = {
 
 /**
  * Desktop: iOS-style capsule with a sliding thumb under the active label.
- * Narrow: breaks into individual wrapping / stacked buttons (no unified track).
+ * Narrow: content-sized pills that wrap by available width (no full-width stack).
  */
 export function FilterSegmentTrack({
   items,
