@@ -5,7 +5,7 @@ import {
   INSIGHT_COVER_W,
   getInsightTagLabels,
   type InsightMeta,
-} from "@/lib/insights";
+} from "@/lib/insight-meta";
 
 type InsightsLeadProps = {
   insight: InsightMeta;

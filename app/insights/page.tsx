@@ -5,7 +5,10 @@ import { InsightMasonry } from "@/components/InsightMasonry";
 import { InsightsHero } from "@/components/InsightsHero";
 import { InsightsLead } from "@/components/InsightsLead";
 import { findInsightTag } from "@/content/nav";
-import { getAllInsights, getInsightsByTag } from "@/lib/insights";
+import {
+  getInsightsByTag,
+  getInsightsFeaturedLead,
+} from "@/lib/insights";
 
 export const metadata: Metadata = {
   title: "Insights",
@@ -20,7 +23,7 @@ export default async function InsightsPage({ searchParams }: InsightsPageProps) 
   const params = await searchParams;
   const activeTag = params.tag ? findInsightTag(params.tag) : null;
   /* Featured lead is fixed — not part of the filter swap */
-  const lead = getAllInsights()[0] ?? null;
+  const lead = getInsightsFeaturedLead();
   /* All matching articles under the filter (3-col layout, not a 3-item cap) */
   const filtered = getInsightsByTag(activeTag?.slug ?? null).filter(
     (insight) => insight.slug !== lead?.slug,
@@ -40,7 +43,7 @@ export default async function InsightsPage({ searchParams }: InsightsPageProps) 
       <section className="insights-body">
         <div className="insights-shell">
           <InsightFilter activeTag={activeTag} />
-          <FilterResults key={filterKey}>
+          <FilterResults filterKey={filterKey}>
             <InsightMasonry insights={filtered} />
           </FilterResults>
         </div>

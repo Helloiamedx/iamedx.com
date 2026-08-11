@@ -1,11 +1,20 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { motion, useReducedMotion } from "motion/react";
+import {
+  filterCardItemVariants,
+  filterCardItemVariantsReduced,
+  filterCardListVariants,
+  filterCardListVariantsReduced,
+} from "@/components/filterCardMotion";
 import {
   INSIGHT_COVER_H,
   INSIGHT_COVER_W,
   getInsightTagLabels,
   type InsightMeta,
-} from "@/lib/insights";
+} from "@/lib/insight-meta";
 
 type InsightMasonryProps = {
   insights: InsightMeta[];
@@ -19,8 +28,26 @@ export function InsightMasonry({
   emptyLabel = "No insights with this tag yet.",
   layout = "tri",
 }: InsightMasonryProps) {
+  const reduceMotion = useReducedMotion();
+  const listVariants = reduceMotion
+    ? filterCardListVariantsReduced
+    : filterCardListVariants;
+  const itemVariants = reduceMotion
+    ? filterCardItemVariantsReduced
+    : filterCardItemVariants;
+
   if (insights.length === 0) {
-    return <p className="empty-state">{emptyLabel}</p>;
+    return (
+      <motion.p
+        className="empty-state"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: reduceMotion ? 0.01 : 0.2 }}
+      >
+        {emptyLabel}
+      </motion.p>
+    );
   }
 
   const listClass =
@@ -29,13 +56,23 @@ export function InsightMasonry({
       : "insight-showcase insight-showcase--tri";
 
   return (
-    <ul className={listClass}>
+    <motion.ul
+      className={listClass}
+      variants={listVariants}
+      initial="hidden"
+      animate="show"
+      exit="exit"
+    >
       {insights.map((insight) => {
         /* Showcase cards carry a single Insights mega tag */
         const tagLabel = getInsightTagLabels(insight.tags).at(0) ?? null;
 
         return (
-          <li key={insight.slug} className="insight-showcase__item">
+          <motion.li
+            key={insight.slug}
+            className="insight-showcase__item"
+            variants={itemVariants}
+          >
             <Link
               href={`/insights/${insight.slug}`}
               className="insight-showcase__link"
@@ -61,9 +98,9 @@ export function InsightMasonry({
                 ) : null}
               </div>
             </Link>
-          </li>
+          </motion.li>
         );
       })}
-    </ul>
+    </motion.ul>
   );
 }

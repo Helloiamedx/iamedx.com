@@ -5,22 +5,23 @@ alwaysApply: true
 
 # Mobile meta (Projects + Insights)
 
-On viewports `≤800px`, every lead / card meta row shares one rhythm:
+On viewports `≤800px` (and the same 58/42 rhythm on tablet/laptop cards), every lead / card meta row shares one rhythm:
 
-1. **Left:** title + description only — column capped at `min(13.05rem, 55.8%)` so copy does not run into the chip.
-2. **Right:** project / article type chip — end-aligned with air from the copy (`column-gap: 1.25rem`).
+1. **Left:** title + description — column capped at **58%** so copy does not run into the chip.
+2. **Right:** project / article type chip — end-aligned in the remaining **42%**, with air from the copy (`column-gap: 1.25rem`).
 3. **Fixed leads**（Projects / Insights 第一个推荐，不受筛选器影响）:
-   - Equal L/R inset (`padding-inline: 0.75rem`) — chip is **not** flush to the image edge.
-   - Chip **bottom-aligns** with the description line (`align-self: end`).
-4. **Filter cards** under images may keep chip flush to the media right edge.
+   - Insights lead: Equal L/R inset (`padding-inline: 0.75rem`); chip **bottom-aligns** with the description line (`align-self: end`).
+   - Projects「第一个项目」: meta is a **bottom-right stack** on the cover (not the 58/42 bar) so left art stays clear.
+4. **Filter / Related cards** (project + insight index and detail Related): same 58/42 + gap; chips stay inside the card (`max-width: 100%`, nowrap + ellipsis).
 5. **Chip size (mobile):** `font-size: 0.5625rem`, `padding: 0.2rem 0.45rem`.
 
 Applies to:
 
 - `.project-featured__meta`（第一个项目）
-- `.project-window__meta--stack`（项目卡片 / Related）
+- `.project-case-demo__hero-copy`（项目详情首屏）
+- `.project-window__meta--stack`（项目卡片 / 项目详情 Related）
 - `.insights-lead__meta`（见解首篇）
-- `.insight-showcase__meta`（见解卡片 / Related）
+- `.insight-showcase__meta`（见解卡片 / 见解详情 Related）
 
 Do not restack chips under the copy on mobile. Do not let left copy use full `1fr` without a width cap.
 ---

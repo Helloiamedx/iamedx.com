@@ -70,8 +70,23 @@ export type Project = {
   /** Intrinsic cover size — drives card aspect / relative scale */
   coverWidth: number;
   coverHeight: number;
-  /** Case detail first-screen still (replaces default hero video when set) */
+  /** Case detail first-screen still (used when no hero video) */
   heroImage?: string;
+  /**
+   * Case detail first-screen self-hosted video (wins over YouTube / still).
+   * Optional `heroVideoStart` / `heroVideoEnd` = segment in seconds (e.g. 79–401 = 1:19–6:41).
+   * Prefer a pre-trimmed file and omit start/end when possible.
+   */
+  heroVideo?: string;
+  heroVideoStart?: number;
+  heroVideoEnd?: number;
+  /**
+   * Case detail first-screen YouTube background (wins over `heroImage`).
+   * Prefer `heroVideo` when a CDN file exists.
+   */
+  heroYoutubeId?: string;
+  heroYoutubeStart?: number;
+  heroYoutubeEnd?: number;
   /** Case detail first-screen Vimeo (falls back to default demo reel) */
   heroVimeoId?: string;
   heroVimeoHash?: string;
@@ -189,9 +204,19 @@ const FIRST_PROJECT_COVER = projectCoverFromName(
   FIRST_PROJECT_NAME,
   "Mass Effect Tali Companion Bundle-hero.jpg",
 );
+/** Projects index「第一个项目」entry card only */
+const FIRST_PROJECT_FEATURED_COVER = projectCoverFromName(
+  FIRST_PROJECT_NAME,
+  "Mass Effect Tali Companion Bundle.jpg",
+);
 const FIRST_PROJECT_HERO = projectCoverFromName(
   FIRST_PROJECT_NAME,
   "Mass Effect Tali.jpg",
+);
+/** Self-hosted hero background — pre-trimmed clip (play from start, native loop) */
+const FIRST_PROJECT_HERO_VIDEO = projectCoverFromName(
+  FIRST_PROJECT_NAME,
+  "Tali Remastered - Mass Effect 3 - 2018 (Video Spoil).mp4",
 );
 const FIRST_PROJECT_AFTER_COVER_STILLS = {
   items: [
@@ -308,7 +333,7 @@ export const projectsFeaturedLead: ProjectsFeaturedLead = {
   title: FIRST_PROJECT_NAME,
   tagline: "Found your home with Tali?",
   categories: involvementTags("end-to-end"),
-  coverImage: FIRST_PROJECT_COVER,
+  coverImage: FIRST_PROJECT_FEATURED_COVER,
   coverWidth: 1920,
   coverHeight: 1080,
 };
@@ -334,6 +359,8 @@ export const projects: Project[] = [
     coverWidth: 1920,
     coverHeight: 1080,
     heroImage: FIRST_PROJECT_HERO,
+    /* Self-hosted Tali Remastered — pre-trimmed, muted loop from start */
+    heroVideo: FIRST_PROJECT_HERO_VIDEO,
     afterCoverStills: FIRST_PROJECT_AFTER_COVER_STILLS,
     afterCoverExtraRows: FIRST_PROJECT_AFTER_COVER_EXTRA_ROWS,
     afterCoverVideo: FIRST_PROJECT_AFTER_COVER_VIDEO,

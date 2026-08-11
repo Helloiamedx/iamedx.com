@@ -5,7 +5,13 @@ alwaysApply: true
 
 # Project detail videos
 
-All case-page videos (pairs under the gallery, and any future project media videos) follow this stack. Use `ProjectFallbackVideo` + `ProtectedVideo` — do not invent a one-off player.
+All case-page **gallery** videos (pairs under the gallery, process clips) follow this stack. Use `ProjectFallbackVideo` + `ProtectedVideo` — do not invent a one-off player.
+
+## 0. First-screen hero background
+
+## 0. First-screen hero background
+
+Case detail hero prefers self-hosted `heroVideo` (+ optional `heroVideoStart` / `heroVideoEnd`) via `HeroSegmentVideo` + `ProtectedVideo`. YouTube (`heroYoutubeId`) only when no CDN file yet. Still: `heroImage`. Do not invent a CDN fallback.
 
 ## 1. Sources
 

@@ -67,7 +67,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
       <section className="section projects-body">
         <ProjectFeaturedLead project={projectsFeaturedLead} />
         <ProjectFilter active={activeInvolvement} activeIp={activeIp} />
-        <FilterResults key={filterKey}>
+        <FilterResults filterKey={filterKey}>
           <ProjectMasonry projects={listed} />
         </FilterResults>
       </section>

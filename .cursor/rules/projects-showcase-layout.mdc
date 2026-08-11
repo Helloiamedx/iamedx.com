@@ -16,7 +16,7 @@ This is the **only** case-detail pattern. Do not revive the old always-on Backgr
 
 - Height `100svh` / `100vh`, pulled under sticky header (`margin-top: -header-offset`).
 - Full-bleed media (site video / ProtectedVideo or project hero source).
-- Overlay copy **bottom-left**, shell-aligned: eyebrow (optional) · title · short summary · tags.
+- Overlay copy **bottom meta bar** (same as featured lead): title left · tagline center · type chip right, shell-aligned.
 - Nav at rest: clear / over-clear on the video (same as home).
 
 ### 2. Image gallery (content band)
@@ -60,7 +60,7 @@ This is the **only** case-detail pattern. Do not revive the old always-on Backgr
 
 ## Featured lead meta (full width, on-image)
 
-Same as Insights lead: title left · tagline center · type chip right, overlaid on the cover with the same bottom scrim and padding as `.insights-lead__*`.
+「第一个项目」entry (current Tali cover): title · tagline · type chip stacked **bottom-right** (light-on-dark), leaving left art clear. Insights lead may still use the three-up bar.
 
 ## Two-column card meta (match reference)
 

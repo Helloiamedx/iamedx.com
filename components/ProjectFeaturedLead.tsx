@@ -7,7 +7,8 @@ type ProjectFeaturedLeadProps = {
 };
 
 /**
- * Full-width「第一个项目」— overlay meta / spacing aligned with InsightsLead.
+ * Full-width「第一个项目」— cover entry on /projects.
+ * Meta sits bottom-right (art has logo / product on the left).
  */
 export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
   const typeLabel = project.categories.at(0) ?? null;
@@ -22,26 +23,22 @@ export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
           <Image
             src={project.coverImage}
             alt={project.title}
-            width={project.coverWidth}
-            height={project.coverHeight}
+            fill
             sizes="(max-width: 1400px) calc(100vw - 2 * var(--shell-gutter)), 1400px"
             priority
             className="project-featured__image"
           />
+          <div className="project-featured__scrim" aria-hidden="true" />
           <div className="project-featured__meta">
             <h2 className="project-featured__title">{project.title}</h2>
             {project.tagline ? (
               <p className="project-featured__tagline">{project.tagline}</p>
-            ) : (
-              <span className="project-featured__tagline" aria-hidden="true" />
-            )}
+            ) : null}
             {typeLabel ? (
               <span className="project-type-chip project-type-chip--on-media">
                 {typeLabel}
               </span>
-            ) : (
-              <span aria-hidden="true" />
-            )}
+            ) : null}
           </div>
         </div>
       </Link>

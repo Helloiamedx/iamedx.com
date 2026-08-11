@@ -18,7 +18,7 @@ On `/projects` and `/insights`, the **first full-width featured item sits above 
 ## Sources of truth
 
 - **Projects —「第一个项目」:** full-width lead above the filter = `projectsFeaturedLead`. Name drives **title**, **slug** (`projectSlugFromName`), and **cover URL** (`projectCoverFromName` → `/images/projects/{Name}/{Name}.jpg`). Currently **Mass Effect Tali Companion Bundle**. Only change when the user explicitly asks.
-- **Insights:** featured lead is the fixed first insight on the index (same permanence — do not reassign from filter state).
+- **Insights:** featured lead is the fixed first insight on the index (`INSIGHTS_FEATURED_LEAD_SLUG` / `getInsightsFeaturedLead()`). Same permanence — do not reassign from filter state. Currently **Your Greatest Asset in Supply Chain Is Trust — Never Trade It for Short-Term Benefits**. Only change when the user explicitly asks.
 
 ## Do not
 

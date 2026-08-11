@@ -4,8 +4,10 @@ import { useLenis } from "lenis/react";
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ClickSpark } from "@/components/ClickSpark";
+import { HeroSegmentVideo } from "@/components/HeroSegmentVideo";
 import { ProjectFallbackVideo } from "@/components/ProjectFallbackVideo";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
+import { YouTubeBackground } from "@/components/YouTubeBackground";
 import { getCaseCopySections } from "@/content/caseCopy";
 import type { Project } from "@/content/projects";
 import { asset } from "@/lib/assets";
@@ -505,7 +507,21 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
         aria-label={project.title}
       >
         <div className="project-case-demo__hero-media" aria-hidden="true">
-          {project.heroImage ? (
+          {project.heroVideo ? (
+            <HeroSegmentVideo
+              className="project-case-demo__hero-video"
+              src={project.heroVideo}
+              startSeconds={project.heroVideoStart ?? 0}
+              endSeconds={project.heroVideoEnd}
+            />
+          ) : project.heroYoutubeId ? (
+            <YouTubeBackground
+              className="project-case-demo__hero-video project-case-demo__hero-video--embed"
+              videoId={project.heroYoutubeId}
+              startSeconds={project.heroYoutubeStart ?? 0}
+              endSeconds={project.heroYoutubeEnd}
+            />
+          ) : project.heroImage ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               className="project-case-demo__hero-video"

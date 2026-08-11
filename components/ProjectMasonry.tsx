@@ -1,5 +1,14 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { motion, useReducedMotion } from "motion/react";
+import {
+  filterCardItemVariants,
+  filterCardItemVariantsReduced,
+  filterCardListVariants,
+  filterCardListVariantsReduced,
+} from "@/components/filterCardMotion";
 import {
   getInvolvementLabel,
   type Project,
@@ -14,18 +23,46 @@ export function ProjectMasonry({
   projects,
   emptyLabel = "No projects in this category yet.",
 }: ProjectMasonryProps) {
+  const reduceMotion = useReducedMotion();
+  const listVariants = reduceMotion
+    ? filterCardListVariantsReduced
+    : filterCardListVariants;
+  const itemVariants = reduceMotion
+    ? filterCardItemVariantsReduced
+    : filterCardItemVariants;
+
   if (projects.length === 0) {
-    return <p className="empty-state">{emptyLabel}</p>;
+    return (
+      <motion.p
+        className="empty-state"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: reduceMotion ? 0.01 : 0.2 }}
+      >
+        {emptyLabel}
+      </motion.p>
+    );
   }
 
   return (
-    <ul className="project-showcase">
+    <motion.ul
+      className="project-showcase"
+      variants={listVariants}
+      initial="hidden"
+      animate="show"
+      exit="exit"
+    >
       {projects.map((project) => {
         const tagline = project.tagline ?? project.summary;
         const tag = getInvolvementLabel(project.involvement);
 
         return (
-          <li key={project.slug} className="project-showcase__item">
+          <motion.li
+            key={project.slug}
+            className="project-showcase__item"
+            variants={itemVariants}
+          >
             <Link
               href={`/projects/${project.slug}`}
               className="project-showcase__link"
@@ -49,9 +86,9 @@ export function ProjectMasonry({
                 <p className="project-window__tagline">{tagline}</p>
               </div>
             </Link>
-          </li>
+          </motion.li>
         );
       })}
-    </ul>
+    </motion.ul>
   );
 }

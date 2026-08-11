@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { InsightBody } from "@/components/InsightBody";
 import { InsightMasonry } from "@/components/InsightMasonry";
 import {
   INSIGHT_COVER_H,
@@ -46,10 +47,6 @@ export default async function InsightDetailPage({ params }: InsightPageProps) {
   if (!insight) notFound();
 
   const typeLabel = getInsightTagLabels(insight.tags).at(0) ?? null;
-  const paragraphs = insight.content
-    .split(/\n{2,}/)
-    .map((part) => part.trim())
-    .filter(Boolean);
   const related = getRelatedInsights([insight.slug], 2);
 
   return (
@@ -82,12 +79,8 @@ export default async function InsightDetailPage({ params }: InsightPageProps) {
             />
           </div>
 
-          {paragraphs.length > 0 ? (
-            <article className="insight-detail__body">
-              {paragraphs.map((paragraph) => (
-                <p key={paragraph.slice(0, 48)}>{paragraph}</p>
-              ))}
-            </article>
+          {insight.content.trim() ? (
+            <InsightBody content={insight.content} />
           ) : null}
         </div>
 
