@@ -47,7 +47,7 @@ export default async function InsightDetailPage({ params }: InsightPageProps) {
   if (!insight) notFound();
 
   const typeLabel = getInsightTagLabels(insight.tags).at(0) ?? null;
-  const related = getRelatedInsights([insight.slug], 2);
+  const related = getRelatedInsights([insight.slug], 2, insight.tags);
 
   return (
     <main className="insight-detail">

@@ -33,7 +33,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   const project = getProjectBySlug(slug);
   if (!project) notFound();
 
-  const related = getRelatedProjects([project.slug], 2);
+  const related = getRelatedProjects([project.slug], 2, project.tags);
 
   return (
     <main className="project-detail">

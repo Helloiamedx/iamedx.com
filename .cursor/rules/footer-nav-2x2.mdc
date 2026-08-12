@@ -12,6 +12,7 @@ Reference layout (Pentagram-style), black plate:
 2. **Hairline rule**
 3. **About** — left label `About`; right blurb from `footerAboutCopy` in `content/nav.ts`
 4. **Brand wordmark** — `iamedwardxu-logo-white.svg`, shell width, **static** (no video, no LightRays, no mask cutouts)
-5. **Bottom** — social left · Privacy / © right
+5. **Bottom (desktop)** — legal left · payments center · social right  
+   **Bottom (mobile ≤899px)** — one row: Personal left · Social right (grid, not flex-wrap); © year centered on the next row. Keep air under the wordmark. Type ~`0.8125–0.9375rem`.
 
 Do not restore HELLOIAMEDX video marquee, FooterWordmark letter mask, or the old 4-column footer nav / assist CTA pills unless the user asks.

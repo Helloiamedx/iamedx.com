@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { VideoLoadingCover } from "@/components/VideoLoadingCover";
 
 type YouTubeBackgroundProps = {
   videoId: string;
@@ -234,7 +235,7 @@ export function YouTubeBackground({
     >
       <div id={hostId} className="youtube-background__host" title={title} />
       {/* Opaque until stable playback — blocks YouTube title + big play */}
-      <div className="youtube-background__veil" aria-hidden="true" />
+      <VideoLoadingCover ready={ready} />
     </div>
   );
 }

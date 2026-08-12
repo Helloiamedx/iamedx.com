@@ -13,7 +13,7 @@ type InsightsLeadProps = {
 
 /**
  * Insights featured lead — cover only in media;
- * meta below: title 35% | gap 10% | description 35% | tag ~20%, top-aligned.
+ * featured meta only: chip max-content; gaps 13% total; title + excerpt share the rest.
  */
 export function InsightsLead({ insight }: InsightsLeadProps) {
   const tagLabel = getInsightTagLabels(insight.tags).at(0) ?? null;

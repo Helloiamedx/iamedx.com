@@ -167,14 +167,22 @@ export function getInsightsByTag(tagSlug?: string | null) {
   return all.filter((insight) => insight.tags.includes(tagSlug));
 }
 
-/** Related strip: other insights, stable shuffle by seed, capped. */
+/** Related strip: same-tag insights only (stable order), capped. */
 export function getRelatedInsights(
   excludeSlugs: string[],
   limit = 2,
+  preferTags: string[] = [],
 ): InsightMeta[] {
   const exclude = new Set(excludeSlugs);
-  const pool = getAllInsights().filter((insight) => !exclude.has(insight.slug));
-  const ranked = [...pool].sort((a, b) => {
+  const tags = new Set(preferTags.filter(Boolean));
+  if (tags.size === 0) return [];
+
+  const sameTag = getAllInsights().filter(
+    (insight) =>
+      !exclude.has(insight.slug) &&
+      insight.tags.some((tag) => tags.has(tag)),
+  );
+  const ranked = [...sameTag].sort((a, b) => {
     const ha = hashSlug(a.slug);
     const hb = hashSlug(b.slug);
     return ha - hb;

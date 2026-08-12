@@ -4,20 +4,20 @@ globs: app/insights/**/*.tsx, app/projects/**/*.tsx, app/globals.css, components
 alwaysApply: true
 ---
 
-# Type chips / filled tags — no all-caps
+# Type chips / filled tags — no all-caps; plain Pitch Sans labels on Projects/Insights
 
-Any **project type** or **article type** label that sits on a chip fill（套底）must **not** use `text-transform: uppercase`.
+Any **project type** or **article type** label must **not** use `text-transform: uppercase`.
+
+On Projects + Insights surfaces, type labels are **plain text** (no chip fill): Test Pitch Sans Semibold, shared `--type-chip-font`, gray ink. Title/description in those metas are white. See `mobile-meta-chip-right.mdc`.
 
 Applies to:
 
 - `.insight-chip` / `.insight-chip--on-media`
 - `.project-type-chip` / `.project-type-chip--on-media`
 - `.project-case-demo__tag`
-- Any future filled type pill on covers or cards
+- Any future type label on covers or cards
 
-Show the authored label as-is (e.g. `End-to-End Projects`), with normal sentence/title casing — never CSS-forced ALL CAPS.
-
-On **dark surfaces** (`.insights-page`, `.insight-detail`, `.projects-page`), chip fill must use light-on-dark colors — default chip ink is for light backgrounds and will disappear on black.
+Show the authored label as-is (e.g. `End-to-End Projects`).
 
 # Insight label tokens (size / tracking for non-chip microcopy)
 

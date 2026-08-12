@@ -1,38 +1,41 @@
 ---
-description: Mobile card/lead meta — cards 65% title; featured leads three-up under cover
+description: Type labels — Pitch Sans, no fill, gray; featured-lead meta 13% gaps
 alwaysApply: true
 ---
 
-# Mobile meta (Projects + Insights)
+# Type labels (Projects + Insights)
 
-## Featured leads（项目 / 见解主推，不受筛选器影响）
+On `.projects-page`, `.project-detail`, `.insights-page`, `.insight-detail`:
 
-Meta sits **under the cover** (not on-image), three-up:
+1. **No fill** — no border, background, or capsule padding on type labels.
+2. **Font** — `Test Pitch Sans` Semibold via `@font-face` → `/fonts/TestPitchSans-Semibold.otf` (same-origin; CDN alone lacks CORS for `@font-face`). CSS: `--font-type-label`.
+3. **Size** — shared `--type-chip-font` (current size, −3% recipe). Same everywhere: featured, cards, Related, case hero tag.
+4. **Color** — gray (`--type-label-color`, ~50% white).
+5. **Title + description** in card/lead meta — **white** (`#fff`).
+6. **Top-align with title** — every type label (and its chip list wrapper) uses `align-self: start` / `align-items: start`. Never baseline or vertical-center labels against titles.
 
-1. **Title** — left (**35%**)
-2. **Gap** — **10%**
-3. **Description / tagline** — center (**35%**)
-4. **Type chip** — right (**20%** column, end-aligned)
+Applies to `.project-type-chip`, `.insight-chip`, `.project-case-demo__tag`.
 
-**Top-align** title, description, and chip (`align-items: start`).
+Filter involvement pills are separate UI — not this recipe.
 
-Applies to `.project-featured__meta` and `.insights-lead__meta`.
+# Featured lead meta only
 
-## Filter / Related cards
+**Scope:** `.project-featured__meta` and `.insights-lead__meta` only.
 
-On viewports `≤800px` (and the same rhythm on tablet/laptop cards):
+1. Label `max-content`, end-aligned, top-aligned.
+2. Gaps total **13%** (`6.5%` + `6.5%`).
+3. Title + description share remaining width equally.
 
-1. **Title:** up to **65%** of the card width.
-2. **Type chip:** end-aligned on the title row; **top-aligned** with the title (`align-self: start`).
-3. **Description / tagline:** **full width** under the title row.
+Do **not** apply this gap formula to filter/Related cards or case-detail hero meta.
 
-Chip size (mobile): `font-size: 0.5625rem`, `padding: 0.2rem 0.45rem`.
+# Filter / Related cards
 
-Applies to:
+Title up to **65%** | type label end-aligned / top-aligned | description full width under. Label **size** still comes from the unified tokens above.
 
-- `.project-window__meta--stack`（项目卡片 / 项目详情 Related）
-- `.insight-showcase__meta`（见解卡片 / 见解详情 Related）
-- `.project-case-demo__hero-copy`（项目详情首屏 — follow lead three-up when desktop）
+# Project detail hero meta (mobile ≤800px)
 
-Do not bottom-align type chips on filter/related cards or featured leads.
+`.project-case-demo__hero-copy` matches the card stack (not featured-lead 13% gaps):
+
+1. Title ≤ **60%** | type label **end-aligned / top-aligned** (gap between).
+2. Description on the next row, **full** usable width, left-aligned.
 ---

@@ -61,14 +61,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: clamp(1.65rem, 2.4vw, 2.15rem);
+  /* −6% vs prior clamp(1.65rem, 2.4vw, 2.15rem) */
+  height: clamp(1.551rem, 2.256vw, 2.021rem);
 }
 
 .client-logo-marquee__img {
   display: block;
   width: auto;
   height: 100%;
-  max-width: clamp(5.5rem, 12vw, 8.5rem);
+  max-width: clamp(5.17rem, 11.28vw, 7.99rem);
   object-fit: contain;
   object-position: center;
   /* Source SVGs are dark — soft white over the video */
@@ -109,7 +110,8 @@
   }
 
   .client-logo-marquee__item {
-    height: 1.45rem;
+    /* −6% vs prior 1.45rem */
+    height: 1.363rem;
   }
 
   .client-logo-marquee__rail {

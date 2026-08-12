@@ -20,57 +20,36 @@ function asParagraphs(value?: string | string[]): string[] {
 }
 
 /**
- * 项目详情文案 — always Background → Challenge → What I did → Outcome.
+ * 项目详情文案 — order fixed: Background → Challenge → What I did → Outcome.
+ * Only include chapters that have real body copy. No placeholders.
  */
 export function getCaseCopySections(project: Project): CaseCopySection[] {
-  const backgroundBody = asParagraphs(project.overview);
-  const challengeBody = asParagraphs(project.challengesBody);
-  const whatIDidBody = asParagraphs(project.executionBody);
-  const outcomeBody = asParagraphs(project.impactBody);
-
-  return [
+  const candidates: {
+    id: CaseCopySectionId;
+    label: string;
+    body: string[];
+  }[] = [
     {
       id: "background",
       label: "Background",
-      body:
-        backgroundBody.length > 0
-          ? backgroundBody
-          : [
-              project.summary,
-              "Placeholder background — the fuller story for this project will land here.",
-            ],
+      body: asParagraphs(project.overview),
     },
     {
       id: "challenge",
       label: "Challenge",
-      body:
-        challengeBody.length > 0
-          ? challengeBody
-          : [
-              project.challenge,
-              "Placeholder challenge — the hard problems that shaped the work.",
-            ],
+      body: asParagraphs(project.challengesBody),
     },
     {
       id: "what-i-did",
       label: "What I did",
-      body:
-        whatIDidBody.length > 0
-          ? whatIDidBody
-          : [
-              "Placeholder — samples, suppliers, production decisions, and the path from concept to ship.",
-            ],
+      body: asParagraphs(project.executionBody),
     },
     {
       id: "outcome",
       label: "Outcome",
-      body:
-        outcomeBody.length > 0
-          ? outcomeBody
-          : [
-              project.result,
-              "Placeholder outcome — what changed once it shipped.",
-            ],
+      body: asParagraphs(project.impactBody),
     },
   ];
+
+  return candidates.filter((section) => section.body.length > 0);
 }

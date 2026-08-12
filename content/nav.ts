@@ -155,19 +155,6 @@ export const servicesMega: MegaColumn[] = [
       "China Operations Challenges?",
     ].map(serviceTopicLink),
   },
-  {
-    id: "what-are-you-building",
-    title: "What Are You Building?",
-    description: "What are you creating?",
-    links: [
-      "Building a Supply Chain in China",
-      "Launching a New Product",
-      "Expanding Your Product Line",
-      "Creating Custom Products",
-      "Starting a Dropshipping Business",
-      "Developing Small-Batch Products",
-    ].map(serviceTopicLink),
-  },
 ];
 
 function aboutSectionLink(label: string): MegaLink {

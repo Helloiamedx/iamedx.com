@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
+import { VideoLoadingCover } from "@/components/VideoLoadingCover";
 
 export type ProjectFallbackVideoProps = {
   /** Preferred source (e.g. TikTok / original URL). */
@@ -85,14 +86,7 @@ export function ProjectFallbackVideo({
         onError={switchToFallback}
       />
 
-      <div
-        className="project-fallback-video__cover"
-        aria-hidden={ready}
-        aria-busy={!ready}
-      >
-        <span className="project-fallback-video__spinner" aria-hidden="true" />
-        <span className="project-fallback-video__label">Loading</span>
-      </div>
+      <VideoLoadingCover ready={ready} />
     </div>
   );
 }

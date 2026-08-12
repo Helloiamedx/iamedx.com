@@ -31,6 +31,16 @@ type MediaItem =
       ratio: string;
     }
   | {
+      kind: "still-video-pair";
+      still: { src: string; alt: string; ratio: string };
+      video: {
+        primary: string;
+        fallback?: string;
+        alt: string;
+        ratio: string;
+      };
+    }
+  | {
       kind: "video-pair";
       left: { primary: string; fallback?: string; alt: string };
       right: { primary: string; fallback?: string; alt: string };
@@ -182,12 +192,16 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
   const tags = project.tags.length > 0 ? project.tags : [project.involvement];
   const stillRatio = project.afterCoverStills?.ratio ?? "56.25%";
   const media: MediaItem[] = [
-    {
-      kind: "full",
-      src: project.galleryLeadImage ?? project.coverImage,
-      alt: project.title,
-      ratio: "56.25%",
-    },
+    ...(project.galleryLeadImage
+      ? [
+          {
+            kind: "full" as const,
+            src: project.galleryLeadImage,
+            alt: project.title,
+            ratio: "56.25%",
+          },
+        ]
+      : []),
     ...(project.afterCoverStills
       ? project.afterCoverStills.items.length === 1
         ? [
@@ -209,25 +223,66 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
             },
           ]
       : []),
-    ...(project.afterCoverExtraRows?.map((row) => ({
-      kind: "row" as const,
-      items: row.items.map((item) => ({
-        src: item.src,
-        alt: item.alt,
-        ratio: row.ratio ?? "100%",
-      })),
-    })) ?? []),
-    ...(project.afterCoverVideo
+    ...(project.afterCoverExtraRows?.flatMap((row) => {
+      const ratio = row.ratio ?? "100%";
+      if (row.items.length === 1) {
+        return [
+          {
+            kind: "full" as const,
+            src: row.items[0].src,
+            alt: row.items[0].alt,
+            ratio,
+          },
+        ];
+      }
+      return [
+        {
+          kind: "row" as const,
+          items: row.items.map((item) => ({
+            src: item.src,
+            alt: item.alt,
+            ratio,
+          })),
+        },
+      ];
+    }) ?? []),
+    ...(project.afterCoverStillVideoPair
       ? [
           {
-            kind: "video" as const,
-            primary: project.afterCoverVideo.primary,
-            fallback: project.afterCoverVideo.fallback,
-            alt: project.afterCoverVideo.alt,
-            ratio: project.afterCoverVideo.ratio ?? "56.25%",
+            kind: "still-video-pair" as const,
+            still: {
+              src: project.afterCoverStillVideoPair.still.src,
+              alt: project.afterCoverStillVideoPair.still.alt,
+              ratio: project.afterCoverStillVideoPair.ratio ?? "100%",
+            },
+            video: {
+              primary: project.afterCoverStillVideoPair.video.primary,
+              fallback: project.afterCoverStillVideoPair.video.fallback,
+              alt: project.afterCoverStillVideoPair.video.alt,
+              ratio: project.afterCoverStillVideoPair.ratio ?? "100%",
+            },
           },
         ]
       : []),
+    ...(project.afterCoverVideos?.length
+      ? project.afterCoverVideos.map((clip) => ({
+          kind: "video" as const,
+          primary: clip.primary,
+          fallback: clip.fallback,
+          alt: clip.alt,
+          ratio: clip.ratio ?? "56.25%",
+        }))
+      : project.afterCoverVideo
+        ? [
+            {
+              kind: "video" as const,
+              primary: project.afterCoverVideo.primary,
+              fallback: project.afterCoverVideo.fallback,
+              alt: project.afterCoverVideo.alt,
+              ratio: project.afterCoverVideo.ratio ?? "56.25%",
+            },
+          ]
+        : []),
     ...(() => {
       const stills = project.afterVideoStills ?? [];
       const row = project.afterVideoRow;
@@ -266,7 +321,9 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
     ...(!(
       project.afterCoverStills ||
       project.afterCoverExtraRows?.length ||
+      project.afterCoverStillVideoPair ||
       project.afterCoverVideo ||
+      project.afterCoverVideos?.length ||
       project.afterVideoStills ||
       project.afterVideoRow ||
       project.beforeEndRow
@@ -613,6 +670,22 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
                         fallbackSrc={item.right.fallback}
                         alt={item.right.alt}
                         ratio={item.ratio}
+                      />
+                    </div>
+                  );
+                }
+                if (item.kind === "still-video-pair") {
+                  return (
+                    <div
+                      key={`still-video-${index}`}
+                      className="project-case-demo__pair project-case-demo__pair--video"
+                    >
+                      <Frame {...item.still} />
+                      <ProjectFallbackVideo
+                        primarySrc={item.video.primary}
+                        fallbackSrc={item.video.fallback}
+                        alt={item.video.alt}
+                        ratio={item.video.ratio}
                       />
                     </div>
                   );

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
+import { VideoLoadingCover } from "@/components/VideoLoadingCover";
 
 type HeroSegmentVideoProps = {
   src: string;
@@ -15,6 +16,7 @@ type HeroSegmentVideoProps = {
 /**
  * Full-bleed muted hero clip. Optional `[start, end]` loop via currentTime
  * (native `loop` only when no end is set).
+ * Loading cover until a frame can play — same language as gallery videos.
  */
 export function HeroSegmentVideo({
   src,
@@ -85,7 +87,7 @@ export function HeroSegmentVideo({
         preload="auto"
         loop={!segmentLoop}
       />
-      <div className="hero-segment-video__veil" aria-hidden="true" />
+      <VideoLoadingCover ready={ready} />
     </div>
   );
 }

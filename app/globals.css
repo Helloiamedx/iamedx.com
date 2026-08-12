@@ -55,6 +55,19 @@
   font-display: swap;
 }
 
+/* Type labels on Projects / Insights (no fill) */
+@font-face {
+  font-family: "Test Pitch Sans";
+  src:
+    /* Same-origin first — CDN lacks Access-Control-Allow-Origin for @font-face */
+    url("/fonts/TestPitchSans-Semibold.otf") format("opentype"),
+    url("https://assets.iamedx.com/fonts/TestPitchSans-Semibold.otf")
+      format("opentype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Condensed footer knockout — unique name avoids local Manuka override */
 @font-face {
   font-family: "Manuka Footer";
@@ -87,20 +100,20 @@
   --line: rgba(11, 11, 11, 0.12);
   --font-sans: "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
   /*
-   * Content shell — match Pentagram container rhythm on laptops:
-   * fluid to viewport minus outer gutters; hard cap only at very wide screens.
+   * Content shell — desktop trial cap at 1440 (was 1792).
+   * Fluid to viewport minus outer gutters; hard cap on wide screens.
    */
-  --shell-max: 1792px;
+  --shell-max: 1440px;
   --shell-gutter: 12px;
   --header-bar-h: 3.25rem;
   /* Bar + iOS status/notch when viewport-fit=cover */
   --header-offset: calc(var(--header-bar-h) + env(safe-area-inset-top, 0px));
 }
 
-/* Phone / tablet curtain: bar ~10% shorter than desktop */
+/* Phone / tablet curtain: bar ~10% shorter than desktop, then +8px */
 @media (max-width: 899px) {
   :root {
-    --header-bar-h: 2.925rem; /* 3.25rem × 0.9 */
+    --header-bar-h: calc(2.925rem + 8px); /* 3.25rem × 0.9 + 8px */
   }
 }
 
@@ -926,23 +939,63 @@ p {
     column-gap: clamp(2.5rem, 12vw, 4rem);
   }
 
-  .site-footer__bottom {
-    grid-template-columns: 1fr;
-    justify-items: start;
-    row-gap: 0.75rem;
+  .site-footer__brand {
+    /* Air under the wordmark before payments / social — ~half of prior */
+    padding-bottom: 0.4rem;
   }
 
-  .site-footer__legal,
-  .site-footer__payments,
-  .site-footer__social {
-    grid-column: 1;
-    justify-self: start;
-    text-align: left;
-    justify-content: flex-start;
+  .site-footer__shell--bottom {
+    padding-top: 0.4rem;
+  }
+
+  .site-footer__bottom {
+    /* One row: Personal left · Social right; © centered below */
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "payments social"
+      "legal legal";
+    align-items: baseline;
+    column-gap: 0.75rem;
+    /* Keep payments/social put; only the © row sits lower */
+    row-gap: 0;
   }
 
   .site-footer__payments {
-    white-space: normal;
+    grid-area: payments;
+    justify-self: start;
+    align-self: baseline;
+    margin: 0;
+    text-align: left;
+    white-space: nowrap;
+    font-size: clamp(0.8125rem, 2.8vw, 0.9375rem);
+  }
+
+  .site-footer__social {
+    grid-area: social;
+    justify-self: end;
+    align-self: baseline;
+    margin: 0;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    gap: 0.35rem 0.65rem;
+  }
+
+  .site-footer__social-link {
+    font-size: clamp(0.8125rem, 2.8vw, 0.9375rem);
+  }
+
+  .site-footer__legal {
+    grid-area: legal;
+    justify-self: stretch;
+    width: 100%;
+    /* Push © down only — leave Personal / Social where they are */
+    margin: 1.575rem 0 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: clamp(0.8125rem, 2.8vw, 0.9375rem);
   }
 }
 
@@ -997,12 +1050,6 @@ p {
   transition: color 360ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Align “Services” glyph with shell content left edge (drop leading pad) */
-.site-nav > :first-child.site-nav__link,
-.site-nav > :first-child .site-nav__link {
-  padding-inline-start: 0;
-}
-
 /*
  * iPad / touch: desktop chrome (≥900px) keeps text-sized nav hits (~25px).
  * Stretch links to full bar height so the frosted band is tappable, not just glyphs.
@@ -1013,12 +1060,6 @@ p {
     box-sizing: border-box;
     padding-block: 0;
     padding-inline: 0.75rem;
-  }
-
-  .site-nav > :first-child.site-nav__link,
-  .site-nav > :first-child .site-nav__link {
-    padding-inline-start: 0.75rem;
-    margin-inline-start: -0.75rem;
   }
 
   .nav-menu-toggle {
@@ -1668,8 +1709,8 @@ p {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  /* Clear the sticky bar — sit primary links a bit lower under the chrome */
-  padding: calc(var(--header-offset) + 1.85rem) 0
+  /* Clear the sticky bar — primary links sit a bit lower under the chrome */
+  padding: calc(var(--header-offset) + 1.85rem + 0.55rem) 0
     calc(1.25rem + env(safe-area-inset-bottom, 0px));
   overflow: hidden;
   overscroll-behavior: none;
@@ -1705,7 +1746,7 @@ p {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: calc(0.2rem + 2px);
 }
 
 .mobile-menu__link {
@@ -1713,7 +1754,8 @@ p {
   align-items: baseline;
   color: var(--mobile-ink);
   text-decoration: none;
-  font-size: clamp(1.55rem, 6.2vw, 2.15rem);
+  /* +2px vs prior clamp */
+  font-size: clamp(calc(1.55rem + 2px), calc(6.2vw + 2px), calc(2.15rem + 2px));
   font-weight: 500;
   letter-spacing: -0.03em;
   line-height: 1.1;
@@ -1744,7 +1786,7 @@ p {
 
 .mobile-menu__eyebrow {
   margin: 0;
-  font-size: 0.68rem;
+  font-size: calc(0.68rem + 2px);
   font-weight: 500;
   letter-spacing: 0.02em;
   color: var(--mobile-ink);
@@ -1754,7 +1796,7 @@ p {
 .mobile-menu__social a {
   color: var(--mobile-muted);
   text-decoration: none;
-  font-size: 0.8125rem;
+  font-size: calc(0.8125rem + 2px);
   font-weight: 400;
   line-height: 1.3;
 }
@@ -1812,7 +1854,7 @@ p {
 
 .mobile-menu__channel-label {
   margin: 0;
-  font-size: 0.65rem;
+  font-size: calc(0.65rem + 2px);
   font-weight: 500;
   letter-spacing: 0.02em;
   color: var(--mobile-ink);
@@ -1823,7 +1865,7 @@ p {
   text-decoration: underline;
   text-underline-offset: 0.18em;
   text-decoration-thickness: 1px;
-  font-size: 0.8125rem;
+  font-size: calc(0.8125rem + 2px);
   font-weight: 400;
   line-height: 1.25;
   overflow-wrap: anywhere;
@@ -1843,7 +1885,7 @@ body.is-mobile-menu-open .site-header-cta {
 }
 
 /*
- * Desktop chrome: primary nav left · logo centered · Contact raft on the right.
+ * Desktop chrome: logo left · primary nav centered · Contact raft on the right.
  * Breakpoint unchanged: 900px.
  */
 @media (min-width: 900px) {
@@ -1854,24 +1896,24 @@ body.is-mobile-menu-open .site-header-cta {
     gap: 1.25rem;
   }
 
-  .site-nav {
-    display: flex;
+  .site-logo {
     position: relative;
     left: auto;
     transform: none;
-    z-index: 1;
-    justify-content: flex-start;
-    margin-left: 0;
+    z-index: 2;
     flex: 0 0 auto;
-    min-width: 0;
   }
 
-  .site-logo {
+  .site-nav {
+    display: flex;
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 2;
-    order: 0;
+    z-index: 1;
+    justify-content: center;
+    margin-left: 0;
+    flex: 0 0 auto;
+    min-width: 0;
   }
 
   .site-header__actions {
@@ -2201,22 +2243,21 @@ html[data-chrome-ready="1"] .hero__video {
   color: #fff;
 }
 
-.projects-page .project-window__title {
+.projects-page .project-window__title,
+.projects-page .project-featured__title {
   color: #fff;
 }
 
-.projects-page .project-window__tagline {
-  color: rgba(255, 255, 255, 0.72);
-}
-
-.projects-page .project-window__meta--stack .project-window__tagline {
-  color: rgba(255, 255, 255, 0.72);
+.projects-page .project-window__tagline,
+.projects-page .project-window__meta--stack .project-window__tagline,
+.projects-page .project-featured__tagline {
+  color: #fff;
 }
 
 .projects-page .project-type-chip {
-  border-color: rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.68);
+  /* Fill removed — color/font from unified type-label rule */
+  border: 0;
+  background: transparent;
 }
 
 .projects-page .project-showcase__media {
@@ -2329,13 +2370,13 @@ html[data-chrome-ready="1"] .hero__video {
   inset: 0 !important;
 }
 
-/* Featured lead meta — under cover: title 35% | gap 10% | desc 35% | tag 20% */
+/* Featured lead meta ONLY — chip max-content first; gaps total 13%; title+desc share rest */
 .project-featured__meta {
   position: static;
   z-index: auto;
   display: grid;
-  grid-template-columns: 35% 10% 35% 20%;
-  grid-template-areas: "title . desc chip";
+  grid-template-columns: minmax(0, 1fr) 6.5% minmax(0, 1fr) 6.5% max-content;
+  grid-template-areas: "title . desc . chip";
   align-items: start;
   column-gap: 0;
   row-gap: 0;
@@ -2375,7 +2416,7 @@ html[data-chrome-ready="1"] .hero__video {
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.35;
-  color: rgba(255, 255, 255, 0.72);
+  color: #fff;
   text-wrap: pretty;
 }
 
@@ -2385,22 +2426,22 @@ html[data-chrome-ready="1"] .hero__video {
   justify-self: end;
   align-self: start;
   box-sizing: border-box;
-  max-width: 100%;
+  max-width: none;
   width: max-content;
-  min-width: 0;
+  min-width: max-content;
   margin: 0;
-  min-height: 0;
   height: auto;
-  padding: 0.18rem 0.55rem;
-  line-height: 1.15;
+  /* Size locked by unified type-chip rule */
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
 }
 
 @media (max-width: 800px) {
   /*
-   * Mobile filter cards: title 65% | type; description full width.
+   * Mobile filter cards: chip max-content first; title takes remaining.
    */
   .project-window__meta--stack,
   .insight-showcase__meta {
@@ -2419,28 +2460,28 @@ html[data-chrome-ready="1"] .hero__video {
   .insight-showcase__meta > .insight-chip {
     justify-self: end;
     align-self: start;
-    min-height: 0;
-    font-size: 0.5625rem;
-    padding: 0.2rem 0.45rem;
-    line-height: 1.15;
   }
 
   .project-featured__meta {
-    grid-template-columns: 35% 10% 35% 20%;
-    grid-template-areas: "title . desc chip";
+    /* Featured lead only: gaps 13% total, chip first, title|desc equal */
+    grid-template-columns: minmax(0, 1fr) 6.5% minmax(0, 1fr) 6.5% max-content;
+    grid-template-areas: "title . desc . chip";
+    column-gap: 0;
     margin-top: 0.75rem;
     padding: 0;
+    align-items: start;
   }
 
   .project-featured__meta > .project-type-chip {
-    font-size: 0.5625rem;
-    padding: 0.2rem 0.45rem;
+    justify-self: end;
+    align-self: start;
+    white-space: nowrap;
   }
 
   .project-featured__title {
     font-size: 0.6875rem;
     letter-spacing: -0.01em;
-    line-height: 1.2;
+    line-height: 1.15;
   }
 
   .project-featured__tagline {
@@ -2510,7 +2551,7 @@ html[data-chrome-ready="1"] .hero__video {
 
 /*
  * Card meta (Projects + Insights):
- *   TITLE (65%) .............. TYPE (right, bottom of title row)
+ *   TITLE (65%) .............. TYPE (right, top-aligned)
  *   Description full width
  */
 .project-window__meta--stack {
@@ -2532,7 +2573,11 @@ html[data-chrome-ready="1"] .hero__video {
   font-size: clamp(0.9375rem, 0.85rem + 0.35vw, 1.125rem);
   font-weight: 700;
   letter-spacing: 0.02em;
+  line-height: 1.15; /* match type-label lh — optical top align */
   min-width: 0;
+  align-self: start;
+  margin: 0;
+  padding: 0;
 }
 
 .project-window__meta--stack .project-window__categories,
@@ -2562,7 +2607,7 @@ html[data-chrome-ready="1"] .hero__video {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
-  align-items: center;
+  align-items: start;
   max-width: min(100%, 28rem);
 }
 
@@ -2596,6 +2641,111 @@ html[data-chrome-ready="1"] .hero__video {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/*
+ * Type labels (Projects + Insights): no fill.
+ * Pitch Sans Semibold · keep --type-chip-font · gray ink.
+ * Title + description on these surfaces stay white.
+ */
+.projects-page,
+.project-detail,
+.insights-page,
+.insight-detail {
+  --type-chip-font: clamp(
+    calc(0.5625rem * 0.97),
+    calc(0.52rem * 0.97 + 0.15vw * 0.97),
+    calc(0.6875rem * 0.97)
+  );
+  --type-label-color: rgba(255, 255, 255, 0.5);
+  --font-type-label: "Test Pitch Sans", var(--font-sans);
+}
+
+.projects-page .project-type-chip,
+.project-detail .project-type-chip,
+.project-detail .project-case-demo__tag,
+.insights-page .insight-chip,
+.insight-detail .insight-chip,
+.projects-page .project-featured__meta > .project-type-chip,
+.insights-page .insights-lead__meta > .insight-chip,
+.projects-page .project-window__meta--stack .project-type-chip,
+.insights-page .insight-showcase__meta > .insight-chip,
+.project-detail .project-window__meta--stack .project-type-chip,
+.insight-detail .insight-showcase__meta > .insight-chip {
+  font-family: var(--font-type-label) !important;
+  font-size: var(--type-chip-font) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em;
+  line-height: 1.15 !important;
+  color: var(--type-label-color) !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: flex-start;
+  align-self: start;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+/*
+ * Iron rule — type labels top-align with titles (featured / cards / related / case).
+ * Never baseline or vertical-center the label against the title.
+ */
+.project-featured__meta,
+.insights-lead__meta,
+.project-window__meta--stack,
+.insight-showcase__meta,
+.project-case-demo__hero-copy {
+  align-items: start;
+}
+
+.project-featured__title,
+.project-featured__tagline,
+.insights-lead__title,
+.insights-lead__excerpt,
+.project-window__meta--stack .project-window__title,
+.insight-showcase__title,
+.project-case-demo__title {
+  align-self: start;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.project-featured__meta > .project-type-chip,
+.project-featured__meta > .project-featured__chip-slot,
+.insights-lead__meta > .insight-chip,
+.insights-lead__meta > .insights-lead__chip-slot,
+.project-window__meta--stack .project-window__chips,
+.project-window__meta--stack .project-window__categories,
+.project-window__meta--stack .project-type-chip,
+.insight-showcase__meta > .insight-chip,
+.project-case-demo__tags,
+.project-case-demo__tag {
+  align-self: start !important;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.project-window__chips,
+.project-case-demo__tags,
+.insight-chips {
+  align-items: flex-start;
+}
+
+.project-window__chips li,
+.project-case-demo__tags li {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: flex-start;
 }
 
 .project-window__meta--stack .project-window__tagline {
@@ -2643,7 +2793,7 @@ html[data-chrome-ready="1"] .hero__video {
   .project-window__meta--stack .project-window__title {
     font-size: 0.8125rem;
     letter-spacing: -0.01em;
-    line-height: 1.2;
+    line-height: 1.15;
   }
 
   .project-window__meta--stack .project-window__tagline {
@@ -2814,11 +2964,11 @@ html[data-chrome-ready="1"] .hero__video {
     width: auto;
     flex: 0 0 auto;
     justify-content: center;
-    padding: 0.4rem 0.75rem;
+    padding: calc(0.4rem * 0.97) calc(0.75rem * 0.97);
     border-radius: 999px;
     background: #e5e5ea;
     color: #1d1d1f;
-    font-size: 0.8125rem;
+    font-size: calc(0.8125rem * 0.97);
     line-height: 1.2;
     white-space: nowrap;
     text-align: center;
@@ -2991,18 +3141,14 @@ html[data-chrome-ready="1"] .hero__video {
   color: #fff;
 }
 
-.project-detail .project-window__tagline {
-  color: rgba(255, 255, 255, 0.72);
-}
-
+.project-detail .project-window__tagline,
 .project-detail .project-window__meta--stack .project-window__tagline {
-  color: rgba(255, 255, 255, 0.72);
+  color: #fff;
 }
 
 .project-detail .project-type-chip {
-  border-color: rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.68);
+  border: 0;
+  background: transparent;
 }
 
 .project-detail .project-showcase__media {
@@ -3489,7 +3635,8 @@ html[data-chrome-ready="1"] .hero__video {
   gap: var(--insight-meta-gap);
   margin: 0 0 clamp(0.55rem, 1.2vw, 0.75rem);
   font-family: var(--font-sans);
-  font-size: var(--insight-label-size);
+  /* Date + type — 3px under shared insight label token */
+  font-size: calc(var(--insight-label-size) - 3px);
   font-weight: 500;
   letter-spacing: var(--insight-label-tracking);
   line-height: 1.2;
@@ -3584,6 +3731,24 @@ html[data-chrome-ready="1"] .hero__video {
   margin: 0;
   font-style: italic;
   color: inherit;
+}
+
+/* Bold-italic pull quotes: “ text ” with +2px */
+.insight-detail__quote--pull {
+  font-size: calc(1em + 2px);
+}
+
+.insight-detail__quote--pull p {
+  font-weight: 600;
+  font-style: italic;
+  color: #86868b;
+}
+
+.insight-detail__pull {
+  font-size: calc(1em + 2px);
+  font-style: italic;
+  font-weight: 600;
+  color: #86868b;
 }
 
 .insight-detail__quote + .insight-detail__quote {
@@ -3722,13 +3887,13 @@ html[data-chrome-ready="1"] .hero__video {
   object-fit: cover;
 }
 
-/* Featured insight lead — under cover: title 35% | gap 10% | desc 35% | tag 20% */
+/* Featured insight lead ONLY — chip max-content first; gaps total 13%; title+desc share rest */
 .insights-lead__meta {
   position: static;
   z-index: auto;
   display: grid;
-  grid-template-columns: 35% 10% 35% 20%;
-  grid-template-areas: "title . desc chip";
+  grid-template-columns: minmax(0, 1fr) 6.5% minmax(0, 1fr) 6.5% max-content;
+  grid-template-areas: "title . desc . chip";
   align-items: start;
   column-gap: 0;
   row-gap: 0;
@@ -3767,7 +3932,7 @@ html[data-chrome-ready="1"] .hero__video {
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.35;
-  color: rgba(255, 255, 255, 0.72);
+  color: #fff;
 }
 
 .insights-lead__meta > .insight-chip,
@@ -3776,25 +3941,26 @@ html[data-chrome-ready="1"] .hero__video {
   justify-self: end;
   align-self: start;
   box-sizing: border-box;
-  max-width: 100%;
+  max-width: none;
   width: max-content;
-  min-width: 0;
+  min-width: max-content;
   margin: 0;
-  min-height: 0;
   height: auto;
-  padding: 0.18rem 0.55rem;
-  line-height: 1.15;
+  /* Size locked by unified type-chip rule */
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   white-space: nowrap;
+  overflow: visible;
 }
 
 @media (max-width: 800px) {
   .insights-lead__meta {
-    grid-template-columns: 35% 10% 35% 20%;
-    grid-template-areas: "title . desc chip";
+    grid-template-columns: minmax(0, 1fr) 6.5% minmax(0, 1fr) 6.5% max-content;
+    grid-template-areas: "title . desc . chip";
+    column-gap: 0;
     margin-top: 0.75rem;
     padding: 0;
+    align-items: start;
   }
 
   .insights-lead__title {
@@ -3802,7 +3968,7 @@ html[data-chrome-ready="1"] .hero__video {
     max-width: 100%;
     font-size: 0.6875rem;
     letter-spacing: -0.01em;
-    line-height: 1.2;
+    line-height: 1.15;
     text-transform: none;
   }
 
@@ -3814,8 +3980,9 @@ html[data-chrome-ready="1"] .hero__video {
   }
 
   .insights-lead__meta > .insight-chip {
-    font-size: 0.5625rem;
-    padding: 0.2rem 0.45rem;
+    justify-self: end;
+    align-self: start;
+    white-space: nowrap;
   }
 }
 
@@ -3884,8 +4051,9 @@ html[data-chrome-ready="1"] .hero__video {
   }
 
   .insights-page .insight-filter-bar .project-involvement__pill {
-    padding: 0.4rem 0.75rem;
-    font-size: 0.8125rem;
+    /* 3% smaller than shared mobile pill for denser wrap */
+    padding: calc(0.4rem * 0.97) calc(0.75rem * 0.97);
+    font-size: calc(0.8125rem * 0.97);
     line-height: 1.2;
     background: rgba(255, 255, 255, 0.12);
     color: rgba(255, 255, 255, 0.86);
@@ -3977,12 +4145,14 @@ html[data-chrome-ready="1"] .hero__video {
 .insight-showcase__title {
   grid-area: title;
   margin: 0;
+  padding: 0;
   min-width: 0;
+  align-self: start;
   font-family: var(--font-sans);
   font-size: clamp(0.9375rem, 0.85rem + 0.35vw, 1.125rem);
   font-weight: 500;
   letter-spacing: -0.01em;
-  line-height: 1.25;
+  line-height: 1.15; /* match type-label lh — optical top align */
   color: #fff;
 }
 
@@ -4009,7 +4179,7 @@ html[data-chrome-ready="1"] .hero__video {
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.4;
-  color: rgba(255, 255, 255, 0.62);
+  color: #fff;
 }
 
 @media (max-width: 800px) {
@@ -4028,7 +4198,7 @@ html[data-chrome-ready="1"] .hero__video {
 
   .insight-showcase__title {
     font-size: 0.8125rem;
-    line-height: 1.2;
+    line-height: 1.15;
   }
 
   .insight-showcase__meta > .insight-chip {
@@ -4045,17 +4215,15 @@ html[data-chrome-ready="1"] .hero__video {
 }
 
 .insights-page .insight-chip {
-  border-color: rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.68);
+  border: 0;
+  background: transparent;
   letter-spacing: -0.01em;
 }
 
-/* Related strip lives on detail (black) — same chip fill as the index */
+/* Related strip lives on detail (black) — same plain label as the index */
 .insight-detail .insight-chip {
-  border-color: rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.78);
+  border: 0;
+  background: transparent;
   letter-spacing: -0.01em;
 }
 
@@ -4094,12 +4262,10 @@ html[data-chrome-ready="1"] .hero__video {
   white-space: nowrap;
 }
 
-/* Featured chips share the title top edge */
+/* Featured chips share the title top edge — size stays on unified type-chip rule */
 .insights-lead__meta > .insight-chip,
 .project-featured__meta > .project-type-chip {
   align-self: start;
-  min-height: 0;
-  height: auto;
   margin-top: 0;
 }
 
@@ -4184,20 +4350,12 @@ html[data-chrome-ready="1"] .hero__video {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.hero-segment-video__veil {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: #0a0a0a;
-  opacity: 1;
-  transition: opacity 420ms cubic-bezier(0.22, 1, 0.36, 1);
-  pointer-events: none;
-}
-
-.hero-segment-video.is-ready .hero-segment-video__veil {
   opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.hero-segment-video.is-ready .hero-segment-video__media {
+  opacity: 1;
 }
 
 /* YouTube / Vimeo iframe — cover the viewport like object-fit: cover */
@@ -4256,26 +4414,12 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   opacity: 1;
 }
 
-/* Hide title / big-play flash until playback is stable past start */
-.youtube-background__veil {
-  position: absolute;
+/* Hide title / big-play flash until playback is stable past start —
+   cover markup is VideoLoadingCover (.video-loading-cover) */
+.youtube-background .video-loading-cover {
   inset: -1px;
   z-index: 2;
   background: #0a0a0a;
-  opacity: 1;
-  visibility: visible;
-  transition:
-    opacity 480ms cubic-bezier(0.22, 1, 0.36, 1),
-    visibility 0s linear 0s;
-  pointer-events: none;
-}
-
-.youtube-background.is-ready .youtube-background__veil {
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity 480ms cubic-bezier(0.22, 1, 0.36, 1),
-    visibility 0s linear 480ms;
 }
 
 .project-case-demo__hero-scrim {
@@ -4292,7 +4436,7 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   );
 }
 
-/* Meta bar — same three-up as featured lead: title | tagline | type */
+/* Meta bar — title | tagline | type (not the featured-lead 13% gap formula) */
 .project-case-demo__hero-copy {
   position: absolute;
   z-index: 1;
@@ -4318,29 +4462,35 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
 }
 
 @media (max-width: 800px) {
+  /*
+   * Mobile case hero meta — same stack as filter cards:
+   *   TITLE (≤60%) ........ TYPE (right)
+   *   Description full width
+   */
   .project-case-demo__hero-copy {
     left: var(--shell-gutter);
     right: var(--shell-gutter);
-    grid-template-columns: minmax(0, 65%) minmax(0, 35%);
+    grid-template-columns: minmax(0, 60%) minmax(0, 1fr);
     grid-template-areas:
       "title tags"
       "summary summary";
-    justify-content: space-between;
     column-gap: 1.25rem;
     align-items: start;
     row-gap: 0.12rem;
-    padding-inline: 0.75rem;
+    padding-inline: 0;
   }
 }
 
 .project-case-demo__title {
   grid-area: title;
   margin: 0;
+  padding: 0;
+  align-self: start;
   font-family: var(--font-sans);
   font-size: clamp(1.05rem, 0.95rem + 0.45vw, 1.35rem);
   font-weight: 500;
   letter-spacing: -0.015em;
-  line-height: 1.2;
+  line-height: 1.15; /* match type-label lh — optical top align */
   text-transform: none;
   color: #fff;
   text-wrap: balance;
@@ -4357,7 +4507,7 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.35;
-  color: rgba(255, 255, 255, 0.82);
+  color: #fff;
   text-wrap: pretty;
 }
 
@@ -4368,6 +4518,7 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   justify-content: flex-end;
   justify-self: end;
   align-self: start;
+  align-items: flex-start;
   gap: 0.4rem;
   margin: 0;
   padding: 0;
@@ -4376,45 +4527,50 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
 
 @media (max-width: 800px) {
   .project-case-demo__title {
+    min-width: 0;
+    max-width: 100%;
     font-size: 0.8125rem;
     letter-spacing: -0.01em;
-    line-height: 1.2;
+    line-height: 1.15;
   }
 
   .project-case-demo__summary {
-    justify-self: start;
+    justify-self: stretch;
+    width: 100%;
+    max-width: none;
     text-align: left;
-    max-width: 100%;
     font-size: 0.6875rem;
     line-height: 1.25;
   }
 
   .project-case-demo__tags {
+    justify-self: end;
+    justify-content: flex-end;
     align-self: start;
+    width: max-content;
+    max-width: 100%;
+    text-align: right;
   }
 
   .project-case-demo__tag {
-    font-size: 0.5625rem;
-    padding: 0.2rem 0.45rem;
-    line-height: 1.15;
+    /* Unified --type-chip-* size — no local font/padding override */
+    line-height: 1;
   }
 }
 
 .project-case-demo__tag {
-  display: block;
-  padding: 0.28rem 0.65rem;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  font-family: var(--font-sans);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
-  text-transform: none; /* Filled type chips — never all-caps */
-  color: rgba(255, 255, 255, 0.92);
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  font-family: var(--font-type-label, "Test Pitch Sans", var(--font-sans));
+  /* Size/color from unified type-label rule on .project-detail */
+  text-transform: none;
+  white-space: nowrap;
 }
 
 .project-case-demo__body {
@@ -4635,7 +4791,8 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   opacity: 1;
 }
 
-.project-fallback-video__cover {
+/* Shared — hero, gallery, YouTube veil */
+.video-loading-cover {
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -4651,15 +4808,22 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   letter-spacing: 0.06em;
   text-transform: uppercase;
   opacity: 1;
-  transition: opacity 0.35s ease;
+  visibility: visible;
+  transition:
+    opacity 0.35s ease,
+    visibility 0s linear 0s;
   pointer-events: none;
 }
 
-.project-fallback-video.is-ready .project-fallback-video__cover {
+.video-loading-cover.is-ready {
   opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.35s ease,
+    visibility 0s linear 0.35s;
 }
 
-.project-fallback-video__spinner {
+.video-loading-cover__spinner {
   width: 1.25rem;
   height: 1.25rem;
   border: 1.5px solid rgba(255, 255, 255, 0.18);
@@ -4668,7 +4832,7 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   animation: project-fallback-spin 0.7s linear infinite;
 }
 
-.project-fallback-video__label {
+.video-loading-cover__label {
   line-height: 1;
 }
 
@@ -4679,13 +4843,14 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .project-fallback-video__spinner {
+  .video-loading-cover__spinner {
     animation: none;
     border-top-color: rgba(255, 255, 255, 0.45);
   }
 
   .project-fallback-video__media,
-  .project-fallback-video__cover {
+  .hero-segment-video__media,
+  .video-loading-cover {
     transition: none;
   }
 }

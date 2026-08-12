@@ -72,10 +72,11 @@ export type Project = {
   coverHeight: number;
   /**
    * Case detail — first still under the hero.
-   * When set, replaces `coverImage` in the gallery only (index cards keep `coverImage`).
+   * Index `coverImage` must never be reused here; only set when the user
+   * supplies a dedicated detail still.
    */
   galleryLeadImage?: string;
-  /** Case detail first-screen still (used when no hero video) */
+  /** Case detail first-screen still (used when no hero video) — not the index card cover */
   heroImage?: string;
   /**
    * Case detail first-screen self-hosted video (wins over YouTube / still).
@@ -133,6 +134,29 @@ export type Project = {
     fallback?: string;
     alt: string;
     /** CSS padding-bottom ratio; default 16:9 */
+    ratio?: string;
+  };
+  /**
+   * Full-width videos after stills, in order.
+   * When set, used instead of a single `afterCoverVideo`.
+   */
+  afterCoverVideos?: {
+    primary: string;
+    fallback?: string;
+    alt: string;
+    ratio?: string;
+  }[];
+  /**
+   * Two-up row after stills / before `afterCoverVideos`: still left, video right.
+   */
+  afterCoverStillVideoPair?: {
+    still: { src: string; alt: string };
+    video: {
+      primary: string;
+      fallback?: string;
+      alt: string;
+    };
+    /** CSS padding-bottom ratio per cell; default 100% */
     ratio?: string;
   };
   /** Full-width stills after the process video (each item = one row). */
@@ -357,12 +381,19 @@ const SECOND_PROJECT_AFTER_COVER_STILLS = {
     {
       src: projectCoverFromName(
         SECOND_PROJECT_NAME,
-        "dragon-age-writing-bundle-banner-h1.jpg",
+        "dragon-age-writing-bundle-banner-h2.jpg",
       ),
-      alt: "Collector box",
+      alt: "Detail 2",
+    },
+    {
+      src: projectCoverFromName(
+        SECOND_PROJECT_NAME,
+        "dragon-age-writing-bundle-banner-h3.jpg",
+      ),
+      alt: "Detail 3",
     },
   ],
-  ratio: "56.25%",
+  ratio: "100%",
 };
 const SECOND_PROJECT_AFTER_COVER_EXTRA_ROWS = [
   {
@@ -370,19 +401,12 @@ const SECOND_PROJECT_AFTER_COVER_EXTRA_ROWS = [
       {
         src: projectCoverFromName(
           SECOND_PROJECT_NAME,
-          "dragon-age-writing-bundle-banner-h2.jpg",
+          "dragon-age-writing-bundle-banner-h1.jpg",
         ),
-        alt: "Detail 2",
-      },
-      {
-        src: projectCoverFromName(
-          SECOND_PROJECT_NAME,
-          "dragon-age-writing-bundle-banner-h3.jpg",
-        ),
-        alt: "Detail 3",
+        alt: "Collector box",
       },
     ],
-    ratio: "100%",
+    ratio: "56.25%",
   },
   {
     items: [
@@ -457,6 +481,79 @@ const SECOND_PROJECT_BEFORE_END_ROW = {
   ],
   ratio: "100%",
 };
+
+/** 「第三个项目」— grid card under the featured lead */
+const THIRD_PROJECT_NAME = "Horizon Zero Dawn The Thunderjaw Collection Statue";
+/** CDN folder casing (covers / future gallery) — keep exact */
+const THIRD_PROJECT_CDN_FOLDER =
+  "Horizon zero dawn the thunderjaw collection statue";
+const THIRD_PROJECT_SLUG = projectSlugFromName(THIRD_PROJECT_NAME);
+const THIRD_PROJECT_COVER = projectCoverFromName(
+  THIRD_PROJECT_CDN_FOLDER,
+  "Horizon zero dawn the thunderjaw collection statue hero.jpg",
+);
+const THIRD_PROJECT_HERO_VIDEO = projectCoverFromName(
+  THIRD_PROJECT_CDN_FOLDER,
+  "Horizon Zero Dawn - The Machines- Thunderjaw.mp4",
+);
+const THIRD_PROJECT_TAGLINE =
+  "Thunderjaw resin sculpture capturing the ultimate power of machine and battle.";
+
+const THIRD_PROJECT_STILL = (n: 1 | 2 | 3 | 4 | 5 | 6, alt: string) => ({
+  src: projectCoverFromName(
+    THIRD_PROJECT_CDN_FOLDER,
+    `Horizon Zero Dawn - The Machines- Thunderjaw${n}.jpg`,
+  ),
+  alt,
+});
+
+/** Detail gallery: 1 full → 2|3 → 4|5|6 → 8|Machines → unboxing */
+const THIRD_PROJECT_GALLERY_LEAD = THIRD_PROJECT_STILL(1, "Thunderjaw 1").src;
+const THIRD_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    THIRD_PROJECT_STILL(2, "Thunderjaw 2"),
+    THIRD_PROJECT_STILL(3, "Thunderjaw 3"),
+  ],
+  ratio: "100%",
+};
+const THIRD_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      THIRD_PROJECT_STILL(4, "Thunderjaw 4"),
+      THIRD_PROJECT_STILL(5, "Thunderjaw 5"),
+      THIRD_PROJECT_STILL(6, "Thunderjaw 6"),
+    ],
+    ratio: "100%",
+  },
+];
+/** Row 4: still 8 | Machines clip — then unboxing full-width */
+const THIRD_PROJECT_AFTER_COVER_STILL_VIDEO_PAIR = {
+  still: {
+    src: projectCoverFromName(
+      THIRD_PROJECT_CDN_FOLDER,
+      "Horizon Zero Dawn - The Machines- Thunderjaw8.jpg",
+    ),
+    alt: "Thunderjaw 8",
+  },
+  video: {
+    primary: projectCoverFromName(
+      THIRD_PROJECT_CDN_FOLDER,
+      "Horizon Zero Dawn - The Machines- Thunderjawshow.mp4",
+    ),
+    alt: "The Machines — Thunderjaw",
+  },
+  ratio: "100%",
+} as const;
+const THIRD_PROJECT_AFTER_COVER_VIDEOS = [
+  {
+    primary: projectCoverFromName(
+      THIRD_PROJECT_CDN_FOLDER,
+      "Unboxing - Horizon Zero Dawn Thunderjaw Collection and Collector's Edition Comparison.mp4",
+    ),
+    alt: "Thunderjaw Collection unboxing and Collector's Edition comparison",
+    ratio: "56.25%",
+  },
+] as const;
 
 export const projectsFeaturedLead: ProjectsFeaturedLead = {
   slug: FIRST_PROJECT_SLUG,
@@ -603,6 +700,61 @@ export const projects: Project[] = [
     result:
       "A cohesive writing collectible—and more confidence for the client to explore design ideas into real products.",
   },
+  {
+    slug: THIRD_PROJECT_SLUG,
+    title: THIRD_PROJECT_NAME,
+    materials: ["resin"],
+    ips: ["horizon-zero-dawn"],
+    tags: involvementTags("contribution"),
+    summary: THIRD_PROJECT_TAGLINE,
+    tagline: THIRD_PROJECT_TAGLINE,
+    headline: THIRD_PROJECT_TAGLINE,
+    studySub: "study what i did",
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "contribution",
+    coverImage: THIRD_PROJECT_COVER,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    galleryLeadImage: THIRD_PROJECT_GALLERY_LEAD,
+    heroVideo: THIRD_PROJECT_HERO_VIDEO,
+    afterCoverStills: THIRD_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: THIRD_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    afterCoverStillVideoPair: THIRD_PROJECT_AFTER_COVER_STILL_VIDEO_PAIR,
+    afterCoverVideos: [...THIRD_PROJECT_AFTER_COVER_VIDEOS],
+    overview: [
+      "Horizon Zero Dawn is an action role-playing game developed by Guerrilla Games and published by Sony Interactive Entertainment.",
+      "Set in a post-apocalyptic world where humans live in tribal societies alongside powerful mechanical creatures, the story follows Aloy as she explores the origins of the machines and uncovers the history behind the collapse of the old civilization.",
+      "This project was developed around one of the game’s most recognizable machines, the Thunderjaw, and was designed as a premium collectible set for fans of the Horizon Zero Dawn universe.",
+      "The centerpiece was a highly detailed Thunderjaw statue measuring approximately 38 cm tall and 39 cm long, assembled from more than 200 individual parts.",
+      "The complete set also included an exclusive world map, Aloy’s Focus earpiece, two lithograph art prints, and premium packaging.",
+      "Bringing these different components together required the project to combine collectible statue production, accessory development, printed materials, and packaging into one consistent product experience that reflected the visual quality and identity of the original game.",
+    ],
+    challengesBody: [
+      "Recreating the Thunderjaw in resin was no easy feat, especially given the machine’s highly detailed and complex design. The greatest challenge lay in striking the right balance between mechanical realism and artistic interpretation. Each component, from the massive hydraulic legs to the intricately layered body armor, required exceptional precision.",
+      "The sculptors faced difficulties with the Thunderjaw’s interlocking parts, which had to fit together seamlessly while maintaining the dynamic posture that captures its readiness for battle.",
+      "Another significant hurdle was its massive size—ensuring the model’s proportions were accurate without compromising stability. Resin, while strong, has limitations when it comes to supporting such weight across multiple small joints, like the articulated tail or the delicate weaponry along its back.",
+      "The sculptors had to develop an internal structure to reinforce stability while keeping the overall model lightweight enough for display.",
+      "The paintwork also presented its own challenges—replicating the weathered, metallic look of the machine while adding lifelike touches to the synthetic parts required advanced layering techniques and precise color matching.",
+    ],
+    executionBody: [
+      "I supported the development and production of the Thunderjaw statue from 3D model breakdown through molding, painting, assembly, and final quality control.",
+      "One of the key challenges was making sure each component could be produced accurately and assembled correctly without affecting the overall appearance or structural stability of the statue.",
+      "I coordinated the production requirements for different sections, including the mechanical joints, armor panels, weapons, and display base.",
+      "I also followed the painting and finishing process to ensure the different materials, metallic effects, weathering, and surface details remained consistent with the original in-game design.",
+      "During final assembly, I focused on part fit, structural integrity, visual consistency, and overall finishing quality, helping identify and resolve issues before the completed statues moved to final inspection and packaging.",
+    ],
+    year: 2024,
+    client: "Horizon Zero Dawn",
+    featured: false,
+    challenge:
+      "Balance mechanical realism and artistic interpretation in a large multi-part resin Thunderjaw—fit, stability, and weathered metallic paint.",
+    result:
+      "A premium Thunderjaw collectible set spanning statue production, accessories, prints, and packaging.",
+  },
 ];
 
 export function getProjectBySlug(slug: string) {
@@ -634,14 +786,22 @@ export function filterProjects(options?: {
   });
 }
 
-/** Related strip: other projects, stable shuffle by seed, capped. */
+/** Related strip: same involvement-tag projects only (stable order), capped. */
 export function getRelatedProjects(
   excludeSlugs: string[],
   limit = 5,
+  preferTags: string[] = [],
 ): Project[] {
   const exclude = new Set(excludeSlugs);
-  const pool = projects.filter((p) => !exclude.has(p.slug));
-  const ranked = [...pool].sort((a, b) => {
+  const tags = new Set(preferTags.filter(Boolean));
+  if (tags.size === 0) return [];
+
+  const sameTag = projects.filter(
+    (project) =>
+      !exclude.has(project.slug) &&
+      project.tags.some((tag) => tags.has(tag)),
+  );
+  const ranked = [...sameTag].sort((a, b) => {
     const ha = hashSlug(a.slug);
     const hb = hashSlug(b.slug);
     return ha - hb;

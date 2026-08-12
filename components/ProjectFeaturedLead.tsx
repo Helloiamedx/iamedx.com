@@ -8,7 +8,7 @@ type ProjectFeaturedLeadProps = {
 
 /**
  * Full-width「第一个项目」— cover entry on /projects.
- * Meta below: title 35% | gap 10% | tagline 35% | tag ~20%, top-aligned.
+ * Featured meta only: chip max-content; gaps 13% total; title + tagline share the rest.
  */
 export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
   const typeLabel = project.categories.at(0) ?? null;

@@ -7,11 +7,19 @@ alwaysApply: true
 
 All case-page **gallery** videos (pairs under the gallery, process clips) follow this stack. Use `ProjectFallbackVideo` + `ProtectedVideo` — do not invent a one-off player.
 
-## 0. First-screen hero background
+## Index card cover ≠ detail media
+
+When the user supplies a **projects homepage / filter card cover** (`coverImage`):
+
+- Wire it **only** to the index / featured / masonry card.
+- **Do not** put that image on the project detail page as `heroImage`, `galleryLeadImage`, or any gallery still.
+- Detail **hero video** and **all detail photos** are supplied separately — wait for those assets; do not invent or reuse the card cover.
+
+`ProjectCaseDemo` must not fall back from missing gallery lead to `coverImage`.
 
 ## 0. First-screen hero background
 
-Case detail hero prefers self-hosted `heroVideo` (+ optional `heroVideoStart` / `heroVideoEnd`) via `HeroSegmentVideo` + `ProtectedVideo`. YouTube (`heroYoutubeId`) only when no CDN file yet. Still: `heroImage`. Do not invent a CDN fallback.
+Case detail hero prefers self-hosted `heroVideo` (+ optional `heroVideoStart` / `heroVideoEnd`) via `HeroSegmentVideo` + `ProtectedVideo`. YouTube (`heroYoutubeId`) only when no CDN file yet. Still: `heroImage` only when the user gives a dedicated detail still (never the index card). Do not invent a CDN fallback.
 
 ## 1. Sources
 
@@ -23,8 +31,9 @@ Playback requirements on the working source: **muted**, **autoplay**, **loop**, 
 
 ## 2. Cover before play
 
-- **Loading only** — spinner / “Loading” cover until the video can play, then fade out and play.
+- **Loading only** — spinner / “Loading video” cover (`VideoLoadingCover`) until the video can play, then fade out and play.
 - **Do not** extract a frame, generate a poster image, or invent a still from the video.
+- Applies to case hero (`HeroSegmentVideo`), gallery clips (`ProjectFallbackVideo`), and YouTube hero veil.
 
 ## 3. Layout
 

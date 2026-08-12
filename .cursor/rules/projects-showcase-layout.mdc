@@ -60,7 +60,7 @@ This is the **only** case-detail pattern. Do not revive the old always-on Backgr
 
 ## Featured lead meta
 
-Projects「第一个项目」and Insights featured lead — meta **under** the cover, three-up: title **35%** · gap **10%** · description **35%** · type chip **~20%** (end-aligned). Title / description / chip **top-aligned**.
+Projects「第一个项目」and Insights featured lead — meta **under** the cover only (`.project-featured__meta` / `.insights-lead__meta`): chip `max-content` first; interstitial gaps total **13%** (`6.5%` + `6.5%`); title + description share the remaining width equally. Type chips use the **unified −3%** size tokens on all Projects/Insights surfaces — see `mobile-meta-chip-right.mdc`. Do **not** apply the 13% gap formula to filter/Related cards or case hero meta.
 
 ## Two-column card meta (match reference)
 
