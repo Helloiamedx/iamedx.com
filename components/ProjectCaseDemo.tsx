@@ -187,172 +187,176 @@ type ProjectCaseDemoProps = {
   project: Project;
 };
 
-export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
-  const copySections = getCaseCopySections(project);
-  const tags = project.tags.length > 0 ? project.tags : [project.involvement];
+function buildCaseMedia(project: Project): MediaItem[] {
+  const media: MediaItem[] = [];
   const stillRatio = project.afterCoverStills?.ratio ?? "56.25%";
-  const media: MediaItem[] = [
-    ...(project.galleryLeadImage
-      ? [
-          {
-            kind: "full" as const,
-            src: project.galleryLeadImage,
-            alt: project.title,
-            ratio: "56.25%",
-          },
-        ]
-      : []),
-    ...(project.afterCoverStills
-      ? project.afterCoverStills.items.length === 1
-        ? [
-            {
-              kind: "full" as const,
-              src: project.afterCoverStills.items[0].src,
-              alt: project.afterCoverStills.items[0].alt,
-              ratio: stillRatio,
-            },
-          ]
-        : [
-            {
-              kind: "row" as const,
-              items: project.afterCoverStills.items.map((item) => ({
-                src: item.src,
-                alt: item.alt,
-                ratio: stillRatio,
-              })),
-            },
-          ]
-      : []),
-    ...(project.afterCoverExtraRows?.flatMap((row) => {
-      const ratio = row.ratio ?? "100%";
-      if (row.items.length === 1) {
-        return [
-          {
-            kind: "full" as const,
-            src: row.items[0].src,
-            alt: row.items[0].alt,
-            ratio,
-          },
-        ];
-      }
-      return [
-        {
-          kind: "row" as const,
-          items: row.items.map((item) => ({
-            src: item.src,
-            alt: item.alt,
-            ratio,
-          })),
-        },
-      ];
-    }) ?? []),
-    ...(project.afterCoverStillVideoPair
-      ? [
-          {
-            kind: "still-video-pair" as const,
-            still: {
-              src: project.afterCoverStillVideoPair.still.src,
-              alt: project.afterCoverStillVideoPair.still.alt,
-              ratio: project.afterCoverStillVideoPair.ratio ?? "100%",
-            },
-            video: {
-              primary: project.afterCoverStillVideoPair.video.primary,
-              fallback: project.afterCoverStillVideoPair.video.fallback,
-              alt: project.afterCoverStillVideoPair.video.alt,
-              ratio: project.afterCoverStillVideoPair.ratio ?? "100%",
-            },
-          },
-        ]
-      : []),
-    ...(project.afterCoverVideos?.length
-      ? project.afterCoverVideos.map((clip) => ({
-          kind: "video" as const,
-          primary: clip.primary,
-          fallback: clip.fallback,
-          alt: clip.alt,
-          ratio: clip.ratio ?? "56.25%",
-        }))
-      : project.afterCoverVideo
-        ? [
-            {
-              kind: "video" as const,
-              primary: project.afterCoverVideo.primary,
-              fallback: project.afterCoverVideo.fallback,
-              alt: project.afterCoverVideo.alt,
-              ratio: project.afterCoverVideo.ratio ?? "56.25%",
-            },
-          ]
-        : []),
-    ...(() => {
-      const stills = project.afterVideoStills ?? [];
-      const row = project.afterVideoRow;
-      const split = Math.min(
-        Math.max(row?.afterIndex ?? stills.length, 0),
-        stills.length,
-      );
-      const rowRatio = row?.ratio ?? "100%";
-      const before = stills.slice(0, split).map((still) => ({
-        kind: "full" as const,
-        src: still.src,
-        alt: still.alt,
-        ratio: still.ratio ?? "56.25%",
-      }));
-      const mid = row
-        ? [
-            {
-              kind: "row" as const,
-              items: row.items.map((item) => ({
-                src: item.src,
-                alt: item.alt,
-                ratio: rowRatio,
-              })),
-            },
-          ]
-        : [];
-      const after = stills.slice(split).map((still) => ({
-        kind: "full" as const,
-        src: still.src,
-        alt: still.alt,
-        ratio: still.ratio ?? "56.25%",
-      }));
-      return [...before, ...mid, ...after];
-    })(),
-    /* Demo weave only when this project has no real after-cover gallery yet */
-    ...(!(
-      project.afterCoverStills ||
+
+  if (project.galleryLeadImage) {
+    media.push({
+      kind: "full",
+      src: project.galleryLeadImage,
+      alt: project.title,
+      ratio: "56.25%",
+    });
+  }
+
+  if (project.afterCoverStills) {
+    if (project.afterCoverStills.items.length === 1) {
+      const item = project.afterCoverStills.items[0];
+      media.push({
+        kind: "full",
+        src: item.src,
+        alt: item.alt,
+        ratio: stillRatio,
+      });
+    } else {
+      media.push({
+        kind: "row",
+        items: project.afterCoverStills.items.map((item) => ({
+          src: item.src,
+          alt: item.alt,
+          ratio: stillRatio,
+        })),
+      });
+    }
+  }
+
+  for (const row of project.afterCoverExtraRows ?? []) {
+    const ratio = row.ratio ?? "100%";
+    if (row.items.length === 1) {
+      media.push({
+        kind: "full",
+        src: row.items[0].src,
+        alt: row.items[0].alt,
+        ratio,
+      });
+    } else {
+      media.push({
+        kind: "row",
+        items: row.items.map((item) => ({
+          src: item.src,
+          alt: item.alt,
+          ratio,
+        })),
+      });
+    }
+  }
+
+  if (project.afterCoverStillVideoPair) {
+    const pair = project.afterCoverStillVideoPair;
+    const ratio = pair.ratio ?? "100%";
+    media.push({
+      kind: "still-video-pair",
+      still: {
+        src: pair.still.src,
+        alt: pair.still.alt,
+        ratio,
+      },
+      video: {
+        primary: pair.video.primary,
+        fallback: pair.video.fallback,
+        alt: pair.video.alt,
+        ratio,
+      },
+    });
+  }
+
+  if (project.afterCoverVideos?.length) {
+    for (const clip of project.afterCoverVideos) {
+      media.push({
+        kind: "video",
+        primary: clip.primary,
+        fallback: clip.fallback,
+        alt: clip.alt,
+        ratio: clip.ratio ?? "56.25%",
+      });
+    }
+  } else if (project.afterCoverVideo) {
+    media.push({
+      kind: "video",
+      primary: project.afterCoverVideo.primary,
+      fallback: project.afterCoverVideo.fallback,
+      alt: project.afterCoverVideo.alt,
+      ratio: project.afterCoverVideo.ratio ?? "56.25%",
+    });
+  }
+
+  const stills = project.afterVideoStills ?? [];
+  const afterVideoRow = project.afterVideoRow;
+  const split = Math.min(
+    Math.max(afterVideoRow?.afterIndex ?? stills.length, 0),
+    stills.length,
+  );
+  const rowRatio = afterVideoRow?.ratio ?? "100%";
+
+  for (const still of stills.slice(0, split)) {
+    media.push({
+      kind: "full",
+      src: still.src,
+      alt: still.alt,
+      ratio: still.ratio ?? "56.25%",
+    });
+  }
+  if (afterVideoRow) {
+    media.push({
+      kind: "row",
+      items: afterVideoRow.items.map((item) => ({
+        src: item.src,
+        alt: item.alt,
+        ratio: rowRatio,
+      })),
+    });
+  }
+  for (const still of stills.slice(split)) {
+    media.push({
+      kind: "full",
+      src: still.src,
+      alt: still.alt,
+      ratio: still.ratio ?? "56.25%",
+    });
+  }
+
+  const hasRealGallery = Boolean(
+    project.afterCoverStills ||
       project.afterCoverExtraRows?.length ||
       project.afterCoverStillVideoPair ||
       project.afterCoverVideo ||
       project.afterCoverVideos?.length ||
       project.afterVideoStills ||
       project.afterVideoRow ||
-      project.beforeEndRow
-    )
-      ? PLACEHOLDER_MEDIA
-      : []),
-    ...(project.beforeEndRow
-      ? [
-          {
-            kind: "row" as const,
-            items: project.beforeEndRow.items.map((item) => ({
-              src: item.src,
-              alt: item.alt,
-              ratio: project.beforeEndRow!.ratio ?? "100%",
-            })),
-          },
-        ]
-      : []),
-    ...(project.endVideoPair
-      ? [
-          {
-            kind: "video-pair" as const,
-            left: project.endVideoPair.left,
-            right: project.endVideoPair.right,
-            ratio: "177.78%",
-          },
-        ]
-      : []),
-  ];
+      project.beforeEndRow,
+  );
+  if (!hasRealGallery) {
+    media.push(...PLACEHOLDER_MEDIA);
+  }
+
+  if (project.beforeEndRow) {
+    media.push({
+      kind: "row",
+      items: project.beforeEndRow.items.map((item) => ({
+        src: item.src,
+        alt: item.alt,
+        ratio: project.beforeEndRow!.ratio ?? "100%",
+      })),
+    });
+  }
+
+  if (project.endVideoPair) {
+    media.push({
+      kind: "video-pair",
+      left: project.endVideoPair.left,
+      right: project.endVideoPair.right,
+      ratio: "177.78%",
+    });
+  }
+
+  return media;
+}
+
+export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
+  const copySections = getCaseCopySections(project);
+  const tags = project.tags.length > 0 ? project.tags : [project.involvement];
+  const media = buildCaseMedia(project);
 
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
