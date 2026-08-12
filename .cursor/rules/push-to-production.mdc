@@ -1,14 +1,30 @@
 ---
-description: Always deploy/push to production (main)
+description: Work and deploy only on main — no feature/preview branches
 alwaysApply: true
 ---
 
-# Push / deploy target
+# Main-only workflow
 
-When the user asks to **推送 / push / deploy / 上线**:
+This project uses **`main` as the only working and deployment branch**.
 
-1. **Target is production** — push to **`main`** (this repo’s production branch). Do not stop at a feature-branch-only push unless they explicitly ask for a PR-only or preview deploy.
-2. **Include the work** — commit relevant changes first (never commit `tmp/` or secrets), then get them onto `main` (merge or rebase as appropriate) and `git push origin main`.
-3. **Confirm** — after push, tell them production (`main`) was updated.
+Intended path: **Cursor → `main` → GitHub → Vercel Production**
 
-Do not invent a `production` remote branch name; **production = `main`**.
+## Always
+
+1. **Before any code changes** — run `git branch --show-current` (and `git status`).
+2. If on a `cursor/*` or other non-`main` branch — **switch to `main` first**. Preserve work safely (commit on current branch, stash, or cherry-pick as needed). **Do not delete or overwrite** existing work when switching.
+3. Make all code changes **directly on `main`**.
+4. When committing / pushing is requested: commit **on `main`**, then **`git push origin main` only**.
+5. Stay on `main` unless the user **explicitly** asks for another branch.
+
+## Never (unless the user explicitly asks)
+
+- Create new `cursor/*` or other feature branches
+- Push to temporary / feature branches
+- Open a separate Preview-only deploy workflow
+- Stop at a feature-branch push when the user asked to ship / 推送 / deploy
+
+## Deploy target
+
+- **Production = `main`** (do not invent a `production` branch name)
+- Goal: one Production deploy per change — avoid Preview + Production every time
