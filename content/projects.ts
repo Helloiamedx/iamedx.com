@@ -70,6 +70,11 @@ export type Project = {
   /** Intrinsic cover size — drives card aspect / relative scale */
   coverWidth: number;
   coverHeight: number;
+  /**
+   * Case detail — first still under the hero.
+   * When set, replaces `coverImage` in the gallery only (index cards keep `coverImage`).
+   */
+  galleryLeadImage?: string;
   /** Case detail first-screen still (used when no hero video) */
   heroImage?: string;
   /**
@@ -204,7 +209,7 @@ const FIRST_PROJECT_COVER = projectCoverFromName(
   FIRST_PROJECT_NAME,
   "Mass Effect Tali Companion Bundle-hero.jpg",
 );
-/** Projects index「第一个项目」entry card only */
+/** Index card + featured lead — same asset */
 const FIRST_PROJECT_FEATURED_COVER = projectCoverFromName(
   FIRST_PROJECT_NAME,
   "Mass Effect Tali Companion Bundle.jpg",
@@ -328,6 +333,131 @@ const FIRST_PROJECT_END_VIDEOS = {
   },
 } as const;
 
+/** 「第二个项目」— grid card under the featured lead */
+const SECOND_PROJECT_NAME = "Dragon Age Writing Bundle";
+const SECOND_PROJECT_SLUG = projectSlugFromName(SECOND_PROJECT_NAME);
+const SECOND_PROJECT_COVER = projectCoverFromName(
+  SECOND_PROJECT_NAME,
+  "VARRIC TETHRAS cover.jpg",
+);
+/** Detail page — first still under the hero */
+const SECOND_PROJECT_GALLERY_LEAD = projectCoverFromName(
+  SECOND_PROJECT_NAME,
+  "dragon-age-writing-bundle-banner-v1.png",
+);
+const SECOND_PROJECT_HERO_VIDEO = projectCoverFromName(
+  SECOND_PROJECT_NAME,
+  "VARRIC TETHRAS-monologue.mp4",
+);
+const SECOND_PROJECT_TAGLINE =
+  '"Get the captain," Donnen sighed. "We\'ve got a dead magistrate."';
+
+const SECOND_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    {
+      src: projectCoverFromName(
+        SECOND_PROJECT_NAME,
+        "dragon-age-writing-bundle-banner-h1.jpg",
+      ),
+      alt: "Collector box",
+    },
+  ],
+  ratio: "56.25%",
+};
+const SECOND_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      {
+        src: projectCoverFromName(
+          SECOND_PROJECT_NAME,
+          "dragon-age-writing-bundle-banner-h2.jpg",
+        ),
+        alt: "Detail 2",
+      },
+      {
+        src: projectCoverFromName(
+          SECOND_PROJECT_NAME,
+          "dragon-age-writing-bundle-banner-h3.jpg",
+        ),
+        alt: "Detail 3",
+      },
+    ],
+    ratio: "100%",
+  },
+  {
+    items: [
+      {
+        src: projectCoverFromName(
+          SECOND_PROJECT_NAME,
+          "dragon-age-writing-bundle-banner-h4.jpg",
+        ),
+        alt: "Detail 4",
+      },
+      {
+        src: projectCoverFromName(
+          SECOND_PROJECT_NAME,
+          "dragon-age-writing-bundle-banner-h5.jpg",
+        ),
+        alt: "Detail 5",
+      },
+    ],
+    ratio: "100%",
+  },
+];
+const SECOND_PROJECT_AFTER_COVER_VIDEO = {
+  primary: projectCoverFromName(
+    SECOND_PROJECT_NAME,
+    "dragon-age-writing-bundle processing.mov",
+  ),
+  alt: "Processing",
+  ratio: "56.25%",
+} as const;
+const SECOND_PROJECT_AFTER_VIDEO_ROW = {
+  items: [
+    {
+      src: projectCoverFromName(
+        SECOND_PROJECT_NAME,
+        "dragon-age-writing-bundle-banner-h6.jpg",
+      ),
+      alt: "Detail 6",
+    },
+    {
+      src: projectCoverFromName(
+        SECOND_PROJECT_NAME,
+        "dragon-age-writing-bundle-banner-h7.jpg",
+      ),
+      alt: "Detail 7",
+    },
+  ],
+  ratio: "100%",
+};
+const SECOND_PROJECT_BEFORE_END_ROW = {
+  items: [
+    {
+      src: projectCoverFromName(
+        SECOND_PROJECT_NAME,
+        "dragon-age-writing-bundle-banner-h8.jpg",
+      ),
+      alt: "Detail 8",
+    },
+    {
+      src: projectCoverFromName(
+        SECOND_PROJECT_NAME,
+        "dragon-age-writing-bundle-banner-h9.jpg",
+      ),
+      alt: "Detail 9",
+    },
+    {
+      src: projectCoverFromName(
+        SECOND_PROJECT_NAME,
+        "dragon-age-writing-bundle-banner-h10.jpg",
+      ),
+      alt: "Detail 10",
+    },
+  ],
+  ratio: "100%",
+};
+
 export const projectsFeaturedLead: ProjectsFeaturedLead = {
   slug: FIRST_PROJECT_SLUG,
   title: FIRST_PROJECT_NAME,
@@ -355,9 +485,10 @@ export const projects: Project[] = [
       "production-management",
     ],
     involvement: "end-to-end",
-    coverImage: FIRST_PROJECT_COVER,
+    coverImage: FIRST_PROJECT_FEATURED_COVER,
     coverWidth: 1920,
     coverHeight: 1080,
+    galleryLeadImage: FIRST_PROJECT_COVER,
     heroImage: FIRST_PROJECT_HERO,
     /* Self-hosted Tali Remastered — pre-trimmed, muted loop from start */
     heroVideo: FIRST_PROJECT_HERO_VIDEO,
@@ -397,14 +528,14 @@ export const projects: Project[] = [
       "A premium metallic wood finish at competitive cost, with strong sell-through and follow-on SKUs.",
   },
   {
-    slug: "wimbledon",
-    title: "Wimbledon",
-    materials: ["fabric", "paper"],
-    ips: [],
+    slug: SECOND_PROJECT_SLUG,
+    title: SECOND_PROJECT_NAME,
+    materials: ["metal", "leather", "paper", "fabric"],
+    ips: ["dragon-age"],
     tags: involvementTags("end-to-end"),
-    summary: "Embodying the spirit of tennis\u2019 grandest stage",
-    tagline: "Embodying the spirit of tennis\u2019 grandest stage",
-    headline: "Embodying the spirit of tennis\u2019 grandest stage",
+    summary: SECOND_PROJECT_TAGLINE,
+    tagline: SECOND_PROJECT_TAGLINE,
+    headline: SECOND_PROJECT_TAGLINE,
     studySub: "study what i did",
     role: [
       "product-development",
@@ -412,366 +543,65 @@ export const projects: Project[] = [
       "production-management",
     ],
     involvement: "end-to-end",
-    coverImage:
-      "https://cdn.prod.website-files.com/6849da698cb78e39e81215c3/6a4e1d09946021ea4d30670a_Artboard%201-100.jpg",
-    coverWidth: 1920,
-    coverHeight: 1080,
-    year: 2025,
-    client: "Wimbledon",
-    featured: false,
-    challenge:
-      "Translate the Championships\u2019 heritage into tangible brand touchpoints.",
-    result:
-      "A cohesive physical experience system across brand, sport, and region.",
-  },
-  {
-    slug: "hsbc-svns",
-    title: "HSBC SVNS",
-    materials: ["fabric", "paper"],
-    ips: [],
-    tags: involvementTags("end-to-end"),
-    summary: "Transforming rugby into a global experience",
-    tagline: "Transforming rugby into a global experience",
-    headline: "Transforming rugby into a global festival experience",
-    statementHeadline: "Transforming rugby into a global festival experience",
+    coverImage: SECOND_PROJECT_COVER,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    galleryLeadImage: SECOND_PROJECT_GALLERY_LEAD,
+    heroImage: SECOND_PROJECT_COVER,
+    heroVideo: SECOND_PROJECT_HERO_VIDEO,
+    afterCoverStills: SECOND_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: SECOND_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    afterCoverVideo: SECOND_PROJECT_AFTER_COVER_VIDEO,
+    afterVideoRow: SECOND_PROJECT_AFTER_VIDEO_ROW,
+    beforeEndRow: SECOND_PROJECT_BEFORE_END_ROW,
     overview: [
-      "World Rugby HSBC Sevens Series is renowned as a destination for great sport and partying for those close to rugby. Our brief was to reimagine what the Series could become through a new brand vision, evolving Sevens from a rugby tournament into an iconic global festival experience for both fans and non-fans around the world. Positioning it as the go-to destination for sport, entertainment and culture.",
-      "The tournament has one key thing that makes it different from anything else: Sevens is always following the sun. Taking place in summertime destinations across seven unforgettable months; from sun soaked days in Cape Town to buzz-filled nights in Dubai. The power of Seven doesn\u2019t stop here. It\u2019s inherent in the game itself, where teams are made up of seven players and matches are played over two, high-energy seven-minute halves. This became the inspiration for our strategic platform: Chase the sun. Live the rush.",
-      "As part of this exploration, the brand positioning and unique festival format of entertainment, culture and sport was imagined through three experience principals: Sunrisers, Sungoers and Sunsetters, which help frame how different audiences could engage with the series, setting the vibe, bringing the energy and ensuring every HSBC SVNS event ends on a high.",
-      "Once we had defined the brand strategy, we moved to naming. It was more an evolution than a complete reimagination. The name SVNS was proposed as a bold evolution of the Series name, keeping the brand recognition of the tournament while adding a playful energy that matches its new format.",
+      "This project was a writing-themed collector’s gift set developed around Varric Tethras from Dragon Age.",
+      "In the game, Varric is not only an adventurer, but also a writer and storyteller. Hard in Hightown is one of the works closely connected to his character. Based on that idea, the set was built around his identity as a writer, using items such as a quill, ink, notebook, ribbon, and metal details to turn that part of the game world into something fans could actually use and collect.",
+      "The goal was not simply to put several merchandise items into one box. The different materials and production methods had to come together under the same visual language, so the whole set would feel like it belonged to the same character and the same world.",
     ],
-    challengesHeadline: "Turning a rugby series into a global festival",
     challengesBody: [
-      "Placeholder challenges — the Series needed a sharper reason to care beyond the rugby faithful, without losing the heat that already made host cities feel electric.",
-      "Placeholder challenges — scale across sun destinations also meant one brand system had to flex for day-to-night rituals, from Cape Town heat to Dubai nights.",
+      "One of the biggest challenges was keeping the visual result consistent across different materials and production processes, while also meeting the quality and testing requirements of a collectible product.",
+      "The first challenge was color consistency.",
+      "The set mainly used gold, magenta, and black, but those colors had to appear across very different materials, including feathers, ribbon, leather, paper, and metal parts. The same color can look very different depending on the material, surface finish, and the way it reflects light.",
+      "So it was not just a matter of finding the right supplier or giving everyone the same color reference. It required a lot of color matching, supplier coordination, and sample comparison to make sure all the parts still looked consistent when they were finally put together.",
+      "The second challenge was the accuracy of the notebook cover.",
+      "The leather cover went through processes such as embossing and foil stamping, which could cause some compression or deformation in the material. At the same time, several metal decorations, graphics, and text elements had to be placed accurately on the same surface.",
+      "When so many details come together on one area, even a small shift can affect the final appearance. Keeping everything aligned through different production steps was one of the key challenges.",
+      "The third challenge was testing and compliance.",
+      "The set included many different materials, such as metal, leather, paper, feathers, ribbon, and ink. Ink in particular required extra attention. This meant the product involved several different testing requirements, and each material needed to be checked carefully to make sure the final product could pass the required tests and receive qualified reports.",
     ],
-    executionHeadline: "Chase the sun. Live the rush.",
     executionBody: [
-      "Placeholder execution — we locked the strategic platform, named the evolution to SVNS, and mapped three audience modes: Sunrisers, Sungoers, and Sunsetters.",
-      "Placeholder execution — from there, identity, festival formats, and touchpoints were built to follow the sun across the season.",
+      "At the beginning of the project, I did not immediately start looking for materials or suppliers. I first focused on understanding what really made the design work.",
+      "For me, the key was consistency. Even though the set was made up of many different parts, the customer should not open the box and feel like they were looking at a group of unrelated products. Everything needed to feel like it had been designed as one complete set from the beginning.",
+      "Because of that, I treated color consistency, material coordination, and the overall premium look as the main standards throughout development. Material selection, sampling, and production decisions were all made around that direction.",
+      "Color matching took a large amount of work.",
+      "The same magenta had to appear on completely different materials such as feathers, ribbon, and leather. This was not something that could be solved by simply sending suppliers one color code.",
+      "I collected physical samples from many suppliers, compared them side by side, and went through multiple rounds of screening and sampling. If there was no suitable stock color available, I arranged custom sampling and color adjustment until the different materials worked together visually.",
+      "The important part was that I was not judging each component by itself. A color might look correct on its own but still feel wrong once it was placed next to another material. So the final decision was always based on how the whole set looked together.",
+      "I also got involved in product testing early in the development process.",
+      "I communicated with testing agencies such as SGS to understand exactly which tests were required and what the limits were. I then brought those requirements back to the suppliers during material selection and sampling.",
+      "For example, if certain substances, parameters, or material contents had specific limits, I made those requirements clear before production started.",
+      "The idea was not to finish the product first and then send it for testing to see whether it passed. I wanted to remove as many risks as possible during development, so suppliers could provide suitable materials from the beginning. This helped reduce the risk of rework, repeated testing, extra cost, and lost time.",
+      "Another area I spent a lot of time on was how the components were fixed and presented inside the packaging.",
+      "The first impression matters a lot for a collectible product. I did not want to use too many visible ties, clips, or supporting parts just to hold everything in place. Those solutions might make assembly easier, but they could also distract from the product itself.",
+      "I tested and developed several assembly options, with a focus on fixing the products mainly from the back so that as little supporting structure as possible would be visible from the front.",
+      "The final solution kept the components secure while still giving the customer a clean and complete view of the product when the box was opened.",
+      "Overall, my role was to understand what the design was really trying to achieve, and then turn those ideas into practical requirements for materials, color, testing, and assembly.",
     ],
-    impactHeadline: "A festival brand with room to grow",
     impactBody: [
-      "Placeholder impact — SVNS gave the Series a bolder voice and a clearer festival promise for fans and non-fans alike.",
-      "Placeholder impact — the platform now frames how each host city can set the vibe, raise the energy, and close every event on a high.",
+      "This project further demonstrated my ability to handle complex custom product development.",
+      "Whether the same color needs to be matched across completely different materials, or different colors need to be achieved through different materials and processes, I can work through material sourcing, color matching, sampling, and production adjustments to keep everything within the same design language.",
+      "For the client’s designers, this means they do not have to limit their ideas too early because of concerns about materials or manufacturing.",
+      "Some effects may look difficult to achieve when they first appear in a design file, but that does not necessarily mean they cannot be made. Many of those ideas can be worked through during product development by finding the right materials, processes, and production solutions.",
+      "For me, the value of this project was not only in delivering the final set. It was also about giving the client more confidence to explore their design ideas, knowing that I could help turn those ideas into real products.",
     ],
-    studySub: "study what i did",
-    role: [
-      "product-development",
-      "sample-development",
-      "production-management",
-    ],
-    involvement: "end-to-end",
-    coverImage:
-      "https://cdn.prod.website-files.com/6849da698cb78e39e81215c3/69b1911c10abf160ba841703_20.jpg",
-    coverWidth: SHOWCASE_COVER_W,
-    coverHeight: SHOWCASE_COVER_H,
-    year: 2025,
-    client: "HSBC",
-    featured: true,
+    year: 2024,
+    client: "Dragon Age",
+    featured: false,
     challenge:
-      "Turn a multi-city rugby series into a coherent festival-scale brand experience.",
+      "Keep color, cover accuracy, and compliance consistent across feathers, ribbon, leather, paper, metal, and ink.",
     result:
-      "Unified physical and digital touchpoints across host venues and fan journeys.",
-  },
-  {
-    slug: "eurostar",
-    title: "Eurostar",
-    materials: ["metal", "paper"],
-    ips: [],
-    tags: involvementTags("end-to-end"),
-    summary: "High-speed journeys shaped into a tangible brand experience",
-    tagline: "High-speed journeys shaped into a tangible brand experience",
-    role: [
-      "product-development",
-      "sample-development",
-      "production-management",
-    ],
-    involvement: "end-to-end",
-    coverImage:
-      "https://cdn.prod.website-files.com/6849da698cb78e39e81215c3/68a32ffc0479118d7db797a6_eurostar_featureimage%201-min.jpg",
-    coverWidth: SHOWCASE_COVER_W,
-    coverHeight: SHOWCASE_COVER_H,
-    year: 2025,
-    client: "Eurostar",
-    featured: true,
-    challenge: "Extend a transit brand into memorable physical touchpoints.",
-    result: "A cohesive feature system across journey and destination moments.",
-  },
-  {
-    slug: "walnut-desk-organizer",
-    title: "Walnut desk organizer",
-    materials: ["wood"],
-    ips: ["the-witcher"],
-    tags: involvementTags("end-to-end"),
-    summary:
-      "A modular walnut organizer developed from sketch through small-batch production.",
-    role: [
-      "product-development",
-      "sample-development",
-      "production-management",
-    ],
-    involvement: "end-to-end",
-    coverImage: "/projects/demo-portrait.svg",
-    coverWidth: SHOWCASE_COVER_W,
-    coverHeight: SHOWCASE_COVER_H,
-    year: 2024,
-    featured: true,
-    challenge:
-      "Need a clean desktop system that could be CNC-cut at scale without finishing issues.",
-    result: "Approved sample in three rounds; first production run shipped on schedule.",
-  },
-  {
-    slug: "brushed-steel-tray",
-    title: "Brushed steel tray",
-    materials: ["metal"],
-    ips: ["halo-guardians", "destiny"],
-    tags: involvementTags("contribution"),
-    summary:
-      "Precision metal tray with controlled surface finish for retail gift sets.",
-    role: [
-      "factory-sourcing",
-      "factory-verification",
-      "sample-development",
-    ],
-    involvement: "contribution",
-    coverImage: "/projects/demo-landscape.svg",
-    coverWidth: SHOWCASE_COVER_W,
-    coverHeight: SHOWCASE_COVER_H,
-    year: 2024,
-    featured: true,
-    challenge: "Find a metal shop that could hold tolerance and consistent brushing.",
-    result:
-      "Verified factory, locked finish standard, and cleared pre-production sample.",
-  },
-  {
-    slug: "folded-paper-mailer",
-    title: "Folded paper mailer",
-    materials: ["paper"],
-    ips: ["starfield"],
-    tags: involvementTags("specialized"),
-    summary: "Structural paper mailer designed for unboxing and ship durability.",
-    role: ["custom-packaging", "sample-development"],
-    involvement: "specialized",
-    coverImage: "/projects/demo-wide.svg",
-    coverWidth: SHOWCASE_COVER_W,
-    coverHeight: SHOWCASE_COVER_H,
-    year: 2023,
-    featured: false,
-    challenge: "Reduce plastic while keeping transit protection for fragile goods.",
-    result: "Paper structure passed drop tests and replaced the previous poly mailer.",
-  },
-  {
-    slug: "cast-resin-coaster",
-    title: "Cast resin coaster",
-    materials: ["resin"],
-    ips: ["cyberpunk-2077", "doom"],
-    tags: involvementTags("end-to-end"),
-    summary: "Pigmented resin coaster set with controlled pour and edge finishing.",
-    role: [
-      "product-development",
-      "sample-development",
-      "production-management",
-    ],
-    involvement: "end-to-end",
-    coverImage: "/projects/demo-square.svg",
-    coverWidth: SHOWCASE_COVER_W,
-    coverHeight: SHOWCASE_COVER_H,
-    year: 2025,
-    featured: true,
-    challenge: "Stabilize color batches and demolding defects across a gift SKU.",
-    result: "Process notes and QC checkpoints cut defect rate before full run.",
-  },
-  {
-    slug: "woven-carry-pouch",
-    title: "Woven carry pouch",
-    materials: ["fabric"],
-    ips: ["horizon-zero-dawn", "tomb-raider"],
-    tags: involvementTags("end-to-end"),
-    summary: "Durable fabric pouch with controlled stitch quality for travel SKUs.",
-    role: [
-      "product-development",
-      "sample-development",
-      "production-management",
-    ],
-    involvement: "end-to-end",
-    coverImage: "/projects/demo-tall.svg",
-    coverWidth: SHOWCASE_COVER_W,
-    coverHeight: SHOWCASE_COVER_H,
-    year: 2025,
-    featured: true,
-    challenge: "Lock fabric hand-feel and seam strength across colorways.",
-    result: "Approved construction package and first production QC plan.",
-  },
-  {
-    slug: "tooled-leather-folio",
-    title: "Tooled leather folio",
-    materials: ["leather"],
-    ips: ["the-elder-scrolls", "dragon-age"],
-    tags: involvementTags("contribution"),
-    summary: "Small-batch leather folio with edge paint and hardware consistency.",
-    role: [
-      "factory-sourcing",
-      "sample-development",
-      "production-management",
-    ],
-    involvement: "contribution",
-    coverImage: "/projects/demo-compact.svg",
-    coverWidth: SHOWCASE_COVER_W,
-    coverHeight: SHOWCASE_COVER_H,
-    year: 2024,
-    featured: false,
-    challenge: "Match leather grade and tooling depth across suppliers.",
-    result: "Selected tannery partner and cleared pre-production sample set.",
-  },
-  /* —— Placeholder seeds for involvement filter density (swap when real work lands) —— */
-  {
-    slug: "anodized-phone-stand",
-    title: "Anodized phone stand",
-    materials: ["metal"],
-    ips: ["halo-guardians"],
-    tags: involvementTags("contribution"),
-    summary: "CNC stand with locked anodize color across three finish lots.",
-    tagline: "CNC stand with locked anodize color across three finish lots",
-    role: ["factory-sourcing", "sample-development"],
-    involvement: "contribution",
-    coverImage: "/projects/demo-landscape.svg",
-    coverWidth: SHOWCASE_COVER_W,
-    coverHeight: SHOWCASE_COVER_H,
-    year: 2025,
-    featured: true,
-    challenge: "Hold anodize hue between sample and volume without re-quoting finish.",
-    result: "Verified shop, locked color standard, cleared PP sample.",
-  },
-  {
-    slug: "injection-clip-set",
-    title: "Injection clip set",
-    materials: ["resin"],
-    ips: ["destiny"],
-    tags: involvementTags("contribution"),
-    summary: "Small clip family with shared tooling and consistent gate finish.",
-    tagline: "Shared tooling with consistent gate finish across SKUs",
-    role: ["factory-verification", "sample-development"],
-    involvement: "contribution",
-    coverImage: "/projects/demo-square.svg",
-    coverWidth: SHOWCASE_COVER_W,
-    coverHeight: SHOWCASE_COVER_H,
-    year: 2024,
-    featured: true,
-    challenge: "Keep clip snap force in range when cavity count increases.",
-    result: "Process window documented; first run passed pull tests.",
-  },
-  {
-    slug: "soft-touch-lid-insert",
-    title: "Soft-touch lid insert",
-    materials: ["fabric", "paper"],
-    ips: [],
-    tags: involvementTags("contribution"),
-    summary: "Lid insert with soft-touch wear check before holiday volume.",
-    tagline: "Soft-touch wear check before holiday volume",
-    role: ["sample-development", "production-management"],
-    involvement: "contribution",
-    coverImage: "/projects/demo-wide.svg",
-    coverWidth: SHOWCASE_COVER_W,
-    coverHeight: SHOWCASE_COVER_H,
-    year: 2025,
-    featured: false,
-    challenge: "Soft-touch looked premium on day one and scuffed by week two.",
-    result: "Finish stack revised; abrasion standard added to QC sheet.",
-  },
-  {
-    slug: "die-cut-sleeve-system",
-    title: "Die-cut sleeve system",
-    materials: ["paper"],
-    ips: ["starfield"],
-    tags: involvementTags("specialized"),
-    summary: "Structural sleeve for retail sets with transit crush resistance.",
-    tagline: "Retail sleeve with transit crush resistance",
-    role: ["custom-packaging"],
-    involvement: "specialized",
-    coverImage: "/projects/demo-wide.svg",
-    coverWidth: SHOWCASE_COVER_W,
-    coverHeight: SHOWCASE_COVER_H,
-    year: 2024,
-    featured: true,
-    challenge: "Reduce plastic while keeping corner protection on long-haul cartons.",
-    result: "Paper structure passed drop tests and replaced poly wrap.",
-  },
-  {
-    slug: "foam-fitment-kit",
-    title: "Foam fitment kit",
-    materials: ["fabric"],
-    ips: ["tomb-raider"],
-    tags: involvementTags("specialized"),
-    summary: "Custom foam kit for fragile gift sets across two carton sizes.",
-    tagline: "Custom foam kit across two carton sizes",
-    role: ["custom-packaging", "sample-development"],
-    involvement: "specialized",
-    coverImage: "/projects/demo-compact.svg",
-    coverWidth: SHOWCASE_COVER_W,
-    coverHeight: SHOWCASE_COVER_H,
-    year: 2025,
-    featured: true,
-    challenge: "One foam CAD had to flex for US and EU carton footprints.",
-    result: "Shared cut nest; both cartons cleared ISTA sample.",
-  },
-  {
-    slug: "label-and-stamp-pack",
-    title: "Label and stamp pack",
-    materials: ["paper"],
-    ips: [],
-    tags: involvementTags("specialized"),
-    summary: "Pad-print and label package for a three-SKU accessory launch.",
-    tagline: "Pad-print and label package for a three-SKU launch",
-    role: ["custom-packaging"],
-    involvement: "specialized",
-    coverImage: "/projects/demo-portrait.svg",
-    coverWidth: SHOWCASE_COVER_W,
-    coverHeight: SHOWCASE_COVER_H,
-    year: 2023,
-    featured: false,
-    challenge: "Logo sharpness drifted after heat and handling on dark finishes.",
-    result: "Ink and stamp sequence locked with reject photo library.",
-  },
-  {
-    slug: "travel-bottle-tray",
-    title: "Travel bottle tray",
-    materials: ["metal", "fabric"],
-    ips: ["horizon-zero-dawn"],
-    tags: involvementTags("end-to-end"),
-    summary: "End-to-end tray from sketch through first carton for a travel brand.",
-    tagline: "From sketch through first carton for a travel brand",
-    role: [
-      "product-development",
-      "sample-development",
-      "production-management",
-    ],
-    involvement: "end-to-end",
-    coverImage: "/projects/demo-tall.svg",
-    coverWidth: SHOWCASE_COVER_W,
-    coverHeight: SHOWCASE_COVER_H,
-    year: 2025,
-    featured: true,
-    challenge: "Balance weight, felt lining, and MOQ without losing the gift feel.",
-    result: "Approved construction; first run shipped on the launch calendar.",
-  },
-  {
-    slug: "ceramic-sample-board",
-    title: "Ceramic sample board",
-    materials: ["resin"],
-    ips: ["cyberpunk-2077"],
-    tags: involvementTags("end-to-end"),
-    summary: "Finish board used to freeze glaze ranges before steel is cut.",
-    tagline: "Freeze glaze ranges before steel is cut",
-    role: ["product-development", "sample-development"],
-    involvement: "end-to-end",
-    coverImage: "/projects/demo-square.svg",
-    coverWidth: SHOWCASE_COVER_W,
-    coverHeight: SHOWCASE_COVER_H,
-    year: 2024,
-    featured: true,
-    challenge: "Marketing wanted three glazes; tooling could only protect two.",
-    result: "Board forced a dated freeze; two glazes shipped with clear QC.",
+      "A cohesive writing collectible—and more confidence for the client to explore design ideas into real products.",
   },
 ];
 
@@ -852,7 +682,7 @@ export const projectsHeroRoll: ProjectsHeroRollItem[] = Array.from(
   { length: PROJECTS_ROLL_COUNT },
   (_, index) => {
     const imageNumber = index + 1;
-    const slug = projects[index % projects.length]?.slug ?? "wimbledon";
+    const slug = projects[index % projects.length]?.slug ?? FIRST_PROJECT_SLUG;
     const ext = PROJECTS_ROLL_JPEG.has(imageNumber) ? "jpeg" : "jpg";
     return {
       id: `projectsroll-${imageNumber}`,

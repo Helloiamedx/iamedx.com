@@ -11,6 +11,10 @@ type InsightsLeadProps = {
   insight: InsightMeta;
 };
 
+/**
+ * Insights featured lead — cover only in media;
+ * meta below: title 35% | gap 10% | description 35% | tag ~20%, top-aligned.
+ */
 export function InsightsLead({ insight }: InsightsLeadProps) {
   const tagLabel = getInsightTagLabels(insight.tags).at(0) ?? null;
 
@@ -27,20 +31,19 @@ export function InsightsLead({ insight }: InsightsLeadProps) {
             priority
             className="insights-lead__image"
           />
-          <div className="insights-lead__scrim" aria-hidden="true" />
-          <div className="insights-lead__meta">
-            <h2 className="insights-lead__title">{insight.title}</h2>
-            {insight.excerpt ? (
-              <p className="insights-lead__excerpt">{insight.excerpt}</p>
-            ) : (
-              <span className="insights-lead__excerpt" aria-hidden="true" />
-            )}
-            {tagLabel ? (
-              <span className="insight-chip insight-chip--on-media">{tagLabel}</span>
-            ) : (
-              <span aria-hidden="true" />
-            )}
-          </div>
+        </div>
+        <div className="insights-lead__meta">
+          <h2 className="insights-lead__title">{insight.title}</h2>
+          {insight.excerpt ? (
+            <p className="insights-lead__excerpt">{insight.excerpt}</p>
+          ) : (
+            <span className="insights-lead__excerpt" aria-hidden="true" />
+          )}
+          {tagLabel ? (
+            <span className="insight-chip">{tagLabel}</span>
+          ) : (
+            <span className="insights-lead__chip-slot" aria-hidden="true" />
+          )}
         </div>
       </Link>
     </article>

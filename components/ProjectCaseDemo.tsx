@@ -184,7 +184,7 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
   const media: MediaItem[] = [
     {
       kind: "full",
-      src: project.coverImage,
+      src: project.galleryLeadImage ?? project.coverImage,
       alt: project.title,
       ratio: "56.25%",
     },

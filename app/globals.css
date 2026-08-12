@@ -627,7 +627,8 @@ p {
 
 .site-header__bar {
   position: relative;
-  z-index: 2;
+  /* Above .mega-panel (z-index: 1) — keep taps on nav when Services is open */
+  z-index: 5;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -651,6 +652,8 @@ p {
   color: var(--footer-ink);
   font-size: 1.125rem;
   padding: 0 0 env(safe-area-inset-bottom, 0px);
+  /* Full-bleed top edge — marks where the footer begins */
+  border-top: 1px solid rgba(255, 255, 255, 0.22);
 }
 
 .site-footer__stage {
@@ -667,6 +670,8 @@ p {
 }
 
 .site-footer__shell {
+  /* Equal air above & below the “Let me help you” band */
+  --footer-edge-gap: clamp(2.25rem, 4.25vw, 3.15rem);
   position: relative;
   z-index: 4;
   display: flex;
@@ -674,7 +679,7 @@ p {
   box-sizing: border-box;
   width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
   margin-inline: auto;
-  padding: clamp(2.5rem, 5vw, 3.5rem) 0 0;
+  padding: var(--footer-edge-gap) 0 0;
   gap: 0;
   overflow: visible;
 }
@@ -693,12 +698,13 @@ p {
   grid-template-columns: var(--footer-band-label) minmax(0, 1fr);
   column-gap: clamp(1.5rem, 4vw, 3rem);
   align-items: start;
-  padding: 0 0 1.85rem;
+  /* Match shell padding-top — equal air under this band before the rule */
+  padding: 0 0 var(--footer-edge-gap);
 }
 
 .site-footer__band--about {
-  /* Extra air before the large wordmark */
-  padding: 1.85rem 0 5.5rem;
+  /* Same edge-gap above the rule; extra air before the wordmark */
+  padding: var(--footer-edge-gap) 0 5.5rem;
 }
 
 .site-footer__band-label {
@@ -715,7 +721,7 @@ p {
   grid-template-columns: max-content minmax(0, 1fr);
   /* More air between channel name and value */
   column-gap: clamp(4rem, 8vw, 6.5rem);
-  row-gap: 0.5rem;
+  row-gap: 0.12rem;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -735,7 +741,7 @@ p {
   font-family: var(--font-sans);
   font-size: 1.125rem;
   font-weight: 400;
-  line-height: 1.45;
+  line-height: 1.32;
   color: var(--footer-ink);
 }
 
@@ -743,11 +749,9 @@ p {
   font-family: var(--font-sans);
   font-size: 1.125rem;
   font-weight: 400;
-  line-height: 1.45;
+  line-height: 1.32;
   color: var(--footer-ink);
-  text-decoration: underline;
-  text-underline-offset: 0.18em;
-  text-decoration-thickness: 1px;
+  text-decoration: none;
 }
 
 .site-footer__rule {
@@ -902,11 +906,11 @@ p {
   }
 
   .site-footer__band {
-    padding-bottom: 2.25rem;
+    padding-bottom: var(--footer-edge-gap);
   }
 
   .site-footer__band--about {
-    padding: 2.25rem 0 4rem;
+    padding: var(--footer-edge-gap) 0 4rem;
   }
 
   .site-footer__channels,
@@ -1315,9 +1319,18 @@ p {
 }
 
 .mega-panel.is-open {
-  pointer-events: auto;
+  /*
+   * Panel still paints frost over the bar strip (top: 0), but must not steal
+   * taps there — Safari/iPad often hit-tests the backdrop-filter layer above
+   * the transparent bar. Only the dropdown body is interactive.
+   */
+  pointer-events: none;
   /* Height only — opacity fade made the hanging bar look cleared, then grown from 0 */
   transition: height 480ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mega-panel.is-open .mega-panel__body {
+  pointer-events: auto;
 }
 
 .mega-panel.is-closing {
@@ -2215,6 +2228,12 @@ html[data-chrome-ready="1"] .hero__video {
 }
 
 .projects-page .empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: clamp(14rem, 38vh, 26rem);
+  margin: 0;
+  text-align: center;
   color: rgba(255, 255, 255, 0.55);
 }
 
@@ -2275,10 +2294,11 @@ html[data-chrome-ready="1"] .hero__video {
   }
 }
 
-/* Further-style full-width lead — overlay meta matches InsightsLead exactly */
+/* Further-style full-width lead — meta under cover (same as InsightsLead) */
 .project-featured {
-  /* Space before the filter — matches gap under the filter */
-  margin: 0 0 var(--filter-band-gap, clamp(1.75rem, 3.25vw, 2.5rem));
+  /* Extra air before the filter (a bit more than the filter→grid gap) */
+  margin: 0 0
+    calc(var(--filter-band-gap, clamp(1.75rem, 3.25vw, 2.5rem)) + 0.85rem);
 }
 
 .project-featured__link {
@@ -2296,20 +2316,6 @@ html[data-chrome-ready="1"] .hero__video {
   background: #000;
 }
 
-/* Short soft feather under overlay copy — not a tall scrim */
-.project-featured__scrim {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0) 55%,
-    rgba(0, 0, 0, 0.12) 78%,
-    rgba(0, 0, 0, 0.35) 100%
-  );
-  pointer-events: none;
-}
-
 .project-featured__image {
   object-fit: cover;
   object-position: center;
@@ -2323,119 +2329,122 @@ html[data-chrome-ready="1"] .hero__video {
   inset: 0 !important;
 }
 
-/* Bottom-right stack — leave left art (logo / products) clear */
+/* Featured lead meta — under cover: title 35% | gap 10% | desc 35% | tag 20% */
 .project-featured__meta {
-  position: absolute;
-  z-index: 2;
-  left: auto;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.35rem;
-  margin: 0;
-  max-width: min(42%, 28rem);
-  padding: clamp(1rem, 2.4vw, 1.5rem) clamp(0.85rem, 1.5vw, 1.15rem)
-    clamp(0.45rem, 1vw, 0.65rem);
-  text-align: right;
+  position: static;
+  z-index: auto;
+  display: grid;
+  grid-template-columns: 35% 10% 35% 20%;
+  grid-template-areas: "title . desc chip";
+  align-items: start;
+  column-gap: 0;
+  row-gap: 0;
+  margin: 0.75rem 0 0;
+  max-width: none;
+  padding: 0;
+  text-align: left;
 }
 
 .project-featured__title {
+  grid-area: title;
   margin: 0;
+  padding: 0;
+  justify-self: stretch;
+  align-self: start;
+  min-width: 0;
   font-family: var(--font-sans);
-  font-size: clamp(1.05rem, 0.95rem + 0.45vw, 1.35rem);
+  font-size: clamp(0.8125rem, 0.75rem + 0.35vw, 1.125rem);
   font-weight: 500;
   letter-spacing: -0.015em;
-  line-height: 1.2;
+  line-height: 1.15;
   text-transform: none;
   color: #fff;
   text-wrap: balance;
 }
 
 .project-featured__tagline {
+  grid-area: desc;
   margin: 0;
-  max-width: 36ch;
+  justify-self: stretch;
+  align-self: start;
+  text-align: left;
+  width: 100%;
+  max-width: 100%;
   font-family: var(--font-sans);
   font-size: clamp(0.8125rem, 0.75rem + 0.25vw, 0.9375rem);
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.35;
-  color: rgba(255, 255, 255, 0.82);
+  color: rgba(255, 255, 255, 0.72);
   text-wrap: pretty;
 }
 
-.project-featured__meta .project-type-chip {
+.project-featured__meta > .project-type-chip,
+.project-featured__meta > .project-featured__chip-slot {
+  grid-area: chip;
   justify-self: end;
-}
-
-.project-featured__meta .project-type-chip--on-media {
-  border-color: rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.92);
+  align-self: start;
+  box-sizing: border-box;
+  max-width: 100%;
+  width: max-content;
+  min-width: 0;
+  margin: 0;
+  min-height: 0;
+  height: auto;
+  padding: 0.18rem 0.55rem;
+  line-height: 1.15;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
 }
 
 @media (max-width: 800px) {
   /*
-   * Mobile card/lead meta — shared rhythm sitewide:
-   * left copy capped; type chip on the right with air from the description.
-   * (`.project-featured__meta` is right-stacked for this cover — see below.)
+   * Mobile filter cards: title 65% | type; description full width.
    */
   .project-window__meta--stack,
-  .insights-lead__meta,
   .insight-showcase__meta {
-    grid-template-columns: minmax(0, 58%) minmax(0, 42%);
+    grid-template-columns: minmax(0, 65%) minmax(0, 35%);
     justify-content: space-between;
     column-gap: 1.25rem;
     align-items: start;
   }
 
-  /* Filter cards under images: chip flush to media right */
   .project-window__meta--stack,
   .insight-showcase__meta {
     padding-inline: 0;
   }
 
-  .project-featured__meta .project-type-chip,
   .project-window__meta--stack .project-type-chip,
-  .insights-lead__meta .insight-chip,
   .insight-showcase__meta > .insight-chip {
     justify-self: end;
     align-self: start;
     min-height: 0;
-    font-size: 0.5625rem; /* −10% from 0.625rem */
+    font-size: 0.5625rem;
     padding: 0.2rem 0.45rem;
     line-height: 1.15;
   }
 
-  /*
-   * Fixed leads (不受筛选器影响): equal L/R inset; chip bottom-aligns with desc.
-   */
-  .insights-lead__meta {
-    padding-inline: 0.75rem;
-  }
-
-  .insights-lead__meta .insight-chip,
-  .insights-lead__meta > :last-child {
-    align-self: end;
-  }
-}
-
-@media (max-width: 800px) {
-  /* Featured lead: keep bottom-right stack on this dark cover */
   .project-featured__meta {
-    max-width: min(70%, 22rem);
-    padding: 0.65rem 0.75rem 0.5rem;
-    gap: 0.2rem;
+    grid-template-columns: 35% 10% 35% 20%;
+    grid-template-areas: "title . desc chip";
+    margin-top: 0.75rem;
+    padding: 0;
+  }
+
+  .project-featured__meta > .project-type-chip {
+    font-size: 0.5625rem;
+    padding: 0.2rem 0.45rem;
   }
 
   .project-featured__title {
-    font-size: 0.8125rem;
+    font-size: 0.6875rem;
     letter-spacing: -0.01em;
     line-height: 1.2;
   }
 
   .project-featured__tagline {
+    width: 100%;
     max-width: 100%;
     font-size: 0.6875rem;
     line-height: 1.25;
@@ -2500,16 +2509,16 @@ html[data-chrome-ready="1"] .hero__video {
 }
 
 /*
- * Two-column card meta (reference layout):
- *   TITLE (58%) .............. TAGS (42%)
- *   Tagline under the title — air between copy and chip
+ * Card meta (Projects + Insights):
+ *   TITLE (65%) .............. TYPE (right, bottom of title row)
+ *   Description full width
  */
 .project-window__meta--stack {
   display: grid;
-  grid-template-columns: minmax(0, 58%) minmax(0, 42%);
+  grid-template-columns: minmax(0, 65%) minmax(0, 35%);
   grid-template-areas:
     "title cats"
-    "tagline .";
+    "tagline tagline";
   align-items: start;
   column-gap: 1.25rem;
   row-gap: 0.35rem;
@@ -2617,15 +2626,15 @@ html[data-chrome-ready="1"] .hero__video {
     justify-content: flex-start;
   }
 
-  /* Showcase cards: copy 58% left, type chip right with air */
+  /* Showcase cards: title 65% | type; description full width */
   .project-window__meta--stack {
     /* Re-assert after .project-window__meta { 1fr } in this same query */
-    grid-template-columns: minmax(0, 58%) minmax(0, 42%);
+    grid-template-columns: minmax(0, 65%) minmax(0, 35%);
     justify-content: space-between;
     column-gap: 1.25rem;
     grid-template-areas:
       "title cats"
-      "tagline cats";
+      "tagline tagline";
     align-items: start;
     row-gap: 0.12rem;
     padding-inline: 0;
@@ -2646,7 +2655,7 @@ html[data-chrome-ready="1"] .hero__video {
   .project-window__meta--stack .project-window__categories,
   .project-window__meta--stack .project-window__chips {
     justify-self: end;
-    align-self: end;
+    align-self: start;
     text-align: right;
     white-space: nowrap;
     max-width: 100%;
@@ -2661,6 +2670,8 @@ html[data-chrome-ready="1"] .hero__video {
   align-items: center;
   margin-bottom: var(--filter-band-gap, clamp(1.75rem, 3.25vw, 2.5rem));
   text-align: center;
+  /* Projects + Insights filter chrome: −5% */
+  zoom: 0.95;
 }
 
 .project-involvement__heading {
@@ -2838,12 +2849,20 @@ html[data-chrome-ready="1"] .hero__video {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: clamp(1.1rem, 2vw, 1.6rem) clamp(1rem, 2.5vw, 1.75rem);
 }
 
+.project-showcase--tri {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.project-showcase--related {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 @media (max-width: 700px) {
-  .project-showcase {
+  .project-showcase--tri,
+  .project-showcase--related {
     grid-template-columns: 1fr;
   }
 }
@@ -3519,10 +3538,10 @@ html[data-chrome-ready="1"] .hero__video {
   max-width: 100%;
   margin: 0 auto;
   font-family: var(--font-sans);
-  font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem);
+  font-size: clamp(0.9375rem, 0.875rem + 0.3vw, 1.0625rem);
   font-weight: 400;
   letter-spacing: -0.01em;
-  line-height: 1.35;
+  line-height: 1.3;
   color: #fff;
 }
 
@@ -3604,7 +3623,8 @@ html[data-chrome-ready="1"] .hero__video {
     --insight-cover-min: 100%;
     --insight-cover-ideal: 100%;
     --insight-title-scale: 0.94;
-    --insight-copy-scale: 0.799;
+    /* Phone body = 85% of cover width (cover is full frame) */
+    --insight-copy-scale: 0.85;
   }
 
   .insight-detail__meta {
@@ -3702,129 +3722,117 @@ html[data-chrome-ready="1"] .hero__video {
   object-fit: cover;
 }
 
-/* Apple-style bottom fade — short soft feather only */
-.insights-lead__scrim {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0) 62%,
-    rgba(0, 0, 0, 0.22) 82%,
-    rgba(0, 0, 0, 0.48) 100%
-  );
-  pointer-events: none;
-}
-
-/* Attributes overlaid on the lower band of the image */
+/* Featured insight lead — under cover: title 35% | gap 10% | desc 35% | tag 20% */
 .insights-lead__meta {
-  position: absolute;
-  z-index: 2;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: flex-start;
-  margin: 0;
-  padding: clamp(1rem, 2.4vw, 1.5rem) clamp(0.85rem, 1.5vw, 1.15rem)
-    clamp(0.75rem, 1.4vw, 1rem);
+  position: static;
+  z-index: auto;
+  display: grid;
+  grid-template-columns: 35% 10% 35% 20%;
+  grid-template-areas: "title . desc chip";
+  align-items: start;
+  column-gap: 0;
+  row-gap: 0;
+  margin: 0.75rem 0 0;
+  padding: 0;
 }
 
 .insights-lead__title {
+  grid-area: title;
   margin: 0;
-  flex: 0 0 auto;
-  width: 35vw;
-  max-width: 35vw;
+  padding: 0;
+  justify-self: stretch;
+  align-self: start;
+  min-width: 0;
+  width: auto;
+  max-width: 100%;
   font-family: var(--font-sans);
-  font-size: clamp(1.05rem, 0.95rem + 0.45vw, 1.35rem);
+  font-size: clamp(0.8125rem, 0.75rem + 0.35vw, 1.125rem);
   font-weight: 500;
   letter-spacing: 0.04em;
-  line-height: 1.2;
+  line-height: 1.15;
   text-transform: uppercase;
   color: #fff;
 }
 
 .insights-lead__excerpt {
+  grid-area: desc;
   margin: 0;
-  /* 6vw clear after the title box; top-aligned with title */
-  margin-left: 6vw;
-  flex: 0 0 auto;
-  width: 30vw;
-  max-width: 30vw;
+  justify-self: stretch;
+  align-self: start;
+  width: 100%;
+  max-width: 100%;
   text-align: left;
   font-family: var(--font-sans);
   font-size: clamp(0.8125rem, 0.75rem + 0.25vw, 0.9375rem);
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.35;
-  color: rgba(255, 255, 255, 0.86);
+  color: rgba(255, 255, 255, 0.72);
 }
 
-.insights-lead__meta .insight-chip {
-  flex: 0 0 auto;
-  margin-left: auto;
-  align-self: flex-start;
+.insights-lead__meta > .insight-chip,
+.insights-lead__meta > .insights-lead__chip-slot {
+  grid-area: chip;
+  justify-self: end;
+  align-self: start;
+  box-sizing: border-box;
   max-width: 100%;
-}
-
-.insights-lead__meta .insight-chip--on-media {
-  border-color: rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.14);
-  color: rgba(255, 255, 255, 0.92);
+  width: max-content;
+  min-width: 0;
+  margin: 0;
+  min-height: 0;
+  height: auto;
+  padding: 0.18rem 0.55rem;
+  line-height: 1.15;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
 }
 
 @media (max-width: 800px) {
-  /* Lead: title + excerpt left (compact, capped); chip right */
   .insights-lead__meta {
-    display: grid;
-    grid-template-columns: minmax(0, 58%) minmax(0, 42%);
-    justify-content: space-between;
-    column-gap: 1.25rem;
-    grid-template-areas:
-      "title chip"
-      "excerpt chip";
-    align-items: start;
-    row-gap: 0.12rem;
-    padding: 0.65rem 0.75rem 0.5rem;
+    grid-template-columns: 35% 10% 35% 20%;
+    grid-template-areas: "title . desc chip";
+    margin-top: 0.75rem;
+    padding: 0;
   }
 
   .insights-lead__title {
-    grid-area: title;
     width: auto;
-    max-width: none;
-    font-size: 0.8125rem;
+    max-width: 100%;
+    font-size: 0.6875rem;
     letter-spacing: -0.01em;
     line-height: 1.2;
     text-transform: none;
   }
 
   .insights-lead__excerpt {
-    grid-area: excerpt;
-    margin-left: 0;
-    width: auto;
+    width: 100%;
     max-width: 100%;
-    justify-self: start;
-    text-align: left;
     font-size: 0.6875rem;
     line-height: 1.25;
   }
 
-  .insights-lead__meta > :last-child {
-    grid-area: chip;
-    margin-left: 0;
-    justify-self: end;
-    align-self: end;
+  .insights-lead__meta > .insight-chip {
+    font-size: 0.5625rem;
+    padding: 0.2rem 0.45rem;
   }
 }
 
 .insights-body {
-  /* Equal air above & below the tag filter (matches Projects) */
+  /* Equal air below the tag filter; lead→filter gets a bit more */
   --filter-band-gap: clamp(1.75rem, 3.25vw, 2.5rem);
-  padding-top: var(--filter-band-gap);
+  padding-top: calc(var(--filter-band-gap) + 0.85rem);
   padding-bottom: clamp(3rem, 6vw, 5rem);
 }
 
 .insights-page .empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: clamp(14rem, 38vh, 26rem);
+  margin: 0;
+  text-align: center;
   color: rgba(255, 255, 255, 0.55);
 }
 
@@ -3954,10 +3962,10 @@ html[data-chrome-ready="1"] .hero__video {
 
 .insight-showcase__meta {
   display: grid;
-  grid-template-columns: minmax(0, 58%) minmax(0, 42%);
+  grid-template-columns: minmax(0, 65%) minmax(0, 35%);
   grid-template-areas:
     "title chip"
-    "excerpt .";
+    "excerpt excerpt";
   align-items: start;
   column-gap: 1.25rem;
   row-gap: 0.35rem;
@@ -4005,14 +4013,14 @@ html[data-chrome-ready="1"] .hero__video {
 }
 
 @media (max-width: 800px) {
-  /* Same as project cards: copy 58% left, chip right with air */
+  /* Same as project cards: title 65% | type; excerpt full width */
   .insight-showcase__meta {
-    grid-template-columns: minmax(0, 58%) minmax(0, 42%);
+    grid-template-columns: minmax(0, 65%) minmax(0, 35%);
     justify-content: space-between;
     column-gap: 1.25rem;
     grid-template-areas:
       "title chip"
-      "excerpt chip";
+      "excerpt excerpt";
     align-items: start;
     row-gap: 0.12rem;
     padding-inline: 0;
@@ -4025,7 +4033,7 @@ html[data-chrome-ready="1"] .hero__video {
 
   .insight-showcase__meta > .insight-chip {
     max-width: 100%;
-    align-self: end;
+    align-self: start;
     white-space: nowrap;
   }
 
@@ -4084,6 +4092,15 @@ html[data-chrome-ready="1"] .hero__video {
   line-height: 1;
   text-transform: none;
   white-space: nowrap;
+}
+
+/* Featured chips share the title top edge */
+.insights-lead__meta > .insight-chip,
+.project-featured__meta > .project-type-chip {
+  align-self: start;
+  min-height: 0;
+  height: auto;
+  margin-top: 0;
 }
 
 @media (max-width: 700px) {
@@ -4293,7 +4310,7 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1fr);
   grid-template-areas: "title summary tags";
-  align-items: baseline;
+  align-items: start;
   column-gap: 1rem;
   row-gap: 0.35rem;
   padding-inline: 0.05rem;
@@ -4304,10 +4321,10 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   .project-case-demo__hero-copy {
     left: var(--shell-gutter);
     right: var(--shell-gutter);
-    grid-template-columns: minmax(0, 58%) minmax(0, 42%);
+    grid-template-columns: minmax(0, 65%) minmax(0, 35%);
     grid-template-areas:
       "title tags"
-      "summary tags";
+      "summary summary";
     justify-content: space-between;
     column-gap: 1.25rem;
     align-items: start;
@@ -4350,7 +4367,7 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   flex-wrap: wrap;
   justify-content: flex-end;
   justify-self: end;
-  align-self: baseline;
+  align-self: start;
   gap: 0.4rem;
   margin: 0;
   padding: 0;
@@ -4373,7 +4390,7 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   }
 
   .project-case-demo__tags {
-    align-self: end;
+    align-self: start;
   }
 
   .project-case-demo__tag {
@@ -4738,9 +4755,9 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
 
 .project-case-demo__panel-copy {
   font-family: var(--font-sans);
-  /* Was ~14px — two steps up; same white as titles on black */
-  font-size: 1.125rem;
-  line-height: 1.38;
+  /* Body only — titles stay at panel-title size */
+  font-size: 1rem;
+  line-height: 1.3;
   color: #fff;
   letter-spacing: -0.01em;
 }

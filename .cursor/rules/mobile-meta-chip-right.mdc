@@ -1,27 +1,38 @@
 ---
-description: Mobile card/lead meta — capped left copy, type chip always right
+description: Mobile card/lead meta — cards 65% title; featured leads three-up under cover
 alwaysApply: true
 ---
 
 # Mobile meta (Projects + Insights)
 
-On viewports `≤800px` (and the same 58/42 rhythm on tablet/laptop cards), every lead / card meta row shares one rhythm:
+## Featured leads（项目 / 见解主推，不受筛选器影响）
 
-1. **Left:** title + description — column capped at **58%** so copy does not run into the chip.
-2. **Right:** project / article type chip — end-aligned in the remaining **42%**, with air from the copy (`column-gap: 1.25rem`).
-3. **Fixed leads**（Projects / Insights 第一个推荐，不受筛选器影响）:
-   - Insights lead: Equal L/R inset (`padding-inline: 0.75rem`); chip **bottom-aligns** with the description line (`align-self: end`).
-   - Projects「第一个项目」: meta is a **bottom-right stack** on the cover (not the 58/42 bar) so left art stays clear.
-4. **Filter / Related cards** (project + insight index and detail Related): same 58/42 + gap; chips stay inside the card (`max-width: 100%`, nowrap + ellipsis).
-5. **Chip size (mobile):** `font-size: 0.5625rem`, `padding: 0.2rem 0.45rem`.
+Meta sits **under the cover** (not on-image), three-up:
+
+1. **Title** — left (**35%**)
+2. **Gap** — **10%**
+3. **Description / tagline** — center (**35%**)
+4. **Type chip** — right (**20%** column, end-aligned)
+
+**Top-align** title, description, and chip (`align-items: start`).
+
+Applies to `.project-featured__meta` and `.insights-lead__meta`.
+
+## Filter / Related cards
+
+On viewports `≤800px` (and the same rhythm on tablet/laptop cards):
+
+1. **Title:** up to **65%** of the card width.
+2. **Type chip:** end-aligned on the title row; **top-aligned** with the title (`align-self: start`).
+3. **Description / tagline:** **full width** under the title row.
+
+Chip size (mobile): `font-size: 0.5625rem`, `padding: 0.2rem 0.45rem`.
 
 Applies to:
 
-- `.project-featured__meta`（第一个项目）
-- `.project-case-demo__hero-copy`（项目详情首屏）
 - `.project-window__meta--stack`（项目卡片 / 项目详情 Related）
-- `.insights-lead__meta`（见解首篇）
 - `.insight-showcase__meta`（见解卡片 / 见解详情 Related）
+- `.project-case-demo__hero-copy`（项目详情首屏 — follow lead three-up when desktop）
 
-Do not restack chips under the copy on mobile. Do not let left copy use full `1fr` without a width cap.
+Do not bottom-align type chips on filter/related cards or featured leads.
 ---

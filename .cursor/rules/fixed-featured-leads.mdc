@@ -6,13 +6,13 @@ alwaysApply: true
 
 # Fixed featured leads (index pages)
 
-On `/projects` and `/insights`, the **first full-width featured item sits above the filter** and is **not** part of filter results.
+On `/projects` and `/insights`, the **first full-width featured item sits above the filter** and stays pinned there. It **also appears in the filtered grid** when it matches the active filter (including “all”).
 
 ## Rules
 
-1. **Always visible** — changing involvement / IP / insight tag must not hide or swap the lead.
-2. **Above the filter** — layout order: Hero → Featured lead → Filter → filtered grid only.
-3. **Deduplicate** — exclude the lead’s slug from the masonry / grid under the filter so it never appears twice.
+1. **Always visible above the filter** — changing involvement / IP / insight tag must not hide or swap the lead.
+2. **Above the filter** — layout order: Hero → Featured lead → Filter → filtered grid.
+3. **Also in filter results** — do **not** exclude the lead’s slug from the masonry / grid. When the lead matches the active filter (or filter is “all”), it shows again in the results.
 4. **Do not change the lead** unless the user **explicitly** asks to replace which project or insight is featured.
 
 ## Sources of truth
@@ -25,3 +25,4 @@ On `/projects` and `/insights`, the **first full-width featured item sits above 
 - Gate the lead behind `active === "all"` or empty search params
 - Move the lead inside `FilterResults`
 - Auto-pick a new lead from filter matches, sort order, or “most recent”
+- Strip the lead out of filter results for deduplication

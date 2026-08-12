@@ -1,0 +1,14 @@
+---
+description: Always deploy/push to production (main)
+alwaysApply: true
+---
+
+# Push / deploy target
+
+When the user asks to **推送 / push / deploy / 上线**:
+
+1. **Target is production** — push to **`main`** (this repo’s production branch). Do not stop at a feature-branch-only push unless they explicitly ask for a PR-only or preview deploy.
+2. **Include the work** — commit relevant changes first (never commit `tmp/` or secrets), then get them onto `main` (merge or rebase as appropriate) and `git push origin main`.
+3. **Confirm** — after push, tell them production (`main`) was updated.
+
+Do not invent a `production` remote branch name; **production = `main`**.

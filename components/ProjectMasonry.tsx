@@ -17,11 +17,14 @@ import {
 type ProjectMasonryProps = {
   projects: Project[];
   emptyLabel?: string;
+  /** `tri` = index filter (3-col). `related` = 2-col detail strip. */
+  layout?: "tri" | "related";
 };
 
 export function ProjectMasonry({
   projects,
   emptyLabel = "No projects in this category yet.",
+  layout = "tri",
 }: ProjectMasonryProps) {
   const reduceMotion = useReducedMotion();
   const listVariants = reduceMotion
@@ -45,9 +48,18 @@ export function ProjectMasonry({
     );
   }
 
+  const listClass =
+    layout === "related"
+      ? "project-showcase project-showcase--related"
+      : "project-showcase project-showcase--tri";
+  const sizes =
+    layout === "related"
+      ? "(max-width: 700px) 100vw, (max-width: 1400px) 48vw, 700px"
+      : "(max-width: 700px) 100vw, (max-width: 1400px) 33vw, 480px";
+
   return (
     <motion.ul
-      className="project-showcase"
+      className={listClass}
       variants={listVariants}
       initial="hidden"
       animate="show"
@@ -73,7 +85,7 @@ export function ProjectMasonry({
                   alt={project.title}
                   width={project.coverWidth}
                   height={project.coverHeight}
-                  sizes="(max-width: 700px) 100vw, (max-width: 1400px) 48vw, 700px"
+                  sizes={sizes}
                 />
               </div>
               <div className="project-window__meta project-window__meta--stack">

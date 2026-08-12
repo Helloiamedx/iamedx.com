@@ -9,6 +9,7 @@ import {
   getInsightsByTag,
   getInsightsFeaturedLead,
 } from "@/lib/insights";
+import { shuffleArray } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Insights",
@@ -22,12 +23,10 @@ type InsightsPageProps = {
 export default async function InsightsPage({ searchParams }: InsightsPageProps) {
   const params = await searchParams;
   const activeTag = params.tag ? findInsightTag(params.tag) : null;
-  /* Featured lead is fixed — not part of the filter swap */
+  /* Featured lead stays above the filter — also included in filter results when it matches */
   const lead = getInsightsFeaturedLead();
-  /* All matching articles under the filter (3-col layout, not a 3-item cap) */
-  const filtered = getInsightsByTag(activeTag?.slug ?? null).filter(
-    (insight) => insight.slug !== lead?.slug,
-  );
+  /* Matching articles under the filter (lead included when it matches); random order incl. all */
+  const filtered = shuffleArray(getInsightsByTag(activeTag?.slug ?? null));
   const filterKey = activeTag?.slug ?? "all";
 
   return (

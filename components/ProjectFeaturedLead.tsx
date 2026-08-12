@@ -8,7 +8,7 @@ type ProjectFeaturedLeadProps = {
 
 /**
  * Full-width「第一个项目」— cover entry on /projects.
- * Meta sits bottom-right (art has logo / product on the left).
+ * Meta below: title 35% | gap 10% | tagline 35% | tag ~20%, top-aligned.
  */
 export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
   const typeLabel = project.categories.at(0) ?? null;
@@ -28,18 +28,19 @@ export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
             priority
             className="project-featured__image"
           />
-          <div className="project-featured__scrim" aria-hidden="true" />
-          <div className="project-featured__meta">
-            <h2 className="project-featured__title">{project.title}</h2>
-            {project.tagline ? (
-              <p className="project-featured__tagline">{project.tagline}</p>
-            ) : null}
-            {typeLabel ? (
-              <span className="project-type-chip project-type-chip--on-media">
-                {typeLabel}
-              </span>
-            ) : null}
-          </div>
+        </div>
+        <div className="project-featured__meta">
+          <h2 className="project-featured__title">{project.title}</h2>
+          {project.tagline ? (
+            <p className="project-featured__tagline">{project.tagline}</p>
+          ) : (
+            <span className="project-featured__tagline" aria-hidden="true" />
+          )}
+          {typeLabel ? (
+            <span className="project-type-chip">{typeLabel}</span>
+          ) : (
+            <span className="project-featured__chip-slot" aria-hidden="true" />
+          )}
         </div>
       </Link>
     </article>

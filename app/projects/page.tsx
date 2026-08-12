@@ -11,6 +11,7 @@ import {
   projectsFeaturedLead,
   type Involvement,
 } from "@/content/projects";
+import { shuffleArray } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Projects",
@@ -50,11 +51,13 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
     : "all";
   const activeIp = isIp(params.ip) ? params.ip : null;
 
-  /* Featured lead is fixed above the filter — never tied to filter results */
-  const listed = filterProjects({
-    involvement: activeInvolvement,
-    ip: activeIp,
-  }).filter((p) => p.slug !== projectsFeaturedLead.slug);
+  /* Featured lead stays above the filter — also included in filter results when it matches */
+  const listed = shuffleArray(
+    filterProjects({
+      involvement: activeInvolvement,
+      ip: activeIp,
+    }),
+  );
 
   const filterKey = activeIp
     ? `${activeInvolvement}:${activeIp}`

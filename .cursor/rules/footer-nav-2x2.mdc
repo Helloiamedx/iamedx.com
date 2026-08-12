@@ -8,7 +8,7 @@ alwaysApply: false
 
 Reference layout (Pentagram-style), black plate:
 
-1. **Help row** — left label `Let me help you`; right text links in order: WhatsApp · WeChat · Email · Phone (underlined, not colored pills).
+1. **Help row** — left label `Let me help you`; right text links in order: WhatsApp · WeChat · Email · Phone (plain text links, not underlined / not colored pills).
 2. **Hairline rule**
 3. **About** — left label `About`; right blurb from `footerAboutCopy` in `content/nav.ts`
 4. **Brand wordmark** — `iamedwardxu-logo-white.svg`, shell width, **static** (no video, no LightRays, no mask cutouts)
