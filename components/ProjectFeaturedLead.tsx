@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ProtectedVideo } from "@/components/ProtectedVideo";
 import type { ProjectsFeaturedLead } from "@/content/projects";
 
 type ProjectFeaturedLeadProps = {
@@ -8,7 +9,8 @@ type ProjectFeaturedLeadProps = {
 
 /**
  * Full-width「第一个项目」— cover entry on /projects.
- * Featured meta only: chip max-content; gaps 13% total; title + tagline share the rest.
+ * Meta shares the case-hero desktop recipe: desc aligns to .site-nav;
+ * 5.5vw after title; 10vw before the type label.
  */
 export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
   const typeLabel = project.categories.at(0) ?? null;
@@ -20,14 +22,23 @@ export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
         className="project-featured__link"
       >
         <div className="project-featured__media">
-          <Image
-            src={project.coverImage}
-            alt={project.title}
-            fill
-            sizes="(max-width: 1400px) calc(100vw - 2 * var(--shell-gutter)), 1400px"
-            priority
-            className="project-featured__image"
-          />
+          {project.coverVideo ? (
+            <ProtectedVideo
+              className="project-featured__cover-video"
+              src={project.coverVideo}
+              preload="metadata"
+              aria-label={project.title}
+            />
+          ) : (
+            <Image
+              src={project.coverImage}
+              alt={project.title}
+              fill
+              sizes="(max-width: 1400px) calc(100vw - 2 * var(--shell-gutter)), 1400px"
+              priority
+              className="project-featured__image"
+            />
+          )}
         </div>
         <div className="project-featured__meta">
           <h2 className="project-featured__title">{project.title}</h2>

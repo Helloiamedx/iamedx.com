@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { InsightBody } from "@/components/InsightBody";
 import { InsightMasonry } from "@/components/InsightMasonry";
+import { ProtectedVideo } from "@/components/ProtectedVideo";
 import {
   INSIGHT_COVER_H,
   INSIGHT_COVER_W,
@@ -10,6 +11,7 @@ import {
   getInsightSlugs,
   getInsightTagLabels,
   getRelatedInsights,
+  isInsightVideoCover,
 } from "@/lib/insights";
 
 type InsightPageProps = {
@@ -68,15 +70,24 @@ export default async function InsightDetailPage({ params }: InsightPageProps) {
           </header>
 
           <div className="insight-detail__cover">
-            <Image
-              src={insight.coverImage}
-              alt=""
-              width={INSIGHT_COVER_W}
-              height={INSIGHT_COVER_H}
-              sizes="(max-width: 700px) 100vw, (max-width: 1100px) 82vw, 70vw"
-              priority
-              className="insight-detail__cover-image"
-            />
+            {isInsightVideoCover(insight.coverImage) ? (
+              <ProtectedVideo
+                className="insight-detail__cover-video"
+                src={insight.coverImage}
+                preload="metadata"
+                aria-label={insight.title}
+              />
+            ) : (
+              <Image
+                src={insight.coverImage}
+                alt=""
+                width={INSIGHT_COVER_W}
+                height={INSIGHT_COVER_H}
+                sizes="(max-width: 700px) 100vw, (max-width: 1100px) 82vw, 70vw"
+                priority
+                className="insight-detail__cover-image"
+              />
+            )}
           </div>
 
           {insight.content.trim() ? (

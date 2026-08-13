@@ -5,6 +5,7 @@ import {
   INSIGHT_COVER_H,
   INSIGHT_COVER_W,
   getInsightTagLabels,
+  isInsightVideoCover,
   type Insight,
   type InsightMeta,
 } from "@/lib/insight-meta";
@@ -13,6 +14,7 @@ export {
   INSIGHT_COVER_H,
   INSIGHT_COVER_W,
   getInsightTagLabels,
+  isInsightVideoCover,
   type Insight,
   type InsightMeta,
 };
@@ -138,7 +140,7 @@ export function getInsightBySlug(slug: string): Insight | null {
  * Change only when the user explicitly asks to replace the featured insight.
  */
 export const INSIGHTS_FEATURED_LEAD_SLUG =
-  "your-greatest-asset-in-supply-chain-is-trust-never-trade-it-for-short-term-benefits";
+  "when-game-merchandise-needs-more-than-just-a-logo";
 
 export function getInsightsFeaturedLead(): InsightMeta | null {
   const featured = getInsightBySlug(INSIGHTS_FEATURED_LEAD_SLUG);

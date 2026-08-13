@@ -67,6 +67,11 @@ export type Project = {
   role: string[];
   involvement: Involvement;
   coverImage: string;
+  /**
+   * Index / Related card cover as muted looping video (wins over `coverImage`).
+   * Use when the user supplies an mp4 for the outside card.
+   */
+  coverVideo?: string;
   /** Intrinsic cover size — drives card aspect / relative scale */
   coverWidth: number;
   coverHeight: number;
@@ -197,6 +202,8 @@ export type ProjectsFeaturedLead = {
   tagline: string;
   categories: string[];
   coverImage: string;
+  /** When set, featured media plays this muted loop instead of `coverImage` */
+  coverVideo?: string;
   coverWidth: number;
   coverHeight: number;
 };
@@ -226,14 +233,14 @@ export function projectCoverFromName(
   return asset(`/images/projects/${folder}/${file}`);
 }
 
-/** 「第一个项目」— name drives title, slug, and cover URL */
+/** Mass Effect Tali — grid / detail (no longer the projects featured lead) */
 const FIRST_PROJECT_NAME = "Mass Effect Tali Companion Bundle";
 const FIRST_PROJECT_SLUG = projectSlugFromName(FIRST_PROJECT_NAME);
 const FIRST_PROJECT_COVER = projectCoverFromName(
   FIRST_PROJECT_NAME,
   "Mass Effect Tali Companion Bundle-hero.jpg",
 );
-/** Index card + featured lead — same asset */
+/** Index card cover (featured lead uses NECROM Look Book Bundle) */
 const FIRST_PROJECT_FEATURED_COVER = projectCoverFromName(
   FIRST_PROJECT_NAME,
   "Mass Effect Tali Companion Bundle.jpg",
@@ -555,12 +562,132 @@ const THIRD_PROJECT_AFTER_COVER_VIDEOS = [
   },
 ] as const;
 
+/** 「第四个项目」— grid card under the featured lead */
+const FOURTH_PROJECT_NAME =
+  "The Elder Scrolls Online 10-Year Coin Shadowbox";
+const FOURTH_PROJECT_SLUG = projectSlugFromName(FOURTH_PROJECT_NAME);
+const FOURTH_PROJECT_COVER = projectCoverFromName(
+  FOURTH_PROJECT_NAME,
+  "cover.jpg",
+);
+const FOURTH_PROJECT_TAGLINE =
+  "A 10th anniversary collectible designed to preserve the memories, stories, and connections built within The Elder Scrolls Online community.";
+/** Detail hero — self-hosted intro clip (muted, loops from start) */
+const FOURTH_PROJECT_HERO_VIDEO = projectCoverFromName(
+  FOURTH_PROJECT_NAME,
+  "The Elder Scrolls Online 10-Year Coin Shadowboxintrude.mp4",
+);
+
+const FOURTH_PROJECT_STILL = (file: string, alt: string) => ({
+  src: projectCoverFromName(FOURTH_PROJECT_NAME, file),
+  alt,
+});
+
+/** Detail gallery: cover → 3 → 1|2 → 4|6|5 → drawing */
+const FOURTH_PROJECT_GALLERY_LEAD = FOURTH_PROJECT_COVER;
+const FOURTH_PROJECT_AFTER_COVER_STILLS = {
+  items: [FOURTH_PROJECT_STILL("Coin Shadowbox3.jpg", "Coin Shadowbox 3")],
+  ratio: "56.25%",
+};
+const FOURTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      FOURTH_PROJECT_STILL("Coin Shadowbox1.jpg", "Coin Shadowbox 1"),
+      FOURTH_PROJECT_STILL("Coin Shadowbox2.jpg", "Coin Shadowbox 2"),
+    ],
+    ratio: "100%",
+  },
+  {
+    items: [
+      FOURTH_PROJECT_STILL("Coin Shadowbox4.jpg", "Coin Shadowbox 4"),
+      FOURTH_PROJECT_STILL("Coin Shadowbox6.jpg", "Coin Shadowbox 6"),
+      FOURTH_PROJECT_STILL("Coin Shadowbox5.jpg", "Coin Shadowbox 5"),
+    ],
+    ratio: "100%",
+  },
+];
+const FOURTH_PROJECT_AFTER_COVER_VIDEO = {
+  primary: projectCoverFromName(FOURTH_PROJECT_NAME, "drawing.mp4"),
+  alt: "Drawing",
+  ratio: "56.25%",
+} as const;
+
+/**
+ * 「第一个项目」— full-width featured lead above the filter.
+ * Index / featured cover and detail hero are separate clips.
+ */
+const FIFTH_PROJECT_NAME =
+  "The Elder Scrolls Online NECROM Look Book Bundle";
+const FIFTH_PROJECT_SLUG = projectSlugFromName(FIFTH_PROJECT_NAME);
+const FIFTH_PROJECT_TAGLINE =
+  "A physical tribute to the forbidden secrets of Apocrypha, bringing the Arcanist’s mystical power from Tamriel into a collectible experience.";
+/** Outside card + featured lead cover */
+const FIFTH_PROJECT_COVER_VIDEO = projectCoverFromName(
+  FIFTH_PROJECT_NAME,
+  "The Elder Scrolls Online NECROM Look Book.mp4",
+);
+/** Case detail first-screen hero */
+const FIFTH_PROJECT_HERO_VIDEO = projectCoverFromName(
+  FIFTH_PROJECT_NAME,
+  "The Elder Scrolls Online NECROM Look hero.mp4",
+);
+/** Detail gallery — first full-width still under the hero */
+const FIFTH_PROJECT_GALLERY_LEAD = projectCoverFromName(
+  FIFTH_PROJECT_NAME,
+  "The Elder Scrolls Online NECROM Look Book Bundlecover.jpg",
+);
+const FIFTH_PROJECT_STILL = (file: string, alt: string) => ({
+  src: projectCoverFromName(FIFTH_PROJECT_NAME, file),
+  alt,
+});
+/** Detail gallery row 2: 9 | 12 */
+const FIFTH_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    FIFTH_PROJECT_STILL(
+      "The Elder Scrolls Online NECROM Look Book Bundle - 9.jpg",
+      "Look Book Bundle 9",
+    ),
+    FIFTH_PROJECT_STILL(
+      "The Elder Scrolls Online NECROM Look Book Bundle - 12.jpg",
+      "Look Book Bundle 12",
+    ),
+  ],
+  ratio: "100%",
+};
+/** Detail gallery row 3: 7 | 6 | 8 */
+const FIFTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      FIFTH_PROJECT_STILL(
+        "The Elder Scrolls Online NECROM Look Book Bundle - 7.jpg",
+        "Look Book Bundle 7",
+      ),
+      FIFTH_PROJECT_STILL(
+        "The Elder Scrolls Online NECROM Look Book Bundle - 6.jpg",
+        "Look Book Bundle 6",
+      ),
+      FIFTH_PROJECT_STILL(
+        "The Elder Scrolls Online NECROM Look Book Bundle - 8.jpg",
+        "Look Book Bundle 8",
+      ),
+    ],
+    ratio: "100%",
+  },
+];
+/** Detail gallery — closing full-width process clip */
+const FIFTH_PROJECT_AFTER_COVER_VIDEO = {
+  primary: projectCoverFromName(FIFTH_PROJECT_NAME, "developing.mp4"),
+  alt: "Developing",
+  ratio: "56.25%",
+} as const;
+
 export const projectsFeaturedLead: ProjectsFeaturedLead = {
-  slug: FIRST_PROJECT_SLUG,
-  title: FIRST_PROJECT_NAME,
-  tagline: "Found your home with Tali?",
+  slug: FIFTH_PROJECT_SLUG,
+  title: FIFTH_PROJECT_NAME,
+  tagline: FIFTH_PROJECT_TAGLINE,
   categories: involvementTags("end-to-end"),
-  coverImage: FIRST_PROJECT_FEATURED_COVER,
+  coverImage: FIFTH_PROJECT_COVER_VIDEO,
+  coverVideo: FIFTH_PROJECT_COVER_VIDEO,
   coverWidth: 1920,
   coverHeight: 1080,
 };
@@ -572,9 +699,12 @@ export const projects: Project[] = [
     materials: ["wood", "resin", "metal", "paper"],
     ips: ["mass-effect"],
     tags: involvementTags("end-to-end"),
-    summary: "Found your home with Tali?",
-    tagline: "Found your home with Tali?",
-    headline: "Found your home with Tali?",
+    summary:
+      "A collectible created to preserve the journey, memories, and connection players built with Tali’Zorah throughout the Mass Effect universe.",
+    tagline:
+      "A collectible created to preserve the journey, memories, and connection players built with Tali’Zorah throughout the Mass Effect universe.",
+    headline:
+      "A collectible created to preserve the journey, memories, and connection players built with Tali’Zorah throughout the Mass Effect universe.",
     studySub: "study what i did",
     role: [
       "product-development",
@@ -618,7 +748,7 @@ export const projects: Project[] = [
     ],
     year: 2024,
     client: "Mass Effect",
-    featured: true,
+    featured: false,
     challenge:
       "Deliver a metal-like wooden box finish and a lower-cost sculpture structure without losing collectible quality.",
     result:
@@ -754,6 +884,105 @@ export const projects: Project[] = [
       "Balance mechanical realism and artistic interpretation in a large multi-part resin Thunderjaw—fit, stability, and weathered metallic paint.",
     result:
       "A premium Thunderjaw collectible set spanning statue production, accessories, prints, and packaging.",
+  },
+  {
+    slug: FOURTH_PROJECT_SLUG,
+    title: FOURTH_PROJECT_NAME,
+    materials: ["metal", "wood"],
+    ips: ["the-elder-scrolls"],
+    tags: involvementTags("specialized"),
+    summary: FOURTH_PROJECT_TAGLINE,
+    tagline: FOURTH_PROJECT_TAGLINE,
+    headline: FOURTH_PROJECT_TAGLINE,
+    studySub: "study what i did",
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "specialized",
+    coverImage: FOURTH_PROJECT_COVER,
+    coverWidth: 1920,
+    coverHeight: 1080,
+    galleryLeadImage: FOURTH_PROJECT_GALLERY_LEAD,
+    heroVideo: FOURTH_PROJECT_HERO_VIDEO,
+    afterCoverStills: FOURTH_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: FOURTH_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    afterCoverVideo: FOURTH_PROJECT_AFTER_COVER_VIDEO,
+    overview: [
+      "The Elder Scrolls Online (ESO) has built a unique community over the past 10 years, bringing together millions of players through shared adventures, friendships, and unforgettable experiences.",
+      "Beyond the game itself, ESO has become a place where players from different backgrounds connect, support each other, and create their own stories. Many players describe the community as welcoming, inclusive, and more like a family built through years of shared experiences.",
+      "To celebrate the 10th anniversary milestone, this project was created as a commemorative collectible featuring a premium coin display shadowbox. The goal was to transform the history and emotional connection behind the game into a physical collectible that players could display and preserve as a reminder of their journey throughout ESO’s decade-long legacy.",
+    ],
+    challengesBody: [
+      "The main challenges of this project focused on precision assembly and the structural integration between the metal coins and the display panel.",
+      "The first challenge was accurately assembling the 10 circular links that connect each coin around the display. Since the entire design relies on a balanced radial layout, even a small deviation in positioning could affect the symmetry of the artwork and reduce the premium appearance of the final collectible. Achieving consistent spacing and alignment across all connection points required careful control during the assembly process.",
+      "The second challenge was finding a reliable way to secure the metal coins onto the back panel while maintaining a clean appearance. Traditional adhesive methods were not suitable because the connection area was extremely limited due to the thin edges of the surrounding links. Applying glue directly could easily cause overflow or visible residue, and once the adhesive spread onto the surface, it was difficult to remove without damaging the finish. A mounting solution was required that could provide strong fixation while preserving the clean, high-quality appearance expected from an anniversary collectible.",
+    ],
+    executionBody: [
+      "To improve assembly accuracy, I developed custom positioning jigs to assist with the installation of the 10 circular links. Instead of relying only on manual alignment, the workers could first place the jig inside the frame, position each link according to the predefined locations, and then complete the fixation process. This reduced alignment errors and helped maintain the overall symmetry of the design during production.",
+      "For the connection between the metal coins and the display panel, I redesigned the structure instead of using visible adhesive methods. The front panel was adjusted to a thinner structure, allowing screws to pass through the panel and secure the bottom of the circular links from behind. After assembly, the rear cover was installed to conceal the entire fixing structure. This solution maintained the three-dimensional appearance of the collectible while providing a stronger and cleaner assembly method without affecting the final presentation.",
+    ],
+    year: 2024,
+    client: "The Elder Scrolls Online",
+    featured: false,
+    challenge:
+      "Precision assembly of the radial coin links, and a clean structural mount for the metal coins without visible adhesive.",
+    result: "",
+  },
+  {
+    slug: FIFTH_PROJECT_SLUG,
+    title: FIFTH_PROJECT_NAME,
+    materials: ["paper", "metal", "fabric"],
+    ips: ["the-elder-scrolls"],
+    tags: involvementTags("end-to-end"),
+    summary: FIFTH_PROJECT_TAGLINE,
+    tagline: FIFTH_PROJECT_TAGLINE,
+    headline: FIFTH_PROJECT_TAGLINE,
+    studySub: "study what i did",
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "end-to-end",
+    coverImage: FIFTH_PROJECT_COVER_VIDEO,
+    coverVideo: FIFTH_PROJECT_COVER_VIDEO,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    galleryLeadImage: FIFTH_PROJECT_GALLERY_LEAD,
+    heroVideo: FIFTH_PROJECT_HERO_VIDEO,
+    afterCoverStills: FIFTH_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: FIFTH_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    afterCoverVideo: FIFTH_PROJECT_AFTER_COVER_VIDEO,
+    overview: [
+      "Inspired by the forbidden knowledge hidden within Apocrypha, The Elder Scrolls Online: Necrom Look Book Bundle was created as a collector’s piece that brings the mystery and magic of the Arcanist class from Tamriel into the real world. In the game’s universe, Arcanists draw their power from ancient secrets preserved within forgotten tomes, and this set was designed to transform that lore into a tangible collectible experience.",
+      "The collection features a book-shaped display box inspired by the Arcanist’s tome of power, paired with an Ouroboros necklace featuring the iconic three-headed symbol from the world of The Elder Scrolls Online. Through the combination of storytelling, material selection, and craftsmanship, the set recreates the feeling of uncovering an ancient artifact — allowing fans to experience not only a physical collectible, but also a deeper connection to the atmosphere, lore, and magical identity of the Arcanist.",
+    ],
+    challengesBody: [
+      "The main challenge of this project was managing the integration of multiple manufacturing processes within a single product while maintaining consistency and quality throughout production.",
+      "The product combined several complex techniques, including digital printing for high-definition patterns and full-color reproduction, a temperature-sensitive color-changing process to enhance interactivity, hot stamping to create a premium finish, sticky mesh application to improve texture and layering, and embossing to strengthen the three-dimensional effect. Each process required precise control, and even a small inconsistency between different processes could affect the overall appearance and quality of the final product.",
+      "Another challenge was ensuring that these different materials and processes could work together during mass production. Since each technique had its own production requirements and limitations, the difficulty was not only achieving the desired visual effect but also finding a reliable manufacturing solution that could remain stable and repeatable at scale.",
+      "In addition, the project required exploring new material applications to enhance the collector experience. Using materials that were not commonly applied in this product category introduced additional challenges in terms of production feasibility, material compatibility, and quality control.",
+    ],
+    executionBody: [
+      "I focused on turning the design into a stable and repeatable production solution before mass production began. Because the product involved multiple materials and processes — including hot stamping, digital printing, hand-applied mesh, embossing, and other finishing techniques — I planned the manufacturing sequence carefully and coordinated the different suppliers involved. The order of these processes was important, as an incorrect sequence could easily create more defects in the later stages of production.",
+      "A major part of my work happened during sampling. I identified potential production problems early and repeatedly adjusted dimensions, tolerances, and design details based on the actual manufacturing results. Rather than waiting until mass production to solve these issues, I used the sampling stage to validate the key details and make the design more stable and suitable for production.",
+      "I also explored a new material solution for the book box. The customer wanted the edges of the box to look and feel like layers of real paper, which could not be achieved through conventional printing alone. I introduced a material normally used in the interior decoration industry and worked out how it could be adapted to the structure and manufacturing requirements of this product.",
+      "For the raised details along the book spine, I worked with the mold supplier to adjust the structure and determine the appropriate dimensions and height. The goal was to achieve a clear three-dimensional effect without putting too much stress on the surface material or causing damage during forming.",
+      "I also carried out extensive assembly testing to determine how the internal box, outer book cover, and necklace could be integrated reliably. The necklace area was specifically redesigned so that it could be securely held inside the package while keeping the interior visually clean and reducing unnecessary supporting materials. This allowed the final presentation to remain simple and immersive without compromising assembly stability.",
+    ],
+    impactBody: [
+      "Despite the amount of handwork and the complexity involved in production, the final product achieved a high level of detail and closely captured the look and character of the original in-game design. The craftsmanship and overall presentation were well received by fans of the character and the game.",
+      "After launch, the product sold out quickly even at a retail price approaching $200. This strong market response gave the customer confidence in both the product concept and the production approach, leading them to move forward with the development of a second and third product in the same series.",
+    ],
+    year: 2024,
+    client: "The Elder Scrolls Online",
+    featured: true,
+    challenge:
+      "Integrate digital printing, color-changing finish, hot stamping, mesh, and embossing into one stable mass-production path.",
+    result:
+      "High-fidelity collectible that sold out near $200 retail, unlocking two follow-on products in the series.",
   },
 ];
 

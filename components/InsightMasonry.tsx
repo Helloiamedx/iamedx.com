@@ -13,8 +13,10 @@ import {
   INSIGHT_COVER_H,
   INSIGHT_COVER_W,
   getInsightTagLabels,
+  isInsightVideoCover,
   type InsightMeta,
 } from "@/lib/insight-meta";
+import { ProtectedVideo } from "@/components/ProtectedVideo";
 
 type InsightMasonryProps = {
   insights: InsightMeta[];
@@ -78,13 +80,22 @@ export function InsightMasonry({
               className="insight-showcase__link"
             >
               <div className="insight-showcase__media">
-                <Image
-                  src={insight.coverImage}
-                  alt=""
-                  width={INSIGHT_COVER_W}
-                  height={INSIGHT_COVER_H}
-                  sizes="(max-width: 700px) 100vw, (max-width: 900px) 48vw, (max-width: 1400px) 32vw, 460px"
-                />
+                {isInsightVideoCover(insight.coverImage) ? (
+                  <ProtectedVideo
+                    className="insight-showcase__cover-video"
+                    src={insight.coverImage}
+                    preload="metadata"
+                    aria-label={insight.title}
+                  />
+                ) : (
+                  <Image
+                    src={insight.coverImage}
+                    alt=""
+                    width={INSIGHT_COVER_W}
+                    height={INSIGHT_COVER_H}
+                    sizes="(max-width: 700px) 100vw, (max-width: 900px) 48vw, (max-width: 1400px) 32vw, 460px"
+                  />
+                )}
               </div>
               <div className="insight-showcase__meta">
                 <h3 className="insight-showcase__title">{insight.title}</h3>

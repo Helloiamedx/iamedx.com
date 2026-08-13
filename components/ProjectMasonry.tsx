@@ -9,6 +9,7 @@ import {
   filterCardListVariants,
   filterCardListVariantsReduced,
 } from "@/components/filterCardMotion";
+import { ProtectedVideo } from "@/components/ProtectedVideo";
 import {
   getInvolvementLabel,
   type Project,
@@ -80,13 +81,22 @@ export function ProjectMasonry({
               className="project-showcase__link"
             >
               <div className="project-showcase__media">
-                <Image
-                  src={project.coverImage}
-                  alt={project.title}
-                  width={project.coverWidth}
-                  height={project.coverHeight}
-                  sizes={sizes}
-                />
+                {project.coverVideo ? (
+                  <ProtectedVideo
+                    className="project-showcase__cover-video"
+                    src={project.coverVideo}
+                    preload="metadata"
+                    aria-label={project.title}
+                  />
+                ) : (
+                  <Image
+                    src={project.coverImage}
+                    alt={project.title}
+                    width={project.coverWidth}
+                    height={project.coverHeight}
+                    sizes={sizes}
+                  />
+                )}
               </div>
               <div className="project-window__meta project-window__meta--stack">
                 <h3 className="project-window__title">{project.title}</h3>

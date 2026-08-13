@@ -44,10 +44,14 @@ function renderInline(text: string): ReactNode[] {
   });
 }
 
+function isBulletLine(line: string) {
+  return /^\s*[-*]\s+/.test(line);
+}
+
 /**
- * Insight article body from Markdown hierarchy only:
- * `##` headings, `>` quotations, `**bold**` / `***bold-italic***` emphasis.
- * No divider lines or cards.
+ * Insight article body from Markdown hierarchy:
+ * `##` / `###` headings, `>` quotations, `-` / `*` lists,
+ * `**bold**` / `***bold-italic***` emphasis.
  */
 export function InsightBody({ content }: InsightBodyProps) {
   const blocks = content
@@ -58,11 +62,18 @@ export function InsightBody({ content }: InsightBodyProps) {
   return (
     <article className="insight-detail__body">
       {blocks.map((block, index) => {
+        if (block.startsWith("### ")) {
+          return (
+            <h3 key={index} className="insight-detail__subheading">
+              {renderInline(block.slice(4).trimEnd())}
+            </h3>
+          );
+        }
+
         if (block.startsWith("## ")) {
-          const heading = block.slice(3).trimEnd();
           return (
             <h2 key={index} className="insight-detail__heading">
-              {renderInline(heading)}
+              {renderInline(block.slice(3).trimEnd())}
             </h2>
           );
         }
@@ -87,6 +98,18 @@ export function InsightBody({ content }: InsightBodyProps) {
             <blockquote key={index} className="insight-detail__quote">
               <p>{renderInline(quote)}</p>
             </blockquote>
+          );
+        }
+
+        if (lines.every(isBulletLine)) {
+          return (
+            <ul key={index} className="insight-detail__list">
+              {lines.map((line, itemIndex) => (
+                <li key={itemIndex}>
+                  {renderInline(line.replace(/^\s*[-*]\s+/, "").trim())}
+                </li>
+              ))}
+            </ul>
           );
         }
 

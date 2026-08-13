@@ -25,7 +25,6 @@ export default async function InsightsPage({ searchParams }: InsightsPageProps) 
   const activeTag = params.tag ? findInsightTag(params.tag) : null;
   /* Featured lead stays above the filter — also included in filter results when it matches */
   const lead = getInsightsFeaturedLead();
-  /* Matching articles under the filter (lead included when it matches); random order incl. all */
   const filtered = shuffleArray(getInsightsByTag(activeTag?.slug ?? null));
   const filterKey = activeTag?.slug ?? "all";
 

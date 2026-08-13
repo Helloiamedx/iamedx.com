@@ -350,6 +350,47 @@ export function Header() {
     setMobilePortalReady(true);
   }, []);
 
+  /*
+   * Publish inset from shell left → first primary-nav label (SERVICES text),
+   * so project meta descriptions share that vertical on desktop.
+   */
+  useLayoutEffect(() => {
+    const header = headerRef.current;
+    const nav = header?.querySelector<HTMLElement>(".site-nav");
+    const shell = header?.querySelector<HTMLElement>(".shell");
+    if (!nav || !shell) return;
+
+    const sync = () => {
+      const shellRect = shell.getBoundingClientRect();
+      const firstLink = nav.querySelector<HTMLElement>(".site-nav__link");
+      if (!firstLink || shellRect.width <= 0) return;
+
+      /* Align to the glyph, not the padded hit box */
+      const padLeft = Number.parseFloat(getComputedStyle(firstLink).paddingLeft) || 0;
+      const alignLeft = firstLink.getBoundingClientRect().left + padLeft;
+      const inset = Math.max(0, alignLeft - shellRect.left);
+      document.documentElement.style.setProperty(
+        "--site-nav-inset",
+        `${inset}px`,
+      );
+      document.documentElement.style.setProperty(
+        "--site-nav-half",
+        `${nav.getBoundingClientRect().width / 2}px`,
+      );
+    };
+
+    sync();
+    void document.fonts?.ready.then(sync);
+    window.addEventListener("resize", sync);
+    const ro = new ResizeObserver(sync);
+    ro.observe(nav);
+    ro.observe(shell);
+    return () => {
+      window.removeEventListener("resize", sync);
+      ro.disconnect();
+    };
+  }, []);
+
   /* Prefer chrome (logo / menu) over hero video — gate video until a logo paints */
   useEffect(() => {
     const root = document.documentElement;

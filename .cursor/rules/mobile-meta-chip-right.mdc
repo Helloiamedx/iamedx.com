@@ -1,5 +1,5 @@
 ---
-description: Type labels — Pitch Sans, no fill, gray; featured-lead meta 13% gaps
+description: Type labels — Pitch Sans, no fill, gray; projects meta aligns to nav
 alwaysApply: true
 ---
 
@@ -18,15 +18,17 @@ Applies to `.project-type-chip`, `.insight-chip`, `.project-case-demo__tag`.
 
 Filter involvement pills are separate UI — not this recipe.
 
-# Featured lead meta only
+# Featured / case hero meta (desktop)
 
-**Scope:** `.project-featured__meta` and `.insights-lead__meta` only.
+**Scope:** `.project-featured__meta`, `.insights-lead__meta`, and `.project-case-demo__hero-copy` (desktop). Same recipe.
 
-1. Label `max-content`, end-aligned, top-aligned.
-2. Gaps total **13%** (`6.5%` + `6.5%`).
-3. Title + description share remaining width equally.
+1. Type label `max-content`, **end-aligned**, top-aligned.
+2. Description **left-aligned with** centered `.site-nav` (four primary links). `--site-nav-inset` / `--site-nav-half` from Header.
+3. Title → description gap: **5.5vw**.
+4. Description → tag gap: **10vw**; description takes the remaining width between nav-left and that spacer.
+5. Title size: shared `--project-meta-title-size`.
 
-Do **not** apply this gap formula to filter/Related cards or case-detail hero meta.
+Do **not** apply this recipe to filter/Related cards.
 
 # Filter / Related cards
 
@@ -34,7 +36,7 @@ Title up to **65%** | type label end-aligned / top-aligned | description full wi
 
 # Project detail hero meta (mobile ≤800px)
 
-`.project-case-demo__hero-copy` matches the card stack (not featured-lead 13% gaps):
+`.project-case-demo__hero-copy` matches the card stack (not the desktop nav-align recipe):
 
 1. Title ≤ **60%** | type label **end-aligned / top-aligned** (gap between).
 2. Description on the next row, **full** usable width, left-aligned.

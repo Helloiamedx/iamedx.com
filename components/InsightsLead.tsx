@@ -1,9 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ProtectedVideo } from "@/components/ProtectedVideo";
 import {
   INSIGHT_COVER_H,
   INSIGHT_COVER_W,
   getInsightTagLabels,
+  isInsightVideoCover,
   type InsightMeta,
 } from "@/lib/insight-meta";
 
@@ -12,25 +14,36 @@ type InsightsLeadProps = {
 };
 
 /**
- * Insights featured lead — cover only in media;
- * featured meta only: chip max-content; gaps 13% total; title + excerpt share the rest.
+ * Insights featured lead — cover only in media.
+ * Meta shares projects featured / case-hero desktop recipe: desc aligns to .site-nav;
+ * 5.5vw after title; 10vw before the type label.
  */
 export function InsightsLead({ insight }: InsightsLeadProps) {
   const tagLabel = getInsightTagLabels(insight.tags).at(0) ?? null;
+  const videoCover = isInsightVideoCover(insight.coverImage);
 
   return (
     <article className="insights-lead insights-shell">
       <Link href={`/insights/${insight.slug}`} className="insights-lead__link">
         <div className="insights-lead__media">
-          <Image
-            src={insight.coverImage}
-            alt=""
-            width={INSIGHT_COVER_W}
-            height={INSIGHT_COVER_H}
-            sizes="(max-width: 1400px) calc(100vw - 2 * var(--shell-gutter)), 1400px"
-            priority
-            className="insights-lead__image"
-          />
+          {videoCover ? (
+            <ProtectedVideo
+              className="insights-lead__cover-video"
+              src={insight.coverImage}
+              preload="metadata"
+              aria-label={insight.title}
+            />
+          ) : (
+            <Image
+              src={insight.coverImage}
+              alt=""
+              width={INSIGHT_COVER_W}
+              height={INSIGHT_COVER_H}
+              sizes="(max-width: 1400px) calc(100vw - 2 * var(--shell-gutter)), 1400px"
+              priority
+              className="insights-lead__image"
+            />
+          )}
         </div>
         <div className="insights-lead__meta">
           <h2 className="insights-lead__title">{insight.title}</h2>

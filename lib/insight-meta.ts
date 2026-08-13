@@ -19,6 +19,11 @@ export type Insight = InsightMeta & {
   content: string;
 };
 
+/** True when the cover URL is a self-hosted looping video (e.g. `.mp4`). */
+export function isInsightVideoCover(src: string) {
+  return /\.mp4($|\?)/i.test(src);
+}
+
 /** Client-safe: resolve tag slugs → display labels (no filesystem). */
 export function getInsightTagLabels(tagSlugs: string[]) {
   return tagSlugs
