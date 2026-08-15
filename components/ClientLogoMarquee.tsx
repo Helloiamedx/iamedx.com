@@ -1,15 +1,26 @@
-import { homeClientLogos } from "@/content/client-logos";
+"use client";
+
+import { useLayoutEffect, useRef } from "react";
+import {
+  HOME_LOGO_CENTER_ID,
+  homeClientLogos,
+} from "@/content/client-logos";
 import "./ClientLogoMarquee.css";
 
 /**
  * Infinite logo rail overlaid on the home hero video (bottom, transparent).
  * Two identical tracks — CSS translate -50% loops without a jump.
+ * On every load, animation is already mid-cycle with Disney in the center.
  */
 function LogoTrack({ copy }: { copy: "a" | "b" }) {
   return (
     <ul className="client-logo-marquee__track" aria-hidden="true">
       {homeClientLogos.map((logo) => (
-        <li key={`${copy}-${logo.id}`} className="client-logo-marquee__item">
+        <li
+          key={`${copy}-${logo.id}`}
+          className="client-logo-marquee__item"
+          data-logo-id={logo.id}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             className="client-logo-marquee__img"
@@ -28,14 +39,93 @@ function LogoTrack({ copy }: { copy: "a" | "b" }) {
   );
 }
 
+function readDurationMs(rail: HTMLElement): number {
+  const raw = getComputedStyle(rail).animationDuration;
+  const seconds = Number.parseFloat(raw);
+  if (!Number.isFinite(seconds) || seconds <= 0) return 80_000;
+  return seconds * 1000;
+}
+
 export function ClientLogoMarquee() {
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const railRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const viewport = viewportRef.current;
+    const rail = railRef.current;
+    if (!viewport || !rail) return;
+
+    function syncCenterInMotion() {
+      /* Measure at rest so offsetLeft is not polluted by live transform */
+      rail.classList.add("is-measuring");
+      void rail.offsetWidth;
+
+      const track = rail.querySelector<HTMLElement>(
+        ".client-logo-marquee__track:first-child",
+      );
+      const logo = rail.querySelector<HTMLElement>(
+        `.client-logo-marquee__track:first-child [data-logo-id="${HOME_LOGO_CENTER_ID}"]`,
+      );
+      if (!track || !logo) {
+        rail.classList.remove("is-measuring");
+        return;
+      }
+
+      const logoCenter = track.offsetLeft + logo.offsetLeft + logo.offsetWidth / 2;
+      const loopWidth = rail.scrollWidth / 2;
+      if (loopWidth <= 0) {
+        rail.classList.remove("is-measuring");
+        return;
+      }
+
+      /*
+       * Keyframes: 0 → -50% of rail (= one loopWidth).
+       * Progress p puts logoCenter at viewport center when:
+       *   logoCenter - p * loopWidth = viewportWidth / 2
+       */
+      let progress = (logoCenter - viewport.clientWidth / 2) / loopWidth;
+      progress = ((progress % 1) + 1) % 1;
+
+      const delayMs = -progress * readDurationMs(rail);
+
+      rail.classList.remove("is-measuring");
+      /* Restart mid-cycle: negative delay = already scrolling with logo centered */
+      rail.style.animation = "none";
+      void rail.offsetWidth;
+      rail.style.removeProperty("animation");
+      rail.style.animationDelay = `${delayMs}ms`;
+    }
+
+    let syncRaf = 0;
+    function scheduleSync() {
+      cancelAnimationFrame(syncRaf);
+      syncRaf = requestAnimationFrame(() => syncCenterInMotion());
+    }
+
+    syncCenterInMotion();
+
+    const imgs = rail.querySelectorAll<HTMLImageElement>(
+      ".client-logo-marquee__track:first-child .client-logo-marquee__img",
+    );
+    imgs.forEach((img) => {
+      if (!img.complete) img.addEventListener("load", scheduleSync);
+    });
+
+    window.addEventListener("resize", scheduleSync);
+    return () => {
+      cancelAnimationFrame(syncRaf);
+      window.removeEventListener("resize", scheduleSync);
+      imgs.forEach((img) => img.removeEventListener("load", scheduleSync));
+    };
+  }, []);
+
   return (
     <section
       className="client-logo-marquee"
       aria-label="Selected clients and partners"
     >
-      <div className="client-logo-marquee__viewport">
-        <div className="client-logo-marquee__rail">
+      <div ref={viewportRef} className="client-logo-marquee__viewport">
+        <div ref={railRef} className="client-logo-marquee__rail">
           <LogoTrack copy="a" />
           <LogoTrack copy="b" />
         </div>

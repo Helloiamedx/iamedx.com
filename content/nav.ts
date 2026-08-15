@@ -73,6 +73,7 @@ export const projectIps = [
   "Horizon Zero Dawn",
   "Guild Wars",
   "Injustice",
+  "Recore",
   "Dead Space",
 ] as const;
 
@@ -172,10 +173,10 @@ export const aboutMega: MegaColumn[] = [
     title: "",
     description: "",
     links: [
-      "Who I Am",
-      "How I Work",
-      "Why Choose Me",
-      "My Experience",
+      "About",
+      "Achievement",
+      "Experience",
+      "How I work",
     ].map(aboutSectionLink),
   },
 ];
@@ -195,10 +196,11 @@ export const insightsMega: MegaColumn[] = [
 ];
 
 export const primaryNav: NavItem[] = [
-  { href: "/services", label: "Services", mega: servicesMega },
-  { href: "/projects", label: "Projects", mega: projectsMega },
-  { href: "/insights", label: "Insights", mega: insightsMega },
-  { href: "/about", label: "About", mega: aboutMega },
+  { href: "/about", label: "About" },
+  { href: "/services", label: "Services" },
+  { href: "/projects", label: "Projects" },
+  { href: "/insights", label: "Insights" },
+  { href: "/pricing", label: "Pricing" },
 ];
 
 export const contactCta = {
@@ -294,10 +296,11 @@ export const footerAboutCopy =
   "I create products and experiences that drive remarkable change through radical collaboration.";
 
 export const mobileNavLinks = [
+  { label: "About", href: "/about" },
   { label: "Services", href: "/services" },
   { label: "Projects", href: "/projects" },
   { label: "Insights", href: "/insights" },
-  { label: "About", href: "/about" },
+  { label: "Pricing", href: "/pricing" },
 ] as const;
 
 export const mobileSocialLinks = [
@@ -329,47 +332,33 @@ export type FooterNavColumn = {
 };
 
 /**
- * Footer link columns — few → many (About · Projects · Insights · Services).
+ * Footer link columns — one direct section link each (no mega sub-lists).
  */
 export const footerNavColumns: FooterNavColumn[] = [
   {
     id: "about",
     label: "About",
-    links: aboutMega[0]?.links.map((link) => ({
-      label: link.label,
-      href: link.href,
-    })) ?? [],
+    links: [{ label: "About", href: "/about" }],
   },
   {
     id: "projects",
     label: "Projects",
-    links: projectsMega.flatMap((column) =>
-      column.links.map((link) => ({
-        label: link.label,
-        href: link.href,
-      })),
-    ),
+    links: [{ label: "Projects", href: "/projects" }],
   },
   {
     id: "insights",
     label: "Insights",
-    links: insightsMega.flatMap((column) =>
-      column.links.map((link) => ({
-        label: link.label,
-        href: link.href,
-      })),
-    ),
+    links: [{ label: "Insights", href: "/insights" }],
+  },
+  {
+    id: "pricing",
+    label: "Pricing",
+    links: [{ label: "Pricing", href: "/pricing" }],
   },
   {
     id: "services",
     label: "Services",
-    links:
-      servicesMega
-        .find((column) => column.id === "work-with-me")
-        ?.links.map((link) => ({
-          label: link.label,
-          href: link.href,
-        })) ?? [],
+    links: [{ label: "Services", href: "/services" }],
   },
 ];
 

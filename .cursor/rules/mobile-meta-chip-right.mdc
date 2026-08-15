@@ -23,7 +23,7 @@ Filter involvement pills are separate UI — not this recipe.
 **Scope:** `.project-featured__meta`, `.insights-lead__meta`, and `.project-case-demo__hero-copy` (desktop). Same recipe.
 
 1. Type label `max-content`, **end-aligned**, top-aligned.
-2. Description **left-aligned with** centered `.site-nav` (four primary links). `--site-nav-inset` / `--site-nav-half` from Header.
+2. Description **left-aligned with** centered `.site-nav` (primary links). `--site-nav-inset` / `--site-nav-half` from Header.
 3. Title → description gap: **5.5vw**.
 4. Description → tag gap: **10vw**; description takes the remaining width between nav-left and that spacer.
 5. Title size: shared `--project-meta-title-size`.
@@ -33,6 +33,15 @@ Do **not** apply this recipe to filter/Related cards.
 # Filter / Related cards
 
 Title up to **65%** | type label end-aligned / top-aligned | description full width under. Label **size** still comes from the unified tokens above.
+
+# Featured lead meta (mobile ≤800px)
+
+`.project-featured__meta` and `.insights-lead__meta` match the filter card stack (not the desktop nav-align recipe):
+
+1. Title ≤ **65%** | type label **end-aligned / top-aligned**.
+2. Description on the next row, **full** card width, left-aligned.
+
+Leads stay visible above the filter on mobile (do not hide).
 
 # Project detail hero meta (mobile ≤800px)
 

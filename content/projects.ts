@@ -183,10 +183,12 @@ export type Project = {
   /**
    * Optional closing two-up videos on the case page.
    * Each side tries `primary` first; `fallback` only when the user supplies a CDN mp4.
+   * `ratio` = CSS padding-bottom per cell (default 9:16 / 177.78% for social clips).
    */
   endVideoPair?: {
     left: { primary: string; fallback?: string; alt: string };
     right: { primary: string; fallback?: string; alt: string };
+    ratio?: string;
   };
   year: number;
   client?: string;
@@ -371,7 +373,7 @@ const SECOND_PROJECT_COVER = projectCoverFromName(
   SECOND_PROJECT_NAME,
   "VARRIC TETHRAS cover.jpg",
 );
-/** Detail page — first still under the hero */
+/** Detail page — closing full-width still (was first gallery row) */
 const SECOND_PROJECT_GALLERY_LEAD = projectCoverFromName(
   SECOND_PROJECT_NAME,
   "dragon-age-writing-bundle-banner-v1.png",
@@ -461,7 +463,16 @@ const SECOND_PROJECT_AFTER_VIDEO_ROW = {
     },
   ],
   ratio: "100%",
+  /* Lead still follows beforeEndRow — keep this row before trailing stills */
+  afterIndex: 0,
 };
+const SECOND_PROJECT_AFTER_VIDEO_STILLS = [
+  {
+    src: SECOND_PROJECT_GALLERY_LEAD,
+    alt: "Writing Bundle",
+    ratio: "56.25%",
+  },
+];
 const SECOND_PROJECT_BEFORE_END_ROW = {
   items: [
     {
@@ -681,6 +692,73 @@ const FIFTH_PROJECT_AFTER_COVER_VIDEO = {
   ratio: "56.25%",
 } as const;
 
+/** 「第六个项目」— grid card; media only until copy is ready */
+const SIXTH_PROJECT_NAME = "Ghost Recon Wildlands Statue";
+const SIXTH_PROJECT_SLUG = projectSlugFromName(SIXTH_PROJECT_NAME);
+/** Outside / filter card cover */
+const SIXTH_PROJECT_COVER_VIDEO = projectCoverFromName(
+  SIXTH_PROJECT_NAME,
+  "Ghost Recon Wildlands Statue5.mp4",
+);
+/** Case detail first-screen hero */
+const SIXTH_PROJECT_HERO_VIDEO = projectCoverFromName(
+  SIXTH_PROJECT_NAME,
+  "Ghost Recon Wildlands Statue6.mp4",
+);
+const SIXTH_PROJECT_STILL = (n: 1 | 2 | 3, alt: string) => ({
+  src: projectCoverFromName(
+    SIXTH_PROJECT_NAME,
+    `Ghost Recon Wildlands Statue${n}.jpg`,
+  ),
+  alt,
+});
+/** Detail gallery: 1 full → 2|3 → 4|7 video pair */
+const SIXTH_PROJECT_GALLERY_LEAD = SIXTH_PROJECT_STILL(1, "Statue 1").src;
+const SIXTH_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    SIXTH_PROJECT_STILL(2, "Statue 2"),
+    SIXTH_PROJECT_STILL(3, "Statue 3"),
+  ],
+  ratio: "100%",
+};
+const SIXTH_PROJECT_END_VIDEOS = {
+  left: {
+    primary: projectCoverFromName(
+      SIXTH_PROJECT_NAME,
+      "Ghost Recon Wildlands Statue4.mp4",
+    ),
+    alt: "Statue clip 4",
+  },
+  right: {
+    primary: projectCoverFromName(
+      SIXTH_PROJECT_NAME,
+      "Ghost Recon Wildlands Statue7.mp4",
+    ),
+    alt: "Statue clip 7",
+  },
+  ratio: "100%",
+} as const;
+
+/** 「第七个项目」— grid card cover only until detail media / copy are ready */
+const SEVENTH_PROJECT_NAME = "DC Comics Injustice 2 The Brainiac Statue";
+/** CDN folder casing — keep exact */
+const SEVENTH_PROJECT_CDN_FOLDER =
+  "Dc comics injustice 2 the brainiac statue";
+const SEVENTH_PROJECT_SLUG = projectSlugFromName(SEVENTH_PROJECT_NAME);
+const SEVENTH_PROJECT_COVER_VIDEO = projectCoverFromName(
+  SEVENTH_PROJECT_CDN_FOLDER,
+  "Dc comics injustice 2 the brainiac statue.mp4",
+);
+
+/** 「第八个项目」— grid card cover only until detail media / copy are ready */
+const EIGHTH_PROJECT_NAME = "Recore Collector's Edition Statue";
+const EIGHTH_PROJECT_CDN_FOLDER = "Recore collector's edition statue";
+const EIGHTH_PROJECT_SLUG = projectSlugFromName(EIGHTH_PROJECT_NAME);
+const EIGHTH_PROJECT_COVER_VIDEO = projectCoverFromName(
+  EIGHTH_PROJECT_CDN_FOLDER,
+  "Recore collector's edition statue.mp4",
+);
+
 export const projectsFeaturedLead: ProjectsFeaturedLead = {
   slug: FIFTH_PROJECT_SLUG,
   title: FIFTH_PROJECT_NAME,
@@ -773,13 +851,13 @@ export const projects: Project[] = [
     coverImage: SECOND_PROJECT_COVER,
     coverWidth: SHOWCASE_COVER_W,
     coverHeight: SHOWCASE_COVER_H,
-    galleryLeadImage: SECOND_PROJECT_GALLERY_LEAD,
     heroImage: SECOND_PROJECT_COVER,
     heroVideo: SECOND_PROJECT_HERO_VIDEO,
     afterCoverStills: SECOND_PROJECT_AFTER_COVER_STILLS,
     afterCoverExtraRows: SECOND_PROJECT_AFTER_COVER_EXTRA_ROWS,
     afterCoverVideo: SECOND_PROJECT_AFTER_COVER_VIDEO,
     afterVideoRow: SECOND_PROJECT_AFTER_VIDEO_ROW,
+    afterVideoStills: SECOND_PROJECT_AFTER_VIDEO_STILLS,
     beforeEndRow: SECOND_PROJECT_BEFORE_END_ROW,
     overview: [
       "This project was a writing-themed collector’s gift set developed around Varric Tethras from Dragon Age.",
@@ -983,6 +1061,67 @@ export const projects: Project[] = [
       "Integrate digital printing, color-changing finish, hot stamping, mesh, and embossing into one stable mass-production path.",
     result:
       "High-fidelity collectible that sold out near $200 retail, unlocking two follow-on products in the series.",
+  },
+  {
+    slug: SIXTH_PROJECT_SLUG,
+    title: SIXTH_PROJECT_NAME,
+    materials: ["resin"],
+    ips: ["ghost-recon"],
+    tags: involvementTags("contribution"),
+    summary: "",
+    tagline: "",
+    role: [],
+    involvement: "contribution",
+    coverImage: SIXTH_PROJECT_COVER_VIDEO,
+    coverVideo: SIXTH_PROJECT_COVER_VIDEO,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    galleryLeadImage: SIXTH_PROJECT_GALLERY_LEAD,
+    heroVideo: SIXTH_PROJECT_HERO_VIDEO,
+    afterCoverStills: SIXTH_PROJECT_AFTER_COVER_STILLS,
+    endVideoPair: SIXTH_PROJECT_END_VIDEOS,
+    year: 2024,
+    featured: false,
+    challenge: "",
+    result: "",
+  },
+  {
+    slug: SEVENTH_PROJECT_SLUG,
+    title: SEVENTH_PROJECT_NAME,
+    materials: ["resin"],
+    ips: ["injustice"],
+    tags: involvementTags("contribution"),
+    summary: "",
+    tagline: "",
+    role: [],
+    involvement: "contribution",
+    coverImage: SEVENTH_PROJECT_COVER_VIDEO,
+    coverVideo: SEVENTH_PROJECT_COVER_VIDEO,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    year: 2024,
+    featured: false,
+    challenge: "",
+    result: "",
+  },
+  {
+    slug: EIGHTH_PROJECT_SLUG,
+    title: EIGHTH_PROJECT_NAME,
+    materials: ["resin"],
+    ips: ["recore"],
+    tags: involvementTags("contribution"),
+    summary: "",
+    tagline: "",
+    role: [],
+    involvement: "contribution",
+    coverImage: EIGHTH_PROJECT_COVER_VIDEO,
+    coverVideo: EIGHTH_PROJECT_COVER_VIDEO,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    year: 2024,
+    featured: false,
+    challenge: "",
+    result: "",
   },
 ];
 

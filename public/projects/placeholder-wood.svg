@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" role="img" aria-label="Wood placeholder">
-  <rect width="800" height="600" fill="#8B5E3C"/>
-  <rect x="0" y="80" width="800" height="40" fill="#A06C45" opacity="0.35"/>
-  <rect x="0" y="220" width="800" height="28" fill="#6E482E" opacity="0.35"/>
-  <rect x="0" y="360" width="800" height="50" fill="#A06C45" opacity="0.28"/>
-  <text x="40" y="540" fill="#F4EDE4" font-family="Helvetica, Arial, sans-serif" font-size="36" font-weight="700">WOOD</text>
-</svg>

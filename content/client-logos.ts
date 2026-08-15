@@ -6,13 +6,23 @@ export type ClientLogo = {
   label: string;
 };
 
-/** Filename under `/images/client-logos/brands/` on the CDN */
-const HOME_BRAND_LOGOS: { file: string; label: string }[] = [
+type HomeLogoEntry =
+  | { file: string; label: string }
+  | { id: string; path: string; label: string };
+
+/** Homepage strip — CDN under client-logos/brands/* unless `path` is set */
+const HOME_BRAND_LOGOS: HomeLogoEntry[] = [
   { file: "2K_Games_Logo.svg", label: "2K Games" },
   { file: "Bethesda_Softworks_Logo.svg", label: "Bethesda Softworks" },
   { file: "BioWare-Logo.wine.svg", label: "BioWare" },
   { file: "Blizzard_Entertainment_Logo.svg", label: "Blizzard Entertainment" },
   { file: "Capcom_logo.svg", label: "Capcom" },
+  /* Not list-first — marquee centers this id on every load while already scrolling */
+  {
+    id: "disney",
+    path: "/images/client-logos/homeroll/Disney.svg",
+    label: "Disney",
+  },
   { file: "DPI Merchandising.svg", label: "DPI Merchandising" },
   { file: "Embracer Group.svg", label: "Embracer Group" },
   { file: "IGN Gaming.svg", label: "IGN Gaming" },
@@ -28,11 +38,20 @@ const HOME_BRAND_LOGOS: { file: string; label: string }[] = [
   { file: "site-logo.svg", label: "Partner" },
 ];
 
-/** Homepage strip on the hero video — CDN: client-logos/brands/* */
-export const homeClientLogos: ClientLogo[] = HOME_BRAND_LOGOS.map(
-  ({ file, label }) => ({
-    id: file.replace(/\.[^.]+$/, "").replace(/\s+/g, "-").toLowerCase(),
-    src: asset(`/images/client-logos/brands/${encodeURIComponent(file)}`),
-    label,
-  }),
-);
+/** Logo that sits in the viewport center on every homepage load */
+export const HOME_LOGO_CENTER_ID = "disney";
+
+export const homeClientLogos: ClientLogo[] = HOME_BRAND_LOGOS.map((entry) => {
+  if ("path" in entry) {
+    return {
+      id: entry.id,
+      src: asset(entry.path),
+      label: entry.label,
+    };
+  }
+  return {
+    id: entry.file.replace(/\.[^.]+$/, "").replace(/\s+/g, "-").toLowerCase(),
+    src: asset(`/images/client-logos/brands/${encodeURIComponent(entry.file)}`),
+    label: entry.label,
+  };
+});

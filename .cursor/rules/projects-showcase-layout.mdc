@@ -27,7 +27,7 @@ This is the **only** case-detail pattern. Do not revive the old always-on Backgr
 - Pair (side-by-side) gap tighter: `calc(var(--shell-gutter) * 0.35)` from `800px` up.
 - Images are **display-only** (no lightbox) unless a project explicitly asks otherwise.
 
-### 3. “About the project” control
+### 3. “Study The Project” control
 
 - Shell-fixed (portaled), **not** parented inside the media column — open-push must not move X.
 - Activity band = real media stack (and when open, taller of media vs copy). Never over the video; never into Related.

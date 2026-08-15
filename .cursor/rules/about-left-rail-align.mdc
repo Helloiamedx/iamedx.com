@@ -1,0 +1,34 @@
+---
+description: About left sticky labels (About / Experience / Achievement) must optically lock to the right content band — top and bottom — despite different type sizes and line-heights.
+globs: app/about/**,app/globals.css
+alwaysApply: false
+---
+
+# About left rail alignment
+
+Left labels (`About`, `Experience`, `Achievement`, …) sit in `.about-boua__rail` and stick via `.about-boua__sticky`.
+
+## Rule
+
+The label’s **visible type** must align with the **right-hand content band**:
+
+1. **Top** — optical top of the label matches the optical top of the right content block (About lede caps, career list top, Achievement meta line) — not a random line-box edge from mismatched `line-height` / font-size.
+2. **Bottom** — sticky travel is clipped to the rail height, which stretches with the sibling content. The label must not float past the section’s content.
+
+## How
+
+- Wrap each section label in `.about-boua__rail` (stretches with the grid row).
+- Labels use `line-height: 1` to kill half-leading drift.
+- Experience (career strip): label `padding-block-start: 0` — flush with the list top (do **not** add `--work-row-pad-y` on the label; row padding is only inside rows).
+- About: intro copy optically tops with the portrait (`margin-block-start` cancels lede half-leading).
+- Achievement: keep `.about-boua__rs-meta` at `line-height: 1` (same step as the label).
+
+## Section order
+
+Hero → About → Achievement → Experience → How I work.
+
+## Do not
+
+- Rely on default body `line-height` on left labels
+- Offset the Experience label with row padding (that desyncs it from the content top)
+- Apply `grid-column: 2 / 4` to `.about-boua__rail` (content column only: `div:not(.about-boua__rail)`)

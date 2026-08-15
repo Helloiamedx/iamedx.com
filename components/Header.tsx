@@ -23,7 +23,6 @@ import {
   weChatCta,
   whatsAppCta,
   whatsAppPhone,
-  type NavItem,
 } from "@/content/nav";
 import { asset } from "@/lib/assets";
 
@@ -822,53 +821,19 @@ export function Header() {
     };
   }, [mobileOpen]);
 
-  const isPanelOpen = Boolean(openKey);
-  /* panelKey stays until height tween finishes — keep frost while collapsing */
-  const isPanelClosing = Boolean(panelKey) && !openKey;
-  const panelItem = primaryNav.find((item) => item.label === panelKey && item.mega);
-
-  /* Flash preview only for Services → first column (“Work With Me”) */
-  const servicesPreviewColumn =
-    panelKey === "Services" ? panelItem?.mega?.[0] : undefined;
-  const showMegaPreview = Boolean(servicesPreviewColumn?.links.length);
-
-  useEffect(() => {
-    if (panelKey !== "Services") {
-      setPreviewSlug(null);
-      setPreviewLabel("");
-      return;
-    }
-    const first = primaryNav
-      .find((entry) => entry.label === "Services")
-      ?.mega?.[0]?.links[0];
-    if (!first) {
-      setPreviewSlug(null);
-      setPreviewLabel("");
-      return;
-    }
-    setPreviewSlug(first.slug);
-    setPreviewLabel(first.label);
-  }, [panelKey]);
-  const isExpanded = isPanelOpen || isPanelClosing || mobileOpen || mobileSurface;
+  const isExpanded = mobileOpen || mobileSurface;
   /*
-   * No difference blend on the bar while mega is open or closing — that was
-   * painting a second composite (“复色”) onto the menu chrome mid-retract.
+   * No difference blend on the bar while mobile menu is open.
    */
-  const overClear =
-    atTop && !isPanelOpen && !isPanelClosing && !mobileOpen && !mobileSurface;
+  const overClear = atTop && !mobileOpen && !mobileSurface;
   /* Keep chrome pinned while any menu surface is up */
   navLockedRef.current = isExpanded || navPendingRef.current;
   const chromeHidden = navHidden && !isExpanded;
 
   return (
     <>
-      <div
-        className={`nav-scrim${scrimOn ? " is-visible" : ""}${isPanelOpen ? " is-interactive" : ""}`}
-        aria-hidden="true"
-        onClick={() => {
-          closeMenu();
-        }}
-      />
+      {/* Scrim unused without mega — kept inert for layout continuity */}
+      <div className="nav-scrim" aria-hidden="true" />
 
       <header
         ref={headerRef}
@@ -876,7 +841,6 @@ export function Header() {
         onMouseEnter={onChromePointerEnter}
         onMouseLeave={() => {
           onChromePointerLeave();
-          scheduleCloseFromHover();
         }}
       >
         <div className="shell site-header__bar">
@@ -910,24 +874,9 @@ export function Header() {
 
           <nav className="site-nav" aria-label="Primary">
             {primaryNav.map((item) => (
-              <NavTrigger
-                key={item.href}
-                item={item}
-                menuId={menuId}
-                isOpen={openKey === item.label}
-                triggerRef={(node) => {
-                  triggerRefs.current[item.label] = node;
-                }}
-                onOpen={() => {
-                  if (item.mega) openMenu(item.label);
-                }}
-                onOpenFromHover={() => {
-                  if (item.mega) openMenuFromHover(item.label);
-                }}
-                onClose={closeMenu}
-                onCloseSchedule={scheduleCloseFromHover}
-                onNavigate={() => onMenuNavigate(item.href)}
-              />
+              <Link key={item.href} href={item.href} className="site-nav__link">
+                {item.label}
+              </Link>
             ))}
           </nav>
 
@@ -939,7 +888,6 @@ export function Header() {
               aria-controls={`${menuId}-mobile`}
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
               onClick={() => {
-                closeMenu();
                 setMobileOpen((value) => !value);
               }}
             >
@@ -950,94 +898,6 @@ export function Header() {
                 Close
               </span>
             </button>
-          </div>
-        </div>
-
-        <div
-          ref={panelRef}
-          className={`mega-panel${isPanelOpen ? " is-open" : ""}${isPanelClosing ? " is-closing" : ""}`}
-          id={`${menuId}-desktop`}
-          aria-hidden={!isPanelOpen}
-          onMouseEnter={clearCloseTimer}
-        >
-          <div
-            ref={trackRef}
-            className="mega-panel__track"
-            style={{ "--mega-align": `${panelOffset}px` } as CSSProperties}
-          >
-            {panelItem?.mega ? (
-              <div
-                className={`mega-panel__body${showMegaPreview ? " has-preview" : ""}`}
-                data-cols={panelItem.mega.length}
-                key={panelKey ?? "empty"}
-              >
-                <div className="mega-columns">
-                  {panelItem.mega.map((column, columnIndex) => {
-                    const heading = (column.description || column.title).trim();
-                    const previewColumn =
-                      panelKey === "Services" && columnIndex === 0;
-                    return (
-                      <section
-                        key={column.id}
-                        className={[
-                          "mega-column",
-                          heading ? "" : "mega-column--plain",
-                          column.links.length > 10 ? "mega-column--dense" : "",
-                        ]
-                          .filter(Boolean)
-                          .join(" ")}
-                      >
-                        {/* No heading → links sit on the Services description baseline */}
-                        {heading ? <h2>{heading}</h2> : null}
-                        <ul>
-                          {column.links.map((link) => (
-                            <li key={link.slug}>
-                              <Link
-                                href={link.href}
-                                onClick={() => onMenuNavigate(link.href)}
-                                onMouseEnter={
-                                  previewColumn
-                                    ? () => {
-                                        setPreviewSlug(link.slug);
-                                        setPreviewLabel(link.label);
-                                      }
-                                    : undefined
-                                }
-                                onFocus={
-                                  previewColumn
-                                    ? () => {
-                                        setPreviewSlug(link.slug);
-                                        setPreviewLabel(link.label);
-                                      }
-                                    : undefined
-                                }
-                              >
-                                {link.label}
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      </section>
-                    );
-                  })}
-                </div>
-
-                {/* Services col-1 only — 16:9 flash placeholders until real media */}
-                {showMegaPreview ? (
-                  <aside className="mega-preview" aria-hidden="true">
-                    <div className="mega-preview__frame">
-                      <div
-                        key={previewSlug ?? "idle"}
-                        className="mega-preview__slot"
-                        data-preview={previewSlug ?? ""}
-                      >
-                        <span className="mega-preview__label">{previewLabel}</span>
-                      </div>
-                    </div>
-                  </aside>
-                ) : null}
-              </div>
-            ) : null}
           </div>
         </div>
 
@@ -1077,7 +937,6 @@ export function Header() {
         className={`site-header-cta${ctaMode === "ghost" ? " is-ghost" : ""}${ctaMode === "pills" ? " is-pills" : ""}${ctaMode === "pills-out" ? " is-pills-out" : ""}${chromeHidden ? " is-nav-hidden" : ""}`}
         onMouseEnter={() => {
           onChromePointerEnter();
-          scheduleCloseFromHover();
         }}
         onMouseLeave={onChromePointerLeave}
       >
@@ -1153,80 +1012,5 @@ export function Header() {
         </div>
       </div>
     </>
-  );
-}
-
-type NavTriggerProps = {
-  item: NavItem;
-  menuId: string;
-  isOpen: boolean;
-  triggerRef: (node: HTMLElement | null) => void;
-  onOpen: () => void;
-  onOpenFromHover: () => void;
-  onClose: () => void;
-  onCloseSchedule: () => void;
-  onNavigate: () => void;
-};
-
-function NavTrigger({
-  item,
-  menuId,
-  isOpen,
-  triggerRef,
-  onOpen,
-  onOpenFromHover,
-  onClose,
-  onCloseSchedule,
-  onNavigate,
-}: NavTriggerProps) {
-  if (!item.mega) {
-    return (
-      <Link
-        href={item.href}
-        className="site-nav__link"
-        onMouseEnter={onCloseSchedule}
-      >
-        {item.label}
-      </Link>
-    );
-  }
-
-  return (
-    <div
-      ref={triggerRef}
-      className={`site-nav__item${isOpen ? " is-open" : ""}`}
-      onMouseEnter={onOpenFromHover}
-    >
-      <Link
-        href={item.href}
-        className="site-nav__link"
-        aria-expanded={isOpen}
-        aria-haspopup="true"
-        aria-controls={`${menuId}-desktop`}
-        onFocus={(event) => {
-          /* Keyboard only — window restore / mouse click focus must not open mega */
-          if (event.currentTarget.matches(":focus-visible")) onOpen();
-        }}
-        onClick={(event) => {
-          if (canHoverFine()) {
-            /* Desktop: navigate; mega stays until the route commits */
-            onNavigate();
-            return;
-          }
-          /*
-           * Touch / iPad: first tap opens the mega; second tap on the same
-           * top-level item follows the section link (don’t just toggle shut).
-           */
-          if (isOpen) {
-            onNavigate();
-            return;
-          }
-          event.preventDefault();
-          onOpen();
-        }}
-      >
-        {item.label}
-      </Link>
-    </div>
   );
 }

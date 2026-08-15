@@ -307,28 +307,6 @@ function buildCaseMedia(project: Project): MediaItem[] {
       })),
     });
   }
-  for (const still of stills.slice(split)) {
-    media.push({
-      kind: "full",
-      src: still.src,
-      alt: still.alt,
-      ratio: still.ratio ?? "56.25%",
-    });
-  }
-
-  const hasRealGallery = Boolean(
-    project.afterCoverStills ||
-      project.afterCoverExtraRows?.length ||
-      project.afterCoverStillVideoPair ||
-      project.afterCoverVideo ||
-      project.afterCoverVideos?.length ||
-      project.afterVideoStills ||
-      project.afterVideoRow ||
-      project.beforeEndRow,
-  );
-  if (!hasRealGallery) {
-    media.push(...PLACEHOLDER_MEDIA);
-  }
 
   if (project.beforeEndRow) {
     media.push({
@@ -341,12 +319,37 @@ function buildCaseMedia(project: Project): MediaItem[] {
     });
   }
 
+  /* Trailing afterVideoStills — after beforeEndRow so a moved lead can sit last */
+  for (const still of stills.slice(split)) {
+    media.push({
+      kind: "full",
+      src: still.src,
+      alt: still.alt,
+      ratio: still.ratio ?? "56.25%",
+    });
+  }
+
+  const hasRealGallery = Boolean(
+    project.galleryLeadImage ||
+      project.afterCoverStills ||
+      project.afterCoverExtraRows?.length ||
+      project.afterCoverStillVideoPair ||
+      project.afterCoverVideo ||
+      project.afterCoverVideos?.length ||
+      project.afterVideoStills ||
+      project.afterVideoRow ||
+      project.beforeEndRow,
+  );
+  if (!hasRealGallery) {
+    media.push(...PLACEHOLDER_MEDIA);
+  }
+
   if (project.endVideoPair) {
     media.push({
       kind: "video-pair",
       left: project.endVideoPair.left,
       right: project.endVideoPair.right,
-      ratio: "177.78%",
+      ratio: project.endVideoPair.ratio ?? "177.78%",
     });
   }
 
@@ -624,11 +627,6 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
             >
               <ClickSpark>
                 <div className="project-case-demo__toggle-glass">
-                  {/* Adaptive contrast only — mix-blend difference vs pixels behind */}
-                  <span
-                    className="project-case-demo__toggle-contrast"
-                    aria-hidden="true"
-                  />
                   <button
                     type="button"
                     className={`project-case-demo__toggle${open ? " is-open" : ""}`}
@@ -637,7 +635,7 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
                     tabIndex={btnReady ? 0 : -1}
                     onClick={toggleOpen}
                   >
-                    <span>About The Project</span>
+                    <span>Study The Project</span>
                     <span
                       className="project-case-demo__toggle-icon"
                       aria-hidden="true"

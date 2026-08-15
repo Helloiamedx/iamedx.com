@@ -1,13 +1,27 @@
 ---
-description: About button — only extract mix-blend difference for adaptive contrast
+description: Study The Project button — Apple globalnav frosted glass (not liquid / difference blend)
 alwaysApply: true
 ---
 
-# About The Project button — adaptive contrast
+# Study The Project button — frosted glass
 
-When adapting the case-detail **About The Project** control to light/dark media:
+Case-detail **Study The Project** control uses an **Apple globalnav–style** frosted shell.
 
-1. **Do not** restyle the established glass shell, border, liquid `::after`, ClickSpark, open/close, or pin positioning.
-2. **Only** apply the adaptive **contrast** recipe: a translucent white layer + label/icon using `mix-blend-mode: difference` (see `.project-case-demo__toggle-contrast` and the toggle’s difference blend).
-3. Do **not** use luminance sampling, `is-on-light` theme swaps, or replace the button with the full adaptive-glass-button markup/styles.
+## Visual recipe
+
+1. Shell (`.project-case-demo__toggle-glass`): `background: rgba(255, 255, 255, 0.72)`, `backdrop-filter: saturate(180%) blur(20px)`, no heavy border / liquid `::after` / inset glare.
+2. Label / icon: solid `#1d1d1f` — **no** `mix-blend-mode: difference`, **no** contrast overlay span.
+3. Capsule radius (`980px`) is fine; keep padding / Medium weight.
+
+## Keep (do not rip out)
+
+- Portaled pin positioning / `is-ready` / activity-band clamp
+- ClickSpark
+- Open / close (`is-open`, + → × rotate)
+- Panel push / mobile sheet behavior
+
+## Do not
+
+- Bring back liquid-glass `::after`, difference-blend contrast layers, or luminance `is-on-light` swaps
+- Replace with the full adaptive-glass-button markup
 ---

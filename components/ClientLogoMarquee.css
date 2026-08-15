@@ -40,6 +40,12 @@
   backface-visibility: hidden;
 }
 
+/* Temporarily park rail to measure logo positions for load-time center */
+.client-logo-marquee__rail.is-measuring {
+  animation: none !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
 .client-logo-marquee:hover .client-logo-marquee__rail {
   animation-play-state: paused;
 }

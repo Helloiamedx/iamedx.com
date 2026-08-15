@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" role="img" aria-label="Paper placeholder">
-  <rect width="800" height="600" fill="#E7E2D8"/>
-  <path d="M120 120h420v360H120z" fill="#F7F4EE" stroke="#C9C2B4"/>
-  <path d="M540 120l140 140V480H540z" fill="#DED7CA"/>
-  <text x="40" y="540" fill="#333" font-family="Helvetica, Arial, sans-serif" font-size="36" font-weight="700">PAPER</text>
-</svg>
