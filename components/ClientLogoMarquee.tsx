@@ -51,9 +51,12 @@ export function ClientLogoMarquee() {
   const railRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
-    const viewport = viewportRef.current;
-    const rail = railRef.current;
-    if (!viewport || !rail) return;
+    const viewportEl = viewportRef.current;
+    const railEl = railRef.current;
+    if (!viewportEl || !railEl) return;
+    /* Explicit locals — nested sync must not see HTMLDivElement | null */
+    const viewport: HTMLDivElement = viewportEl;
+    const rail: HTMLDivElement = railEl;
 
     function syncCenterInMotion() {
       /* Measure at rest so offsetLeft is not polluted by live transform */

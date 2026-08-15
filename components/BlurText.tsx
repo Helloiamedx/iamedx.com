@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion, type TargetAndTransition } from "motion/react";
 import {
   useEffect,
   useMemo,
@@ -11,17 +11,21 @@ import {
 
 type AnimSnapshot = Record<string, string | number>;
 
-function buildKeyframes(from: AnimSnapshot, steps: AnimSnapshot[]) {
+function buildKeyframes(
+  from: AnimSnapshot,
+  steps: AnimSnapshot[],
+): TargetAndTransition {
   const keys = new Set([
     ...Object.keys(from),
     ...steps.flatMap((s) => Object.keys(s)),
   ]);
 
-  const keyframes: Record<string, Array<string | number | undefined>> = {};
+  const keyframes: Record<string, Array<string | number>> = {};
   keys.forEach((k) => {
-    keyframes[k] = [from[k], ...steps.map((s) => s[k])];
+    const fallback = from[k] ?? 0;
+    keyframes[k] = [fallback, ...steps.map((s) => s[k] ?? fallback)];
   });
-  return keyframes;
+  return keyframes as TargetAndTransition;
 }
 
 export type BlurTextProps = {
