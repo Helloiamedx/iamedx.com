@@ -9,6 +9,7 @@ import {
   filterCardListVariants,
   filterCardListVariantsReduced,
 } from "@/components/filterCardMotion";
+import { CoverLoopVideo } from "@/components/CoverLoopVideo";
 import {
   INSIGHT_COVER_H,
   INSIGHT_COVER_W,
@@ -16,7 +17,6 @@ import {
   isInsightVideoCover,
   type InsightMeta,
 } from "@/lib/insight-meta";
-import { ProtectedVideo } from "@/components/ProtectedVideo";
 
 type InsightMasonryProps = {
   insights: InsightMeta[];
@@ -27,7 +27,7 @@ type InsightMasonryProps = {
 
 export function InsightMasonry({
   insights,
-  emptyLabel = "No insights with this tag yet.",
+  emptyLabel = "No thoughts with this tag yet.",
   layout = "tri",
 }: InsightMasonryProps) {
   const reduceMotion = useReducedMotion();
@@ -76,16 +76,15 @@ export function InsightMasonry({
             variants={itemVariants}
           >
             <Link
-              href={`/insights/${insight.slug}`}
+              href={`/thoughts/${insight.slug}`}
               className="insight-showcase__link"
             >
               <div className="insight-showcase__media">
                 {isInsightVideoCover(insight.coverImage) ? (
-                  <ProtectedVideo
+                  <CoverLoopVideo
                     className="insight-showcase__cover-video"
                     src={insight.coverImage}
-                    preload="metadata"
-                    aria-label={insight.title}
+                    ariaLabel={insight.title}
                   />
                 ) : (
                   <Image

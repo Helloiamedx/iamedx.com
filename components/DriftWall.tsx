@@ -120,9 +120,16 @@ export function DriftWall({
   const resolvedColumns = useMemo(() => {
     if (!fillWidth) return columns;
     const unit = tileWidth + gap;
-    const needed = Math.ceil((containerWidth * 1.35) / unit) + 1;
+    /*
+     * Extra overscan for rotateY foreshortening — Safari especially leaves a
+     * black strip on the receding edge when columns only match flat width.
+     */
+    const yaw = (Math.abs(turn) * Math.PI) / 180;
+    const foreshorten = 1 / Math.max(0.55, Math.cos(yaw));
+    const overscan = 1.65 * foreshorten;
+    const needed = Math.ceil((containerWidth * overscan) / unit) + 2;
     return Math.max(columns, needed);
-  }, [fillWidth, columns, tileWidth, gap, containerWidth]);
+  }, [fillWidth, columns, tileWidth, gap, containerWidth, turn]);
 
   const columnItems = useMemo(() => {
     const cols: DriftWallItem[][] = Array.from(

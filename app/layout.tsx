@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/react";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import { SiteFaq } from "@/components/SiteFaq";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { asset } from "@/lib/assets";
 import "./globals.css";
@@ -70,6 +71,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SmoothScroll>
           <Header />
           <div className="site-main">{children}</div>
+          <SiteFaq />
           <Footer />
         </SmoothScroll>
         <Analytics />

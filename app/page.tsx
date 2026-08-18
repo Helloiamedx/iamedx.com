@@ -1,17 +1,26 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ClientLogoMarquee } from "@/components/ClientLogoMarquee";
 import { HeroBackgroundVideo } from "@/components/HeroBackgroundVideo";
 import { HeroHeadline } from "@/components/HeroHeadline";
-import { getFeaturedProjects } from "@/content/projects";
+import { HomeCopyBlock } from "@/components/HomeCopyBlock";
+import { HomePricing } from "@/components/HomePricing";
+import { InsightMasonry } from "@/components/InsightMasonry";
+import { ProjectMasonry } from "@/components/ProjectMasonry";
+import { SupportBento } from "@/components/SupportBento";
+import { whatSetsMeApart, whyWorkWithMe } from "@/content/homeCopy";
+import { projects } from "@/content/projects";
 import { getAllInsights } from "@/lib/insights";
+import { shuffleArray } from "@/lib/utils";
+
+/** Fresh random picks on each request */
+export const dynamic = "force-dynamic";
 
 export default function HomePage() {
-  const featured = getFeaturedProjects(3);
-  const insights = getAllInsights().slice(0, 2);
+  const selectedProjects = shuffleArray(projects).slice(0, 3);
+  const selectedInsights = shuffleArray(getAllInsights()).slice(0, 3);
 
   return (
-    <main>
+    <main className="home-page">
       <section className="hero">
         <div className="hero__media" aria-hidden="true">
           <HeroBackgroundVideo />
@@ -22,48 +31,27 @@ export default function HomePage() {
         <ClientLogoMarquee />
       </section>
 
-      <section className="section">
+      <SupportBento />
+
+      <HomeCopyBlock section={whatSetsMeApart} />
+      <HomeCopyBlock section={whyWorkWithMe} />
+
+      <HomePricing />
+
+      <section className="section home-page__section">
         <div className="section__header">
           <h2>Selected projects</h2>
           <Link href="/projects">All projects</Link>
         </div>
-        <ul className="project-grid">
-          {featured.map((project) => (
-            <li key={project.slug}>
-              <Link href={`/projects/${project.slug}`} className="project-card">
-                <div className="project-card__media">
-                  <Image
-                    src={project.coverImage}
-                    alt={project.title}
-                    width={800}
-                    height={600}
-                  />
-                </div>
-                <div className="project-card__meta">
-                  <h3>{project.title}</h3>
-                  <p>{project.materials.join(" · ")}</p>
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <ProjectMasonry projects={selectedProjects} />
       </section>
 
-      <section className="section">
+      <section className="section home-page__section">
         <div className="section__header">
-          <h2>Insights</h2>
-          <Link href="/insights">All insights</Link>
+          <h2>Selected thoughts</h2>
+          <Link href="/thoughts">All thoughts</Link>
         </div>
-        <ul className="insight-list">
-          {insights.map((insight) => (
-            <li key={insight.slug}>
-              <Link href={`/insights/${insight.slug}`}>
-                <h3>{insight.title}</h3>
-                <p>{insight.excerpt}</p>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <InsightMasonry insights={selectedInsights} />
       </section>
     </main>
   );

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { FrostIndexLink } from "@/components/FrostIndexLink";
 import { InsightBody } from "@/components/InsightBody";
 import { InsightMasonry } from "@/components/InsightMasonry";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
@@ -101,8 +102,11 @@ export default async function InsightDetailPage({ params }: InsightPageProps) {
               Related
             </h2>
             <InsightMasonry insights={related} layout="related" />
+            <FrostIndexLink href="/thoughts">All thoughts</FrostIndexLink>
           </section>
-        ) : null}
+        ) : (
+          <FrostIndexLink href="/thoughts">All thoughts</FrostIndexLink>
+        )}
       </div>
     </main>
   );

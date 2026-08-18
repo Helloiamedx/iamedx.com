@@ -1,6 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { ProtectedVideo } from "@/components/ProtectedVideo";
+import { CoverLoopVideo } from "@/components/CoverLoopVideo";
 import type { ProjectsFeaturedLead } from "@/content/projects";
 
 type ProjectFeaturedLeadProps = {
@@ -23,11 +25,10 @@ export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
       >
         <div className="project-featured__media">
           {project.coverVideo ? (
-            <ProtectedVideo
+            <CoverLoopVideo
               className="project-featured__cover-video"
               src={project.coverVideo}
-              preload="metadata"
-              aria-label={project.title}
+              ariaLabel={project.title}
             />
           ) : (
             <Image

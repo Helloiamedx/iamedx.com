@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
-import { VideoLoadingCover } from "@/components/VideoLoadingCover";
+import {
+  VideoLoadingCover,
+  useVideoLoadProgress,
+} from "@/components/VideoLoadingCover";
 
 type HeroSegmentVideoProps = {
   src: string;
@@ -16,7 +19,7 @@ type HeroSegmentVideoProps = {
 /**
  * Full-bleed muted hero clip. Optional `[start, end]` loop via currentTime
  * (native `loop` only when no end is set).
- * Loading cover until a frame can play — same language as gallery videos.
+ * Progress bar until buffer hits 100%, then play.
  */
 export function HeroSegmentVideo({
   src,
@@ -25,13 +28,12 @@ export function HeroSegmentVideo({
   className = "",
 }: HeroSegmentVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [ready, setReady] = useState(false);
+  const { progress, ready } = useVideoLoadProgress(videoRef, src);
   const segmentLoop = endSeconds != null && endSeconds > startSeconds;
 
   useEffect(() => {
-    setReady(false);
     const el = videoRef.current;
-    if (!el) return;
+    if (!el || !ready) return;
 
     const seekStart = () => {
       if (Math.abs(el.currentTime - startSeconds) > 0.35) {
@@ -39,13 +41,10 @@ export function HeroSegmentVideo({
       }
     };
 
-    const onReady = () => {
-      seekStart();
-      void el.play().catch(() => {
-        /* muted autoplay usually ok */
-      });
-      setReady(true);
-    };
+    seekStart();
+    void el.play().catch(() => {
+      /* muted autoplay usually ok */
+    });
 
     const onTimeUpdate = () => {
       if (!segmentLoop) return;
@@ -60,20 +59,13 @@ export function HeroSegmentVideo({
       void el.play().catch(() => {});
     };
 
-    el.addEventListener("loadeddata", onReady);
-    el.addEventListener("canplay", onReady);
     el.addEventListener("timeupdate", onTimeUpdate);
     el.addEventListener("ended", onEnded);
-
-    if (el.readyState >= 2) onReady();
-
     return () => {
-      el.removeEventListener("loadeddata", onReady);
-      el.removeEventListener("canplay", onReady);
       el.removeEventListener("timeupdate", onTimeUpdate);
       el.removeEventListener("ended", onEnded);
     };
-  }, [src, startSeconds, endSeconds, segmentLoop]);
+  }, [ready, src, startSeconds, endSeconds, segmentLoop]);
 
   return (
     <div
@@ -85,9 +77,10 @@ export function HeroSegmentVideo({
         className="hero-segment-video__media"
         src={src}
         preload="auto"
+        autoPlay={false}
         loop={!segmentLoop}
       />
-      <VideoLoadingCover ready={ready} />
+      <VideoLoadingCover progress={progress} ready={ready} />
     </div>
   );
 }

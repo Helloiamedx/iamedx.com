@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { ClickSpark } from "@/components/ClickSpark";
+import { contactCta } from "@/content/nav";
 import { currency, services, type Service } from "@/content/services";
 
 function formatPrice(service: Service) {
@@ -35,9 +35,11 @@ export function ServicePicker() {
   }
 
   const inquireHref =
-    selected.length > 0
-      ? `/contact?services=${selected.join(",")}`
-      : "/contact";
+    selectedServices.length > 0
+      ? `${contactCta.href}?subject=${encodeURIComponent("Service inquiry")}&body=${encodeURIComponent(
+          `I am interested in: ${selectedServices.map((service) => service.title).join(", ")}.`,
+        )}`
+      : contactCta.href;
 
   return (
     <div className="service-picker">
@@ -84,9 +86,9 @@ export function ServicePicker() {
           Estimated total: {currency} {total}
         </p>
         <ClickSpark>
-          <Link href={inquireHref} className="button">
+          <a href={inquireHref} className="button">
             Inquire about selected services
-          </Link>
+          </a>
         </ClickSpark>
       </aside>
     </div>

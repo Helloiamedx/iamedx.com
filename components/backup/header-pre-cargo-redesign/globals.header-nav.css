@@ -1,0 +1,1131 @@
+/* Snapshot of header / nav / mega / CTA raft CSS before cargo-style desktop redesign. */
+
+/* ---- backup extract: globals.css L288-702 ---- */
+.site-header {
+  /* Slightly denser than 0.86 — mega/header over white bands was reading too see-through */
+  --nav-frost-bg: rgba(251, 251, 253, 0.94);
+  --nav-frost-filter: saturate(200%) blur(48px);
+  /* Apple label ink on frost — not pure #000 (hover can go full black) */
+  --nav-ink: #1d1d1f;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  /* viewport-fit=cover: keep bar below the status bar / notch */
+  padding-top: env(safe-area-inset-top, 0px);
+  background: var(--nav-frost-bg);
+  backdrop-filter: var(--nav-frost-filter);
+  -webkit-backdrop-filter: var(--nav-frost-filter);
+  border: none;
+  /* Hairline under frost 套底 — not on clear top chrome */
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+  outline: none;
+  /*
+   * Transform only — never tween background/frost. A 360ms bg fade after mega
+   * close read as a second “套底” pop on the bar.
+   * Also never tween backdrop-filter (Safari dark mid-frame).
+   */
+  transition: transform 380ms cubic-bezier(0.4, 0, 0.2, 1);
+  /*
+   * Do NOT set will-change:transform on the resting bar — it promotes a layer
+   * that breaks .mega-panel’s backdrop-filter (black / flat sheet on leave).
+   */
+}
+
+/*
+ * Scroll tuck / idle hide: whole bar (fill + logo + links) rolls up as one.
+ * Keep a frost-matched opaque fill during the transform — killing the fill
+ * made the底 vanish first while type still slid away. Live blur stays off
+ * (WebKit paints a black slab if backdrop-filter translates over white).
+ */
+.site-header.is-nav-hidden {
+  transform: translate3d(0, calc(-100% - 1px), 0);
+  pointer-events: none;
+  background: rgb(251, 251, 253);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  mix-blend-mode: normal;
+  box-shadow: none;
+  transition: transform 380ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* All pages at top of scroll: fully clear — same gate as the home hero */
+.site-header.is-over-clear {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  /* No hairline on clear chrome — line belongs on frost 套底 only */
+  box-shadow: none;
+  /* Snap clear fill — keep hide/show transform tween */
+  transition: transform 380ms cubic-bezier(0.4, 0, 0.2, 1);
+  /*
+   * Blend MUST live on this sticky/z-index root (Further uses fixed + difference
+   * on the nav layer itself). Child-level difference is trapped inside the
+   * stacking context and only sees an empty backdrop → white chrome vanishes.
+   * Contact pills are a sibling raft so they stay solid brand colors.
+   */
+  mix-blend-mode: difference;
+}
+
+.site-header.is-over-clear .site-nav__link,
+.site-header.is-over-clear .site-nav__item.is-open .site-nav__link,
+.site-header.is-over-clear .site-nav__link:hover,
+.site-header.is-over-clear .nav-menu-toggle {
+  color: #fff;
+}
+
+.site-header.is-over-clear .site-logo__img--white {
+  opacity: 1;
+}
+
+.site-header.is-over-clear .site-logo__img--black {
+  opacity: 0;
+}
+
+/* Hide must win over .is-over-clear’s difference blend */
+.site-header.is-over-clear.is-nav-hidden {
+  background: transparent;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  mix-blend-mode: normal;
+  transition: transform 380ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Contact raft — outside blended header; ghost uses its own difference */
+.site-header-cta {
+  /* Sibling raft — mirror header ink token (not nested under .site-header) */
+  --nav-ink: #1d1d1f;
+  position: fixed;
+  top: env(safe-area-inset-top, 0px);
+  right: 0;
+  left: 0;
+  z-index: 60;
+  height: var(--header-bar-h);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  transition: transform 380ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.site-header-cta.is-nav-hidden {
+  transform: translate3d(0, calc(-100% - env(safe-area-inset-top, 0px) - 1px), 0);
+  /* Keep in lockstep with .site-header tuck */
+  transition: transform 380ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* Difference over white → black flash while the raft slides away */
+  mix-blend-mode: normal !important;
+}
+
+.site-header-cta__inner {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
+  margin-inline: auto;
+  pointer-events: none;
+}
+
+.site-header-cta__inner > * {
+  pointer-events: auto;
+}
+
+/* Clear top: text+icon only, same difference contrast as menu */
+.site-header-cta.is-ghost {
+  mix-blend-mode: difference;
+}
+
+.site-header-cta.is-ghost .nav-contact-glare.glare-hover,
+.site-header-cta:not(.is-pills) .nav-contact-glare.glare-hover {
+  background: transparent !important;
+  border-color: transparent !important;
+  /* Transparent border still eats 1px — drop it so text can sit flush */
+  border-width: 0;
+  /* Keep pill radius while fill fades out — avoids a rectangular flash */
+  overflow: visible;
+}
+
+/* Ghost: kill glare wipe — use L→R underline instead */
+.site-header-cta:not(.is-pills) .nav-contact-glare.glare-hover::before {
+  content: none;
+  display: none;
+}
+
+.site-header-cta.is-ghost .nav-contact {
+  color: #fff;
+}
+
+/*
+ * Under difference blend, never tween brand fills (wrong capsule colors).
+ * Snap only after .is-pills-out has finished shrinking.
+ */
+.site-header-cta.is-ghost .nav-contact-glare.glare-hover,
+.site-header-cta.is-ghost .nav-contact {
+  transform: none;
+  transition: none !important;
+  transition-delay: 0ms !important;
+}
+
+/*
+ * Ghost underline under the label only (not the icon) —
+ * currentColor + parent mix-blend:difference for invert contrast.
+ */
+.site-header-cta:not(.is-pills) .nav-contact__label {
+  position: relative;
+}
+
+.site-header-cta:not(.is-pills) .nav-contact__label::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.08em;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.site-header-cta:not(.is-pills) .nav-contact:hover .nav-contact__label::after {
+  transform: scaleX(1);
+}
+
+/*
+ * Ghost / pre-pill: no pill padding — right edge aligns to shell like menu text.
+ * Keep a little start padding between items; last item is fully flush right.
+ */
+.site-header-cta:not(.is-pills) .nav-contact,
+.site-header-cta:not(.is-pills) .nav-contact--with-icon {
+  padding-inline: 0.35rem 0;
+}
+
+.site-header-cta:not(.is-pills) .site-header-cta__inner > *:first-child .nav-contact {
+  padding-inline-start: 0;
+}
+
+@media (min-width: 900px) {
+  .site-header-cta:not(.is-pills) .nav-contact:not(.nav-contact--block) {
+    padding-inline: 0.35rem 0;
+  }
+
+  .site-header-cta:not(.is-pills)
+    .site-header-cta__inner
+    > *:first-child
+    .nav-contact:not(.nav-contact--block) {
+    padding-inline-start: 0;
+  }
+}
+
+/*
+ * Frost on, pills not yet — match nav ink. Must NOT win during .is-pills-out
+ * (that mode is already #fff + difference; dark ink made labels vanish, then
+ * “pop” bright when landing on .is-ghost).
+ */
+.site-header-cta:not(.is-ghost):not(.is-pills):not(.is-pills-out) .nav-contact {
+  color: var(--nav-ink, #1d1d1f);
+}
+
+/*
+ * Pill enter (.is-pills): fade brand fills in.
+ * Pill exit (.is-pills-out): SNAP fills off, then ease padding — never tween
+ * green/blue under mix-blend:difference (reads as a wrong mid-color flash).
+ */
+.site-header-cta.is-pills .nav-contact-glare.glare-hover {
+  border-radius: 999px;
+  transform-origin: right center;
+  background: #0076dd !important;
+  border-color: #0076dd !important;
+  border-width: 1px;
+  overflow: hidden;
+  transform: scale(1);
+  transition:
+    background-color 320ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 320ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-width 320ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.site-header-cta.is-pills .nav-contact {
+  transition:
+    color 320ms cubic-bezier(0.4, 0, 0.2, 1),
+    padding 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.site-header-cta.is-pills-out {
+  mix-blend-mode: difference;
+}
+
+.site-header-cta.is-pills-out .nav-contact-glare.glare-hover {
+  border-radius: 999px;
+  transform-origin: right center;
+  background: transparent !important;
+  border-color: transparent !important;
+  border-width: 0;
+  overflow: visible;
+  transform: scale(1);
+  /* No background/border-color tween — fills are gone on the first exit frame */
+  transition:
+    border-width 320ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.site-header-cta.is-pills-out .nav-contact-glare.glare-hover::before {
+  content: none;
+  display: none;
+}
+
+.site-header-cta.is-pills-out .nav-contact,
+.site-header-cta.is-pills-out .nav-contact--with-icon {
+  padding-inline: 0.35rem 0;
+  /* Keep ghost white through the whole shrink — no dark mid-frame */
+  color: #fff !important;
+  transition: padding 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.site-header-cta.is-pills-out .site-header-cta__inner > *:first-child .nav-contact {
+  padding-inline-start: 0;
+}
+
+@media (min-width: 900px) {
+  .site-header-cta.is-pills-out .nav-contact:not(.nav-contact--block) {
+    padding-inline: 0.35rem 0;
+  }
+
+  .site-header-cta.is-pills-out
+    .site-header-cta__inner
+    > *:first-child
+    .nav-contact:not(.nav-contact--block) {
+    padding-inline-start: 0;
+  }
+}
+
+/* Enter: left → right */
+.site-header-cta.is-pills .site-header-cta__inner > *:nth-child(1) .nav-contact-glare,
+.site-header-cta.is-pills .site-header-cta__inner > *:nth-child(1) .nav-contact {
+  transition-delay: 0ms;
+}
+
+.site-header-cta.is-pills .site-header-cta__inner > *:nth-child(2) .nav-contact-glare,
+.site-header-cta.is-pills .site-header-cta__inner > *:nth-child(2) .nav-contact {
+  transition-delay: 55ms;
+}
+
+.site-header-cta.is-pills .site-header-cta__inner > *:nth-child(3) .nav-contact-glare,
+.site-header-cta.is-pills .site-header-cta__inner > *:nth-child(3) .nav-contact {
+  transition-delay: 110ms;
+}
+
+/* Exit: reverse stagger, tuck toward the right */
+.site-header-cta.is-pills-out .site-header-cta__inner > *:nth-child(1) .nav-contact-glare,
+.site-header-cta.is-pills-out .site-header-cta__inner > *:nth-child(1) .nav-contact {
+  transition-delay: 110ms;
+}
+
+.site-header-cta.is-pills-out .site-header-cta__inner > *:nth-child(2) .nav-contact-glare,
+.site-header-cta.is-pills-out .site-header-cta__inner > *:nth-child(2) .nav-contact {
+  transition-delay: 55ms;
+}
+
+.site-header-cta.is-pills-out .site-header-cta__inner > *:nth-child(3) .nav-contact-glare,
+.site-header-cta.is-pills-out .site-header-cta__inner > *:nth-child(3) .nav-contact {
+  transition-delay: 0ms;
+}
+
+.site-header-cta.is-pills .nav-contact-glare.glare-hover::before {
+  display: block;
+  content: "";
+}
+
+.site-header-cta.is-pills .nav-contact__label::after {
+  content: none;
+  display: none;
+}
+
+.site-header-cta.is-pills .nav-contact-glare--whatsapp.glare-hover {
+  background: #25d366 !important;
+  border-color: #25d366 !important;
+}
+
+.site-header-cta.is-pills .nav-contact-glare--wechat.glare-hover {
+  background: #07c160 !important;
+  border-color: #07c160 !important;
+}
+
+/* Same ink as .site-nav__link on frost — Apple #1d1d1f, not pure #000 */
+.site-header-cta.is-pills .nav-contact {
+  color: var(--nav-ink, #1d1d1f);
+  font-weight: 500;
+}
+
+.site-header-cta.is-pills .nav-contact--with-icon {
+  padding-inline: 0.55rem 0.7rem;
+}
+
+@media (min-width: 900px) {
+  .site-header-cta.is-pills .nav-contact:not(.nav-contact--block) {
+    padding: 0.32rem 0.9rem;
+  }
+
+  .site-header-cta.is-pills .nav-contact--with-icon:not(.nav-contact--block) {
+    padding-inline: 0.55rem 0.7rem;
+  }
+}
+
+@media (max-width: 899px) {
+  .site-header-cta {
+    display: none;
+  }
+
+  .site-header {
+    /* Sit above page layers Safari can promote into the hit path */
+    z-index: 100;
+    isolation: isolate;
+  }
+
+  .nav-menu-toggle,
+  .site-logo {
+    position: relative;
+    z-index: 2;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/*
+ * Open + closing: frost lives on .mega-panel only — one sheet, one opacity.
+ * Stacking bar frost under the sheet made the ~50px band denser than the
+ * dropdown. Resting header frost returns only after is-closing ends.
+ */
+.site-header:has(.mega-panel.is-open),
+.site-header:has(.mega-panel.is-closing) {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  mix-blend-mode: normal;
+  box-shadow: none;
+  transition: none;
+}
+
+.site-header__bar {
+  position: relative;
+  /* Above .mega-panel (z-index: 1) — keep taps on nav when Services is open */
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: var(--header-bar-h);
+}
+
+
+/* ---- backup extract: globals.css L1143-1502 ---- */
+.nav-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  background: rgba(0, 0, 0, 0.42);
+  opacity: 0;
+  pointer-events: none;
+  /* Fade both ways — hold timing is gated in Header (halfway through mega close) */
+  transition: opacity 360ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-scrim.is-visible {
+  opacity: 1;
+}
+
+.nav-scrim.is-interactive {
+  pointer-events: auto;
+}
+
+.site-header__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+.site-nav {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.05rem;
+  font-size: 0.8125rem;
+  font-weight: 500; /* Medium — clearer over difference blend */
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.site-nav__link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.28rem 0.62rem;
+  color: var(--nav-ink, #1d1d1f);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: color 360ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/*
+ * iPad / touch: desktop chrome (≥900px) keeps text-sized nav hits (~25px).
+ * Stretch links to full bar height so the frosted band is tappable, not just glyphs.
+ *
+ * Safari (phone + iPad): mix-blend-mode:difference on sticky chrome steals /
+ * drops taps site-wide — Chrome does not. Clear top already paints white
+ * labels/logo; drop the blend on touch so every page’s nav stays tappable.
+ */
+@media (hover: none), (pointer: coarse) {
+  .site-header.is-over-clear {
+    mix-blend-mode: normal;
+  }
+
+  .site-header-cta.is-ghost,
+  .site-header-cta.is-pills-out {
+    mix-blend-mode: normal;
+  }
+
+  .site-header {
+    z-index: 100;
+    isolation: isolate;
+  }
+
+  .site-nav__link {
+    min-height: var(--header-bar-h);
+    box-sizing: border-box;
+    padding-block: 0;
+    padding-inline: 0.75rem;
+    position: relative;
+    z-index: 2;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .nav-menu-toggle {
+    min-height: var(--header-bar-h);
+    min-width: 2.75rem;
+    padding-inline: 0.5rem 0;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 2;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .site-logo {
+    position: relative;
+    z-index: 2;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .site-header-cta:not(.is-pills) .nav-contact,
+  .site-header-cta:not(.is-pills) .nav-contact--with-icon {
+    min-height: 2.75rem;
+    box-sizing: border-box;
+    padding-inline: 0.55rem;
+    align-items: center;
+    touch-action: manipulation;
+  }
+
+  .mega-column a {
+    padding-block: 0.45rem;
+  }
+}
+
+.site-nav__item.is-open .site-nav__link,
+.site-nav__link:hover {
+  color: #000; /* full black on hover */
+}
+
+.nav-contact-glare.glare-hover {
+  vertical-align: middle;
+  /* Solid brand blue on the light frosted header — no frost washout */
+  background: #0076dd !important;
+  border-color: #0076dd !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.nav-contact-glare--whatsapp.glare-hover {
+  background: #25d366 !important;
+  border-color: #25d366 !important;
+}
+
+.nav-contact-glare--wechat.glare-hover {
+  background: #07c160 !important;
+  border-color: #07c160 !important;
+}
+
+.nav-contact {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  min-height: 1.45rem;
+  padding: 0.22rem 0.65rem;
+  border-radius: 980px;
+  background: transparent;
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.nav-contact--with-icon {
+  padding-inline: 0.55rem 0.7rem;
+}
+
+.nav-contact__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 0.85rem;
+  height: 0.85rem;
+  line-height: 0;
+}
+
+.nav-contact__icon svg {
+  display: block;
+  overflow: visible;
+}
+
+.nav-contact:hover {
+  background: transparent;
+}
+
+/* Mouse click leaves :focus stuck — looks like a permanent “selected” fill.
+   Keep a ring only for keyboard (:focus-visible). */
+.nav-contact:focus {
+  outline: none;
+  background: transparent;
+}
+
+.nav-contact:focus:not(:focus-visible) {
+  outline: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.nav-contact:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+.site-header-cta.is-ghost .nav-contact-glare:focus-within,
+.site-header-cta:not(.is-pills) .nav-contact-glare:focus-within {
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+.site-header-cta.is-ghost .nav-contact:focus,
+.site-header-cta:not(.is-pills) .nav-contact:focus {
+  background: transparent;
+}
+
+.click-spark {
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+  overflow: visible;
+}
+
+.click-spark__canvas {
+  position: absolute;
+  top: calc(-1 * var(--click-spark-pad, 32px));
+  left: calc(-1 * var(--click-spark-pad, 32px));
+  width: calc(100% + var(--click-spark-pad, 32px) * 2);
+  height: calc(100% + var(--click-spark-pad, 32px) * 2);
+  display: block;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+}
+
+.click-spark > :not(.click-spark__canvas) {
+  position: relative;
+  z-index: 0;
+}
+
+.nav-contact--block {
+  width: 100%;
+  min-height: 2.75rem;
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  padding: 0.4rem 1.05rem;
+}
+
+@media (min-width: 900px) {
+  .nav-contact:not(.nav-contact--block) {
+    min-height: 1.75rem;
+    padding: 0.32rem 0.9rem;
+    font-size: 0.8125rem;
+  }
+
+  /*
+   * Must follow the general desktop .nav-contact padding rule above —
+   * otherwise ghost CTAs keep pill inset and look off the right edge.
+   */
+  .site-header-cta:not(.is-pills) .nav-contact:not(.nav-contact--block),
+  .site-header-cta:not(.is-pills) .nav-contact--with-icon:not(.nav-contact--block) {
+    padding: 0.22rem 0 0.22rem 0.3rem;
+  }
+
+  .site-header-cta:not(.is-pills)
+    .site-header-cta__inner
+    > *:first-child
+    .nav-contact:not(.nav-contact--block) {
+    padding-left: 0;
+  }
+
+  .site-header-cta.is-pills .nav-contact:not(.nav-contact--block) {
+    padding: 0.32rem 0.9rem;
+  }
+
+  .site-header-cta.is-pills .nav-contact--with-icon:not(.nav-contact--block) {
+    padding-inline: 0.55rem 0.7rem;
+  }
+}
+
+.site-logo {
+  display: inline-grid;
+  align-items: center;
+  flex-shrink: 0;
+  line-height: 0;
+  position: relative;
+}
+
+.site-logo__img {
+  grid-area: 1 / 1;
+  /* Edward Xu wordmark — keep compact in the header */
+  height: 0.8rem;
+  width: auto;
+  display: block;
+  transition: opacity 360ms cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity;
+}
+
+.site-logo__img--white {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.site-logo__img--black {
+  opacity: 1;
+}
+
+.site-logo img {
+  height: 0.8rem;
+  width: auto;
+}
+
+.nav-menu-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+  min-height: 1.45rem;
+  border: 0;
+  background: transparent;
+  /* Flush to shell right — no trailing pad that reads as off-right */
+  padding: 0.15rem 0;
+  margin: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: right;
+  color: #1d1d1f;
+  transition: color 360ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-menu-toggle__label {
+  display: block;
+  text-align: right;
+  transition:
+    opacity 280ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 280ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-menu-toggle__label[data-label="menu"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.nav-menu-toggle__label[data-label="close"] {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  opacity: 0;
+  transform: translateY(calc(-50% + 6px));
+  pointer-events: none;
+}
+
+.nav-menu-toggle.is-open .nav-menu-toggle__label[data-label="menu"] {
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+}
+
+.nav-menu-toggle.is-open .nav-menu-toggle__label[data-label="close"] {
+  opacity: 1;
+  transform: translateY(-50%);
+  pointer-events: auto;
+}
+
+
+/* ---- backup extract: globals.css L1504-1787 ---- */
+.mega-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 1;
+  height: 0;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  border: none;
+  box-shadow: none;
+  /* Height collapse on exit — keep frost opaque while height tweens (see .is-closing) */
+  transition: height 480ms cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: height;
+}
+
+/*
+ * Open + closing: one frost sheet. Exit tweens height → nav bar height (not 0).
+ * Drop live blur on close only (Safari black slab while height moves).
+ */
+.mega-panel.is-open,
+.mega-panel.is-closing {
+  opacity: 1;
+  background: var(--nav-frost-bg);
+  backdrop-filter: var(--nav-frost-filter);
+  -webkit-backdrop-filter: var(--nav-frost-filter);
+}
+
+.mega-panel.is-open {
+  /*
+   * Panel still paints frost over the bar strip (top: 0), but must not steal
+   * taps there — Safari/iPad often hit-tests the backdrop-filter layer above
+   * the transparent bar. Only the dropdown body is interactive.
+   */
+  pointer-events: none;
+  /* Height only — opacity fade made the hanging bar look cleared, then grown from 0 */
+  transition: height 480ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mega-panel.is-open .mega-panel__body {
+  pointer-events: auto;
+}
+
+.mega-panel.is-closing {
+  pointer-events: none;
+  /* Keep the same frost token as .is-open — one continuous sheet */
+  background: var(--nav-frost-bg);
+  backdrop-filter: var(--nav-frost-filter);
+  -webkit-backdrop-filter: var(--nav-frost-filter);
+  transition: height 480ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* First-screen: dissolve the barH strip so finishPanelClose doesn’t hard-cut it */
+.site-header.is-at-top .mega-panel.is-closing {
+  opacity: 0;
+  transition:
+    height 480ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 150ms linear 330ms;
+}
+
+/* Scrolled: keep the strip opaque — header underfill matches until classes drop */
+.site-header:not(.is-at-top) .mega-panel.is-closing {
+  opacity: 1;
+  transition: height 480ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mega-panel__track {
+  /* Same 25px air under the bar and above the sheet bottom — all columns */
+  padding: calc(var(--header-offset) + 25px) var(--shell-gutter) 25px 0;
+  box-sizing: border-box;
+}
+
+.mega-panel__body {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: max-content;
+  max-width: calc(100vw - var(--mega-align, 16px) - var(--shell-gutter));
+  margin-left: var(--mega-align, 16px);
+  box-sizing: border-box;
+}
+
+.mega-panel__body.has-preview {
+  gap: 25px;
+}
+
+.mega-columns {
+  /* Fixed gap between every top-level group — columns hug their text */
+  --mega-gap: 3.5rem;
+  --mega-dense-gap: 1.25rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: var(--mega-gap);
+  width: max-content;
+  min-width: 0;
+  margin-left: 0;
+  max-width: none;
+}
+
+/* Services first-column only — 16:9 flash placeholder until real media */
+.mega-preview {
+  flex: 0 0 clamp(14rem, 22vw, 20rem);
+  width: clamp(14rem, 22vw, 20rem);
+  align-self: flex-start;
+}
+
+.mega-preview__frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 0.85rem;
+  overflow: hidden;
+  background: #e8e8ed;
+  isolation: isolate;
+}
+
+.mega-preview__slot {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 0.85rem;
+  box-sizing: border-box;
+  background:
+    linear-gradient(145deg, #f5f5f7 0%, #d2d2d7 48%, #e8e8ed 100%);
+  animation: mega-preview-flash 420ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mega-preview__label {
+  max-width: 100%;
+  text-align: center;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6e6e73;
+  line-height: 1.35;
+}
+
+@keyframes mega-preview-flash {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* iPad / small laptop: tighter gutters so three columns fit from the shell edge */
+@media (max-width: 1199px) {
+  .mega-columns {
+    --mega-gap: clamp(1.6rem, 3.2vw, 3rem);
+    --mega-dense-gap: 1rem;
+  }
+
+  .mega-column a {
+    font-size: 0.8125rem;
+  }
+
+  .mega-column--dense a {
+    font-size: 0.75rem;
+  }
+}
+
+.mega-column {
+  flex: 0 0 auto;
+  width: max-content;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* Projects / Insights / About: no description row — first link is the top edge */
+.mega-column--plain > ul {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.mega-column--dense {
+  /* IP group = one unit; internal dual list uses tighter gap */
+  width: max-content;
+}
+
+@keyframes mega-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mega-column h2 {
+  font-size: 0.75rem;
+  font-weight: 300; /* Light */
+  letter-spacing: 0.02em;
+  margin: 0 0 0.85rem;
+  color: #6e6e73;
+}
+
+.mega-column > p {
+  margin: -0.45rem 0 0.85rem;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  color: #6e6e73;
+}
+
+.mega-column ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.mega-column a {
+  display: block;
+  padding: 0.14rem 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+  color: #424245;
+  white-space: nowrap;
+  transition: color 180ms ease;
+}
+
+.mega-column a:hover {
+  color: #1d1d1f;
+}
+
+.mega-column--dense ul {
+  display: grid;
+  grid-template-columns: max-content max-content;
+  column-gap: var(--mega-dense-gap);
+  row-gap: 0.1rem;
+  width: max-content;
+}
+
+.mega-column--dense a {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/*
+ * Mobile curtain surface: kill frost instantly (no backdrop-filter transition).
+ * Frost blur fighting scaleY strips is why non-home pages stuttered on open/close.
+ */
+.site-header.is-mobile-surface {
+  --mobile-panel-bg: #f5f5f7;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transition: none;
+}
+
+.site-header.is-mobile-surface .site-logo__img--white {
+  opacity: 0;
+  transition: none;
+}
+
+.site-header.is-mobile-surface .site-logo__img--black {
+  opacity: 1;
+  transition: none;
+}
+
+.site-header.is-mobile-surface .nav-menu-toggle {
+  color: #1d1d1f;
+  transition: none;
+}
+
+
+/* ---- backup extract: globals.css L2055-2112 ---- */
+/* CTA raft sits at z-index 60 — tuck it under the portaled menu */
+body.is-mobile-menu-open .site-header-cta {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/*
+ * Desktop chrome: logo left · primary nav centered · Contact raft on the right.
+ * Breakpoint unchanged: 900px.
+ */
+@media (min-width: 900px) {
+  .site-header__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+  }
+
+  .site-logo {
+    position: relative;
+    left: auto;
+    transform: none;
+    z-index: 2;
+    flex: 0 0 auto;
+  }
+
+  .site-nav {
+    display: flex;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    justify-content: center;
+    margin-left: 0;
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+
+  .site-header__actions {
+    flex: 0 0 auto;
+    margin-left: auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .nav-menu-toggle,
+  .mobile-nav {
+    display: none !important;
+  }
+}
+
+/* Narrower laptop: slightly smaller 16:9 rail */
+@media (min-width: 900px) and (max-width: 1199px) {
+  .mega-preview {
+    flex-basis: clamp(12.5rem, 20vw, 16rem);
+    width: clamp(12.5rem, 20vw, 16rem);
+  }
+}
+
+

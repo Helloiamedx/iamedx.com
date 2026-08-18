@@ -27,7 +27,7 @@ export function AboutHeroHeadline() {
           items={aboutDriftWallItems}
           columns={7}
           fillWidth
-          scale={1.45}
+          scale={1.55}
           turn={14}
           radius={9}
           tileWidth={148}
@@ -36,7 +36,7 @@ export function AboutHeroHeadline() {
           speed={14}
           overlayColor="#0a0a0a"
           dim={0.42}
-          fade={0.38}
+          fade={0}
         />
       </div>
       <AboutHeroParticleField startMorph={startMorph} />

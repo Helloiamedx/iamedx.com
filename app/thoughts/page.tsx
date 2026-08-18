@@ -12,7 +12,7 @@ import {
 import { shuffleArray } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Insights",
+  title: "Thoughts",
   description: "Notes and reflections from product manufacturing work.",
 };
 

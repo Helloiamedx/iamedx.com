@@ -1,27 +1,29 @@
 ---
-description: Study The Project button — Apple globalnav frosted glass (not liquid / difference blend)
+description: About the project button — Apple globalnav frosted glass + glare wipe
 alwaysApply: true
 ---
 
-# Study The Project button — frosted glass
+# About the project button — frosted glass
 
-Case-detail **Study The Project** control uses an **Apple globalnav–style** frosted shell.
+Case-detail **About the project** control uses an **Apple globalnav–style** frosted shell plus the site hover glare wipe.
 
 ## Visual recipe
 
-1. Shell (`.project-case-demo__toggle-glass`): `background: rgba(255, 255, 255, 0.72)`, `backdrop-filter: saturate(180%) blur(20px)`, no heavy border / liquid `::after` / inset glare.
-2. Label / icon: solid `#1d1d1f` — **no** `mix-blend-mode: difference`, **no** contrast overlay span.
-3. Capsule radius (`980px`) is fine; keep padding / Medium weight.
+1. Shell (`GlareHover.project-case-demo__toggle-glare`): `background: rgba(255, 255, 255, 0.72)`, `backdrop-filter: saturate(180%) blur(20px)`, no heavy border / liquid `::after` / inset glare.
+2. Label: solid `#1d1d1f` — **no** `mix-blend-mode: difference`, **no** contrast overlay span. Child fill stays transparent so the wipe is visible.
+3. Rounded rectangle (`8px`) — not a capsule; keep padding / Medium weight.
+4. Hover wipe uses `GLARE_WIPE_MS` from `GlareHover.tsx`.
 
 ## Keep (do not rip out)
 
-- Portaled pin positioning / `is-ready` / activity-band clamp
+- Sticky pin in the case body
 - ClickSpark
-- Open / close (`is-open`, + → × rotate)
+- Open / close (`is-open`, panel push)
 - Panel push / mobile sheet behavior
 
 ## Do not
 
+- Bring back the + / × icon or rotate animation
 - Bring back liquid-glass `::after`, difference-blend contrast layers, or luminance `is-on-light` swaps
 - Replace with the full adaptive-glass-button markup
 ---

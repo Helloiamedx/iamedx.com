@@ -5,9 +5,9 @@ import {
   footerAboutCopy,
   footerChannels,
   footerHelpTitle,
-  footerPaymentsNote,
   mobileSocialLinks,
 } from "@/content/nav";
+import { WeChatQrModal } from "@/components/WeChatQrModal";
 import { asset } from "@/lib/assets";
 
 function ExternalArrow() {
@@ -39,15 +39,21 @@ export function Footer() {
               {footerChannels.map((row) => (
                 <li key={row.label} className="site-footer__channel">
                   <span className="site-footer__channel-label">{row.label}</span>
-                  <a
-                    href={row.href}
-                    className="site-footer__channel-value"
-                    {...(row.external
-                      ? { target: "_blank", rel: "noopener noreferrer" }
-                      : {})}
-                  >
-                    {row.value}
-                  </a>
+                  {"action" in row && row.action === "wechat" ? (
+                    <WeChatQrModal className="site-footer__channel-value">
+                      {row.value}
+                    </WeChatQrModal>
+                  ) : (
+                    <a
+                      href={row.href}
+                      className="site-footer__channel-value"
+                      {...(row.external
+                        ? { target: "_blank", rel: "noopener noreferrer" }
+                        : {})}
+                    >
+                      {row.value}
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>
@@ -77,13 +83,13 @@ export function Footer() {
           <div className="site-footer__bottom">
             <p className="site-footer__legal">
               <span>© {year} iamedx</span>
-              <span className="site-footer__legal-sep" aria-hidden="true">
-                ·
+              <span className="site-footer__legal-extra">
+                <span className="site-footer__legal-sep" aria-hidden="true">
+                  ·
+                </span>
+                <span>All rights reserved</span>
               </span>
-              <span>All rights reserved</span>
             </p>
-
-            <p className="site-footer__payments">{footerPaymentsNote}</p>
 
             <ul className="site-footer__social">
               {mobileSocialLinks.map((link) => (

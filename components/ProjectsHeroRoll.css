@@ -31,13 +31,17 @@
   margin: 0;
   padding: 0;
   border-radius: 2px;
-  overflow: visible;
+  /* Clip filter fringe — blur/brightness on <img> otherwise paints a 1px magenta hairline */
+  overflow: hidden;
   background: transparent;
   pointer-events: none;
   will-change: transform;
   animation-name: projects-hero-roll-up;
   animation-timing-function: linear;
   animation-fill-mode: forwards;
+  isolation: isolate;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .projects-hero-roll__frame img {
@@ -53,18 +57,20 @@
   -webkit-user-drag: none;
   pointer-events: none;
   border-radius: inherit;
+  /* Avoid subpixel AA rim against the dark stage */
+  transform: translateZ(0);
 }
 
 /*
- * Depth: brightness / soft blur only — no box-shadow, no inset rim,
- * nothing that draws a lit outline on the photo edge.
+ * Depth: brightness only — CSS blur on bitmaps paints a chroma fringe
+ * (reads as a pink/red hairline on the top edge while scrolling).
  */
 .projects-hero-roll__frame--far {
   box-shadow: none;
 }
 
 .projects-hero-roll__frame--far img {
-  filter: brightness(0.72) contrast(0.92) saturate(0.92) blur(1px);
+  filter: brightness(0.72) contrast(0.92) saturate(0.92);
 }
 
 .projects-hero-roll__frame--mid {

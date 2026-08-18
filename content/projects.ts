@@ -114,6 +114,10 @@ export type Project = {
   /** Case Outcome chapter */
   impactHeadline?: string;
   impactBody?: string | string[];
+  /** Case panel — Special thanks (company + name) */
+  specialThanks?: { company: string; name: string }[];
+  /** Case credits — collaborator names (last row, right column) */
+  collaborators?: string[];
   gallery?: string[];
   /**
    * Still(s) directly under the first gallery still (row 2).
@@ -510,6 +514,11 @@ const THIRD_PROJECT_COVER = projectCoverFromName(
   THIRD_PROJECT_CDN_FOLDER,
   "Horizon zero dawn the thunderjaw collection statue hero.jpg",
 );
+/** Index / filter card cover loop — not detail hero */
+const THIRD_PROJECT_COVER_VIDEO = projectCoverFromName(
+  THIRD_PROJECT_CDN_FOLDER,
+  "video.mp4",
+);
 const THIRD_PROJECT_HERO_VIDEO = projectCoverFromName(
   THIRD_PROJECT_CDN_FOLDER,
   "Horizon Zero Dawn - The Machines- Thunderjaw.mp4",
@@ -698,7 +707,7 @@ const SIXTH_PROJECT_SLUG = projectSlugFromName(SIXTH_PROJECT_NAME);
 /** Outside / filter card cover */
 const SIXTH_PROJECT_COVER_VIDEO = projectCoverFromName(
   SIXTH_PROJECT_NAME,
-  "Ghost Recon Wildlands Statue5.mp4",
+  "Ghost Recon Wildlands Statue10.mp4",
 );
 /** Case detail first-screen hero */
 const SIXTH_PROJECT_HERO_VIDEO = projectCoverFromName(
@@ -757,6 +766,23 @@ const EIGHTH_PROJECT_SLUG = projectSlugFromName(EIGHTH_PROJECT_NAME);
 const EIGHTH_PROJECT_COVER_VIDEO = projectCoverFromName(
   EIGHTH_PROJECT_CDN_FOLDER,
   "Recore collector's edition statue.mp4",
+);
+
+/** 「第九个项目」— grid card cover only until detail media / copy are ready */
+const NINTH_PROJECT_NAME =
+  "Halo 5 Guardians Limited Edition Collectors Statue";
+const NINTH_PROJECT_SLUG = projectSlugFromName(NINTH_PROJECT_NAME);
+const NINTH_PROJECT_COVER_VIDEO = projectCoverFromName(
+  NINTH_PROJECT_NAME,
+  "video.mp4",
+);
+
+/** 「第十个项目」— grid card cover only until detail media / copy are ready */
+const TENTH_PROJECT_NAME = "Gears of War Fenix Statue Figure";
+const TENTH_PROJECT_SLUG = projectSlugFromName(TENTH_PROJECT_NAME);
+const TENTH_PROJECT_COVER_VIDEO = projectCoverFromName(
+  TENTH_PROJECT_NAME,
+  "video.mp4",
 );
 
 export const projectsFeaturedLead: ProjectsFeaturedLead = {
@@ -925,6 +951,7 @@ export const projects: Project[] = [
     ],
     involvement: "contribution",
     coverImage: THIRD_PROJECT_COVER,
+    coverVideo: THIRD_PROJECT_COVER_VIDEO,
     coverWidth: SHOWCASE_COVER_W,
     coverHeight: SHOWCASE_COVER_H,
     galleryLeadImage: THIRD_PROJECT_GALLERY_LEAD,
@@ -1116,6 +1143,44 @@ export const projects: Project[] = [
     involvement: "contribution",
     coverImage: EIGHTH_PROJECT_COVER_VIDEO,
     coverVideo: EIGHTH_PROJECT_COVER_VIDEO,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    year: 2024,
+    featured: false,
+    challenge: "",
+    result: "",
+  },
+  {
+    slug: NINTH_PROJECT_SLUG,
+    title: NINTH_PROJECT_NAME,
+    materials: ["resin"],
+    ips: ["halo-guardians"],
+    tags: involvementTags("contribution"),
+    summary: "",
+    tagline: "",
+    role: [],
+    involvement: "contribution",
+    coverImage: NINTH_PROJECT_COVER_VIDEO,
+    coverVideo: NINTH_PROJECT_COVER_VIDEO,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    year: 2024,
+    featured: false,
+    challenge: "",
+    result: "",
+  },
+  {
+    slug: TENTH_PROJECT_SLUG,
+    title: TENTH_PROJECT_NAME,
+    materials: ["resin"],
+    ips: ["gears-of-war"],
+    tags: involvementTags("contribution"),
+    summary: "",
+    tagline: "",
+    role: [],
+    involvement: "contribution",
+    coverImage: TENTH_PROJECT_COVER_VIDEO,
+    coverVideo: TENTH_PROJECT_COVER_VIDEO,
     coverWidth: SHOWCASE_COVER_W,
     coverHeight: SHOWCASE_COVER_H,
     year: 2024,

@@ -4,7 +4,7 @@ import { getInsightSlugs } from "@/lib/insights";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://iamedx.com";
-  const staticRoutes = ["", "/projects", "/services", "/about", "/insights", "/contact"];
+  const staticRoutes = ["", "/projects", "/services", "/about", "/clients", "/thoughts"];
 
   return [
     ...staticRoutes.map((route) => ({
@@ -16,7 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
     })),
     ...getInsightSlugs().map((slug) => ({
-      url: `${base}/insights/${slug}`,
+      url: `${base}/thoughts/${slug}`,
       lastModified: new Date(),
     })),
   ];

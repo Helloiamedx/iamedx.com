@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800">
+  <rect width="800" height="800" fill="#ececec"/>
+  <text x="400" y="390" text-anchor="middle" fill="#151515" font-family="system-ui, sans-serif" font-size="28" font-weight="500">WeChat QR</text>
+  <text x="400" y="434" text-anchor="middle" fill="#6e6e73" font-family="system-ui, sans-serif" font-size="20">Placeholder</text>
+</svg>

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { AboutExperienceList } from "@/components/AboutExperienceList";
 import { AboutHeroHeadline } from "@/components/AboutHeroHeadline";
-import { experienceRoles } from "@/content/experience";
+import { AboutScrollLede } from "@/components/AboutScrollLede";
 import { asset } from "@/lib/assets";
 
 export const metadata: Metadata = {
@@ -14,13 +15,79 @@ const profileImage = asset(
   `/images/about/${encodeURIComponent("My Profile.jpg")}`,
 );
 
-const capabilities = [
-  "Product development",
-  "Sample development",
-  "Production management",
-  "Quality control",
-  "Packaging & delivery",
-];
+const aboutLede =
+  "Hi, I’m Edward Xu.\n“Loyalty to my clients, protecting their interests, and helping them build highly tailored supply chains in China define how I approach every project.”";
+
+/** Expertise — Competence / Product Categories filled; Material + Process later */
+const expertiseColumns = [
+  {
+    id: "competence",
+    title: "Competence",
+    items: [
+      "China Sourcing Specialist",
+      "Procurement Specialist",
+      "Manufacturing Consultant",
+      "Product Development Specialist",
+      "Supplier Management",
+      "Quality Control Specialist",
+      "Factory Audit",
+      "Custom Packaging Development",
+      "China Representative",
+    ],
+  },
+  {
+    id: "product-categories",
+    title: "Product Categories",
+    items: [
+      "Collectibles",
+      "Licensed Products",
+      "Gift Sets",
+      "Promotional Items",
+      "Custom Consumer Products",
+    ],
+  },
+  {
+    id: "process",
+    title: "Process",
+    items: [
+      "Embossing",
+      "Debossing",
+      "Hot Stamping",
+      "Foil Stamping",
+      "Digital Printing",
+      "UV Printing",
+      "Laser Engraving",
+      "Laser Cutting",
+      "CNC Machining",
+      "Die Casting",
+      "Metal Stamping",
+      "Electroplating",
+      "Injection Molding",
+      "Resin Casting",
+      "Painting",
+      "Spray Coating",
+      "Hand Painting",
+      "Embroidery",
+      "Sewing",
+      "Heat Transfer",
+      "Die Cutting",
+    ],
+  },
+  {
+    id: "material",
+    title: "Material",
+    items: [
+      "Wood / MDF",
+      "Leather / PU Leather",
+      "Metal / Alloy",
+      "Resin",
+      "Fabric / Textile",
+      "Paper / Cardboard",
+      "EVA Foam",
+      "Plastic",
+    ],
+  },
+] as const;
 
 const workTools = [
   "Notion",
@@ -35,28 +102,27 @@ const workTools = [
   "Autodesk CAD",
 ];
 
-/** Placeholder testimonials — replace when real quotes arrive */
 const testimonials = [
   {
     quote:
       "Edward treated our product like it was his own. He caught issues before they became expensive, kept every factory aligned, and never left us guessing about timeline or quality.",
-    name: "Sarah Chen",
-    company: "Northstar Collectibles",
-    role: "Head of Product",
+    name: "Charlotte Tem",
+    company: "Best Link (USA) Corp. Ltd.",
+    role: "CEO",
   },
   {
     quote:
-      "We needed a China supply chain we could actually control. Edward built the process, negotiated hard for our interests, and delivered samples that matched what we signed off — then scaled it cleanly.",
-    name: "Marcus Reid",
-    company: "Harbor & Co.",
-    role: "Founder",
+      "We needed a China supply chain we could actually control. Edward built the process, negotiated hard for our interests, and delivered samples that matched what we signed off. His ability to organize the process and communicate clearly significantly reduced unnecessary back-and-forth and improved the overall efficiency of the project.",
+    name: "Angela McReynolds",
+    company: "DPI Merchandising Inc.",
+    role: "President",
   },
   {
     quote:
-      "From packaging development through final inspection, Edward was the single point of accountability we had been missing. Clear decisions, honest QC, and shipments that landed when promised.",
-    name: "Elena Vargas",
-    company: "Lumen Goods",
-    role: "Operations Director",
+      "Working with Edward made the entire process much smoother. He always had a clear plan for the next steps and made sure I understood what needed to be done and what the final goal should look like.",
+    name: "Eric Winn",
+    company: "KindLucky Hong Kong International Limited",
+    role: "Procurement Manager",
   },
 ];
 
@@ -159,37 +225,88 @@ export default function AboutPage() {
                 />
               </div>
               <div className="about-boua__intro-copy">
-                <p className="about-boua__lede">
-                  “Loyalty to my clients, protecting their interests, and helping
-                  them build highly tailored supply chains in China define how I
-                  approach every project.”
-                </p>
+                <AboutScrollLede text={aboutLede} />
                 <p className="about-boua__body">
-                  My goal is simple: To build a reliable and controllable supply
-                  chain in China that is highly tailored to your business needs.
+                  My clients focus on building their brands and connecting with
+                  their customers, while I provide the product development,
+                  manufacturing expertise, and hands-on support needed to bring
+                  their ideas to life in China. Together, we combine our
+                  strengths to create products that are both commercially
+                  successful
                 </p>
               </div>
             </div>
-            <ul className="about-boua__quotes">
-              {testimonials.map((item) => (
-                <li key={item.name} className="about-boua__quote">
-                  <p className="about-boua__quote-text">“{item.quote}”</p>
-                  <div className="about-boua__quote-attr">
-                    <p className="about-boua__quote-name">{item.name}</p>
-                    <p className="about-boua__quote-meta">
-                      {item.company}
-                      <span aria-hidden="true"> · </span>
-                      {item.role}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <ul className="about-boua__capabilities">
-              {capabilities.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section
+        id="testimonials"
+        className="about-boua__testimonials about-boua__container"
+        aria-labelledby="about-testimonials-heading"
+      >
+        <div className="about-boua__testimonials-grid">
+          <div className="about-boua__rail">
+            <h2
+              id="about-testimonials-heading"
+              className="about-boua__label about-boua__sticky"
+            >
+              Testimonials
+            </h2>
+          </div>
+          <ul className="about-boua__quotes">
+            {testimonials.map((item) => (
+              <li key={item.name} className="about-boua__quote">
+                <p className="about-boua__quote-text">“{item.quote}”</p>
+                <div className="about-boua__quote-attr">
+                  <p className="about-boua__quote-name">{item.name}</p>
+                  <p className="about-boua__quote-meta">
+                    {item.company}
+                    <span aria-hidden="true"> · </span>
+                    {item.role}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* Expertise */}
+      <section
+        id="expertise"
+        className="about-boua__expertise about-boua__container"
+        aria-labelledby="about-expertise-heading"
+      >
+        <div className="about-boua__expertise-grid">
+          <div className="about-boua__rail">
+            <h2
+              id="about-expertise-heading"
+              className="about-boua__label about-boua__sticky"
+            >
+              Expertise
+            </h2>
+          </div>
+          <div className="about-boua__expertise-cols">
+            {expertiseColumns.map((column) => (
+              <div key={column.id} className="about-boua__expertise-col">
+                <h3 className="about-boua__expertise-col-title">
+                  {column.title}
+                </h3>
+                {column.items.length > 0 ? (
+                  <ul className="about-boua__expertise-list">
+                    {column.items.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="about-boua__expertise-empty" aria-hidden="true">
+                    —
+                  </p>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -248,23 +365,7 @@ export default function AboutPage() {
               Experience
             </h2>
           </div>
-          <ul className="about-boua__work-list">
-            {experienceRoles.map((role, index) => (
-              <li key={role.id} className="about-boua__work-row">
-                <span className="about-boua__work-index">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <span className="about-boua__work-title">{role.role}</span>
-                <span className="about-boua__work-company">
-                  <span className="about-boua__work-company-name">
-                    {role.company}
-                  </span>
-                </span>
-                <span className="about-boua__work-country">{role.country}</span>
-                <span className="about-boua__work-period">{role.period}</span>
-              </li>
-            ))}
-          </ul>
+          <AboutExperienceList />
         </div>
       </section>
 

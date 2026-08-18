@@ -31,9 +31,9 @@ Playback requirements on the working source: **muted**, **autoplay**, **loop**, 
 
 ## 2. Cover before play
 
-- **Loading only** — spinner / “Loading video” cover (`VideoLoadingCover`) until the video can play, then fade out and play.
+- **Loading only** — pill progress bar (`VideoLoadingCover`, no copy) until buffer / playable hits **100%**, then fade out and play.
 - **Do not** extract a frame, generate a poster image, or invent a still from the video.
-- Applies to case hero (`HeroSegmentVideo`), gallery clips (`ProjectFallbackVideo`), and YouTube hero veil.
+- Applies to case hero (`HeroSegmentVideo`), gallery clips (`ProjectFallbackVideo`), YouTube hero veil, home hero, and footer underlay.
 
 ## 3. Layout
 

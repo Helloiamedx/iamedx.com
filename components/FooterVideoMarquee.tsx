@@ -3,30 +3,28 @@
 import { useEffect, useRef, useState } from "react";
 import { footerMarqueeVideos } from "@/content/nav";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
+import {
+  VideoLoadingCover,
+  useVideoLoadProgress,
+} from "@/components/VideoLoadingCover";
 import { asset } from "@/lib/assets";
 
 /**
  * Footer underlay video — always fit the exact HELLOIAMEDX box
  * (--footer-wordmark-x/w/h), object-fit cover, object-position top.
- * Swap `footerMarqueeVideos[0].src` when replacing the clip; keep this framing.
- *
- * Until the first frame is ready, the fill box stays black so Safari doesn’t
- * flash a white hairline above the HELLOIAMEDX knockout (white placeholder
- * used to peek through sub-pixel SVG mask edges).
+ * Progress bar until buffer hits 100%, then play.
  */
 export function FooterVideoMarquee() {
   const clip = footerMarqueeVideos[0];
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [ready, setReady] = useState(false);
-
-  const markReady = () => setReady(true);
+  const src = asset(clip.src);
+  const { progress, ready } = useVideoLoadProgress(videoRef, src);
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (video && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-      setReady(true);
-    }
-  }, []);
+    const el = videoRef.current;
+    if (!el || !ready) return;
+    void el.play().catch(() => {});
+  }, [ready]);
 
   return (
     <div
@@ -36,13 +34,13 @@ export function FooterVideoMarquee() {
       <ProtectedVideo
         ref={videoRef}
         className="footer-video-fill__media"
-        src={asset(clip.src)}
-        preload="none"
+        src={src}
+        preload="auto"
+        autoPlay={false}
         aria-label={clip.label}
         style={{ objectFit: "cover", objectPosition: "top center" }}
-        onLoadedData={markReady}
-        onCanPlay={markReady}
       />
+      <VideoLoadingCover progress={progress} ready={ready} />
     </div>
   );
 }

@@ -2,8 +2,8 @@
 
 import { useLenis } from "lenis/react";
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { ClickSpark } from "@/components/ClickSpark";
+import { GlareHover, GLARE_WIPE_MS } from "@/components/GlareHover";
 import { HeroSegmentVideo } from "@/components/HeroSegmentVideo";
 import { ProjectFallbackVideo } from "@/components/ProjectFallbackVideo";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
@@ -11,6 +11,23 @@ import { YouTubeBackground } from "@/components/YouTubeBackground";
 import { getCaseCopySections } from "@/content/caseCopy";
 import type { Project } from "@/content/projects";
 import { asset } from "@/lib/assets";
+
+/** Placeholder credits until per-project copy arrives */
+const PLACEHOLDER_THANKS = [
+  {
+    company: "Best Link (USA) Corp. Ltd.",
+    name: "Charlotte Tem",
+  },
+  {
+    company: "DPI Merchandising Inc.",
+    name: "Angela McReynolds",
+  },
+  {
+    company: "KindLucky Hong Kong International Limited",
+    name: "Eric Winn",
+  },
+];
+const PLACEHOLDER_COLLABORATORS = ["Jordan Hale", "Mei Chen"];
 
 type MediaItem =
   | { kind: "full"; src: string; alt: string; ratio: string }
@@ -358,17 +375,23 @@ function buildCaseMedia(project: Project): MediaItem[] {
 
 export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
   const copySections = getCaseCopySections(project);
+  const specialThanks =
+    project.specialThanks && project.specialThanks.length > 0
+      ? project.specialThanks
+      : PLACEHOLDER_THANKS;
+  const collaborators =
+    project.collaborators && project.collaborators.length > 0
+      ? project.collaborators
+      : PLACEHOLDER_COLLABORATORS;
   const tags = project.tags.length > 0 ? project.tags : [project.involvement];
   const media = buildCaseMedia(project);
 
   const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const [btnReady, setBtnReady] = useState(false);
-  const [btnTop, setBtnTop] = useState(0);
   const panelId = useId();
   const bodyRef = useRef<HTMLDivElement>(null);
   const mediaStackRef = useRef<HTMLDivElement>(null);
-  const pinRef = useRef<HTMLDivElement>(null);
+  const mediaColRef = useRef<HTMLDivElement>(null);
+  const creditsRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLElement>(null);
   const panelInnerRef = useRef<HTMLDivElement>(null);
   const lenis = useLenis();
@@ -422,97 +445,6 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
   };
 
   const toggleOpen = () => setOpen((prev) => !prev);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  /*
-   * Center-X, prefer ~30px above the viewport bottom.
-   * Top: clamp to contentTop + inset (gap under first frames, then stop).
-   * Bottom: rest in the pad under the last frame — never on the images,
-   * never into Related / footer.
-   * Hero: hide once media top clears the pin slot — no loose hysteresis
-   * that re-shows a flash over the video.
-   */
-  useEffect(() => {
-    const media = mediaStackRef.current;
-    const body = bodyRef.current;
-    if (!media) return;
-
-    const sync = () => {
-      const mediaRect = media.getBoundingClientRect();
-      const panelRect = panelRef.current?.getBoundingClientRect();
-      const mobile = isMobilePanel();
-      const contentTop = mediaRect.top;
-      /* When open on desktop, taller of media vs copy defines the box */
-      const contentBottom =
-        open && !mobile && panelRect && panelRect.height > 0
-          ? Math.max(mediaRect.bottom, panelRect.bottom)
-          : mediaRect.bottom;
-      const viewH = window.visualViewport?.height ?? window.innerHeight;
-      const pinBottom = 30;
-      const btnH = pinRef.current?.offsetHeight || 44;
-      const preferredTop = viewH - pinBottom - btnH;
-      const inset = Math.max(readShellGutter(), 32);
-      const minTop = contentTop + inset;
-      const relatedEl = document.querySelector(".project-detail__related");
-      const relatedTop =
-        relatedEl?.getBoundingClientRect().top ?? Number.POSITIVE_INFINITY;
-      const footerEl = document.querySelector(".site-footer");
-      const footerTop =
-        footerEl?.getBoundingClientRect().top ?? Number.POSITIVE_INFINITY;
-      const bodyBottom =
-        body?.getBoundingClientRect().bottom ?? Number.POSITIVE_INFINITY;
-      /*
-       * Hard stop in the gap under the last frame (body pad / Related),
-       * not on the images — do not clamp to contentBottom.
-       */
-      const bandBottom = Math.min(relatedTop, footerTop, bodyBottom);
-      const maxTop = bandBottom - inset - btnH;
-
-      /* Mobile open sheet: park at preferred bottom so Close stays reachable */
-      if (open && mobile) {
-        setBtnReady(true);
-        setBtnTop((prev) => (prev === preferredTop ? prev : preferredTop));
-        return;
-      }
-
-      const hasRoom = maxTop >= minTop;
-      /*
-       * Visible only while media has entered enough that the docked top
-       * (minTop) still sits at/above the preferred pin — not over the hero.
-       */
-      const nextReady =
-        hasRoom &&
-        contentTop < preferredTop &&
-        contentBottom > inset &&
-        minTop < viewH;
-      const top = nextReady
-        ? Math.min(Math.max(preferredTop, minTop), maxTop)
-        : preferredTop;
-
-      setBtnReady((prev) => (prev === nextReady ? prev : nextReady));
-      setBtnTop((prev) => (prev === top ? prev : top));
-    };
-
-    sync();
-    window.addEventListener("scroll", sync, { passive: true });
-    window.addEventListener("resize", sync);
-    const vv = window.visualViewport;
-    vv?.addEventListener("resize", sync);
-    vv?.addEventListener("scroll", sync);
-    const ro = new ResizeObserver(sync);
-    ro.observe(media);
-    if (body) ro.observe(body);
-    return () => {
-      window.removeEventListener("scroll", sync);
-      window.removeEventListener("resize", sync);
-      vv?.removeEventListener("resize", sync);
-      vv?.removeEventListener("scroll", sync);
-      ro.disconnect();
-    };
-  }, [mounted, open]);
 
   /*
    * On open: ease page to copy line 1 (same duration as the panel push).
@@ -618,41 +550,34 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
         </div>
       </section>
 
-      {mounted
-        ? createPortal(
-            <div
-              ref={pinRef}
-              className={`project-case-demo__toggle-pin${btnReady ? " is-ready" : ""}`}
-              style={{ top: btnTop }}
-            >
-              <ClickSpark>
-                <div className="project-case-demo__toggle-glass">
-                  <button
-                    type="button"
-                    className={`project-case-demo__toggle${open ? " is-open" : ""}`}
-                    aria-expanded={open}
-                    aria-controls={panelId}
-                    tabIndex={btnReady ? 0 : -1}
-                    onClick={toggleOpen}
-                  >
-                    <span>Study The Project</span>
-                    <span
-                      className="project-case-demo__toggle-icon"
-                      aria-hidden="true"
-                    >
-                      +
-                    </span>
-                  </button>
-                </div>
-              </ClickSpark>
-            </div>,
-            document.body,
-          )
-        : null}
-
       <div ref={bodyRef} className="project-case-demo__body">
+        <div className="project-case-demo__toggle-pin">
+          <ClickSpark>
+            <GlareHover
+              width="auto"
+              height="auto"
+              background="rgba(255, 255, 255, 0.72)"
+              borderRadius="8px"
+              borderColor="transparent"
+              glareColor="#ffffff"
+              glareOpacity={0.55}
+              transitionDuration={GLARE_WIPE_MS}
+              className="project-case-demo__toggle-glare"
+            >
+              <button
+                type="button"
+                className={`project-case-demo__toggle${open ? " is-open" : ""}`}
+                aria-expanded={open}
+                aria-controls={panelId}
+                onClick={toggleOpen}
+              >
+                About the project
+              </button>
+            </GlareHover>
+          </ClickSpark>
+        </div>
         <div className="project-case-demo__columns">
-          <div className="project-case-demo__media-col">
+          <div ref={mediaColRef} className="project-case-demo__media-col">
             <div ref={mediaStackRef} className="project-case-demo__media-stack">
               {media.map((item, index) => {
                 if (item.kind === "video-pair") {
@@ -777,6 +702,49 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
               </div>
             </div>
           </aside>
+        </div>
+
+        <div
+          ref={creditsRef}
+          className="project-case-demo__credits"
+          aria-label="Special thanks and collaborators"
+        >
+          {specialThanks.map((item, index) => (
+            <div
+              key={`${item.company}-${item.name}`}
+              className="project-case-demo__credits-row"
+            >
+              {index === 0 ? (
+                <p className="project-case-demo__credits-label">
+                  Special thanks
+                </p>
+              ) : (
+                <span className="project-case-demo__credits-spacer" />
+              )}
+              <span className="project-case-demo__credits-company">
+                {item.company}
+              </span>
+              <span className="project-case-demo__credits-name">
+                {item.name}
+              </span>
+            </div>
+          ))}
+          <div className="project-case-demo__credits-row">
+            <span className="project-case-demo__credits-spacer" />
+            <span className="project-case-demo__credits-company">
+              Collaborators
+            </span>
+            <span className="project-case-demo__credits-name">
+              {collaborators.map((name) => (
+                <span
+                  key={name}
+                  className="project-case-demo__credits-name-line"
+                >
+                  {name}
+                </span>
+              ))}
+            </span>
+          </div>
         </div>
       </div>
     </div>

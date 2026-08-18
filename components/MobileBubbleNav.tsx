@@ -9,15 +9,16 @@ import {
   mobileSocialLinks,
   officeInfo,
 } from "@/content/nav";
+import { WeChatQrModal } from "@/components/WeChatQrModal";
 
 type MobileBubbleNavProps = {
   open: boolean;
   onNavigate: () => void;
 };
 
-/* Curtain: 480ms + last-column stagger 210ms — text waits until plate is full */
-const MOBILE_CONTENT_DELAY_S = 0.72;
-const MOBILE_META_DELAY_S = 0.9;
+/* Frost fade — text comes in with the plate */
+const MOBILE_CONTENT_DELAY_S = 0.12;
+const MOBILE_META_DELAY_S = 0.22;
 
 function ExternalArrow() {
   return (
@@ -123,16 +124,22 @@ export function MobileBubbleNav({ open, onNavigate }: MobileBubbleNavProps) {
             {footerChannels.map((row) => (
               <li key={row.label} className="mobile-menu__channel">
                 <span className="mobile-menu__channel-label">{row.label}</span>
-                <a
-                  href={row.href}
-                  className="mobile-menu__channel-value"
-                  {...(row.external
-                    ? { target: "_blank", rel: "noopener noreferrer" }
-                    : {})}
-                  onClick={onNavigate}
-                >
-                  {row.value}
-                </a>
+                {"action" in row && row.action === "wechat" ? (
+                  <WeChatQrModal className="mobile-menu__channel-value">
+                    {row.value}
+                  </WeChatQrModal>
+                ) : (
+                  <a
+                    href={row.href}
+                    className="mobile-menu__channel-value"
+                    {...(row.external
+                      ? { target: "_blank", rel: "noopener noreferrer" }
+                      : {})}
+                    onClick={onNavigate}
+                  >
+                    {row.value}
+                  </a>
+                )}
               </li>
             ))}
           </ul>

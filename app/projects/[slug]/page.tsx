@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { FrostIndexLink } from "@/components/FrostIndexLink";
 import { ProjectCaseDemo } from "@/components/ProjectCaseDemo";
 import { ProjectMasonry } from "@/components/ProjectMasonry";
 import {
@@ -43,8 +44,13 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
         <section className="section projects-related project-detail__related">
           <h2 className="projects-related__title">Related</h2>
           <ProjectMasonry projects={related} layout="related" />
+          <FrostIndexLink href="/projects">All projects</FrostIndexLink>
         </section>
-      ) : null}
+      ) : (
+        <section className="section project-detail__related">
+          <FrostIndexLink href="/projects">All projects</FrostIndexLink>
+        </section>
+      )}
     </main>
   );
 }

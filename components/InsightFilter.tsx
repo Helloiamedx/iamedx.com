@@ -9,11 +9,11 @@ type InsightFilterProps = {
 
 export function InsightFilter({ activeTag }: InsightFilterProps) {
   const items = [
-    { id: "all", label: "All", href: "/insights" },
+    { id: "all", label: "All", href: "/thoughts" },
     ...insightTags.map((tag) => ({
       id: tag.slug,
       label: tag.label,
-      href: `/insights?tag=${tag.slug}`,
+      href: `/thoughts?tag=${tag.slug}`,
     })),
   ];
 

@@ -98,9 +98,9 @@ export const insightTags: InsightTag[] = insightTagGroups.flatMap((group) =>
   })),
 );
 
-/** Insights index — Further-style hero + manifesto band */
+/** Thoughts index — Further-style hero + manifesto band */
 export const insightsHero = {
-  eyebrow: "Insights",
+  eyebrow: "Thoughts",
   headline: "Notes from the work",
 } as const;
 
@@ -174,6 +174,8 @@ export const aboutMega: MegaColumn[] = [
     description: "",
     links: [
       "About",
+      "Testimonials",
+      "Expertise",
       "Achievement",
       "Experience",
       "How I work",
@@ -190,17 +192,34 @@ export const insightsMega: MegaColumn[] = [
     links: insightTags.map((tag) => ({
       label: tag.label,
       slug: tag.slug,
-      href: `/insights?tag=${tag.slug}`,
+      href: `/thoughts?tag=${tag.slug}`,
     })),
   },
 ];
 
+/** Clients mega — placeholders until the roster is filled */
+export const clientsMega: MegaColumn[] = [
+  {
+    id: "clients",
+    title: "",
+    description: "",
+    links: [
+      { label: "Disney", slug: "disney", href: "/clients" },
+      { label: "Nintendo", slug: "nintendo", href: "/clients" },
+      { label: "Bethesda", slug: "bethesda", href: "/clients" },
+      { label: "Ubisoft", slug: "ubisoft", href: "/clients" },
+      { label: "Capcom", slug: "capcom", href: "/clients" },
+      { label: "Rockstar Games", slug: "rockstar", href: "/clients" },
+    ],
+  },
+];
+
 export const primaryNav: NavItem[] = [
-  { href: "/about", label: "About" },
-  { href: "/services", label: "Services" },
-  { href: "/projects", label: "Projects" },
-  { href: "/insights", label: "Insights" },
-  { href: "/pricing", label: "Pricing" },
+  { href: "/services", label: "Services", mega: servicesMega },
+  { href: "/clients", label: "Clients", mega: clientsMega },
+  { href: "/projects", label: "Projects", mega: projectsMega },
+  { href: "/thoughts", label: "Thoughts", mega: insightsMega },
+  { href: "/about", label: "About", mega: aboutMega },
 ];
 
 export const contactCta = {
@@ -225,9 +244,11 @@ export const whatsAppCta = {
 export const weChatId = "Helloiamedx";
 
 export const weChatCta = {
-  href: "/contact",
   label: "WeChat",
 } as const;
+
+/** Swap this file when the real WeChat QR photo arrives */
+export const weChatQrSrc = "/brand/wechat-qr.svg";
 
 /** External social / office — Facebook & TikTok use site until profiles are ready */
 export const linkedInHref = "https://www.linkedin.com/in/edwardadvance/";
@@ -258,6 +279,17 @@ export const phoneCta = {
   label: "Phone",
 } as const;
 
+/** Header right CTAs — WhatsApp (desktop + mobile) / Email (desktop only) */
+export const headerCtaLinks = [
+  {
+    label: whatsAppCta.label,
+    href: whatsAppCta.href,
+    external: true,
+    mobile: true,
+  },
+  { label: contactCta.label, href: contactCta.href, external: false },
+] as const;
+
 /** Footer — Pentagram-style inquiry row */
 export const footerHelpTitle = "Let Me Help You";
 
@@ -272,8 +304,7 @@ export const footerChannels = [
   {
     label: "WeChat",
     value: weChatId,
-    href: weChatCta.href,
-    external: false,
+    action: "wechat",
   },
   {
     label: "Email",
@@ -296,17 +327,15 @@ export const footerAboutCopy =
   "I create products and experiences that drive remarkable change through radical collaboration.";
 
 export const mobileNavLinks = [
-  { label: "About", href: "/about" },
   { label: "Services", href: "/services" },
+  { label: "Clients", href: "/clients" },
   { label: "Projects", href: "/projects" },
-  { label: "Insights", href: "/insights" },
-  { label: "Pricing", href: "/pricing" },
+  { label: "Thoughts", href: "/thoughts" },
+  { label: "About", href: "/about" },
 ] as const;
 
 export const mobileSocialLinks = [
   { label: "LinkedIn", href: linkedInHref },
-  { label: "Facebook", href: facebookHref },
-  { label: "TikTok", href: tiktokHref },
 ] as const;
 
 /** Footer content layer (reference layout) */
@@ -321,9 +350,6 @@ export const footerAssistCopy =
 
 /** Large mid-footer line — rendered uppercase via CSS */
 export const footerThanksLine = "Thanks for your trust";
-
-/** Bottom-right note above HELLOIAMEDX */
-export const footerPaymentsNote = "Personal Payments Accepted";
 
 export type FooterNavColumn = {
   id: string;
@@ -347,8 +373,8 @@ export const footerNavColumns: FooterNavColumn[] = [
   },
   {
     id: "insights",
-    label: "Insights",
-    links: [{ label: "Insights", href: "/insights" }],
+    label: "Thoughts",
+    links: [{ label: "Thoughts", href: "/thoughts" }],
   },
   {
     id: "pricing",

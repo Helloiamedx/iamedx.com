@@ -1,12 +1,12 @@
 ---
 description: Fixed featured leads on Projects / Insights index — never filter-driven
-globs: app/projects/**/*.{tsx,ts}, app/insights/**/*.{tsx,ts}, components/ProjectFeaturedLead.tsx, components/InsightsLead.tsx, content/projects.ts, lib/insights.ts
+globs: app/projects/**/*.{tsx,ts}, app/thoughts/**/*.{tsx,ts}, components/ProjectFeaturedLead.tsx, components/InsightsLead.tsx, content/projects.ts, lib/insights.ts
 alwaysApply: true
 ---
 
 # Fixed featured leads (index pages)
 
-On `/projects` and `/insights`, the **first full-width featured item sits above the filter** and stays pinned there. It **also appears in the filtered grid** when it matches the active filter (including “all”).
+On `/projects` and `/thoughts`, the **first full-width featured item sits above the filter** and stays pinned there. It **also appears in the filtered grid** when it matches the active filter (including “all”).
 
 ## Rules
 

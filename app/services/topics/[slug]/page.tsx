@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ClickSpark } from "@/components/ClickSpark";
-import { findServiceTopic, servicesMega } from "@/content/nav";
+import { contactCta, findServiceTopic, servicesMega } from "@/content/nav";
 
 type TopicPageProps = {
   params: Promise<{ slug: string }>;
@@ -45,9 +45,9 @@ export default async function ServiceTopicPage({ params }: TopicPageProps) {
       </p>
       <p>
         <ClickSpark>
-          <Link href="/contact" className="button">
-            Contact
-          </Link>
+          <a href={contactCta.href} className="button">
+            Email
+          </a>
         </ClickSpark>
       </p>
     </main>

@@ -106,6 +106,7 @@ export function YouTubeBackground({
   const hostId = `yt-bg-${reactId}`;
   const playerRef = useRef<YtPlayer | null>(null);
   const [ready, setReady] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -113,6 +114,7 @@ export function YouTubeBackground({
     let watchId = 0;
     let playingSince: number | null = null;
     setReady(false);
+    setProgress(0);
 
     const restart = (target: YtPlayer) => {
       playingSince = null;
@@ -122,6 +124,12 @@ export function YouTubeBackground({
     };
 
     const inStartWindow = (t: number) => t >= Math.max(0, startSeconds - 0.25);
+
+    /* Soft crawl toward ~90% while waiting for stable PLAYING */
+    const crawlId = window.setInterval(() => {
+      if (cancelled || revealed) return;
+      setProgress((p) => (p >= 90 ? p : Math.min(90, p + 3 + Math.random() * 4)));
+    }, 180);
 
     void loadYouTubeApi().then((YT) => {
       if (cancelled) return;
@@ -153,6 +161,7 @@ export function YouTubeBackground({
             if (playingSince == null) playingSince = now;
             if (now - playingSince >= REVEAL_HOLD_MS) {
               revealed = true;
+              setProgress(100);
               setReady(true);
             }
           } else {
@@ -175,6 +184,7 @@ export function YouTubeBackground({
               event.target.seekTo(startSeconds, true);
             }
             event.target.playVideo();
+            setProgress((p) => Math.max(p, 35));
 
             watchId = window.setInterval(() => {
               try {
@@ -194,6 +204,7 @@ export function YouTubeBackground({
           onStateChange: (event) => {
             if (event.data === YT.PlayerState.PLAYING) {
               event.target.mute();
+              setProgress((p) => Math.max(p, 75));
               tryReveal(event.target);
             } else if (
               event.data === YT.PlayerState.PAUSED ||
@@ -218,6 +229,7 @@ export function YouTubeBackground({
 
     return () => {
       cancelled = true;
+      window.clearInterval(crawlId);
       if (watchId) window.clearInterval(watchId);
       try {
         playerRef.current?.destroy();
@@ -235,7 +247,7 @@ export function YouTubeBackground({
     >
       <div id={hostId} className="youtube-background__host" title={title} />
       {/* Opaque until stable playback — blocks YouTube title + big play */}
-      <VideoLoadingCover ready={ready} />
+      <VideoLoadingCover progress={progress} ready={ready} />
     </div>
   );
 }

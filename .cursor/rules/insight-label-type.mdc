@@ -1,6 +1,6 @@
 ---
 description: Filled type chips never use all-caps; insight label tokens
-globs: app/insights/**/*.tsx, app/projects/**/*.tsx, app/globals.css, components/Insight*.tsx, components/Insights*.tsx, components/Project*.tsx
+globs: app/thoughts/**/*.tsx, app/projects/**/*.tsx, app/globals.css, components/Insight*.tsx, components/Insights*.tsx, components/Project*.tsx
 alwaysApply: true
 ---
 

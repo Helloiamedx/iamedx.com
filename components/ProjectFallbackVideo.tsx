@@ -2,7 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
-import { VideoLoadingCover } from "@/components/VideoLoadingCover";
+import {
+  VideoLoadingCover,
+  useVideoLoadProgress,
+} from "@/components/VideoLoadingCover";
 
 export type ProjectFallbackVideoProps = {
   /** Preferred source (e.g. TikTok / original URL). */
@@ -23,7 +26,7 @@ export type ProjectFallbackVideoProps = {
 /**
  * Tries `primarySrc` first; on load/play failure (or timeout) switches to
  * `fallbackSrc` when provided. Muted autoplay loop, no download.
- * Loading cover only — never a frame-extracted poster.
+ * Progress bar until buffer hits 100%, then play — never a frame poster.
  */
 export function ProjectFallbackVideo({
   primarySrc,
@@ -36,19 +39,17 @@ export function ProjectFallbackVideo({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [src, setSrc] = useState(primarySrc);
   const [usedFallback, setUsedFallback] = useState(false);
-  const [ready, setReady] = useState(false);
+  const { progress, ready } = useVideoLoadProgress(videoRef, src);
 
   useEffect(() => {
     setSrc(primarySrc);
     setUsedFallback(false);
-    setReady(false);
   }, [primarySrc, fallbackSrc]);
 
   useEffect(() => {
     if (!fallbackSrc || usedFallback || ready || src === fallbackSrc) return;
     const id = window.setTimeout(() => {
       setUsedFallback(true);
-      setReady(false);
       setSrc(fallbackSrc);
     }, primaryTimeoutMs);
     return () => window.clearTimeout(id);
@@ -65,7 +66,6 @@ export function ProjectFallbackVideo({
   const switchToFallback = () => {
     if (!fallbackSrc || usedFallback || src === fallbackSrc) return;
     setUsedFallback(true);
-    setReady(false);
     setSrc(fallbackSrc);
   };
 
@@ -80,13 +80,12 @@ export function ProjectFallbackVideo({
         className="project-fallback-video__media"
         src={src}
         preload="auto"
+        autoPlay={false}
         aria-label={alt}
-        onLoadedData={() => setReady(true)}
-        onCanPlay={() => setReady(true)}
         onError={switchToFallback}
       />
 
-      <VideoLoadingCover ready={ready} />
+      <VideoLoadingCover progress={progress} ready={ready} />
     </div>
   );
 }

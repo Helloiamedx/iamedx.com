@@ -69,11 +69,18 @@
   opacity: var(--dw-dim);
   transform: translateZ(0);
   pointer-events: none;
+  /* Kill 1px chroma fringe at rounded clip under 3D GPU layers */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  isolation: isolate;
 }
 
 .drift-wall__tile img {
-  width: 100%;
-  height: 100%;
+  /* Bleed past the clip so subpixel AA never reads as a magenta hairline */
+  width: calc(100% + 2px);
+  height: calc(100% + 2px);
+  max-width: none;
+  margin: -1px;
   object-fit: cover;
   display: block;
   filter: grayscale(var(--dw-gray)) saturate(1);

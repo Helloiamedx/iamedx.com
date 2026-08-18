@@ -9,6 +9,10 @@ import {
 } from "react";
 import { gsap } from "gsap";
 import { HeroActions } from "@/components/HeroActions";
+import {
+  HERO_COPY_ATTR,
+  whenHeroFlag,
+} from "@/lib/heroSequence";
 import "./FoldText.css";
 
 const PREFIX =
@@ -47,6 +51,7 @@ export function HeroHeadline() {
   const [complete, setComplete] = useState(false);
   const [index, setIndex] = useState(0);
   const [ready, setReady] = useState(false);
+  const [copyGate, setCopyGate] = useState(false);
   const rootRef = useRef<HTMLSpanElement>(null);
   const slotRef = useRef<HTMLSpanElement>(null);
   const wordRef = useRef<HTMLSpanElement>(null);
@@ -62,6 +67,17 @@ export function HeroHeadline() {
     indexRef.current = start;
     setIndex(start);
     setReady(true);
+  }, []);
+
+  /* Hold copy until home video is playing (after chrome + buffer). */
+  useEffect(() => {
+    let cancelled = false;
+    void whenHeroFlag(HERO_COPY_ATTR).then(() => {
+      if (!cancelled) setCopyGate(true);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useLayoutEffect(() => {
@@ -135,9 +151,9 @@ export function HeroHeadline() {
     };
   }, [index]);
 
-  /* Fold-in entrance — start immediately; never stall on fonts/CDN. */
+  /* Fold-in entrance — only after home video is playing. */
   useLayoutEffect(() => {
-    if (!ready) return undefined;
+    if (!ready || !copyGate) return undefined;
 
     const root = rootRef.current;
     if (!root) return undefined;
@@ -189,7 +205,7 @@ export function HeroHeadline() {
       tween.kill();
       gsap.killTweensOf(pieces);
     };
-  }, [ready]);
+  }, [ready, copyGate]);
 
   /*
    * Keyword rotate — wait after CTAs appear, then peel/cascade to the NEXT word.

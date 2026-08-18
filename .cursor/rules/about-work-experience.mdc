@@ -1,7 +1,7 @@
 ---
-description: Edward work experience — full bullets live in content/experience.ts; About Experience is a temporary career strip until a dedicated Experience UI is designed.
+description: Edward work experience — full bullets in content/experience.ts; About Experience rows expand on click (no +/- button).
 alwaysApply: false
-globs: content/experience.ts,app/about/**
+globs: content/experience.ts,app/about/**,components/AboutExperienceList.tsx
 ---
 
 # About work experience
@@ -10,11 +10,13 @@ globs: content/experience.ts,app/about/**
 
 Full roles + bullet points: `content/experience.ts` (`experienceRoles`).
 
-Do **not** invent bullets or dates. When the user redesigns Experience / career presentation, pull from that file.
+Do **not** invent bullets or dates.
 
-## Current UI (temporary)
+Scan highlights in bullets use `**phrase**` → rendered white (`.about-boua__work-hl`); body stays gray. Highlight value / scale / capability phrases only — not verbs like Managed / Conducted / Assisted. Keep ~3–5 highlights per role where possible.
 
-About page **Experience** (`#experience`) lists career rows only:
+## Current UI
+
+About page **Experience** (`#experience`) keeps the career strip columns:
 
 1. Index (`01`…)
 2. Role (large)
@@ -22,13 +24,14 @@ About page **Experience** (`#experience`) lists career rows only:
 4. Country (`country` — Title Case in data; uppercase in UI)
 5. Period
 
-- No “All projects” / “Selected Work” label
-- Section label sticky on the left (same grid language as About)
-- Not project case studies
+Click a row to expand that role’s `bullets`. No +/- icon button. No Location line.
+
+- Section label sticky on the left
+- Implementation: `components/AboutExperienceList.tsx`
 
 ## Country copy
 
-Use polished country names in `experienceRoles[].country` (e.g. `United States`, not “unit states”). Do not invent countries.
+Use polished country names in `experienceRoles[].country` (e.g. `United States`). Do not invent countries.
 
 ## When logos arrive
 

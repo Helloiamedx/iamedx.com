@@ -1,6 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { ProtectedVideo } from "@/components/ProtectedVideo";
+import { CoverLoopVideo } from "@/components/CoverLoopVideo";
 import {
   INSIGHT_COVER_H,
   INSIGHT_COVER_W,
@@ -24,14 +26,13 @@ export function InsightsLead({ insight }: InsightsLeadProps) {
 
   return (
     <article className="insights-lead insights-shell">
-      <Link href={`/insights/${insight.slug}`} className="insights-lead__link">
+      <Link href={`/thoughts/${insight.slug}`} className="insights-lead__link">
         <div className="insights-lead__media">
           {videoCover ? (
-            <ProtectedVideo
+            <CoverLoopVideo
               className="insights-lead__cover-video"
               src={insight.coverImage}
-              preload="metadata"
-              aria-label={insight.title}
+              ariaLabel={insight.title}
             />
           ) : (
             <Image
