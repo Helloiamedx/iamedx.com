@@ -43,16 +43,18 @@ export function Footer() {
                     <WeChatQrModal className="site-footer__channel-value">
                       {row.value}
                     </WeChatQrModal>
-                  ) : (
+                  ) : "href" in row ? (
                     <a
                       href={row.href}
                       className="site-footer__channel-value"
-                      {...(row.external
+                      {...("external" in row && row.external
                         ? { target: "_blank", rel: "noopener noreferrer" }
                         : {})}
                     >
                       {row.value}
                     </a>
+                  ) : (
+                    <span className="site-footer__channel-value">{row.value}</span>
                   )}
                 </li>
               ))}

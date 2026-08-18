@@ -18,6 +18,53 @@ import { asset } from "@/lib/assets";
 
 const MOBILE_CURTAIN_MS = 400;
 
+/** Ignore the synthetic hover browsers fire when the window is focused again. */
+let pointerHoverArmed = false;
+let pointerSampleX = Number.NaN;
+let pointerSampleY = Number.NaN;
+let hoverGateBound = false;
+const hoverResetters = new Set<() => void>();
+
+function lockPointerHover() {
+  pointerHoverArmed = false;
+  pointerSampleX = Number.NaN;
+  pointerSampleY = Number.NaN;
+  hoverResetters.forEach((reset) => reset());
+}
+
+function bindPointerHoverGate() {
+  if (hoverGateBound || typeof window === "undefined") return;
+  hoverGateBound = true;
+
+  const onPointerMove = (event: PointerEvent) => {
+    const x = event.clientX;
+    const y = event.clientY;
+    if (!Number.isFinite(pointerSampleX)) {
+      pointerSampleX = x;
+      pointerSampleY = y;
+      if (event.movementX === 0 && event.movementY === 0) return;
+    }
+    if (
+      x === pointerSampleX &&
+      y === pointerSampleY &&
+      event.movementX === 0 &&
+      event.movementY === 0
+    ) {
+      return;
+    }
+    pointerSampleX = x;
+    pointerSampleY = y;
+    pointerHoverArmed = true;
+  };
+
+  window.addEventListener("blur", lockPointerHover);
+  window.addEventListener("pagehide", lockPointerHover);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) lockPointerHover();
+  });
+  window.addEventListener("pointermove", onPointerMove, { passive: true });
+}
+
 function SiteLogo({
   onReady,
 }: {
@@ -68,9 +115,27 @@ function FillHoverLink({
 }) {
   const [phase, setPhase] = useState<"idle" | "in" | "out">("idle");
 
+  useEffect(() => {
+    bindPointerHoverGate();
+    const reset = () => setPhase("idle");
+    hoverResetters.add(reset);
+    return () => {
+      hoverResetters.delete(reset);
+    };
+  }, []);
+
   function onFillEnd(event: TransitionEvent<HTMLSpanElement>) {
     if (event.propertyName !== "transform") return;
     setPhase((current) => (current === "out" ? "idle" : current));
+  }
+
+  function enter() {
+    if (!pointerHoverArmed) return;
+    setPhase("in");
+  }
+
+  function leave() {
+    setPhase((current) => (current === "idle" ? "idle" : "out"));
   }
 
   const classes = `work-with-me${className ? ` ${className}` : ""}${phase === "in" ? " is-cta-in" : ""}${phase === "out" ? " is-cta-out" : ""}${phase === "idle" ? " is-cta-idle" : ""}`;
@@ -89,11 +154,13 @@ function FillHoverLink({
   );
 
   const hover = {
-    onMouseEnter: () => setPhase("in"),
-    onMouseLeave: () =>
-      setPhase((current) => (current === "idle" ? "idle" : "out")),
-    onFocus: () => setPhase("in"),
-    onBlur: () => setPhase((current) => (current === "idle" ? "idle" : "out")),
+    onPointerEnter: enter,
+    onPointerMove: enter,
+    onPointerLeave: leave,
+    onFocus: (event: { currentTarget: HTMLElement }) => {
+      if (event.currentTarget.matches(":focus-visible")) setPhase("in");
+    },
+    onBlur: leave,
   };
 
   if (external) {

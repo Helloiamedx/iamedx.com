@@ -128,17 +128,19 @@ export function MobileBubbleNav({ open, onNavigate }: MobileBubbleNavProps) {
                   <WeChatQrModal className="mobile-menu__channel-value">
                     {row.value}
                   </WeChatQrModal>
-                ) : (
+                ) : "href" in row ? (
                   <a
                     href={row.href}
                     className="mobile-menu__channel-value"
-                    {...(row.external
+                    {...("external" in row && row.external
                       ? { target: "_blank", rel: "noopener noreferrer" }
                       : {})}
                     onClick={onNavigate}
                   >
                     {row.value}
                   </a>
+                ) : (
+                  <span className="mobile-menu__channel-value">{row.value}</span>
                 )}
               </li>
             ))}
