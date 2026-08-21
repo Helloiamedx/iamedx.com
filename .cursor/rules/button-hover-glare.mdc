@@ -1,34 +1,39 @@
 ---
-description: Universal CTA hover glare — wipe sits between button fill and label
+description: Global CTA is OriginButton — except header / nav chrome and footer
 alwaysApply: true
 ---
 
-# Button hover glare (universal)
+# Global button — OriginButton
 
-All interactive CTAs / pills that use a hover “擦亮” wipe must follow this stack.
-This is a site-wide convention — do not invent a different hover highlight.
+All site CTAs (hero, All projects / All thoughts, About the project, forms, pricing, services) use **one** component: `OriginButton` from `components/ui/origin-button.tsx`.
 
-## Required stack (bottom → top)
+Change `components/ui/origin-button.tsx` + `.origin-button` in `app/globals.css` → every CTA updates.
 
-1. **Button fill** — solid or translucent background on the outer shell (`GlareHover` / equivalent)
-2. **Glare wipe** — the moving highlight layer (`::before` or equivalent), clipped to the pill with `overflow: hidden` + matching `border-radius`
-3. **Label / icon** — text stays above the wipe (`z-index` above the glare)
+Rest: **slight radius** (`0.25rem`). **Uppercase** label. **Border always matches text** (`currentColor`). Black fill + white type + white border. Hover: white fill + black type + black border. Weight: Medium (`500`).
 
-Never put an opaque (or mostly opaque) fill on the child that sits above the glare — that buries the wipe (especially on dark buttons like View services).
-
-## Pattern
+## Use
 
 ```tsx
-<GlareHover background="{fill}" borderRadius="999px" glareColor="#ffffff" …>
-  {/* child background must be transparent */}
-  <Link or SpecularButton tintOpacity={0} />
-</GlareHover>
+import { OriginButton } from "@/components/ui/origin-button";
+
+<OriginButton>Label</OriginButton>
+<OriginButton href="/projects">All projects</OriginButton>
+<OriginButton type="submit">Send</OriginButton>
 ```
 
-## Checklist
+Index links can still go through `FrostIndexLink` (layout wrapper) — it renders `OriginButton`.
 
-- Hover wipe is visible on dark and light fills
-- Wipe is masked to capsule/pill — not a raw rectangle
-- Specular / rim idle effects (if any) pause on hover so only the glare wipe shows
-- Nav Contact, hero CTAs, and future buttons share this same hover language
-- Wipe duration uses shared `GLARE_WIPE_MS` from `GlareHover.tsx` (do not invent a faster local duration)
+## Do not
+
+- Wrap CTAs in ClickSpark
+- Invent a new fill, glare wipe, frosted pill, or SpecularButton for CTAs
+- Restyle one instance with local CSS that fights OriginButton (no `background` / `color` / `border-radius` overrides on the button)
+- Put GlareHover on these CTAs
+
+## Exceptions
+
+**Header / nav chrome** stays as-is: logo, primary nav, Menu / Close.
+
+**Footer** uses `InteractiveHoverButton` — not OriginButton. Do not restyle footer CTAs when changing OriginButton.
+
+Not OriginButton: filter pills, FAQ tabs, WeChat QR trigger / backdrop, panel Close, mobile menu list.

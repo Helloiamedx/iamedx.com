@@ -2,9 +2,8 @@
 
 import { useLenis } from "lenis/react";
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
-import { ClickSpark } from "@/components/ClickSpark";
-import { GlareHover, GLARE_WIPE_MS } from "@/components/GlareHover";
 import { HeroSegmentVideo } from "@/components/HeroSegmentVideo";
+import { OriginButton } from "@/components/ui/origin-button";
 import { ProjectFallbackVideo } from "@/components/ProjectFallbackVideo";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
 import { YouTubeBackground } from "@/components/YouTubeBackground";
@@ -552,29 +551,15 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
 
       <div ref={bodyRef} className="project-case-demo__body">
         <div className="project-case-demo__toggle-pin">
-          <ClickSpark>
-            <GlareHover
-              width="auto"
-              height="auto"
-              background="rgba(255, 255, 255, 0.72)"
-              borderRadius="8px"
-              borderColor="transparent"
-              glareColor="#ffffff"
-              glareOpacity={0.55}
-              transitionDuration={GLARE_WIPE_MS}
-              className="project-case-demo__toggle-glare"
-            >
-              <button
-                type="button"
-                className={`project-case-demo__toggle${open ? " is-open" : ""}`}
-                aria-expanded={open}
-                aria-controls={panelId}
-                onClick={toggleOpen}
-              >
-                About the project
-              </button>
-            </GlareHover>
-          </ClickSpark>
+          <OriginButton
+            type="button"
+            className={open ? "is-open" : undefined}
+            aria-expanded={open}
+            aria-controls={panelId}
+            onClick={toggleOpen}
+          >
+            About the project
+          </OriginButton>
         </div>
         <div className="project-case-demo__columns">
           <div ref={mediaColRef} className="project-case-demo__media-col">

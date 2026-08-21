@@ -43,7 +43,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
       {related.length > 0 ? (
         <section className="section projects-related project-detail__related">
           <h2 className="projects-related__title">Related</h2>
-          <ProjectMasonry projects={related} layout="related" />
+          <ProjectMasonry projects={related} layout="related" enableHoverSwap />
           <FrostIndexLink href="/projects">All projects</FrostIndexLink>
         </section>
       ) : (

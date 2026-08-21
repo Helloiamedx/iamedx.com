@@ -71,7 +71,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
         <ProjectFeaturedLead project={projectsFeaturedLead} />
         <ProjectFilter active={activeInvolvement} activeIp={activeIp} />
         <FilterResults filterKey={filterKey}>
-          <ProjectMasonry projects={listed} />
+          <ProjectMasonry projects={listed} enableHoverSwap />
         </FilterResults>
       </section>
     </main>

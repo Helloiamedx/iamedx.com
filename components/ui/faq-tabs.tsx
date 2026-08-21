@@ -1,11 +1,14 @@
 "use client";
 
 import {
+  useEffect,
+  useId,
   useState,
   type HTMLAttributes,
 } from "react";
-import { AnimatePresence, motion } from "motion/react";
-import { Plus } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { Minus, Plus } from "lucide-react";
+import { BackgroundBeams } from "@/components/ui/background-beams";
 import { cn } from "@/lib/utils";
 
 export type FAQItemData = {
@@ -18,17 +21,25 @@ export type FAQData = Record<string, FAQItemData[]>;
 
 export type FAQProps = HTMLAttributes<HTMLElement> & {
   title?: string;
-  subtitle?: string;
   categories: FAQCategories;
   faqData: FAQData;
+  /** Plain support line under the title */
+  supportNote?: string;
+  tocLabel?: string;
 };
 
-/** Reusable FAQ with category tabs + accordion answers */
+const EASE = [0.455, 0.03, 0.515, 0.955] as const;
+
+/**
+ * FAQ page layout — title + support note on top, category TOC left,
+ * accordion right (reference: MyClean-style two-column FAQ).
+ */
 export function FAQ({
   title = "FAQs",
-  subtitle,
   categories,
   faqData,
+  supportNote,
+  tocLabel = "Table of Contents",
   className,
   ...props
 }: FAQProps) {
@@ -36,112 +47,63 @@ export function FAQ({
   const [selectedCategory, setSelectedCategory] = useState(
     categoryKeys[0] ?? "",
   );
+  const tocId = useId();
 
   if (!categoryKeys.length) return null;
 
-  return (
-    <section
-      className={cn(
-        "relative overflow-hidden bg-background px-4 py-12 text-foreground",
-        className,
-      )}
-      {...props}
-    >
-      <FAQHeader title={title} subtitle={subtitle} />
-      <FAQTabs
-        categories={categories}
-        selected={selectedCategory}
-        setSelected={setSelectedCategory}
-      />
-      <FAQList faqData={faqData} selected={selectedCategory} />
-    </section>
-  );
-}
+  const questions = faqData[selectedCategory] ?? [];
 
-function FAQHeader({
-  title,
-  subtitle,
-}: {
-  title: string;
-  subtitle?: string;
-}) {
   return (
-    <div className="site-faq__header relative z-10 flex flex-col items-center justify-center">
-      {subtitle ? (
-        <span className="mb-8 text-sm font-medium text-foreground/80">
-          {subtitle}
-        </span>
-      ) : null}
-      <h2 className="site-faq__title text-center text-4xl tracking-tight md:text-5xl">
-        {title}
-      </h2>
-    </div>
-  );
-}
+    <section className={cn("faq-shell", className)} {...props}>
+      <header className="faq-shell__header">
+        <div className="faq-shell__hero-bg" aria-hidden="true">
+          <BackgroundBeams />
+          <div className="faq-shell__hero-fade" />
+        </div>
+        <div className="faq-shell__hero-copy">
+          <h1 className="faq-shell__title">{title}</h1>
+          {supportNote ? (
+            <p className="faq-shell__support">{supportNote}</p>
+          ) : null}
+        </div>
+      </header>
 
-function FAQTabs({
-  categories,
-  selected,
-  setSelected,
-}: {
-  categories: FAQCategories;
-  selected: string;
-  setSelected: (key: string) => void;
-}) {
-  return (
-    <div className="relative z-10 flex flex-wrap items-center justify-center gap-3">
-      {Object.entries(categories).map(([key, label]) => {
-        const isActive = selected === key;
-        return (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setSelected(key)}
-            className={cn(
-              "site-faq__tab relative overflow-hidden whitespace-nowrap rounded-md px-3 py-1.5 text-sm transition-colors duration-500",
-              isActive ? "text-black" : "bg-transparent text-white",
-            )}
-            data-active={isActive ? "true" : "false"}
-          >
-            <span className="site-faq__tab-label relative z-10">{label}</span>
-            <AnimatePresence>
-              {isActive ? (
-                <motion.span
-                  initial={{ y: "100%" }}
-                  animate={{ y: "0%" }}
-                  exit={{ y: "100%" }}
-                  transition={{ duration: 0.5, ease: "backIn" }}
-                  className="absolute inset-0 z-0 bg-gradient-to-r from-white to-neutral-400"
-                />
-              ) : null}
-            </AnimatePresence>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
+      <div className="faq-shell__body">
+        <nav className="faq-shell__toc" aria-labelledby={tocId}>
+          <p id={tocId} className="faq-shell__toc-label">
+            {tocLabel}
+          </p>
+          <ul className="faq-shell__toc-list">
+            {categoryKeys.map((key) => {
+              const active = selectedCategory === key;
+              return (
+                <li key={key}>
+                  <button
+                    type="button"
+                    className={cn(
+                      "faq-shell__toc-btn",
+                      active && "is-active",
+                    )}
+                    aria-current={active ? "true" : undefined}
+                    onClick={() => setSelectedCategory(key)}
+                  >
+                    {categories[key]}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
 
-function FAQList({
-  faqData,
-  selected,
-}: {
-  faqData: FAQData;
-  selected: string;
-}) {
-  return (
-    <div className="relative z-10 mx-auto mt-12 max-w-3xl">
-      <AnimatePresence mode="wait">
-        {Object.entries(faqData).map(([category, questions]) => {
-          if (selected !== category) return null;
-          return (
+        <div className="faq-shell__panel">
+          <AnimatePresence mode="wait" initial={false}>
             <motion.div
-              key={category}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              transition={{ duration: 0.5, ease: "backIn" }}
-              className="space-y-3"
+              key={selectedCategory}
+              className="faq-shell__list"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.28, ease: EASE }}
             >
               {questions.map((faq) => (
                 <FAQItem
@@ -151,61 +113,64 @@ function FAQList({
                 />
               ))}
             </motion.div>
-          );
-        })}
-      </AnimatePresence>
-    </div>
+          </AnimatePresence>
+        </div>
+      </div>
+    </section>
   );
 }
 
 function FAQItem({ question, answer }: FAQItemData) {
   const [isOpen, setIsOpen] = useState(false);
+  const reduceMotion = useReducedMotion();
+  const panelId = useId();
+  const buttonId = useId();
+
+  /* Close when parent remounts on category change (new key tree) — local state resets */
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen]);
 
   return (
-    <motion.div
-      animate={isOpen ? "open" : "closed"}
-      className="site-faq__item rounded-xl bg-card"
-    >
+    <div className={cn("faq-shell__item", isOpen && "is-open")}>
       <button
+        id={buttonId}
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between gap-4 p-4 text-left"
+        className="faq-shell__trigger"
+        aria-expanded={isOpen}
+        aria-controls={panelId}
+        onClick={() => setIsOpen((open) => !open)}
       >
-        <span
-          className={cn(
-            "site-faq__q text-lg transition-colors",
-            isOpen ? "text-foreground" : "text-white/55",
-          )}
-        >
-          {question}
+        <span className="faq-shell__q">{question}</span>
+        <span className="faq-shell__icon" aria-hidden="true">
+          {isOpen ? <Minus strokeWidth={2} /> : <Plus strokeWidth={2} />}
         </span>
-        <motion.span
-          variants={{
-            open: { rotate: "45deg" },
-            closed: { rotate: "0deg" },
-          }}
-          transition={{ duration: 0.2 }}
-        >
-          <Plus
-            className={cn(
-              "h-5 w-5 transition-colors",
-              isOpen ? "text-foreground" : "text-white/55",
-            )}
-          />
-        </motion.span>
       </button>
       <motion.div
+        id={panelId}
+        role="region"
+        aria-labelledby={buttonId}
         initial={false}
         animate={{
-          height: isOpen ? "auto" : "0px",
-          marginBottom: isOpen ? "16px" : "0px",
+          height: isOpen ? "auto" : 0,
+          opacity: isOpen ? 1 : 0,
         }}
-        transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="overflow-hidden px-4"
+        transition={
+          reduceMotion
+            ? { duration: 0.01 }
+            : { duration: 0.32, ease: EASE }
+        }
+        className="faq-shell__answer-wrap"
       >
-        <p className="site-faq__answer">{answer}</p>
+        <p className="faq-shell__answer">{answer}</p>
       </motion.div>
-    </motion.div>
+    </div>
   );
 }
 

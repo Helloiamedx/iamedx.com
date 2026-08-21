@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { OriginButton } from "@/components/ui/origin-button";
 import {
   homePricingSection,
   homePricingStages,
@@ -10,16 +11,9 @@ export function HomePricing() {
 
   return (
     <section className="home-pricing" id={id} aria-labelledby="home-pricing-title">
-      <div className="home-pricing__intro">
-        <div className="home-pricing__heading">
-          <h2 id="home-pricing-title" className="home-pricing__title">
-            {title}
-          </h2>
-          <Link href={moreHref} className="home-pricing__more">
-            {moreLabel}
-          </Link>
-        </div>
-        <p className="home-pricing__subtitle">{subtitle}</p>
+      <div className="home-page__intro">
+        <h2 id="home-pricing-title">{title}</h2>
+        <p>{subtitle}</p>
       </div>
 
       <ul className="home-pricing__grid">
@@ -32,9 +26,10 @@ export function HomePricing() {
       </ul>
 
       <div className="home-pricing__footer">
-        <a href={ctaHref} className="home-pricing__cta">
-          {ctaLabel}
-        </a>
+        <OriginButton href={ctaHref}>{ctaLabel}</OriginButton>
+        <Link href={moreHref} className="home-pricing__more">
+          {moreLabel}
+        </Link>
       </div>
     </section>
   );

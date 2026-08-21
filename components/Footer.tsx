@@ -2,29 +2,16 @@
 
 import Image from "next/image";
 import {
-  footerAboutCopy,
-  footerChannels,
-  footerHelpTitle,
-  mobileSocialLinks,
+  contactInfo,
+  footerLeadLine,
+  footerMenuLinks,
+  linkedInHref,
+  officeInfo,
+  whatsAppCta,
 } from "@/content/nav";
-import { WeChatQrModal } from "@/components/WeChatQrModal";
+import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
+import { RollLink } from "@/components/RollLink";
 import { asset } from "@/lib/assets";
-
-function ExternalArrow() {
-  return (
-    <span className="site-footer__ext" aria-hidden="true">
-      <svg viewBox="0 0 14 14" fill="none">
-        <path
-          d="M4 10.5L10.5 4M10.5 4H5.5M10.5 4V9"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </span>
-  );
-}
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -33,83 +20,91 @@ export function Footer() {
     <footer className="site-footer">
       <div className="site-footer__stage">
         <div className="site-footer__shell">
-          <div className="site-footer__band">
-            <p className="site-footer__band-label">{footerHelpTitle}</p>
-            <ul className="site-footer__channels">
-              {footerChannels.map((row) => (
-                <li key={row.label} className="site-footer__channel">
-                  <span className="site-footer__channel-label">{row.label}</span>
-                  {"action" in row && row.action === "wechat" ? (
-                    <WeChatQrModal className="site-footer__channel-value">
-                      {row.value}
-                    </WeChatQrModal>
-                  ) : "href" in row ? (
-                    <a
-                      href={row.href}
-                      className="site-footer__channel-value"
-                      {...("external" in row && row.external
-                        ? { target: "_blank", rel: "noopener noreferrer" }
-                        : {})}
-                    >
-                      {row.value}
-                    </a>
-                  ) : (
-                    <span className="site-footer__channel-value">{row.value}</span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <div className="site-footer__top">
+            <p className="site-footer__lead">{footerLeadLine}</p>
 
-          <hr className="site-footer__rule" />
+            <div className="site-footer__cta-actions">
+              <div className="site-footer__whatsapp">
+                <InteractiveHoverButton
+                  text={whatsAppCta.label}
+                  href={whatsAppCta.href}
+                  external
+                  className="site-footer__whatsapp-btn w-[9.25rem]"
+                />
+              </div>
+            </div>
 
-          <div className="site-footer__band site-footer__band--about">
-            <p className="site-footer__band-label">About</p>
-            <p className="site-footer__about-copy">{footerAboutCopy}</p>
-          </div>
-        </div>
+            <div className="site-footer__aside-col">
+              <p className="site-footer__aside-label">Social</p>
+              <p className="site-footer__aside-label">Support</p>
+              <p className="site-footer__aside-label">Menu</p>
 
-        <div className="site-footer__brand" aria-hidden="true">
-          <Image
-            src={asset("/brand/iamedwardxu-logo-white.svg")}
-            alt=""
-            width={500}
-            height={60}
-            unoptimized
-            className="site-footer__brand-img"
-            draggable={false}
-          />
-        </div>
+              <div className="site-footer__aside-content">
+                <RollLink
+                  href={linkedInHref}
+                  className="site-footer__aside-link"
+                  external
+                >
+                  LinkedIn
+                </RollLink>
+              </div>
 
-        <div className="site-footer__shell site-footer__shell--bottom">
-          <div className="site-footer__bottom">
-            <p className="site-footer__legal">
-              <span>© {year} iamedx</span>
-              <span className="site-footer__legal-extra">
-                <span className="site-footer__legal-sep" aria-hidden="true">
-                  ·
-                </span>
-                <span>All rights reserved</span>
-              </span>
-            </p>
+              <div className="site-footer__aside-content">
+                <RollLink href={contactInfo.emailHref} className="site-footer__aside-link">
+                  {contactInfo.email}
+                </RollLink>
+              </div>
 
-            <ul className="site-footer__social">
-              {mobileSocialLinks.map((link) => (
-                <li key={link.label}>
+              <div className="site-footer__aside-content site-footer__aside-content--menu">
+                <ul className="site-footer__menu">
+                  {footerMenuLinks.map((item) => (
+                    <li key={item.href}>
+                      <RollLink href={item.href} className="site-footer__aside-link">
+                        {item.label}
+                      </RollLink>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="site-footer__aside-hq">
+                <p className="site-footer__aside-label">Headquarters</p>
+                <div className="site-footer__aside-content">
                   <a
-                    href={link.href}
-                    className="site-footer__social-link"
+                    href={officeInfo.mapsHref}
+                    className="site-footer__aside-address site-footer__aside-address--static"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <span className="site-footer__social-label">
-                      {link.label}
-                      <ExternalArrow />
-                    </span>
+                    {officeInfo.address}
                   </a>
-                </li>
-              ))}
-            </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="site-footer__brand-block">
+          <p className="site-footer__legal">
+            <span>© {year} iamedx</span>
+            <span className="site-footer__legal-extra">
+              <span className="site-footer__legal-sep" aria-hidden="true">
+                ·
+              </span>
+              <span>All rights reserved</span>
+            </span>
+          </p>
+
+          <div className="site-footer__brand" aria-hidden="true">
+            <Image
+              src={asset("/brand/iamedwardxu-logo-white.svg")}
+              alt=""
+              width={500}
+              height={60}
+              unoptimized
+              className="site-footer__brand-img"
+              draggable={false}
+            />
           </div>
         </div>
       </div>

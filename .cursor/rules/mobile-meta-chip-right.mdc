@@ -1,5 +1,5 @@
 ---
-description: Type labels — Pitch Sans, no fill, gray; projects meta aligns to nav
+description: Type labels — SF Pro Medium (match filter), no fill, gray; projects meta aligns to nav
 alwaysApply: true
 ---
 
@@ -8,7 +8,7 @@ alwaysApply: true
 On `.projects-page`, `.project-detail`, `.insights-page`, `.insight-detail`:
 
 1. **No fill** — no border, background, or capsule padding on type labels.
-2. **Font** — `Test Pitch Sans` Semibold via `@font-face` → `/fonts/TestPitchSans-Semibold.otf` (same-origin; CDN alone lacks CORS for `@font-face`). CSS: `--font-type-label`.
+2. **Font** — SF Pro Display Medium (`var(--font-sans)`, weight `500`) — same as filter pills. CSS: `--font-type-label`.
 3. **Size** — shared `--type-chip-font` (current size, −3% recipe). Same everywhere: featured, cards, Related, case hero tag.
 4. **Color** — gray (`--type-label-color`, ~50% white).
 5. **Title + description** in card/lead meta — **white** (`#fff`).

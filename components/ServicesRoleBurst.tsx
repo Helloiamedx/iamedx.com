@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import { servicesHeroLines, servicesRoleLabels } from "@/content/services-roles";
 import "./ServicesRoleBurst.css";
 
@@ -65,7 +65,8 @@ function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
 }
 
-export function ServicesRoleBurst() {
+export const ServicesRoleBurst = forwardRef<HTMLElement>(
+  function ServicesRoleBurst(_props, ref) {
   const fieldRef = useRef<HTMLDivElement>(null);
   const [lineIndex, setLineIndex] = useState(0);
   const [lineVisible, setLineVisible] = useState(true);
@@ -225,7 +226,7 @@ export function ServicesRoleBurst() {
   }, [reduced]);
 
   return (
-    <section className="services-role-burst" aria-label="Services">
+    <section ref={ref} className="services-role-burst" aria-label="Services">
       <div ref={fieldRef} className="services-role-burst__field" aria-hidden="true">
         {reduced
           ? servicesRoleLabels.slice(0, 8).map((label, index) => {
@@ -268,4 +269,5 @@ export function ServicesRoleBurst() {
       </div>
     </section>
   );
-}
+},
+);

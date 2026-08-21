@@ -11,7 +11,7 @@ type ProjectFeaturedLeadProps = {
 
 /**
  * Full-width「第一个项目」— cover entry on /projects.
- * Meta shares the case-hero desktop recipe: desc aligns to .site-nav;
+ * Meta shares the case-hero desktop recipe: desc at fixed centered-nav inset;
  * 5.5vw after title; 10vw before the type label.
  */
 export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {

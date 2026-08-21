@@ -1,29 +1,22 @@
 ---
-description: About the project button — Apple globalnav frosted glass + glare wipe
+description: About the project button — OriginButton, sticky pin kept
 alwaysApply: true
 ---
 
-# About the project button — frosted glass
+# About the project button
 
-Case-detail **About the project** control uses an **Apple globalnav–style** frosted shell plus the site hover glare wipe.
-
-## Visual recipe
-
-1. Shell (`GlareHover.project-case-demo__toggle-glare`): `background: rgba(255, 255, 255, 0.72)`, `backdrop-filter: saturate(180%) blur(20px)`, no heavy border / liquid `::after` / inset glare.
-2. Label: solid `#1d1d1f` — **no** `mix-blend-mode: difference`, **no** contrast overlay span. Child fill stays transparent so the wipe is visible.
-3. Rounded rectangle (`8px`) — not a capsule; keep padding / Medium weight.
-4. Hover wipe uses `GLARE_WIPE_MS` from `GlareHover.tsx`.
+Case-detail **About the project** uses the global **OriginButton** (`components/ui/origin-button.tsx`). Do not restyle it locally.
 
 ## Keep (do not rip out)
 
-- Sticky pin in the case body
-- ClickSpark
+- Sticky pin in the case body (`.project-case-demo__toggle-pin`)
 - Open / close (`is-open`, panel push)
 - Panel push / mobile sheet behavior
 
 ## Do not
 
+- Wrap it in ClickSpark
 - Bring back the + / × icon or rotate animation
-- Bring back liquid-glass `::after`, difference-blend contrast layers, or luminance `is-on-light` swaps
-- Replace with the full adaptive-glass-button markup
+- Bring back liquid-glass, GlareHover wipe, difference-blend contrast layers, or luminance `is-on-light` swaps
+- Override OriginButton fill / radius / type with local CSS
 ---

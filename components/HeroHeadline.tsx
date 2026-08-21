@@ -62,7 +62,7 @@ export function HeroHeadline() {
   const scheduleRef = useRef<(delay?: number) => void>(() => {});
 
   /* Pick the opening keyword on the client so each visit can start differently. */
-  useLayoutEffect(() => {
+  useEffect(() => {
     const start = pickKeywordIndex();
     indexRef.current = start;
     setIndex(start);

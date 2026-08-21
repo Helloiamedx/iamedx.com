@@ -1,0 +1,36 @@
+---
+description: Services package sheet is the source of truth for /services content
+alwaysApply: false
+globs: app/services/**/*, content/servicePackages.ts, content/services.ts, components/Services*.tsx
+---
+
+# Services content source of truth
+
+When the user asks what belongs on the Services page, which stages exist, fees, tools, or deliverables — **read and use** `content/servicePackages.ts` first (from the China Sourcing & Manufacturing Service Packages sheet). Do not invent alternate stage lists.
+
+## Structure
+
+**3 phases** (full-screen cards on the page concept):
+
+1. **P1 Pre-Production** — ≈ 35 days · $1,200 roll-up · items P1.1–P1.5  
+2. **P2 Mass Production Management** — $1,250 roll-up · items P2.1–P2.2  
+3. **P3 Quality Control & Delivery** — $250 roll-up · items P3.1–P3.2  
+
+**Total project investment:** $2,700
+
+## Each line item — five core fields
+
+1. **服务事项** → `title` (+ `code`)  
+2. **描述** → `description`  
+3. **工具** → `assistance` (software, networks, industry knowledge — not only apps)  
+4. **可交付成果** → `deliverables`  
+5. **费用标签** → `fee.label` / `fee.amountUsd`  
+
+Also keep `timeline`, `notes` (footnote ids), and `sampleLinks` when present.
+
+## Layout direction (current demo)
+
+- Hero starts at the **browser top** (under transparent nav) with a value headline.
+- Then **3 phase bands**: left = name → description → time → fee; right = **vertical strips** (code / title / short description) + **2×2 tags** for the active strip (Description · Deliverables · Fee · Timeline).
+- Click a strip to swap the 2×2 detail tags.
+- Details / polish later — structure first.

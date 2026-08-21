@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { ClickSpark } from "@/components/ClickSpark";
-import { GlareHover, GLARE_WIPE_MS } from "@/components/GlareHover";
+import { OriginButton } from "@/components/ui/origin-button";
 import { contactInfo } from "@/content/nav";
 
 function buildMailto(email: string, message: string) {
@@ -57,23 +56,7 @@ export function FooterContactForm() {
             onChange={(event) => setMessage(event.target.value)}
           />
           <div className="footer-contact__submit">
-            <ClickSpark>
-              <GlareHover
-                width="auto"
-                height="auto"
-                background="#0076dd"
-                borderRadius="999px"
-                borderColor="#0076dd"
-                glareColor="#ffffff"
-                glareOpacity={0.55}
-                transitionDuration={GLARE_WIPE_MS}
-                className="nav-contact-glare"
-              >
-                <button type="submit" className="nav-contact">
-                  Send request
-                </button>
-              </GlareHover>
-            </ClickSpark>
+            <OriginButton type="submit">Send request</OriginButton>
           </div>
         </form>
       </div>

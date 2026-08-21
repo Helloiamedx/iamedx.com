@@ -11,13 +11,16 @@ import {
 export type FilterSegmentItem = {
   id: string;
   label: string;
-  href: string;
+  /** When set, segment navigates (projects / thoughts). Omit for in-place filters (FAQ). */
+  href?: string;
 };
 
 type FilterSegmentTrackProps = {
   items: FilterSegmentItem[];
   activeId: string;
   ariaLabel: string;
+  /** In-place selection — used when items have no `href` */
+  onSelect?: (id: string) => void;
 };
 
 /**
@@ -28,9 +31,10 @@ export function FilterSegmentTrack({
   items,
   activeId,
   ariaLabel,
+  onSelect,
 }: FilterSegmentTrackProps) {
   const trackRef = useRef<HTMLDivElement>(null);
-  const pillRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
+  const pillRefs = useRef<Map<string, HTMLElement>>(new Map());
   const [thumb, setThumb] = useState({ x: 0, w: 0, ready: false });
 
   useLayoutEffect(() => {
@@ -69,6 +73,11 @@ export function FilterSegmentTrack({
       }
     : undefined;
 
+  const setPillRef = (id: string) => (node: HTMLElement | null) => {
+    if (node) pillRefs.current.set(id, node);
+    else pillRefs.current.delete(id);
+  };
+
   return (
     <div
       ref={trackRef}
@@ -87,25 +96,38 @@ export function FilterSegmentTrack({
       />
       {items.map((item) => {
         const isActive = activeId === item.id;
+        const className = isActive
+          ? "project-involvement__pill is-active"
+          : "project-involvement__pill";
+
+        if (item.href) {
+          return (
+            <Link
+              key={item.id}
+              href={item.href}
+              scroll={false}
+              role="listitem"
+              ref={setPillRef(item.id)}
+              className={className}
+              aria-current={isActive ? "page" : undefined}
+            >
+              {item.label}
+            </Link>
+          );
+        }
+
         return (
-          <Link
+          <button
             key={item.id}
-            href={item.href}
-            scroll={false}
+            type="button"
             role="listitem"
-            ref={(node) => {
-              if (node) pillRefs.current.set(item.id, node);
-              else pillRefs.current.delete(item.id);
-            }}
-            className={
-              isActive
-                ? "project-involvement__pill is-active"
-                : "project-involvement__pill"
-            }
-            aria-current={isActive ? "page" : undefined}
+            ref={setPillRef(item.id)}
+            className={className}
+            aria-pressed={isActive}
+            onClick={() => onSelect?.(item.id)}
           >
             {item.label}
-          </Link>
+          </button>
         );
       })}
     </div>

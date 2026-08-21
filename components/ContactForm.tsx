@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { ClickSpark } from "@/components/ClickSpark";
+import { OriginButton } from "@/components/ui/origin-button";
 
 type ContactFormProps = {
   presetMessage?: string;
@@ -42,11 +42,7 @@ export function ContactForm({ presetMessage = "" }: ContactFormProps) {
           required
         />
       </label>
-      <ClickSpark>
-        <button type="submit" className="button">
-          Open email to hello@iamedx.com
-        </button>
-      </ClickSpark>
+        <OriginButton type="submit">Open email to hello@iamedx.com</OriginButton>
     </form>
   );
 }

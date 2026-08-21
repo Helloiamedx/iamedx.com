@@ -17,13 +17,9 @@ export function HomeCopyBlock({ section }: HomeCopyBlockProps) {
       id={section.id}
       aria-labelledby={`${section.id}-title`}
     >
-      <div className="home-copy__intro">
-        <h2 id={`${section.id}-title`} className="home-copy__title">
-          {section.title}
-        </h2>
-        {hasSubtitle ? (
-          <p className="home-copy__subtitle">{section.subtitle}</p>
-        ) : null}
+      <div className="home-page__intro">
+        <h2 id={`${section.id}-title`}>{section.title}</h2>
+        {hasSubtitle ? <p>{section.subtitle}</p> : null}
       </div>
 
       {hasPoints ? (
@@ -37,7 +33,7 @@ export function HomeCopyBlock({ section }: HomeCopyBlockProps) {
             </li>
           ))}
         </ul>
-      ) : (
+      ) : hasSubtitle ? null : (
         <p className="home-copy__placeholder" aria-hidden="true">
           —
         </p>

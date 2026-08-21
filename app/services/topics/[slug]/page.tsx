@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ClickSpark } from "@/components/ClickSpark";
+import { OriginButton } from "@/components/ui/origin-button";
 import { contactCta, findServiceTopic, servicesMega } from "@/content/nav";
 
 type TopicPageProps = {
@@ -44,11 +44,7 @@ export default async function ServiceTopicPage({ params }: TopicPageProps) {
         confirms the mega-menu route is wired.
       </p>
       <p>
-        <ClickSpark>
-          <a href={contactCta.href} className="button">
-            Email
-          </a>
-        </ClickSpark>
+        <OriginButton href={contactCta.href}>Email</OriginButton>
       </p>
     </main>
   );

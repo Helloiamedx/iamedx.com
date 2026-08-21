@@ -197,29 +197,15 @@ export const insightsMega: MegaColumn[] = [
   },
 ];
 
-/** Clients mega — placeholders until the roster is filled */
-export const clientsMega: MegaColumn[] = [
-  {
-    id: "clients",
-    title: "",
-    description: "",
-    links: [
-      { label: "Disney", slug: "disney", href: "/clients" },
-      { label: "Nintendo", slug: "nintendo", href: "/clients" },
-      { label: "Bethesda", slug: "bethesda", href: "/clients" },
-      { label: "Ubisoft", slug: "ubisoft", href: "/clients" },
-      { label: "Capcom", slug: "capcom", href: "/clients" },
-      { label: "Rockstar Games", slug: "rockstar", href: "/clients" },
-    ],
-  },
-];
+/** @deprecated Clients page removed */
+export const clientsMega: MegaColumn[] = [];
 
 export const primaryNav: NavItem[] = [
   { href: "/services", label: "Services", mega: servicesMega },
-  { href: "/clients", label: "Clients", mega: clientsMega },
   { href: "/projects", label: "Projects", mega: projectsMega },
   { href: "/thoughts", label: "Thoughts", mega: insightsMega },
   { href: "/about", label: "About", mega: aboutMega },
+  { href: "/faq", label: "FAQ" },
 ];
 
 export const contactCta = {
@@ -260,7 +246,8 @@ export const officeInfo = {
   eyebrow: "Edward Xu HQ",
   address:
     "No. 880 Longjin Avenue, Qianku Town, Cangnan County, Wenzhou City, Zhejiang Province, China",
-  mapsHref: "https://maps.app.goo.gl/5snACoZbxVXQ3NRdA",
+  coordinates: `27°28'07.9"N 120°34'43.9"E`,
+  mapsHref: "https://www.google.com/maps?q=27.4688611,120.5788611",
 } as const;
 
 export const contactInfo = {
@@ -279,18 +266,14 @@ export const phoneCta = {
   label: "Phone",
 } as const;
 
-/** Header right CTAs — WhatsApp (desktop + mobile) / Email (desktop only) */
-export const headerCtaLinks = [
-  {
-    label: whatsAppCta.label,
-    href: whatsAppCta.href,
-    external: true,
-    mobile: true,
-  },
-  { label: contactCta.label, href: contactCta.href, external: false },
-] as const;
+/** @deprecated Contact page removed — footer WhatsApp is primary CTA */
+export const headerCtaLinks = [] as const;
 
-/** Footer — Pentagram-style inquiry row */
+/** Footer — lead line above contact CTAs */
+export const footerLeadLine =
+  "Let's Make Something Iconic.";
+
+/** Footer — Pentagram-style inquiry row (legacy title) */
 export const footerHelpTitle = "Let Me Help You";
 
 /** Footer contact channels: label column + value column */
@@ -328,10 +311,10 @@ export const footerAboutCopy =
 
 export const mobileNavLinks = [
   { label: "Services", href: "/services" },
-  { label: "Clients", href: "/clients" },
   { label: "Projects", href: "/projects" },
   { label: "Thoughts", href: "/thoughts" },
   { label: "About", href: "/about" },
+  { label: "FAQ", href: "/faq" },
 ] as const;
 
 export const mobileSocialLinks = [
@@ -356,6 +339,17 @@ export type FooterNavColumn = {
   label: string;
   links: { label: string; href: string }[];
 };
+
+/**
+ * Footer Menu column — main site links + FAQ.
+ */
+export const footerMenuLinks = [
+  { label: "Services", href: "/services" },
+  { label: "Projects", href: "/projects" },
+  { label: "Thoughts", href: "/thoughts" },
+  { label: "About", href: "/about" },
+  { label: "FAQ", href: "/faq" },
+] as const;
 
 /**
  * Footer link columns — one direct section link each (no mega sub-lists).
@@ -385,6 +379,11 @@ export const footerNavColumns: FooterNavColumn[] = [
     id: "services",
     label: "Services",
     links: [{ label: "Services", href: "/services" }],
+  },
+  {
+    id: "faq",
+    label: "FAQ",
+    links: [{ label: "FAQ", href: "/faq" }],
   },
 ];
 

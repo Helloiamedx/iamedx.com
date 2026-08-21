@@ -4,11 +4,11 @@ globs: app/thoughts/**/*.tsx, app/projects/**/*.tsx, app/globals.css, components
 alwaysApply: true
 ---
 
-# Type chips / filled tags — no all-caps; plain Pitch Sans labels on Projects/Insights
+# Type chips / filled tags — no all-caps; plain SF labels on Projects/Insights
 
 Any **project type** or **article type** label must **not** use `text-transform: uppercase`.
 
-On Projects + Insights surfaces, type labels are **plain text** (no chip fill): Test Pitch Sans Semibold, shared `--type-chip-font`, gray ink. Title/description in those metas are white. See `mobile-meta-chip-right.mdc`.
+On Projects + Insights surfaces, type labels are **plain text** (no chip fill): SF Pro Display Medium (same as filter pills), shared `--type-chip-font`, gray ink. Title/description in those metas are white. See `mobile-meta-chip-right.mdc`.
 
 Applies to:
 

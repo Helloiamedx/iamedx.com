@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { AboutExperienceList } from "@/components/AboutExperienceList";
-import { AboutHeroHeadline } from "@/components/AboutHeroHeadline";
-import { AboutScrollLede } from "@/components/AboutScrollLede";
+import { AboutExpertise } from "@/components/AboutExpertise";
+import { AboutPageHero } from "@/components/AboutPageHero";
 import { asset } from "@/lib/assets";
 
 export const metadata: Metadata = {
@@ -18,76 +18,6 @@ const profileImage = asset(
 const aboutLede =
   "Hi, I’m Edward Xu.\n“Loyalty to my clients, protecting their interests, and helping them build highly tailored supply chains in China define how I approach every project.”";
 
-/** Expertise — Competence / Product Categories filled; Material + Process later */
-const expertiseColumns = [
-  {
-    id: "competence",
-    title: "Competence",
-    items: [
-      "China Sourcing Specialist",
-      "Procurement Specialist",
-      "Manufacturing Consultant",
-      "Product Development Specialist",
-      "Supplier Management",
-      "Quality Control Specialist",
-      "Factory Audit",
-      "Custom Packaging Development",
-      "China Representative",
-    ],
-  },
-  {
-    id: "product-categories",
-    title: "Product Categories",
-    items: [
-      "Collectibles",
-      "Licensed Products",
-      "Gift Sets",
-      "Promotional Items",
-      "Custom Consumer Products",
-    ],
-  },
-  {
-    id: "process",
-    title: "Process",
-    items: [
-      "Embossing",
-      "Debossing",
-      "Hot Stamping",
-      "Foil Stamping",
-      "Digital Printing",
-      "UV Printing",
-      "Laser Engraving",
-      "Laser Cutting",
-      "CNC Machining",
-      "Die Casting",
-      "Metal Stamping",
-      "Electroplating",
-      "Injection Molding",
-      "Resin Casting",
-      "Painting",
-      "Spray Coating",
-      "Hand Painting",
-      "Embroidery",
-      "Sewing",
-      "Heat Transfer",
-      "Die Cutting",
-    ],
-  },
-  {
-    id: "material",
-    title: "Material",
-    items: [
-      "Wood / MDF",
-      "Leather / PU Leather",
-      "Metal / Alloy",
-      "Resin",
-      "Fabric / Textile",
-      "Paper / Cardboard",
-      "EVA Foam",
-      "Plastic",
-    ],
-  },
-] as const;
 
 const workTools = [
   "Notion",
@@ -109,13 +39,19 @@ const testimonials = [
     name: "Charlotte Tem",
     company: "Best Link (USA) Corp. Ltd.",
     role: "CEO",
+    photo: asset(
+      `/images/about/${encodeURIComponent("Charlotte Tem.avif")}`,
+    ),
   },
   {
     quote:
-      "We needed a China supply chain we could actually control. Edward built the process, negotiated hard for our interests, and delivered samples that matched what we signed off. His ability to organize the process and communicate clearly significantly reduced unnecessary back-and-forth and improved the overall efficiency of the project.",
+      "Edward built the process, negotiated hard for our interests, and delivered samples that matched what we signed off. His ability to organize the process and communicate clearly significantly reduced unnecessary back-and-forth and improved the overall efficiency of the project.",
     name: "Angela McReynolds",
     company: "DPI Merchandising Inc.",
     role: "President",
+    photo: asset(
+      `/images/about/${encodeURIComponent("Angela McReynolds.jpeg")}`,
+    ),
   },
   {
     quote:
@@ -123,6 +59,7 @@ const testimonials = [
     name: "Eric Winn",
     company: "KindLucky Hong Kong International Limited",
     role: "Procurement Manager",
+    photo: asset(`/images/about/${encodeURIComponent("Eric Winn.avif")}`),
   },
 ];
 
@@ -192,55 +129,59 @@ const achievementStats: AchievementStat[] = [
 export default function AboutPage() {
   return (
     <main className="about-page">
-      {/* Hero — BlurText lead-in, then worldwide particle morph */}
-      <section className="about-boua__hero about-boua__container" id="top">
-        <AboutHeroHeadline />
-      </section>
+      <AboutPageHero />
 
-      {/* About */}
-      <section
-        id="about"
-        className="about-boua__about about-boua__container"
-        aria-labelledby="about-about-heading"
-      >
-        <div className="about-boua__about-grid">
-          <div className="about-boua__rail about-boua__rail--lede">
-            <h2
-              id="about-about-heading"
-              className="about-boua__label about-boua__sticky"
-            >
-              About
-            </h2>
-          </div>
-          <div>
-            <div className="about-boua__intro">
-              <div className="about-boua__portrait">
-                <Image
-                  src={profileImage}
-                  alt="Edward Xu"
-                  width={480}
-                  height={600}
-                  sizes="(max-width: 720px) 48vw, 18rem"
-                  priority
-                />
-              </div>
-              <div className="about-boua__intro-copy">
-                <AboutScrollLede text={aboutLede} />
-                <p className="about-boua__body">
-                  My clients focus on building their brands and connecting with
-                  their customers, while I provide the product development,
-                  manufacturing expertise, and hands-on support needed to bring
-                  their ideas to life in China. Together, we combine our
-                  strengths to create products that are both commercially
-                  successful
-                </p>
+      <div className="about-content-sheet">
+        {/* About */}
+        <section
+          id="about"
+          className="about-boua__about about-boua__container"
+          aria-labelledby="about-about-heading"
+        >
+          <div className="about-boua__about-grid">
+            <div className="about-boua__rail about-boua__rail--lede">
+              <h2
+                id="about-about-heading"
+                className="about-boua__label about-boua__sticky"
+              >
+                About
+              </h2>
+            </div>
+            <div>
+              <div className="about-boua__intro">
+                <div className="about-boua__portrait">
+                  <Image
+                    src={profileImage}
+                    alt="Edward Xu"
+                    width={480}
+                    height={600}
+                    sizes="(max-width: 720px) 48vw, 18rem"
+                    priority
+                  />
+                </div>
+                <div className="about-boua__intro-copy">
+                  <p className="about-boua__lede">
+                    {aboutLede.split("\n").map((line) => (
+                      <span key={line} className="about-boua__lede-line">
+                        {line}
+                      </span>
+                    ))}
+                  </p>
+                  <p className="about-boua__body">
+                    My clients focus on building their brands and connecting with
+                    their customers, while I provide the product development,
+                    manufacturing expertise, and hands-on support needed to bring
+                    their ideas to life in China. Together, we combine our
+                    strengths to create products that are both commercially
+                    successful
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Testimonials */}
+        {/* Testimonials */}
       <section
         id="testimonials"
         className="about-boua__testimonials about-boua__container"
@@ -260,6 +201,15 @@ export default function AboutPage() {
               <li key={item.name} className="about-boua__quote">
                 <p className="about-boua__quote-text">“{item.quote}”</p>
                 <div className="about-boua__quote-attr">
+                  <div className="about-boua__quote-photo">
+                    <Image
+                      src={item.photo}
+                      alt=""
+                      width={96}
+                      height={96}
+                      sizes="3.5rem"
+                    />
+                  </div>
                   <p className="about-boua__quote-name">{item.name}</p>
                   <p className="about-boua__quote-meta">
                     {item.company}
@@ -270,44 +220,6 @@ export default function AboutPage() {
               </li>
             ))}
           </ul>
-        </div>
-      </section>
-
-      {/* Expertise */}
-      <section
-        id="expertise"
-        className="about-boua__expertise about-boua__container"
-        aria-labelledby="about-expertise-heading"
-      >
-        <div className="about-boua__expertise-grid">
-          <div className="about-boua__rail">
-            <h2
-              id="about-expertise-heading"
-              className="about-boua__label about-boua__sticky"
-            >
-              Expertise
-            </h2>
-          </div>
-          <div className="about-boua__expertise-cols">
-            {expertiseColumns.map((column) => (
-              <div key={column.id} className="about-boua__expertise-col">
-                <h3 className="about-boua__expertise-col-title">
-                  {column.title}
-                </h3>
-                {column.items.length > 0 ? (
-                  <ul className="about-boua__expertise-list">
-                    {column.items.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="about-boua__expertise-empty" aria-hidden="true">
-                    —
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -369,6 +281,8 @@ export default function AboutPage() {
         </div>
       </section>
 
+      <AboutExpertise />
+
       {/* How I work — tools / stack */}
       <section
         id="how-i-work"
@@ -393,6 +307,7 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+      </div>
     </main>
   );
 }

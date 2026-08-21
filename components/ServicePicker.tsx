@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ClickSpark } from "@/components/ClickSpark";
+import { OriginButton } from "@/components/ui/origin-button";
 import { contactCta } from "@/content/nav";
 import { currency, services, type Service } from "@/content/services";
 
@@ -85,11 +85,9 @@ export function ServicePicker() {
         <p className="service-summary__total">
           Estimated total: {currency} {total}
         </p>
-        <ClickSpark>
-          <a href={inquireHref} className="button">
-            Inquire about selected services
-          </a>
-        </ClickSpark>
+        <OriginButton href={inquireHref}>
+          Inquire about selected services
+        </OriginButton>
       </aside>
     </div>
   );
