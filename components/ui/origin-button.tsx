@@ -18,17 +18,6 @@ type OriginButtonProps = {
   "type" | "children" | "className" | "disabled"
 >;
 
-function assignRef<T>(ref: React.ForwardedRef<T>, value: T | null) {
-  if (typeof ref === "function") {
-    ref(value);
-    return;
-  }
-
-  if (ref) {
-    ref.current = value;
-  }
-}
-
 function hasTextContent(node: React.ReactNode): boolean {
   if (typeof node === "string" || typeof node === "number") {
     return String(node).trim().length > 0;
@@ -50,7 +39,10 @@ function isExternalHref(href: string, external?: boolean) {
   return /^(https?:|mailto:|tel:)/i.test(href);
 }
 
-const OriginButton = React.forwardRef<HTMLButtonElement, OriginButtonProps>(
+const OriginButton = React.forwardRef<
+  HTMLButtonElement | HTMLAnchorElement,
+  OriginButtonProps
+>(
   (
     {
       children,
@@ -89,17 +81,18 @@ const OriginButton = React.forwardRef<HTMLButtonElement, OriginButtonProps>(
     }, [ariaLabel, ariaLabelledBy, children]);
 
     if (href) {
-      const linkRef = ref as unknown as React.Ref<HTMLAnchorElement>;
+      const anchorProps =
+        props as unknown as React.AnchorHTMLAttributes<HTMLAnchorElement>;
 
       if (isExternalHref(href, external)) {
         return (
           <a
-            {...props}
+            {...anchorProps}
             aria-busy={loading || undefined}
             aria-disabled={isDisabled || undefined}
             className={classes}
             href={isDisabled ? undefined : href}
-            ref={linkRef}
+            ref={ref as React.Ref<HTMLAnchorElement>}
             rel={external ? "noopener noreferrer" : undefined}
             target={external ? "_blank" : undefined}
           >
@@ -110,12 +103,12 @@ const OriginButton = React.forwardRef<HTMLButtonElement, OriginButtonProps>(
 
       return (
         <Link
-          {...props}
+          {...anchorProps}
           aria-busy={loading || undefined}
           aria-disabled={isDisabled || undefined}
           className={classes}
           href={href}
-          ref={linkRef}
+          ref={ref as React.Ref<HTMLAnchorElement>}
         >
           {children}
         </Link>
@@ -128,7 +121,7 @@ const OriginButton = React.forwardRef<HTMLButtonElement, OriginButtonProps>(
         aria-busy={loading || undefined}
         className={classes}
         disabled={isDisabled}
-        ref={ref}
+        ref={ref as React.Ref<HTMLButtonElement>}
         type={type}
       >
         {children}
