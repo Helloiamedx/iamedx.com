@@ -54,8 +54,9 @@ function mapRange(
 const PX_RATIO = typeof window !== "undefined" ? window.devicePixelRatio : 1;
 
 const SITE_SANS =
-  '"SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif';
-const SITE_MONO = '"SF Mono", Menlo, Monaco, "Courier New", monospace';
+  '"Grtsk", "Helvetica Neue", Helvetica, Arial, sans-serif';
+const SITE_MONO =
+  '"FK Grotesk Mono", "SF Mono", Menlo, Monaco, "Courier New", monospace';
 
 type AsciiFilterOptions = {
   fontSize?: number;

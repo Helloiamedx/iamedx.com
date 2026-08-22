@@ -17,6 +17,10 @@ import { primaryNav } from "@/content/nav";
 import { asset } from "@/lib/assets";
 
 const MOBILE_CURTAIN_MS = 400;
+/** Past this Y, down-scroll may tuck the chrome */
+const NAV_HIDE_AFTER_Y = 48;
+/** Ignore tiny scroll jitter */
+const NAV_SCROLL_DELTA = 4;
 
 function SiteLogo() {
   return (
@@ -52,11 +56,17 @@ export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobilePortalReady, setMobilePortalReady] = useState(false);
   const [mobileSurface, setMobileSurface] = useState(false);
+  const [navHidden, setNavHidden] = useState(false);
   const chromeRef = useRef<HTMLDivElement>(null);
+  const lastScrollY = useRef(0);
+  const navHiddenRef = useRef(false);
   const menuId = useId();
 
   useEffect(() => {
     setMobileOpen(false);
+    navHiddenRef.current = false;
+    setNavHidden(false);
+    lastScrollY.current = typeof window !== "undefined" ? window.scrollY : 0;
   }, [pathname]);
 
   /* Portal only after mount — avoid Image/load callbacks updating pre-mount trees. */
@@ -94,11 +104,111 @@ export function Header() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  /*
+   * Chrome tuck: first screen may show the bar; after a short down-scroll it
+   * hides; up-scroll reveals and keeps it until the next down-scroll.
+   * While the mobile About sheet is open, page scroll is locked — listen to the
+   * sheet’s own scrollTop instead of window.
+   */
+  useEffect(() => {
+    if (mobileOpen) {
+      navHiddenRef.current = false;
+      setNavHidden(false);
+      document.documentElement.removeAttribute("data-about-sheet-open");
+      return;
+    }
+
+    let panelEl: HTMLElement | null = null;
+
+    function setHidden(hidden: boolean) {
+      if (navHiddenRef.current === hidden) return;
+      navHiddenRef.current = hidden;
+      setNavHidden(hidden);
+    }
+
+    function onScrollY(y: number) {
+      const nextY = Math.max(0, y);
+      const delta = nextY - lastScrollY.current;
+      lastScrollY.current = nextY;
+
+      if (nextY <= NAV_HIDE_AFTER_Y) {
+        setHidden(false);
+        return;
+      }
+
+      if (delta > NAV_SCROLL_DELTA) {
+        setHidden(true);
+        return;
+      }
+
+      if (delta < -NAV_SCROLL_DELTA) {
+        setHidden(false);
+      }
+    }
+
+    function onWindowScroll() {
+      if (panelEl) return;
+      onScrollY(window.scrollY);
+    }
+
+    function onPanelScroll() {
+      if (!panelEl) return;
+      onScrollY(panelEl.scrollTop);
+    }
+
+    function bindAboutPanel() {
+      const next = document.querySelector(
+        ".project-case-demo.is-panel-open .project-case-demo__panel",
+      );
+      const el = next instanceof HTMLElement ? next : null;
+      if (el === panelEl) return;
+
+      if (panelEl) {
+        panelEl.removeEventListener("scroll", onPanelScroll);
+      }
+
+      panelEl = el;
+
+      if (panelEl) {
+        document.documentElement.dataset.aboutSheetOpen = "1";
+        lastScrollY.current = panelEl.scrollTop;
+        setHidden(false);
+        panelEl.addEventListener("scroll", onPanelScroll, { passive: true });
+        return;
+      }
+
+      document.documentElement.removeAttribute("data-about-sheet-open");
+      lastScrollY.current = window.scrollY;
+      onScrollY(window.scrollY);
+    }
+
+    lastScrollY.current = window.scrollY;
+    onScrollY(window.scrollY);
+    bindAboutPanel();
+
+    window.addEventListener("scroll", onWindowScroll, { passive: true });
+    const mo = new MutationObserver(bindAboutPanel);
+    mo.observe(document.body, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => {
+      window.removeEventListener("scroll", onWindowScroll);
+      panelEl?.removeEventListener("scroll", onPanelScroll);
+      mo.disconnect();
+      document.documentElement.removeAttribute("data-about-sheet-open");
+    };
+  }, [mobileOpen]);
+
   useLayoutEffect(() => {
     if (!mobileOpen) return;
 
     const scrollY = window.scrollY;
     const scrollbar = window.innerWidth - document.documentElement.clientWidth;
+    const html = document.documentElement;
+    html.style.overflow = "hidden";
     document.body.style.overflow = "hidden";
     document.body.style.position = "fixed";
     document.body.style.top = `-${scrollY}px`;
@@ -116,6 +226,7 @@ export function Header() {
 
     return () => {
       document.removeEventListener("touchmove", preventTouch);
+      html.style.overflow = "";
       document.body.style.overflow = "";
       document.body.style.position = "";
       document.body.style.top = "";
@@ -128,9 +239,20 @@ export function Header() {
   }, [mobileOpen]);
 
   const chrome = (
-    <div ref={chromeRef} className="site-header-chrome">
+    <div
+      ref={chromeRef}
+      className={`site-header-chrome${navHidden ? " is-nav-hidden" : ""}`}
+    >
+      {/* Same horizontal edges as page `.shell` content */}
       <div className="shell site-header__bar">
-        <Link href="/" className="site-logo" aria-label="Edward Xu home">
+        <Link
+          href="/"
+          className="site-logo"
+          aria-label="Edward Xu home"
+          onClick={() => {
+            setMobileOpen(false);
+          }}
+        >
           <SiteLogo />
         </Link>
 
@@ -197,7 +319,9 @@ export function Header() {
                 />
               </div>
             </div>,
-            document.body,
+            /* Outside body — body is position:fixed while open; Safari then
+               mis-anchors fixed overlays and the translucent top chrome leaks. */
+            document.documentElement,
           )
         : null}
     </>

@@ -21,7 +21,7 @@ Word may be all-lowercase for speed. **On the site, polish:**
 
 - **Titles:** Title Case — capitalize each major word (e.g. `Mass Effect Tali Companion Bundle`). Do **not** leave all-lowercase; do **not** force CSS `text-transform: uppercase` on project titles unless the design system already requires it for a specific label style.
 - **Taglines / short descriptions:** Sentence case (e.g. `Found your home with Tali?`).
-- **Involvement / article type chips (filled 套底):** never CSS `text-transform: uppercase` — show polished labels as written (`End-to-End Projects`, etc.).
+- **Involvement / article type chips:** CSS `text-transform: uppercase` — small labels are all caps (FK Grotesk Mono).
 - Brand / character names keep correct proper nouns (Mass Effect, Tali, etc.).
 
 ## Known bug — fixed

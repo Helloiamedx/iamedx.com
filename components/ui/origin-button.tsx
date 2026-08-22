@@ -39,6 +39,10 @@ function isExternalHref(href: string, external?: boolean) {
   return /^(https?:|mailto:|tel:)/i.test(href);
 }
 
+function OriginButtonShell({ children }: { children: React.ReactNode }) {
+  return <span className="origin-button-wrap">{children}</span>;
+}
+
 const OriginButton = React.forwardRef<
   HTMLButtonElement | HTMLAnchorElement,
   OriginButtonProps
@@ -86,46 +90,52 @@ const OriginButton = React.forwardRef<
 
       if (isExternalHref(href, external)) {
         return (
-          <a
-            {...anchorProps}
-            aria-busy={loading || undefined}
-            aria-disabled={isDisabled || undefined}
-            className={classes}
-            href={isDisabled ? undefined : href}
-            ref={ref as React.Ref<HTMLAnchorElement>}
-            rel={external ? "noopener noreferrer" : undefined}
-            target={external ? "_blank" : undefined}
-          >
-            {children}
-          </a>
+          <OriginButtonShell>
+            <a
+              {...anchorProps}
+              aria-busy={loading || undefined}
+              aria-disabled={isDisabled || undefined}
+              className={classes}
+              href={isDisabled ? undefined : href}
+              ref={ref as React.Ref<HTMLAnchorElement>}
+              rel={external ? "noopener noreferrer" : undefined}
+              target={external ? "_blank" : undefined}
+            >
+              {children}
+            </a>
+          </OriginButtonShell>
         );
       }
 
       return (
-        <Link
-          {...anchorProps}
-          aria-busy={loading || undefined}
-          aria-disabled={isDisabled || undefined}
-          className={classes}
-          href={href}
-          ref={ref as React.Ref<HTMLAnchorElement>}
-        >
-          {children}
-        </Link>
+        <OriginButtonShell>
+          <Link
+            {...anchorProps}
+            aria-busy={loading || undefined}
+            aria-disabled={isDisabled || undefined}
+            className={classes}
+            href={href}
+            ref={ref as React.Ref<HTMLAnchorElement>}
+          >
+            {children}
+          </Link>
+        </OriginButtonShell>
       );
     }
 
     return (
-      <button
-        {...props}
-        aria-busy={loading || undefined}
-        className={classes}
-        disabled={isDisabled}
-        ref={ref as React.Ref<HTMLButtonElement>}
-        type={type}
-      >
-        {children}
-      </button>
+      <OriginButtonShell>
+        <button
+          {...props}
+          aria-busy={loading || undefined}
+          className={classes}
+          disabled={isDisabled}
+          ref={ref as React.Ref<HTMLButtonElement>}
+          type={type}
+        >
+          {children}
+        </button>
+      </OriginButtonShell>
     );
   },
 );

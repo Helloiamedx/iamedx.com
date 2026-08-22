@@ -14,6 +14,9 @@
  * Plus optional timeline / notes / sample links from the sheet.
  */
 
+import { asset } from "@/lib/assets";
+import { supplierDiscoveryVerificationImages } from "@/content/serviceCoverMedia";
+
 export type ServicePackageFee = {
   /** Display label, e.g. "$350.00" or "Free" */
   label: string;
@@ -41,6 +44,10 @@ export type ServicePackageItem = {
   notes?: string[];
   /** Sample report / quotation links from the sheet */
   sampleLinks?: { label: string; href: string }[];
+  /** Card media loop (services page) */
+  coverVideo?: string;
+  /** Card image stack — same recipe as home Support panels */
+  coverImages?: readonly string[];
 };
 
 export type ServicePackagePhase = {
@@ -103,6 +110,7 @@ export const servicePackagePhases: ServicePackagePhase[] = [
         ],
         timeline: "18H",
         fee: { label: "Free", amountUsd: 0 },
+        coverVideo: asset("images/service/Initial%20Project%20Review.mov"),
       },
       {
         id: "supplier-identification",
@@ -127,6 +135,7 @@ export const servicePackagePhases: ServicePackagePhase[] = [
         ],
         timeline: "3–5 business days",
         fee: { label: "$350.00", amountUsd: 350 },
+        coverVideo: asset("images/service/Supplier%20Identification.m4v"),
       },
       {
         id: "supplier-evaluation-audit",
@@ -144,6 +153,7 @@ export const servicePackagePhases: ServicePackagePhase[] = [
         deliverables: ["Factory Visit & Audit Report"],
         timeline: "1–2 business days",
         fee: { label: "$250.00", amountUsd: 250 },
+        coverImages: supplierDiscoveryVerificationImages,
         notes: ["1", "2"],
         sampleLinks: [
           {
@@ -176,6 +186,9 @@ export const servicePackagePhases: ServicePackagePhase[] = [
         ],
         timeline: "2–3 business days",
         fee: { label: "$250.00", amountUsd: 250 },
+        coverVideo: asset(
+          "images/service/Product%20Requirement%20Translation%20%26amp%3B%20Supplier%20Negotiation.mp4",
+        ),
         sampleLinks: [
           {
             label: "Sample quotation sheet",
@@ -202,6 +215,9 @@ export const servicePackagePhases: ServicePackagePhase[] = [
         ],
         timeline: "About 2–3 weeks",
         fee: { label: "$350.00", amountUsd: 350 },
+        coverVideo: asset(
+          "images/service/Sample%20Development%20%26%20Production%20Validation.mov",
+        ),
       },
     ],
   },
@@ -239,6 +255,7 @@ export const servicePackagePhases: ServicePackagePhase[] = [
         ],
         timeline: "Based on production schedule and order complexity",
         fee: { label: "$750.00", amountUsd: 750 },
+        coverVideo: asset("images/home/Production%20Management.mov"),
       },
       {
         id: "compliance-testing",
@@ -258,6 +275,9 @@ export const servicePackagePhases: ServicePackagePhase[] = [
         ],
         timeline: "Based on project complexity",
         fee: { label: "$500.00", amountUsd: 500 },
+        coverVideo: asset(
+          "images/service/Product%20Compliance%20%26amp%3B%20Testing%20Coordination.m4v",
+        ),
       },
     ],
   },
@@ -290,6 +310,7 @@ export const servicePackagePhases: ServicePackagePhase[] = [
         ],
         timeline: "1–2 business days",
         fee: { label: "$150.00", amountUsd: 150 },
+        coverImages: [asset("images/service/fullinspection.jpg")],
         notes: ["3"],
         sampleLinks: [
           {
@@ -319,6 +340,9 @@ export const servicePackagePhases: ServicePackagePhase[] = [
         ],
         timeline: "1 business day",
         fee: { label: "$100.00", amountUsd: 100 },
+        coverImages: [
+          asset("images/service/Container-loading-supervision-China.jpg"),
+        ],
         notes: ["4"],
         sampleLinks: [
           {

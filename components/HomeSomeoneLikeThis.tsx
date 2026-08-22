@@ -1,18 +1,12 @@
 "use client";
 
-import { useLenis } from "lenis/react";
 import { motion } from "motion/react";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-} from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import {
   someoneLikeThisLines,
   whyWorkWithMe,
 } from "@/content/homeCopy";
+import { usePinnedScrub } from "@/hooks/usePinnedScrub";
 
 const LINES = someoneLikeThisLines;
 const LAST = LINES.length - 1;
@@ -20,17 +14,10 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 
 /**
  * Home first editorial block — pinned sentence, scroll swaps ability + challenge.
- * Plays once per page load; never reverses or replays on re-entry.
+ * Scrub follows scroll both ways.
  */
 export function HomeSomeoneLikeThis() {
   const trackRef = useRef<HTMLDivElement>(null);
-  const latchedIndexRef = useRef(0);
-  const freeExitRef = useRef(false);
-  const doneRef = useRef(false);
-  const lenis = useLenis();
-
-  const [index, setIndex] = useState(0);
-  const [freeExit, setFreeExit] = useState(false);
   const [reduced, setReduced] = useState(false);
 
   useEffect(() => {
@@ -41,93 +28,15 @@ export function HomeSomeoneLikeThis() {
     return () => mq.removeEventListener("change", sync);
   }, []);
 
-  const enterFreeExit = useCallback(() => {
-    if (freeExitRef.current) return;
-    const track = trackRef.current;
-    if (!track) return;
+  const progress = usePinnedScrub({
+    trackRef,
+    enabled: !reduced,
+  });
 
-    const before = track.offsetHeight;
-    freeExitRef.current = true;
-    setFreeExit(true);
-
-    requestAnimationFrame(() => {
-      const after = track.offsetHeight;
-      const lost = before - after;
-      if (lost <= 1) return;
-      if (lenis) {
-        lenis.scrollTo(lenis.scroll - lost, { immediate: true });
-      } else {
-        window.scrollBy(0, -lost);
-      }
-    });
-  }, [lenis]);
-
-  const markDone = useCallback(() => {
-    if (doneRef.current) return;
-    doneRef.current = true;
-    latchedIndexRef.current = LAST;
-    setIndex(LAST);
-    enterFreeExit();
-  }, [enterFreeExit]);
-
-  useEffect(() => {
-    if (reduced) return;
-
-    const track = trackRef.current;
-    if (!track) return;
-
-    let raf = 0;
-
-    const paint = () => {
-      raf = 0;
-
-      if (doneRef.current) {
-        if (!freeExitRef.current) enterFreeExit();
-        return;
-      }
-
-      if (freeExitRef.current) return;
-
-      const rect = track.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const range = Math.max(1, track.offsetHeight - vh);
-      const progress = Math.min(1, Math.max(0, -rect.top / range));
-      const next = Math.min(LAST, Math.floor(progress * LINES.length + 1e-6));
-
-      if (next > latchedIndexRef.current) {
-        latchedIndexRef.current = next;
-        setIndex(next);
-      }
-
-      if (latchedIndexRef.current >= LAST && progress >= 0.995) {
-        markDone();
-        return;
-      }
-
-      /* Upward after first lines → finish once, never replay */
-      if (
-        latchedIndexRef.current > 0 &&
-        progress < latchedIndexRef.current / LINES.length - 0.02
-      ) {
-        markDone();
-      }
-    };
-
-    const schedule = () => {
-      if (raf) return;
-      raf = window.requestAnimationFrame(paint);
-    };
-
-    paint();
-    window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule, { passive: true });
-    return () => {
-      if (raf) window.cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", schedule);
-    };
-  }, [reduced, enterFreeExit, markDone]);
-
+  const index = Math.min(
+    LAST,
+    Math.floor(progress * LINES.length + 1e-6),
+  );
   const line = LINES[index] ?? LINES[0];
 
   return (
@@ -153,7 +62,7 @@ export function HomeSomeoneLikeThis() {
       ) : (
         <div
           ref={trackRef}
-          className={`home-someone__track${freeExit ? " is-free-exit" : ""}`}
+          className="home-someone__track"
           style={{ "--beats": LINES.length } as CSSProperties}
         >
           <div className="home-someone__pin">

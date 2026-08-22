@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  /* LAN preview (iPad etc.) — allow this Mac’s LAN host for /_next dev assets */
+  allowedDevOrigins: ["192.168.2.40", "localhost", "127.0.0.1"],
   async redirects() {
     return [
       {

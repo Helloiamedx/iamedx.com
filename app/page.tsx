@@ -52,7 +52,11 @@ export default function HomePage() {
           </p>
         </div>
         <ProjectFeaturedLead project={projectsFeaturedLead} />
-        <ProjectMasonry projects={selectedProjects} layout="related" />
+        <ProjectMasonry
+          projects={selectedProjects}
+          layout="related"
+          enableHoverSwap
+        />
         <FrostIndexLink href="/projects">All projects</FrostIndexLink>
       </section>
 

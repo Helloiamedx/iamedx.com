@@ -140,7 +140,7 @@ export function getInsightBySlug(slug: string): Insight | null {
  * Change only when the user explicitly asks to replace the featured insight.
  */
 export const INSIGHTS_FEATURED_LEAD_SLUG =
-  "when-game-merchandise-needs-more-than-just-a-logo";
+  "your-greatest-asset-in-supply-chain-is-trust-never-trade-it-for-short-term-benefits";
 
 export function getInsightsFeaturedLead(): InsightMeta | null {
   const featured = getInsightBySlug(INSIGHTS_FEATURED_LEAD_SLUG);

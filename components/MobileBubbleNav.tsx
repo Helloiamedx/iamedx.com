@@ -119,7 +119,6 @@ export function MobileBubbleNav({ open, onNavigate }: MobileBubbleNavProps) {
         </div>
 
         <div className="mobile-menu__block" data-mobile-anim="block">
-          <p className="mobile-menu__eyebrow">Contact</p>
           <ul className="mobile-menu__channels">
             {footerChannels.map((row) => (
               <li key={row.label} className="mobile-menu__channel">

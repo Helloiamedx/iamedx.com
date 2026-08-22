@@ -29,9 +29,9 @@ const KEYWORDS = [
   { word: "Proactive", color: "#4D9FFF" },
 ] as const;
 
-/* ~2px smaller than the original clamp */
+/* Half of previous: clamp(2.2rem − 2px, 6.2vw − 2px, 5.25rem − 2px) */
 const FONT_SIZE =
-  "clamp(calc(2.2rem - 2px), calc(6.2vw - 2px), calc(5.25rem - 2px))";
+  "clamp(calc((2.2rem - 2px) * 0.5), calc((6.2vw - 2px) * 0.5), calc((5.25rem - 2px) * 0.5))";
 const FONT_WEIGHT = 700;
 const TEXT_COLOR = "#ffffff";
 /** Pause after buttons appear before the first keyword change */

@@ -9,7 +9,7 @@ import {
   officeInfo,
   whatsAppCta,
 } from "@/content/nav";
-import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
+import { OriginButton } from "@/components/ui/origin-button";
 import { RollLink } from "@/components/RollLink";
 import { asset } from "@/lib/assets";
 
@@ -25,46 +25,60 @@ export function Footer() {
 
             <div className="site-footer__cta-actions">
               <div className="site-footer__whatsapp">
-                <InteractiveHoverButton
-                  text={whatsAppCta.label}
+                <OriginButton
                   href={whatsAppCta.href}
                   external
-                  className="site-footer__whatsapp-btn w-[9.25rem]"
-                />
+                  className="site-footer__whatsapp-btn"
+                >
+                  {whatsAppCta.label}
+                </OriginButton>
               </div>
             </div>
 
             <div className="site-footer__aside-col">
-              <p className="site-footer__aside-label">Social</p>
-              <p className="site-footer__aside-label">Support</p>
-              <p className="site-footer__aside-label">Menu</p>
+              <div className="site-footer__aside-pair">
+                <div className="site-footer__aside-group">
+                  <p className="site-footer__aside-label">Social</p>
+                  <div className="site-footer__aside-content">
+                    <RollLink
+                      href={linkedInHref}
+                      className="site-footer__aside-link"
+                      external
+                    >
+                      LinkedIn
+                    </RollLink>
+                  </div>
+                </div>
 
-              <div className="site-footer__aside-content">
-                <RollLink
-                  href={linkedInHref}
-                  className="site-footer__aside-link"
-                  external
-                >
-                  LinkedIn
-                </RollLink>
+                <div className="site-footer__aside-group">
+                  <p className="site-footer__aside-label">Support</p>
+                  <div className="site-footer__aside-content">
+                    <RollLink
+                      href={contactInfo.emailHref}
+                      className="site-footer__aside-link"
+                    >
+                      {contactInfo.email}
+                    </RollLink>
+                  </div>
+                </div>
               </div>
 
-              <div className="site-footer__aside-content">
-                <RollLink href={contactInfo.emailHref} className="site-footer__aside-link">
-                  {contactInfo.email}
-                </RollLink>
-              </div>
-
-              <div className="site-footer__aside-content site-footer__aside-content--menu">
-                <ul className="site-footer__menu">
-                  {footerMenuLinks.map((item) => (
-                    <li key={item.href}>
-                      <RollLink href={item.href} className="site-footer__aside-link">
-                        {item.label}
-                      </RollLink>
-                    </li>
-                  ))}
-                </ul>
+              <div className="site-footer__aside-group site-footer__aside-group--menu">
+                <p className="site-footer__aside-label">Menu</p>
+                <div className="site-footer__aside-content site-footer__aside-content--menu">
+                  <ul className="site-footer__menu">
+                    {footerMenuLinks.map((item) => (
+                      <li key={item.href}>
+                        <RollLink
+                          href={item.href}
+                          className="site-footer__aside-link"
+                        >
+                          {item.label}
+                        </RollLink>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
 
               <div className="site-footer__aside-hq">

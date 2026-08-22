@@ -1,3 +1,5 @@
+import { supplierDiscoveryVerificationImages } from "@/content/serviceCoverMedia";
+
 export type SupportKnowCard = {
   id: string;
   /** Card title under the panel */
@@ -24,14 +26,7 @@ export const supportKnowCards: SupportKnowCard[] = [
     id: "supplier-discovery-verification",
     headline: "Supplier Discovery & Verification",
     size: "xl",
-    panelImages: [
-      "https://assets.iamedx.com/images/home/1.jpeg",
-      "https://assets.iamedx.com/images/home/2.jpg",
-      "https://assets.iamedx.com/images/home/3.jpg",
-      "https://assets.iamedx.com/images/home/4.jpeg",
-      "https://assets.iamedx.com/images/home/5.jpeg",
-      "https://assets.iamedx.com/images/home/6.jpeg",
-    ],
+    panelImages: [...supplierDiscoveryVerificationImages],
     description:
       "Connect you with suitable suppliers based on your product category, technical requirements, production capabilities, and project goals. Through factory evaluations and direct communication, verify their experience, capabilities, and suitability before moving forward.",
   },

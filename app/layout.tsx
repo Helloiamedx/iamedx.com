@@ -44,7 +44,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
         <link
           rel="preload"
-          href={asset("/fonts/SF-Pro-Display-Medium.woff2")}
+          href="/fonts/FKGroteskMono-Medium.woff2"
           as="font"
           type="font/woff2"
           crossOrigin="anonymous"
@@ -52,11 +52,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
         <link
           rel="preload"
-          href={asset("/fonts/SF-Pro-Display-Bold.woff2")}
+          href="/fonts/Grtsk-bold.woff2"
           as="font"
           type="font/woff2"
           crossOrigin="anonymous"
           fetchPriority="high"
+        />
+        <link
+          rel="preload"
+          href="/fonts/Grtsk-Regular.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
         />
       </head>
       <body className="min-h-full flex flex-col">

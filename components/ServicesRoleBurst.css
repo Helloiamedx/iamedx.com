@@ -33,10 +33,11 @@
   top: 50%;
   left: 50%;
   margin: 0;
-  font-family: var(--font-sans);
+  font-family: var(--font-label);
   font-size: clamp(0.78rem, 0.58rem + 0.7vw, 1.05rem);
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   line-height: 1.15;
   /* Apple secondary gray — clearer than near-white on black */
   color: rgba(161, 161, 166, 0.88);
@@ -67,7 +68,7 @@
   margin: 0;
   max-width: min(34ch, 100%);
   min-height: 1.2em;
-  font-family: var(--font-sans);
+  font-family: var(--font-title);
   font-size: clamp(1.75rem, 1.05rem + 2.8vw, 3.25rem);
   font-weight: 700;
   line-height: 1.12;

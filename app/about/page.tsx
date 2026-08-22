@@ -16,7 +16,7 @@ const profileImage = asset(
 );
 
 const aboutLede =
-  "Hi, I’m Edward Xu.\n“Loyalty to my clients, protecting their interests, and helping them build highly tailored supply chains in China define how I approach every project.”";
+  "“Loyalty to my clients, protecting their interests, and helping them build highly tailored supply chains in China define how I approach every project.”";
 
 
 const workTools = [
@@ -153,27 +153,21 @@ export default function AboutPage() {
                   <Image
                     src={profileImage}
                     alt="Edward Xu"
-                    width={480}
-                    height={600}
+                    fill
                     sizes="(max-width: 720px) 48vw, 18rem"
                     priority
+                    className="about-boua__portrait-img"
                   />
                 </div>
                 <div className="about-boua__intro-copy">
-                  <p className="about-boua__lede">
-                    {aboutLede.split("\n").map((line) => (
-                      <span key={line} className="about-boua__lede-line">
-                        {line}
-                      </span>
-                    ))}
-                  </p>
+                  <p className="about-boua__lede">{aboutLede}</p>
                   <p className="about-boua__body">
                     My clients focus on building their brands and connecting with
                     their customers, while I provide the product development,
                     manufacturing expertise, and hands-on support needed to bring
                     their ideas to life in China. Together, we combine our
                     strengths to create products that are both commercially
-                    successful
+                    successful.
                   </p>
                 </div>
               </div>

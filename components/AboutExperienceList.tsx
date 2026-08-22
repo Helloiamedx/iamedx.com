@@ -1,9 +1,43 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { experienceRoles } from "@/content/experience";
 import { cn } from "@/lib/utils";
+
+const WORK_META_DESKTOP_MQ = "(min-width: 901px)";
+
+function syncWorkMetaColumnWidths(list: HTMLElement) {
+  const desktop = window.matchMedia(WORK_META_DESKTOP_MQ).matches;
+  if (!desktop) {
+    list.style.removeProperty("--work-company-col-w");
+    list.style.removeProperty("--work-country-col-w");
+    list.style.removeProperty("--work-period-col-w");
+    return;
+  }
+
+  const measure = (selector: string) => {
+    let max = 0;
+    list.querySelectorAll<HTMLElement>(selector).forEach((el) => {
+      max = Math.max(max, Math.ceil(el.scrollWidth));
+    });
+    return max;
+  };
+
+  const companyW = measure(".about-boua__work-company-name");
+  const countryW = measure(".about-boua__work-country");
+  const periodW = measure(".about-boua__work-period");
+
+  if (companyW > 0) {
+    list.style.setProperty("--work-company-col-w", `${companyW}px`);
+  }
+  if (countryW > 0) {
+    list.style.setProperty("--work-country-col-w", `${countryW}px`);
+  }
+  if (periodW > 0) {
+    list.style.setProperty("--work-period-col-w", `${periodW}px`);
+  }
+}
 
 /** Renders `**phrase**` markers as white scan highlights. */
 function renderBullet(text: string): ReactNode {
@@ -32,6 +66,7 @@ function toggleExperienceItem(current: string, id: string) {
 export function AboutExperienceList() {
   const [value, setValue] = useState("");
   const [hoverExpand, setHoverExpand] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
@@ -41,6 +76,24 @@ export function AboutExperienceList() {
     return () => mq.removeEventListener("change", sync);
   }, []);
 
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+
+    const run = () => syncWorkMetaColumnWidths(list);
+
+    run();
+    const desktopMq = window.matchMedia(WORK_META_DESKTOP_MQ);
+    desktopMq.addEventListener("change", run);
+    window.addEventListener("resize", run);
+    document.fonts?.ready.then(run);
+
+    return () => {
+      desktopMq.removeEventListener("change", run);
+      window.removeEventListener("resize", run);
+    };
+  }, []);
+
   return (
     <AccordionPrimitive.Root
       type="single"
@@ -48,6 +101,7 @@ export function AboutExperienceList() {
       value={value}
       onValueChange={setValue}
       className="about-boua__work-list"
+      ref={listRef}
     >
       {experienceRoles.map((role, index) => (
         <AccordionPrimitive.Item
@@ -82,13 +136,15 @@ export function AboutExperienceList() {
                 {String(index + 1).padStart(2, "0")}
               </span>
               <span className="about-boua__work-title">{role.role}</span>
-              <span className="about-boua__work-company">
-                <span className="about-boua__work-company-name">
-                  {role.company}
+              <div className="about-boua__work-meta">
+                <span className="about-boua__work-company">
+                  <span className="about-boua__work-company-name">
+                    {role.company}
+                  </span>
                 </span>
-              </span>
-              <span className="about-boua__work-country">{role.country}</span>
-              <span className="about-boua__work-period">{role.period}</span>
+                <span className="about-boua__work-country">{role.country}</span>
+                <span className="about-boua__work-period">{role.period}</span>
+              </div>
             </div>
           </AccordionPrimitive.Header>
 

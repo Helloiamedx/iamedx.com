@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { PanelImageStack } from "@/components/PanelImageStack";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
 import {
   supportBentoSection,
@@ -20,83 +21,6 @@ const WHEEL_GAIN = 1;
 const BUTTON_LERP = 0.18;
 
 type Axis = "x" | "y" | null;
-
-const STACK_INTERVAL_MS = 1500;
-
-/** Images stack one over another — each new frame slides up from below and covers. */
-function SupportPanelStack({
-  images,
-  align,
-}: {
-  images: string[];
-  align?: SupportKnowCard["panelImageAlign"];
-}) {
-  const n = images.length;
-  const [index, setIndex] = useState(0);
-  const [hasCycled, setHasCycled] = useState(false);
-  const reducedRef = useRef(false);
-
-  useEffect(() => {
-    reducedRef.current = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-  }, []);
-
-  useEffect(() => {
-    if (n < 2) return;
-    const id = window.setInterval(() => {
-      setHasCycled(true);
-      setIndex((i) => (i + 1) % n);
-    }, STACK_INTERVAL_MS);
-    return () => window.clearInterval(id);
-  }, [n]);
-
-  const under = (index - 1 + n) % n;
-  const underIsLast = (hasCycled ? under : index) === n - 1;
-  const coverIsLast = index === n - 1;
-  const alignClass =
-    align === "right"
-      ? "is-right-aligned"
-      : align === "top"
-        ? "is-top-aligned"
-        : undefined;
-  /** Supplier stack: last frame tops; skip when an explicit align is set */
-  const lastTopFallback = !align;
-
-  return (
-    <div
-      className="support-know__panel support-know__panel--stack"
-      aria-hidden="true"
-    >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={images[hasCycled ? under : index]}
-        alt=""
-        className={cn(
-          "support-know__stack-img support-know__stack-img--under",
-          lastTopFallback && underIsLast && "is-top-aligned",
-          alignClass,
-        )}
-        draggable={false}
-      />
-      {hasCycled ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          key={index}
-          src={images[index]}
-          alt=""
-          className={cn(
-            "support-know__stack-img support-know__stack-img--cover",
-            lastTopFallback && coverIsLast && "is-top-aligned",
-            alignClass,
-            reducedRef.current && "is-instant",
-          )}
-          draggable={false}
-        />
-      ) : null}
-    </div>
-  );
-}
 
 function SupportPanelVideo({
   src,
@@ -148,7 +72,15 @@ function SupportPanel({ card }: { card: SupportKnowCard }) {
   if (!images?.length) {
     return <div className="support-know__panel" aria-hidden="true" />;
   }
-  return <SupportPanelStack images={images} align={card.panelImageAlign} />;
+  return (
+    <div className="support-know__panel support-know__panel--stack">
+      <PanelImageStack
+        images={images}
+        align={card.panelImageAlign}
+        className="panel-image-stack"
+      />
+    </div>
+  );
 }
 
 /**
@@ -518,7 +450,7 @@ export function SupportStack() {
       />
       <div className="support-know__frost" aria-hidden="true" />
 
-      <div className="support-know__intro">
+      <div className="home-page__intro">
         <h2 id="support-know-title">{supportBentoSection.title}</h2>
         <p>{supportBentoSection.subtitle}</p>
       </div>
@@ -571,7 +503,21 @@ export function SupportStack() {
             disabled={!canPrev}
             onClick={() => scrollByCard(-1)}
           >
-            <span aria-hidden="true">‹</span>
+            <svg
+              className="support-know__nav-icon"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M15 6l-6 6 6 6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="square"
+                strokeLinejoin="miter"
+              />
+            </svg>
           </button>
           <button
             type="button"
@@ -580,7 +526,21 @@ export function SupportStack() {
             disabled={!canNext}
             onClick={() => scrollByCard(1)}
           >
-            <span aria-hidden="true">›</span>
+            <svg
+              className="support-know__nav-icon"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M9 6l6 6-6 6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="square"
+                strokeLinejoin="miter"
+              />
+            </svg>
           </button>
         </div>
       </div>

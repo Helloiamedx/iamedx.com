@@ -1,6 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import { useState } from "react";
+import { CoverLoopVideo } from "@/components/CoverLoopVideo";
+import { PanelImageStack } from "@/components/PanelImageStack";
+import { ServiceWorkflowDialog } from "@/components/ServiceWorkflowDialog";
+import { OriginButton } from "@/components/ui/origin-button";
 import {
   servicePackagePhases,
   type ServicePackageItem,
@@ -9,7 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const HERO_EYEBROW = "What I Do";
-const HERO_TITLE = "My Supports";
+const HERO_TITLE = "My capabilities";
 const HERO_DESC =
   "From initial idea to final delivery, I provide hands-on support throughout your product journey, helping you source suppliers, optimize designs, manage production, and ensure quality.";
 
@@ -91,20 +96,46 @@ function PhaseSection({
 }
 
 function ServiceItemBlock({ item }: { item: ServicePackageItem }) {
+  const [workflowOpen, setWorkflowOpen] = useState(false);
+
   return (
     <article className="svc-item" aria-label={item.title}>
       <h4 className="svc-item__title">{item.title}</h4>
       <p className="svc-item__desc">{item.description}</p>
+      <div className="svc-item__cta">
+        <OriginButton type="button" onClick={() => setWorkflowOpen(true)}>
+          View workflow
+        </OriginButton>
+      </div>
+
+      <ServiceWorkflowDialog
+        open={workflowOpen}
+        onClose={() => setWorkflowOpen(false)}
+        title={item.title}
+      />
 
       <div className="svc-item__media">
-        <Image
-          src={PHASE_PLACEHOLDER_IMAGE}
-          alt=""
-          width={1600}
-          height={900}
-          className="svc-item__image"
-          sizes="(max-width: 900px) 100vw, 50vw"
-        />
+        {item.coverVideo ? (
+          <CoverLoopVideo
+            src={item.coverVideo}
+            className="svc-item__image"
+            ariaLabel={item.title}
+          />
+        ) : item.coverImages?.length ? (
+          <PanelImageStack
+            images={item.coverImages}
+            className="svc-item__image-stack"
+          />
+        ) : (
+          <Image
+            src={PHASE_PLACEHOLDER_IMAGE}
+            alt=""
+            width={1600}
+            height={900}
+            className="svc-item__image"
+            sizes="(max-width: 900px) 100vw, 50vw"
+          />
+        )}
       </div>
 
       <div className="svc-phase__grid" aria-label={`${item.code} details`}>

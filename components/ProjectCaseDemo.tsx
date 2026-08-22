@@ -2,6 +2,7 @@
 
 import { useLenis } from "lenis/react";
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { HeroSegmentVideo } from "@/components/HeroSegmentVideo";
 import { OriginButton } from "@/components/ui/origin-button";
 import { ProjectFallbackVideo } from "@/components/ProjectFallbackVideo";
@@ -386,6 +387,8 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
   const media = buildCaseMedia(project);
 
   const [open, setOpen] = useState(false);
+  const [mobileSheet, setMobileSheet] = useState(false);
+  const [portalReady, setPortalReady] = useState(false);
   const panelId = useId();
   const bodyRef = useRef<HTMLDivElement>(null);
   const mediaStackRef = useRef<HTMLDivElement>(null);
@@ -400,6 +403,15 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
   const isMobilePanel = () =>
     typeof window !== "undefined" &&
     window.matchMedia("(max-width: 799px)").matches;
+
+  useEffect(() => {
+    setPortalReady(true);
+    const mq = window.matchMedia("(max-width: 799px)");
+    const sync = () => setMobileSheet(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   const scrollCopyToStart = (opts?: { smooth?: boolean }) => {
     const panel = panelRef.current;
@@ -444,6 +456,22 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
   };
 
   const toggleOpen = () => setOpen((prev) => !prev);
+
+  const aboutToggle = (
+    <div
+      className={`project-case-demo__toggle-pin${open && mobileSheet ? " is-sheet-float" : ""}`}
+    >
+      <OriginButton
+        type="button"
+        className={open ? "is-open" : undefined}
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={toggleOpen}
+      >
+        About the project
+      </OriginButton>
+    </div>
+  );
 
   /*
    * On open: ease page to copy line 1 (same duration as the panel push).
@@ -550,17 +578,9 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
       </section>
 
       <div ref={bodyRef} className="project-case-demo__body">
-        <div className="project-case-demo__toggle-pin">
-          <OriginButton
-            type="button"
-            className={open ? "is-open" : undefined}
-            aria-expanded={open}
-            aria-controls={panelId}
-            onClick={toggleOpen}
-          >
-            About the project
-          </OriginButton>
-        </div>
+        {open && mobileSheet && portalReady
+          ? createPortal(aboutToggle, document.body)
+          : aboutToggle}
         <div className="project-case-demo__columns">
           <div ref={mediaColRef} className="project-case-demo__media-col">
             <div ref={mediaStackRef} className="project-case-demo__media-stack">
@@ -694,41 +714,45 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
           className="project-case-demo__credits"
           aria-label="Special thanks and collaborators"
         >
-          {specialThanks.map((item, index) => (
-            <div
-              key={`${item.company}-${item.name}`}
-              className="project-case-demo__credits-row"
-            >
-              {index === 0 ? (
-                <p className="project-case-demo__credits-label">
-                  Special thanks
-                </p>
-              ) : (
-                <span className="project-case-demo__credits-spacer" />
-              )}
+          <div className="project-case-demo__credits-grid">
+            {specialThanks.map((item, index) => (
+              <div
+                key={`${item.company}-${item.name}`}
+                className="project-case-demo__credits-row"
+              >
+                {index === 0 ? (
+                  <p className="project-case-demo__credits-label">
+                    Special thanks
+                  </p>
+                ) : (
+                  <span className="project-case-demo__credits-spacer" />
+                )}
+                <span className="project-case-demo__credits-company">
+                  {item.company}
+                </span>
+                <span className="project-case-demo__credits-name">
+                  <span className="project-case-demo__credits-name-line">
+                    {item.name}
+                  </span>
+                </span>
+              </div>
+            ))}
+            <div className="project-case-demo__credits-row">
+              <span className="project-case-demo__credits-spacer" />
               <span className="project-case-demo__credits-company">
-                {item.company}
+                Collaborators
               </span>
               <span className="project-case-demo__credits-name">
-                {item.name}
+                {collaborators.map((name) => (
+                  <span
+                    key={name}
+                    className="project-case-demo__credits-name-line"
+                  >
+                    {name}
+                  </span>
+                ))}
               </span>
             </div>
-          ))}
-          <div className="project-case-demo__credits-row">
-            <span className="project-case-demo__credits-spacer" />
-            <span className="project-case-demo__credits-company">
-              Collaborators
-            </span>
-            <span className="project-case-demo__credits-name">
-              {collaborators.map((name) => (
-                <span
-                  key={name}
-                  className="project-case-demo__credits-name-line"
-                >
-                  {name}
-                </span>
-              ))}
-            </span>
           </div>
         </div>
       </div>

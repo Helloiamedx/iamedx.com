@@ -1,27 +1,26 @@
 ---
-description: Filled type chips never use all-caps; insight label tokens
+description: Type chips use uppercase; insight label tokens
 globs: app/thoughts/**/*.tsx, app/projects/**/*.tsx, app/globals.css, components/Insight*.tsx, components/Insights*.tsx, components/Project*.tsx
 alwaysApply: true
 ---
 
-# Type chips / filled tags — no all-caps; plain SF labels on Projects/Insights
+# Type chips / small labels — uppercase
 
-Any **project type** or **article type** label must **not** use `text-transform: uppercase`.
+Any **project type**, **article type**, or other small UI label uses `text-transform: uppercase` (FK Grotesk Mono Medium / `--font-label`).
 
-On Projects + Insights surfaces, type labels are **plain text** (no chip fill): SF Pro Display Medium (same as filter pills), shared `--type-chip-font`, gray ink. Title/description in those metas are white. See `mobile-meta-chip-right.mdc`.
+On Projects + Insights surfaces, type labels are **plain text** (no chip fill): Mono Medium, shared `--type-chip-font`, gray ink, **all caps**. Title/description in those metas are white. See `mobile-meta-chip-right.mdc`.
 
 Applies to:
 
 - `.insight-chip` / `.insight-chip--on-media`
 - `.project-type-chip` / `.project-type-chip--on-media`
 - `.project-case-demo__tag`
+- Filter involvement pills (`.project-involvement__pill`)
 - Any future type label on covers or cards
-
-Show the authored label as-is (e.g. `End-to-End Projects`).
 
 # Insight label tokens (size / tracking for non-chip microcopy)
 
-Shared tokens on `.insights-page` and `.insight-detail` for date / eyebrows / filter microcopy (not forced-uppercase chips):
+Shared tokens on `.insights-page` and `.insight-detail` for date / eyebrows / filter microcopy:
 
 - `--insight-label-tracking: 0.08em`
 - `--insight-label-size: clamp(0.625rem, 0.58rem + 0.2vw, 0.75rem)`

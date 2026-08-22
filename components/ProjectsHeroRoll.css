@@ -153,7 +153,9 @@
   justify-content: center;
   padding: calc(var(--header-bar-h) + 0.5rem) var(--shell-gutter) 2rem;
   text-align: center;
-  pointer-events: none;
+  pointer-events: auto;
+  -webkit-user-select: text;
+  user-select: text;
   /*
    * Same invert contrast as the clear header — white type differences
    * against whatever art sits behind it.
@@ -165,8 +167,8 @@
   margin: 0;
   max-width: min(26ch, 100%);
   min-height: 1.2em;
-  font-family: var(--font-sans);
-  font-size: clamp(1.65rem, 1.1rem + 2.4vw, 3rem);
+  font-family: var(--font-title);
+  font-size: clamp(0.825rem, calc(0.55rem + 1.2vw), 1.5rem);
   font-weight: 700;
   line-height: 1.12;
   letter-spacing: -0.02em;
@@ -191,7 +193,7 @@
 @media (max-width: 700px) {
   .projects-hero-roll__line {
     max-width: min(20ch, 100%);
-    font-size: clamp(1.55rem, 1.05rem + 3.8vw, 2.15rem);
+    font-size: clamp(0.775rem, calc(0.525rem + 1.9vw), 1.075rem);
   }
 }
 

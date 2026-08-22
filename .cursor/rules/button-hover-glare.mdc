@@ -1,15 +1,15 @@
 ---
-description: Global CTA is OriginButton — except header / nav chrome and footer
+description: Global CTA is OriginButton — except header / nav chrome
 alwaysApply: true
 ---
 
 # Global button — OriginButton
 
-All site CTAs (hero, All projects / All thoughts, About the project, forms, pricing, services) use **one** component: `OriginButton` from `components/ui/origin-button.tsx`.
+All site CTAs (hero, footer, All projects / All thoughts, About the project, forms, pricing, services) use **one** component: `OriginButton` from `components/ui/origin-button.tsx`.
 
 Change `components/ui/origin-button.tsx` + `.origin-button` in `app/globals.css` → every CTA updates.
 
-Rest: **slight radius** (`0.25rem`). **Uppercase** label. **Border always matches text** (`currentColor`). Black fill + white type + white border. Hover: white fill + black type + black border. Weight: Medium (`500`).
+Rest: **square corners** (`border-radius: 0`). **Uppercase** label. **Default:** transparent fill, white border + type with `mix-blend-mode: difference` (negative / adaptive contrast). **Hover:** solid fill — black bg + white type on light surfaces; white bg + black type on dark bands (hero, footer, support-know, case hero, mobile About sheet) — **instant cut** (`transition: none`), `mix-blend-mode: normal` on hover. Font: Regular Giga (`--font-fine`, weight `400`).
 
 ## Use
 
@@ -29,11 +29,10 @@ Index links can still go through `FrostIndexLink` (layout wrapper) — it render
 - Invent a new fill, glare wipe, frosted pill, or SpecularButton for CTAs
 - Restyle one instance with local CSS that fights OriginButton (no `background` / `color` / `border-radius` overrides on the button)
 - Put GlareHover on these CTAs
+- Use `InteractiveHoverButton` for new work (legacy wrapper only)
 
 ## Exceptions
 
 **Header / nav chrome** stays as-is: logo, primary nav, Menu / Close.
-
-**Footer** uses `InteractiveHoverButton` — not OriginButton. Do not restyle footer CTAs when changing OriginButton.
 
 Not OriginButton: filter pills, FAQ tabs, WeChat QR trigger / backdrop, panel Close, mobile menu list.

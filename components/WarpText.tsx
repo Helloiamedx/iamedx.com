@@ -332,7 +332,7 @@ export function WarpText({
   ripple = true,
   fontSize = "clamp(2rem, 5.5vw, 4.25rem)",
   fontWeight = 800,
-  fontFamily = '"SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif',
+  fontFamily = '"Grtsk", "Helvetica Neue", Helvetica, Arial, sans-serif',
   letterSpacing = "-0.03em",
   lineHeight = 1.05,
   className = "",
