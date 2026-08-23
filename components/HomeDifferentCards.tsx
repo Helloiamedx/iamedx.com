@@ -103,7 +103,7 @@ function CardFaces({ point, flipped }: { point: HomeCopyPoint; flipped: boolean 
         <div className="home-different__card-copy">
           <CardBody body={point.body} highlight={point.bodyHighlight} />
         </div>
-        <CardKeywordFooter title={point.title} hideBrowserMark />
+        <CardKeywordFooter title={point.title} />
       </div>
     </motion.div>
   );
