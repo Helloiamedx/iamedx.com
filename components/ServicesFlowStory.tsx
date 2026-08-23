@@ -100,8 +100,10 @@ function ServiceItemBlock({ item }: { item: ServicePackageItem }) {
 
   return (
     <article className="svc-item" aria-label={item.title}>
-      <h4 className="svc-item__title">{item.title}</h4>
-      <p className="svc-item__desc">{item.description}</p>
+      <div className="svc-item__intro">
+        <h4 className="svc-item__title">{item.title}</h4>
+        <p className="svc-item__desc">{item.description}</p>
+      </div>
       <div className="svc-item__cta">
         <OriginButton type="button" onClick={() => setWorkflowOpen(true)}>
           View workflow

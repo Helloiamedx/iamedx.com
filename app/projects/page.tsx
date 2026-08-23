@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { FilterResults } from "@/components/FilterResults";
 import { ProjectFeaturedLead } from "@/components/ProjectFeaturedLead";
 import { ProjectFilter } from "@/components/ProjectFilter";
-import { ProjectMasonry } from "@/components/ProjectMasonry";
+import { ProjectsFilterGrid } from "@/components/ProjectsFilterGrid";
 import { ProjectsHeroRoll } from "@/components/ProjectsHeroRoll";
 import { projectIps } from "@/content/nav";
 import {
@@ -71,7 +71,11 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
         <ProjectFeaturedLead project={projectsFeaturedLead} />
         <ProjectFilter active={activeInvolvement} activeIp={activeIp} />
         <FilterResults filterKey={filterKey}>
-          <ProjectMasonry projects={listed} enableHoverSwap />
+          <ProjectsFilterGrid
+            projects={listed}
+            filterKey={filterKey}
+            enableHoverSwap
+          />
         </FilterResults>
       </section>
     </main>

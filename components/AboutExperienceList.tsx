@@ -137,18 +137,28 @@ export function AboutExperienceList() {
               </span>
               <span className="about-boua__work-title">{role.role}</span>
               <div className="about-boua__work-meta">
-                <span className="about-boua__work-company">
+                <span className="about-boua__work-company about-boua__work-meta--desktop">
                   <span className="about-boua__work-company-name">
                     {role.company}
                   </span>
                 </span>
-                <span className="about-boua__work-country">{role.country}</span>
+                <span className="about-boua__work-country about-boua__work-meta--desktop">
+                  {role.country}
+                </span>
                 <span className="about-boua__work-period">{role.period}</span>
               </div>
             </div>
           </AccordionPrimitive.Header>
 
           <AccordionPrimitive.Content className="about-boua__work-detail">
+            <div
+              className="about-boua__work-detail-rule"
+              aria-hidden="true"
+            />
+            <div className="about-boua__work-detail-intro">
+              <span className="about-boua__work-company-name">{role.company}</span>
+              <span className="about-boua__work-country">{role.country}</span>
+            </div>
             <ul className="about-boua__work-bullets">
               {role.bullets.map((bullet) => (
                 <li key={bullet}>{renderBullet(bullet)}</li>

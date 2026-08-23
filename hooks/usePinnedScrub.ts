@@ -29,12 +29,33 @@ export function usePinnedScrub({
     if (!track) return;
 
     let raf = 0;
+    let lockedRange = 0;
+    let lockedWidth = window.innerWidth;
+
+    const resetRange = () => {
+      lockedRange = 0;
+      lockedWidth = window.innerWidth;
+    };
 
     const paint = () => {
       raf = 0;
       const rect = track.getBoundingClientRect();
       const vh = window.innerHeight;
-      const range = Math.max(1, track.offsetHeight - vh);
+
+      if (window.innerWidth !== lockedWidth) {
+        resetRange();
+      }
+
+      // Lock scrub range while pinned so mobile URL-bar show/hide cannot jump progress.
+      const inPin = rect.top <= 0 && rect.bottom > vh;
+      if (inPin && !lockedRange) {
+        lockedRange = Math.max(1, track.offsetHeight - vh);
+      }
+      if (!inPin && rect.top > 0) {
+        lockedRange = 0;
+      }
+
+      const range = lockedRange || Math.max(1, track.offsetHeight - vh);
       const next = Math.min(1, Math.max(0, -rect.top / range));
       setProgress((prev) => (Math.abs(prev - next) < 1e-4 ? prev : next));
     };

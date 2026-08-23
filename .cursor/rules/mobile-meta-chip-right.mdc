@@ -47,6 +47,6 @@ Leads stay visible above the filter on mobile (do not hide).
 
 `.project-case-demo__hero-copy` matches the card stack (not the desktop nav-align recipe):
 
-1. Title ≤ **60%** | type label **end-aligned / top-aligned** (gap between).
+1. Title ≤ **65%** | type label **end-aligned / top-aligned** (gap between).
 2. Description on the next row, **full** usable width, left-aligned.
 ---

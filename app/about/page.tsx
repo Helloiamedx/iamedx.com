@@ -154,7 +154,7 @@ export default function AboutPage() {
                     src={profileImage}
                     alt="Edward Xu"
                     fill
-                    sizes="(max-width: 720px) 48vw, 18rem"
+                    sizes="(max-width: 800px) 26vw, 18rem"
                     priority
                     className="about-boua__portrait-img"
                   />

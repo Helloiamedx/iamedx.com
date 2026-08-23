@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import {
   useEffect,
   useRef,
@@ -18,32 +18,40 @@ const CARD_COUNT = POINTS.length;
 /** One scroll beat per card flip */
 const BEATS = CARD_COUNT;
 const EASE = [0.22, 1, 0.36, 1] as const;
+const SOLO_COPY_TRANSITION = { duration: 0.32, ease: EASE } as const;
 
 function CardBrowserMark() {
   return (
-    <svg
-      className="home-different__browser-mark"
-      viewBox="0 0 500 500"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path
-        fill="currentColor"
-        d="M392.17,317.83c-25.35,53.04-79.49,89.67-142.17,89.67s-116.83-36.62-142.17-89.67l42.36-19.76c17.88,37.11,55.86,62.7,99.81,62.7s81.94-25.59,99.81-62.7l42.36,19.76Z"
-      />
-      <path
-        fill="currentColor"
-        d="M404.9,221.42c-13.43-73.34-77.67-128.92-154.9-128.92s-141.47,55.58-154.9,128.92c-1.72,9.27-2.6,18.83-2.6,28.58,0,6.19.36,12.31,1.06,18.3h312.88c.7-6,1.06-12.11,1.06-18.3,0-9.76-.88-19.32-2.6-28.58ZM142.95,221.42c1.55-5.87,3.6-11.54,6.05-16.98,17.37-38.45,56.07-65.22,101.01-65.22s83.64,26.77,101.01,65.22c2.45,5.44,4.49,11.11,6.05,16.98h-214.11Z"
-      />
-    </svg>
+    <span className="home-different__browser-mark-wrap" aria-hidden="true">
+      <svg
+        className="home-different__browser-mark"
+        viewBox="0 0 500 500"
+        focusable="false"
+      >
+        <path
+          fill="currentColor"
+          d="M392.17,317.83c-25.35,53.04-79.49,89.67-142.17,89.67s-116.83-36.62-142.17-89.67l42.36-19.76c17.88,37.11,55.86,62.7,99.81,62.7s81.94-25.59,99.81-62.7l42.36,19.76Z"
+        />
+        <path
+          fill="currentColor"
+          d="M404.9,221.42c-13.43-73.34-77.67-128.92-154.9-128.92s-141.47,55.58-154.9,128.92c-1.72,9.27-2.6,18.83-2.6,28.58,0,6.19.36,12.31,1.06,18.3h312.88c.7-6,1.06-12.11,1.06-18.3,0-9.76-.88-19.32-2.6-28.58ZM142.95,221.42c1.55-5.87,3.6-11.54,6.05-16.98,17.37-38.45,56.07-65.22,101.01-65.22s83.64,26.77,101.01,65.22c2.45,5.44,4.49,11.11,6.05,16.98h-214.11Z"
+        />
+      </svg>
+    </span>
   );
 }
 
-function CardKeywordFooter({ title }: { title: string }) {
+function CardKeywordFooter({
+  title,
+  hideBrowserMark = false,
+}: {
+  title: string;
+  hideBrowserMark?: boolean;
+}) {
   return (
     <div className="home-different__keyword-row">
       <span className="home-different__keyword">{title}</span>
-      <CardBrowserMark />
+      {!hideBrowserMark ? <CardBrowserMark /> : null}
     </div>
   );
 }
@@ -77,12 +85,13 @@ function CardFaces({ point, flipped }: { point: HomeCopyPoint; flipped: boolean 
   return (
     <motion.div
       className="home-different__flip"
-      initial={{ rotateY: 0 }}
+      style={{ transformStyle: "preserve-3d" }}
+      initial={false}
       animate={{ rotateY: flipped ? 180 : 0 }}
       transition={{ duration: 0.65, ease: EASE }}
     >
       <div
-        className="home-different__face home-different__face--front"
+        className={`home-different__face home-different__face--front${flipped ? " is-flipped" : ""}`}
         style={faceStyle}
       >
         <CardKeywordFooter title={point.title} />
@@ -94,9 +103,39 @@ function CardFaces({ point, flipped }: { point: HomeCopyPoint; flipped: boolean 
         <div className="home-different__card-copy">
           <CardBody body={point.body} highlight={point.bodyHighlight} />
         </div>
-        <CardKeywordFooter title={point.title} />
+        <CardKeywordFooter title={point.title} hideBrowserMark />
       </div>
     </motion.div>
+  );
+}
+
+function NarrowStage({ flipProgress }: { flipProgress: number }) {
+  const active = Math.min(
+    CARD_COUNT - 1,
+    Math.max(0, Math.floor(flipProgress)),
+  );
+  const point = POINTS[active] ?? POINTS[0];
+
+  return (
+    <div className="home-different__solo-stage">
+      <div className="home-different__card home-different__card--solo home-different__solo-surface">
+        <div className="home-different__card-copy home-different__card-copy--solo">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={point.id}
+              className="home-different__solo-copy-motion"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={SOLO_COPY_TRANSITION}
+            >
+              <CardBody body={point.body} highlight={point.bodyHighlight} />
+            </motion.div>
+          </AnimatePresence>
+        </div>
+        <CardKeywordFooter title={point.title} />
+      </div>
+    </div>
   );
 }
 
@@ -196,21 +235,6 @@ export function HomeDifferentCards() {
         </div>
       </div>
     </section>
-  );
-}
-
-function NarrowStage({ flipProgress }: { flipProgress: number }) {
-  const active = Math.min(
-    CARD_COUNT - 1,
-    Math.max(0, Math.floor(flipProgress - 0.5 + 1e-6)),
-  );
-  const point = POINTS[active] ?? POINTS[0];
-  const flipped = flipProgress >= active + 0.5;
-
-  return (
-    <div className="home-different__card home-different__card--solo">
-      <CardFaces key={point.id} point={point} flipped={flipped} />
-    </div>
   );
 }
 

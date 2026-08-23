@@ -6,11 +6,19 @@ import { useCallback, useEffect, useRef } from "react";
 import { asset } from "@/lib/assets";
 
 const aboutBannerImage = asset("/images/about/Banner.jpg");
+const MOBILE_MQ = "(max-width: 800px)";
 
 /** Max upward nudge while the content sheet covers the hero (~6.4vh). */
 const MAX_PUSH_VH = 0.0644;
 /** Headline gets a little extra travel on top of the hero push. */
 const COPY_EXTRA_MULT = 0.41;
+
+function supportsScrollDrivenParallax() {
+  return (
+    typeof CSS !== "undefined" &&
+    CSS.supports("animation-timeline: scroll()")
+  );
+}
 
 function applyHeroPush(
   hero: HTMLElement,
@@ -55,14 +63,34 @@ function applyHeroPush(
   }
 }
 
+function syncMobileHeroHide(hero: HTMLElement, scrollY: number) {
+  const vh = window.innerHeight || 1;
+  const sheet = document.querySelector<HTMLElement>(".about-content-sheet");
+  let hideHero = false;
+
+  if (sheet) {
+    const sheetBottom = sheet.getBoundingClientRect().bottom;
+    hideHero = scrollY > vh * 0.35 && sheetBottom < vh - 1;
+  }
+
+  hero.classList.toggle("is-hero-hidden", hideHero);
+}
+
 export function AboutPageHero() {
   const heroRef = useRef<HTMLElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
   const reducedRef = useRef(false);
+  const mobileCssParallaxRef = useRef(false);
 
   const paint = useCallback((scrollY: number) => {
     const hero = heroRef.current;
     if (!hero || reducedRef.current) return;
+
+    if (mobileCssParallaxRef.current) {
+      syncMobileHeroHide(hero, scrollY);
+      return;
+    }
+
     applyHeroPush(hero, copyRef.current, scrollY);
   }, []);
 
@@ -76,7 +104,28 @@ export function AboutPageHero() {
     ).matches;
 
     const hero = heroRef.current;
+    const copy = copyRef.current;
     if (!hero || reducedRef.current) return;
+
+    const mobileMq = window.matchMedia(MOBILE_MQ);
+
+    const syncMobileMode = () => {
+      const useCss =
+        mobileMq.matches && supportsScrollDrivenParallax();
+      mobileCssParallaxRef.current = useCss;
+      hero.classList.toggle("is-css-parallax", useCss);
+
+      if (useCss) {
+        hero.style.transform = "";
+        hero.style.visibility = "";
+        hero.style.pointerEvents = "";
+        if (copy) copy.style.transform = "";
+      } else {
+        hero.classList.remove("is-hero-hidden");
+      }
+
+      paint(window.scrollY);
+    };
 
     let raf = 0;
     const schedule = () => {
@@ -87,18 +136,21 @@ export function AboutPageHero() {
       });
     };
 
-    paint(window.scrollY);
+    syncMobileMode();
+    mobileMq.addEventListener("change", syncMobileMode);
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", schedule, { passive: true });
 
     return () => {
       if (raf) window.cancelAnimationFrame(raf);
+      mobileMq.removeEventListener("change", syncMobileMode);
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
+      hero.classList.remove("is-css-parallax", "is-hero-hidden");
       hero.style.transform = "";
       hero.style.visibility = "";
       hero.style.pointerEvents = "";
-      if (copyRef.current) copyRef.current.style.transform = "";
+      if (copy) copy.style.transform = "";
     };
   }, [paint]);
 

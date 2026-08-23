@@ -715,18 +715,12 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
           aria-label="Special thanks and collaborators"
         >
           <div className="project-case-demo__credits-grid">
-            {specialThanks.map((item, index) => (
+            <p className="project-case-demo__credits-label">Special thanks</p>
+            {specialThanks.map((item) => (
               <div
                 key={`${item.company}-${item.name}`}
                 className="project-case-demo__credits-row"
               >
-                {index === 0 ? (
-                  <p className="project-case-demo__credits-label">
-                    Special thanks
-                  </p>
-                ) : (
-                  <span className="project-case-demo__credits-spacer" />
-                )}
                 <span className="project-case-demo__credits-company">
                   {item.company}
                 </span>
@@ -737,8 +731,7 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
                 </span>
               </div>
             ))}
-            <div className="project-case-demo__credits-row">
-              <span className="project-case-demo__credits-spacer" />
+            <div className="project-case-demo__credits-row project-case-demo__credits-row--collaborators">
               <span className="project-case-demo__credits-company">
                 Collaborators
               </span>
