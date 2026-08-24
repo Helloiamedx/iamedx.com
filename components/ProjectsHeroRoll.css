@@ -34,7 +34,7 @@
   /* Clip filter fringe — blur/brightness on <img> otherwise paints a 1px magenta hairline */
   overflow: hidden;
   background: transparent;
-  pointer-events: none;
+  pointer-events: auto;
   will-change: transform;
   animation-name: projects-hero-roll-up;
   animation-timing-function: linear;
@@ -59,6 +59,13 @@
   border-radius: inherit;
   /* Avoid subpixel AA rim against the dark stage */
   transform: translateZ(0);
+}
+
+.projects-hero-roll__frame-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  pointer-events: auto;
 }
 
 /*
@@ -168,8 +175,12 @@
   max-width: min(26ch, 100%);
   min-height: 1.2em;
   font-family: var(--font-title);
-  font-size: clamp(0.825rem, calc(0.55rem + 1.2vw), 1.5rem);
-  font-weight: 700;
+  font-size: clamp(
+    calc(0.825rem + 20px),
+    calc(0.55rem + 1.2vw + 20px),
+    calc(1.5rem + 20px)
+  );
+  font-weight: 600;
   line-height: 1.12;
   letter-spacing: -0.02em;
   color: #fff;
@@ -193,7 +204,11 @@
 @media (max-width: 700px) {
   .projects-hero-roll__line {
     max-width: min(20ch, 100%);
-    font-size: clamp(0.775rem, calc(0.525rem + 1.9vw), 1.075rem);
+    font-size: clamp(
+      calc(0.775rem + 20px),
+      calc(0.525rem + 1.9vw + 20px),
+      calc(1.075rem + 20px)
+    );
   }
 }
 

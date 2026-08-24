@@ -23,8 +23,9 @@ export type FAQProps = HTMLAttributes<HTMLElement> & {
   title?: string;
   categories: FAQCategories;
   faqData: FAQData;
-  /** Plain support line under the title */
-  supportNote?: string;
+  /** Support copy under the title — pair with `supportEmail` for a mailto link */
+  supportNote?: { before: string; after: string };
+  supportEmail?: string;
   tocLabel?: string;
 };
 
@@ -39,6 +40,7 @@ export function FAQ({
   categories,
   faqData,
   supportNote,
+  supportEmail,
   tocLabel = "Table of Contents",
   className,
   ...props
@@ -63,7 +65,16 @@ export function FAQ({
         <div className="faq-shell__hero-copy">
           <h1 className="faq-shell__title">{title}</h1>
           {supportNote ? (
-            <p className="faq-shell__support">{supportNote}</p>
+            <p className="faq-shell__support">
+              {supportNote.before}
+              {supportEmail ? (
+                <>
+                  {" "}
+                  <a href={`mailto:${supportEmail}`}>{supportEmail}</a>{" "}
+                </>
+              ) : null}
+              {supportNote.after}
+            </p>
           ) : null}
         </div>
       </header>

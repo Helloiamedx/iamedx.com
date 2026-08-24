@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   useEffect,
   useId,
@@ -812,6 +813,32 @@ export function ProjectsHeroRoll() {
 
   const staticPreview = projectsHeroRoll.slice(0, 8);
 
+  function renderRollFrame(
+    key: string,
+    item: ProjectsHeroRollItem,
+    className: string,
+    style?: CSSProperties,
+    onAnimationEnd?: (event: AnimationEvent<HTMLElement>) => void,
+  ) {
+    return (
+      <figure
+        key={key}
+        className={className}
+        style={style}
+        onAnimationEnd={onAnimationEnd}
+      >
+        <Link
+          href={item.href}
+          className="projects-hero-roll__frame-link"
+          aria-label={item.alt}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={item.src} alt="" draggable={false} />
+        </Link>
+      </figure>
+    );
+  }
+
   return (
     <section className="projects-cover projects-cover--roll" aria-label="Projects">
       <div className="projects-hero-roll" aria-hidden="true">
@@ -820,27 +847,21 @@ export function ProjectsHeroRoll() {
             ? staticPreview.map((item, index) => {
                 const depth: Depth =
                   index % 3 === 0 ? "near" : index % 3 === 1 ? "mid" : "far";
-                return (
-                  <figure
-                    key={item.id}
-                    className={`projects-hero-roll__frame projects-hero-roll__frame--static projects-hero-roll__frame--s${index} projects-hero-roll__frame--${depth}`}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={item.src} alt="" draggable={false} />
-                  </figure>
+                return renderRollFrame(
+                  item.id,
+                  item,
+                  `projects-hero-roll__frame projects-hero-roll__frame--static projects-hero-roll__frame--s${index} projects-hero-roll__frame--${depth}`,
                 );
               })
-            : floaters.map((floater) => (
-                <figure
-                  key={floater.key}
-                  className={`projects-hero-roll__frame projects-hero-roll__frame--${floater.depth}`}
-                  style={floater.style}
-                  onAnimationEnd={(event) => onEnd(floater.key, event)}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={floater.item.src} alt="" draggable={false} />
-                </figure>
-              ))}
+            : floaters.map((floater) =>
+                renderRollFrame(
+                  floater.key,
+                  floater.item,
+                  `projects-hero-roll__frame projects-hero-roll__frame--${floater.depth}`,
+                  floater.style,
+                  (event) => onEnd(floater.key, event),
+                ),
+              )}
         </div>
         <div className="projects-hero-roll__veil" />
         <div className="projects-hero-roll__grain" />

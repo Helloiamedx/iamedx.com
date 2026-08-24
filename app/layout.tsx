@@ -52,7 +52,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
         <link
           rel="preload"
-          href="/fonts/Grtsk-bold.woff2"
+          href="/fonts/Grtsk-SemiBold.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+          fetchPriority="high"
+        />
+        <link
+          rel="preload"
+          href="/fonts/Grtsk-Light.woff2"
           as="font"
           type="font/woff2"
           crossOrigin="anonymous"

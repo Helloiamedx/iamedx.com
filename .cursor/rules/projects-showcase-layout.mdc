@@ -78,9 +78,9 @@ These fields feed the filter system later — keep as structured data.
 ## Page arrangement (`/projects`)
 
 1. **Hero**
-2. **Featured lead** — full width; **always above the filter**; never tied to filter results (see `fixed-featured-leads.mdc`). Change only when the user explicitly asks.
-3. **Filter** — centered involvement pills
-4. **Everything after** — **three equal-width columns** (filtered list; featured lead included when it matches). Same meta stack on every card.
+2. **Filter** — centered involvement pills
+3. **Featured lead** — full width; follows active involvement via `getProjectsFeaturedLead` (see `fixed-featured-leads.mdc`). Change a lead only when the user explicitly asks.
+4. **Everything after** — **three equal-width columns** (filtered list; featured lead **excluded** so it only appears once above). Same meta stack on every card.
 
 ## Do not
 

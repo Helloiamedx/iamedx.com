@@ -9,25 +9,13 @@ import { ProjectFallbackVideo } from "@/components/ProjectFallbackVideo";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
 import { YouTubeBackground } from "@/components/YouTubeBackground";
 import { getCaseCopySections } from "@/content/caseCopy";
+import {
+  getProjectCollaborators,
+  getProjectSpecialThanks,
+  SITE_CREDIT_ROW,
+} from "@/content/projectCredits";
 import type { Project } from "@/content/projects";
 import { asset } from "@/lib/assets";
-
-/** Placeholder credits until per-project copy arrives */
-const PLACEHOLDER_THANKS = [
-  {
-    company: "Best Link (USA) Corp. Ltd.",
-    name: "Charlotte Tem",
-  },
-  {
-    company: "DPI Merchandising Inc.",
-    name: "Angela McReynolds",
-  },
-  {
-    company: "KindLucky Hong Kong International Limited",
-    name: "Eric Winn",
-  },
-];
-const PLACEHOLDER_COLLABORATORS = ["Jordan Hale", "Mei Chen"];
 
 type MediaItem =
   | { kind: "full"; src: string; alt: string; ratio: string }
@@ -238,28 +226,40 @@ function buildCaseMedia(project: Project): MediaItem[] {
     }
   }
 
-  for (const row of project.afterCoverExtraRows ?? []) {
-    const ratio = row.ratio ?? "100%";
-    if (row.items.length === 1) {
-      media.push({
-        kind: "full",
-        src: row.items[0].src,
-        alt: row.items[0].alt,
-        ratio,
-      });
-    } else {
-      media.push({
-        kind: "row",
-        items: row.items.map((item) => ({
-          src: item.src,
-          alt: item.alt,
-          ratio,
-        })),
-      });
-    }
+  if (project.afterCoverVideoPair) {
+    media.push({
+      kind: "video-pair",
+      left: project.afterCoverVideoPair.left,
+      right: project.afterCoverVideoPair.right,
+      ratio: project.afterCoverVideoPair.ratio ?? "100%",
+    });
   }
 
-  if (project.afterCoverStillVideoPair) {
+  const pushAfterCoverExtraRows = () => {
+    for (const row of project.afterCoverExtraRows ?? []) {
+      const ratio = row.ratio ?? "100%";
+      if (row.items.length === 1) {
+        media.push({
+          kind: "full",
+          src: row.items[0].src,
+          alt: row.items[0].alt,
+          ratio,
+        });
+      } else {
+        media.push({
+          kind: "row",
+          items: row.items.map((item) => ({
+            src: item.src,
+            alt: item.alt,
+            ratio,
+          })),
+        });
+      }
+    }
+  };
+
+  const pushAfterCoverStillVideoPair = () => {
+    if (!project.afterCoverStillVideoPair) return;
     const pair = project.afterCoverStillVideoPair;
     const ratio = pair.ratio ?? "100%";
     media.push({
@@ -276,6 +276,14 @@ function buildCaseMedia(project: Project): MediaItem[] {
         ratio,
       },
     });
+  };
+
+  if (project.afterCoverStillVideoBeforeExtraRows) {
+    pushAfterCoverStillVideoPair();
+    pushAfterCoverExtraRows();
+  } else {
+    pushAfterCoverExtraRows();
+    pushAfterCoverStillVideoPair();
   }
 
   if (project.afterCoverVideos?.length) {
@@ -350,6 +358,7 @@ function buildCaseMedia(project: Project): MediaItem[] {
     project.galleryLeadImage ||
       project.afterCoverStills ||
       project.afterCoverExtraRows?.length ||
+      project.afterCoverVideoPair ||
       project.afterCoverStillVideoPair ||
       project.afterCoverVideo ||
       project.afterCoverVideos?.length ||
@@ -375,14 +384,8 @@ function buildCaseMedia(project: Project): MediaItem[] {
 
 export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
   const copySections = getCaseCopySections(project);
-  const specialThanks =
-    project.specialThanks && project.specialThanks.length > 0
-      ? project.specialThanks
-      : PLACEHOLDER_THANKS;
-  const collaborators =
-    project.collaborators && project.collaborators.length > 0
-      ? project.collaborators
-      : PLACEHOLDER_COLLABORATORS;
+  const specialThanks = getProjectSpecialThanks(project);
+  const collaborators = getProjectCollaborators(project);
   const tags = project.tags.length > 0 ? project.tags : [project.involvement];
   const media = buildCaseMedia(project);
 
@@ -466,9 +469,10 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
         className={open ? "is-open" : undefined}
         aria-expanded={open}
         aria-controls={panelId}
+        aria-label={open ? "Close article" : "About the project"}
         onClick={toggleOpen}
       >
-        About the project
+        {open ? "Close Article" : "About the project"}
       </OriginButton>
     </div>
   );
@@ -718,8 +722,43 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
             <p className="project-case-demo__credits-label">Special thanks</p>
             {specialThanks.map((item) => (
               <div
-                key={`${item.company}-${item.name}`}
+                key={item.company}
                 className="project-case-demo__credits-row"
+              >
+                <span className="project-case-demo__credits-company">
+                  {item.company}
+                </span>
+                <span className="project-case-demo__credits-name">
+                  {item.names.map((name) => (
+                    <span
+                      key={name}
+                      className="project-case-demo__credits-name-line"
+                    >
+                      {name}
+                    </span>
+                  ))}
+                </span>
+              </div>
+            ))}
+            <div className="project-case-demo__credits-row">
+              <span className="project-case-demo__credits-company">
+                {SITE_CREDIT_ROW.company}
+              </span>
+              <span className="project-case-demo__credits-name">
+                {SITE_CREDIT_ROW.names.map((name) => (
+                  <span
+                    key={name}
+                    className="project-case-demo__credits-name-line"
+                  >
+                    {name}
+                  </span>
+                ))}
+              </span>
+            </div>
+            {collaborators.leadPartners?.map((item) => (
+              <div
+                key={`${item.company}-${item.name}`}
+                className="project-case-demo__credits-row project-case-demo__credits-row--collaborator-lead"
               >
                 <span className="project-case-demo__credits-company">
                   {item.company}
@@ -736,7 +775,7 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
                 Collaborators
               </span>
               <span className="project-case-demo__credits-name">
-                {collaborators.map((name) => (
+                {collaborators.names.map((name) => (
                   <span
                     key={name}
                     className="project-case-demo__credits-name-line"
@@ -746,6 +785,21 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
                 ))}
               </span>
             </div>
+            {collaborators.partners?.map((item) => (
+              <div
+                key={`${item.company}-${item.name}`}
+                className="project-case-demo__credits-row project-case-demo__credits-row--collaborator-partner"
+              >
+                <span className="project-case-demo__credits-company">
+                  {item.company}
+                </span>
+                <span className="project-case-demo__credits-name">
+                  <span className="project-case-demo__credits-name-line">
+                    {item.name}
+                  </span>
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </div>

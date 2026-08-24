@@ -7,8 +7,8 @@ import { ProjectsHeroRoll } from "@/components/ProjectsHeroRoll";
 import { projectIps } from "@/content/nav";
 import {
   filterProjects,
+  getProjectsFeaturedLead,
   involvementFilters,
-  projectsFeaturedLead,
   type Involvement,
 } from "@/content/projects";
 import { shuffleArray } from "@/lib/utils";
@@ -51,12 +51,14 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
     : "all";
   const activeIp = isIp(params.ip) ? params.ip : null;
 
-  /* Featured lead stays above the filter — also included in filter results when it matches */
+  const featuredLead = getProjectsFeaturedLead(activeInvolvement);
+
+  /* Lead is already shown above — omit it from the filtered grid */
   const listed = shuffleArray(
     filterProjects({
       involvement: activeInvolvement,
       ip: activeIp,
-    }),
+    }).filter((project) => project.slug !== featuredLead.slug),
   );
 
   const filterKey = activeIp
@@ -68,8 +70,8 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
       <ProjectsHeroRoll />
 
       <section className="section projects-body">
-        <ProjectFeaturedLead project={projectsFeaturedLead} />
         <ProjectFilter active={activeInvolvement} activeIp={activeIp} />
+        <ProjectFeaturedLead project={featuredLead} />
         <FilterResults filterKey={filterKey}>
           <ProjectsFilterGrid
             projects={listed}

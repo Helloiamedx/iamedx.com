@@ -3,6 +3,7 @@ import { FAQ } from "@/components/ui/faq-tabs";
 import {
   siteFaqCategories,
   siteFaqData,
+  siteFaqSupportEmail,
   siteFaqSupportNote,
   siteFaqTitle,
 } from "@/content/faq";
@@ -21,6 +22,7 @@ export default function FaqPage() {
         categories={siteFaqCategories}
         faqData={siteFaqData}
         supportNote={siteFaqSupportNote}
+        supportEmail={siteFaqSupportEmail}
         className="faq-page__inner"
         aria-label={siteFaqTitle}
       />

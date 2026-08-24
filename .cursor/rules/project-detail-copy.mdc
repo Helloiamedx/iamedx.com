@@ -9,7 +9,7 @@ alwaysApply: true
 |-----------|--------|
 | **项目** | Project (`/projects`) |
 | **见解** | Thought (`/thoughts`) |
-| **第一个项目** | Full-width featured lead above the projects filter (`projectsFeaturedLead`) |
+| **第一个项目** | Full-width featured lead on `/projects` (`getProjectsFeaturedLead` / default `projectsFeaturedLead`) |
 | **项目详情** | Project detail **copy** (文案), not the whole page chrome |
 
 # 项目详情文案 — up to these four, in order

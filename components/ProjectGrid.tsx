@@ -8,7 +8,7 @@ type ProjectGridProps = {
 
 export function ProjectGrid({ projects }: ProjectGridProps) {
   if (projects.length === 0) {
-    return <p className="empty-state">No projects in this category yet.</p>;
+    return <p className="empty-state">No more projects in this category yet.</p>;
   }
 
   return (

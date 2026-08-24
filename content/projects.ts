@@ -1,3 +1,4 @@
+import type { CollaboratorCredits, SpecialThanksEntry } from "@/content/projectCredits";
 import { asset } from "@/lib/assets";
 
 export type Material =
@@ -72,6 +73,11 @@ export type Project = {
    * Use when the user supplies an mp4 for the outside card.
    */
   coverVideo?: string;
+  /**
+   * Index / Related card hover — three stills cycled on pointer hover.
+   * When set (length 3), wins over the placeholder color cycle.
+   */
+  coverHoverStills?: [string, string, string];
   /** Intrinsic cover size — drives card aspect / relative scale */
   coverWidth: number;
   coverHeight: number;
@@ -114,10 +120,10 @@ export type Project = {
   /** Case Outcome chapter */
   impactHeadline?: string;
   impactBody?: string | string[];
-  /** Case panel — Special thanks (company + name) */
-  specialThanks?: { company: string; name: string }[];
-  /** Case credits — collaborator names (last row, right column) */
-  collaborators?: string[];
+  /** Case panel — Special thanks (company + one or more names) */
+  specialThanks?: SpecialThanksEntry[];
+  /** Case credits — collaborator names (+ optional company rows) */
+  collaborators?: CollaboratorCredits;
   gallery?: string[];
   /**
    * Still(s) directly under the first gallery still (row 2).
@@ -168,6 +174,20 @@ export type Project = {
     /** CSS padding-bottom ratio per cell; default 100% */
     ratio?: string;
   };
+  /**
+   * When both `afterCoverStillVideoPair` and `afterCoverExtraRows` are set,
+   * render the still+video row before the extra still rows (default: after).
+   */
+  afterCoverStillVideoBeforeExtraRows?: boolean;
+  /**
+   * Two-up row after `afterCoverStills`, before `afterCoverExtraRows`:
+   * video left, video right.
+   */
+  afterCoverVideoPair?: {
+    left: { primary: string; fallback?: string; alt: string };
+    right: { primary: string; fallback?: string; alt: string };
+    ratio?: string;
+  };
   /** Full-width stills after the process video (each item = one row). */
   afterVideoStills?: { src: string; alt: string; ratio?: string }[];
   /**
@@ -210,6 +230,8 @@ export type ProjectsFeaturedLead = {
   coverImage: string;
   /** When set, featured media plays this muted loop instead of `coverImage` */
   coverVideo?: string;
+  /** Hover cycle stills — same recipe as filter cards */
+  coverHoverStills?: [string, string, string];
   coverWidth: number;
   coverHeight: number;
 };
@@ -251,6 +273,24 @@ const FIRST_PROJECT_FEATURED_COVER = projectCoverFromName(
   FIRST_PROJECT_NAME,
   "Mass Effect Tali Companion Bundle.jpg",
 );
+const FIRST_PROJECT_COVER_VIDEO = projectCoverFromName(
+  FIRST_PROJECT_NAME,
+  "Mass Effect Tali Companion Bundle.mp4",
+);
+const FIRST_PROJECT_HOVER_STILLS = [
+  projectCoverFromName(
+    FIRST_PROJECT_NAME,
+    "Mass Effect Tali Companion Bundle hover1.jpg",
+  ),
+  projectCoverFromName(
+    FIRST_PROJECT_NAME,
+    "Mass Effect Tali Companion Bundle hover2.jpg",
+  ),
+  projectCoverFromName(
+    FIRST_PROJECT_NAME,
+    "Mass Effect Tali Companion Bundle hover3.jpg",
+  ),
+] as [string, string, string];
 const FIRST_PROJECT_HERO = projectCoverFromName(
   FIRST_PROJECT_NAME,
   "Mass Effect Tali.jpg",
@@ -370,6 +410,34 @@ const FIRST_PROJECT_END_VIDEOS = {
   },
 } as const;
 
+const FIRST_PROJECT_SPECIAL_THANKS: SpecialThanksEntry[] = [
+  {
+    company: "DPI Merchandising Inc.",
+    names: ["Angela McReynolds", "Michelle Wu", "Nikki Petraitis"],
+  },
+  {
+    company: "Best Link (USA) Corp. Ltd.",
+    names: ["Charlotte Tam", "Cola"],
+  },
+  {
+    company: "Wenzhou Xianrui Packaging Co., Ltd.",
+    names: ["Mr Ling", "Bo Yang"],
+  },
+];
+
+const FIRST_PROJECT_COLLABORATORS: CollaboratorCredits = {
+  names: [
+    "Jian Chen",
+    "Yuchen Wang",
+    "Haoran Liu",
+    "Zihan Zhang",
+    "Kai Xu",
+    "Ruihao Zhou",
+    "Xinyi Li",
+    "Yuting Zhao",
+  ],
+};
+
 /** 「第二个项目」— grid card under the featured lead */
 const SECOND_PROJECT_NAME = "Dragon Age Writing Bundle";
 const SECOND_PROJECT_SLUG = projectSlugFromName(SECOND_PROJECT_NAME);
@@ -377,6 +445,24 @@ const SECOND_PROJECT_COVER = projectCoverFromName(
   SECOND_PROJECT_NAME,
   "VARRIC TETHRAS cover.jpg",
 );
+const SECOND_PROJECT_COVER_VIDEO = projectCoverFromName(
+  SECOND_PROJECT_NAME,
+  "Dragon Age Writing Bundle.mp4",
+);
+const SECOND_PROJECT_HOVER_STILLS = [
+  projectCoverFromName(
+    SECOND_PROJECT_NAME,
+    "Dragon Age Writing Bundle hover1.jpg",
+  ),
+  projectCoverFromName(
+    SECOND_PROJECT_NAME,
+    "Dragon Age Writing Bundle hover2.jpg",
+  ),
+  projectCoverFromName(
+    SECOND_PROJECT_NAME,
+    "Dragon Age Writing Bundle hover3.jpg",
+  ),
+] as [string, string, string];
 /** Detail page — closing full-width still (was first gallery row) */
 const SECOND_PROJECT_GALLERY_LEAD = projectCoverFromName(
   SECOND_PROJECT_NAME,
@@ -388,6 +474,21 @@ const SECOND_PROJECT_HERO_VIDEO = projectCoverFromName(
 );
 const SECOND_PROJECT_TAGLINE =
   '"Get the captain," Donnen sighed. "We\'ve got a dead magistrate."';
+
+const SECOND_PROJECT_SPECIAL_THANKS: SpecialThanksEntry[] = [
+  {
+    company: "DPI Merchandising Inc.",
+    names: ["Michelle Wu"],
+  },
+  {
+    company: "Best Link (USA) Corp. Ltd.",
+    names: ["Cola Li", "Susan Hu", "Grace Yang"],
+  },
+];
+
+const SECOND_PROJECT_COLLABORATORS: CollaboratorCredits = {
+  names: ["Zhang Wei", "Li Hao", "Chen Yu", "Wang Zihan"],
+};
 
 const SECOND_PROJECT_AFTER_COVER_STILLS = {
   items: [
@@ -526,6 +627,21 @@ const THIRD_PROJECT_HERO_VIDEO = projectCoverFromName(
 const THIRD_PROJECT_TAGLINE =
   "Thunderjaw resin sculpture capturing the ultimate power of machine and battle.";
 
+const THIRD_PROJECT_HOVER_STILLS = [
+  projectCoverFromName(
+    THIRD_PROJECT_CDN_FOLDER,
+    "Horizon Zero Dawn - The Machines- Thunderjaw-1.jpg",
+  ),
+  projectCoverFromName(
+    THIRD_PROJECT_CDN_FOLDER,
+    "Horizon Zero Dawn - The Machines- Thunderjaw-2.jpg",
+  ),
+  projectCoverFromName(
+    THIRD_PROJECT_CDN_FOLDER,
+    "Horizon Zero Dawn - The Machines- Thunderjaw-3.jpg",
+  ),
+] as [string, string, string];
+
 const THIRD_PROJECT_STILL = (n: 1 | 2 | 3 | 4 | 5 | 6, alt: string) => ({
   src: projectCoverFromName(
     THIRD_PROJECT_CDN_FOLDER,
@@ -590,6 +706,25 @@ const FOURTH_PROJECT_COVER = projectCoverFromName(
   FOURTH_PROJECT_NAME,
   "cover.jpg",
 );
+/** Index / featured card cover loop */
+const FOURTH_PROJECT_COVER_VIDEO = projectCoverFromName(
+  FOURTH_PROJECT_NAME,
+  "The Elder Scrolls Online 10-Year Coin Shadow box.mp4",
+);
+const FOURTH_PROJECT_HOVER_STILLS = [
+  projectCoverFromName(
+    FOURTH_PROJECT_NAME,
+    "The Elder Scrolls Online 10-Year Coin Shadowbox1.jpg",
+  ),
+  projectCoverFromName(
+    FOURTH_PROJECT_NAME,
+    "The Elder Scrolls Online 10-Year Coin Shadowbox2.jpg",
+  ),
+  projectCoverFromName(
+    FOURTH_PROJECT_NAME,
+    "The Elder Scrolls Online 10-Year Coin Shadowbox3.jpg",
+  ),
+] as [string, string, string];
 const FOURTH_PROJECT_TAGLINE =
   "A 10th anniversary collectible designed to preserve the memories, stories, and connections built within The Elder Scrolls Online community.";
 /** Detail hero — self-hosted intro clip (muted, loops from start) */
@@ -646,6 +781,20 @@ const FIFTH_PROJECT_COVER_VIDEO = projectCoverFromName(
   FIFTH_PROJECT_NAME,
   "The Elder Scrolls Online NECROM Look Book.mp4",
 );
+const FIFTH_PROJECT_HOVER_STILLS = [
+  projectCoverFromName(
+    FIFTH_PROJECT_NAME,
+    "The Elder Scrolls Online NECROM Look Book Bundle hover1.jpg",
+  ),
+  projectCoverFromName(
+    FIFTH_PROJECT_NAME,
+    "The Elder Scrolls Online NECROM Look Book Bundle hover2.jpg",
+  ),
+  projectCoverFromName(
+    FIFTH_PROJECT_NAME,
+    "The Elder Scrolls Online NECROM Look Book Bundle hover3.jpg",
+  ),
+] as [string, string, string];
 /** Case detail first-screen hero */
 const FIFTH_PROJECT_HERO_VIDEO = projectCoverFromName(
   FIFTH_PROJECT_NAME,
@@ -701,6 +850,34 @@ const FIFTH_PROJECT_AFTER_COVER_VIDEO = {
   ratio: "56.25%",
 } as const;
 
+const FIFTH_PROJECT_SPECIAL_THANKS: SpecialThanksEntry[] = [
+  {
+    company: "DPI Merchandising Inc.",
+    names: ["Angela McReynolds", "Michelle Wu", "Nikki Petraitis"],
+  },
+  {
+    company: "Best Link (USA) Corp. Ltd.",
+    names: ["Karyn Leung", "Susan Hu", "Charlotte Tam"],
+  },
+  {
+    company: "Wenzhou Dabenying Stationery Co., Ltd.",
+    names: ["Mr Ling", "Minghao Zhou", "Zhihao Wu", "Yifan Huang"],
+  },
+];
+
+const FIFTH_PROJECT_COLLABORATORS: CollaboratorCredits = {
+  names: [
+    "Wei Zhang",
+    "Hao Chen",
+    "Jun Wang",
+    "Lei Liu",
+    "Tao Xu",
+    "Jing Li",
+    "Yuxin Zhao",
+    "Mengyao Chen",
+  ],
+};
+
 /** 「第六个项目」— grid card; media only until copy is ready */
 const SIXTH_PROJECT_NAME = "Ghost Recon Wildlands Statue";
 const SIXTH_PROJECT_SLUG = projectSlugFromName(SIXTH_PROJECT_NAME);
@@ -748,7 +925,7 @@ const SIXTH_PROJECT_END_VIDEOS = {
   ratio: "100%",
 } as const;
 
-/** 「第七个项目」— grid card cover only until detail media / copy are ready */
+/** 「第七个项目」— DC Comics Injustice 2 The Brainiac Statue */
 const SEVENTH_PROJECT_NAME = "DC Comics Injustice 2 The Brainiac Statue";
 /** CDN folder casing — keep exact */
 const SEVENTH_PROJECT_CDN_FOLDER =
@@ -758,6 +935,66 @@ const SEVENTH_PROJECT_COVER_VIDEO = projectCoverFromName(
   SEVENTH_PROJECT_CDN_FOLDER,
   "Dc comics injustice 2 the brainiac statue.mp4",
 );
+/** Case detail first-screen hero */
+const SEVENTH_PROJECT_HERO_VIDEO = projectCoverFromName(
+  SEVENTH_PROJECT_CDN_FOLDER,
+  "Dc comics injustice 2 the brainiac video.mp4",
+);
+const SEVENTH_PROJECT_GALLERY_LEAD = projectCoverFromName(
+  SEVENTH_PROJECT_CDN_FOLDER,
+  "Dc comics injustice 2 the brainiac statue hover1.jpg",
+);
+const SEVENTH_PROJECT_HOVER_STILLS = [
+  projectCoverFromName(
+    SEVENTH_PROJECT_CDN_FOLDER,
+    "Dc comics injustice 2 the brainiac statue hover1.jpg",
+  ),
+  projectCoverFromName(
+    SEVENTH_PROJECT_CDN_FOLDER,
+    "Dc comics injustice 2 the brainiac statue hover2.jpg",
+  ),
+  projectCoverFromName(
+    SEVENTH_PROJECT_CDN_FOLDER,
+    "Dc comics injustice 2 the brainiac statue hover3.jpg",
+  ),
+] as [string, string, string];
+const SEVENTH_PROJECT_TAGLINE =
+  "Bringing Brainiac's iconic presence from Injustice 2 into a premium collectible statue, this project recreated the legendary DC villain with his signature armor, mechanical tentacles, and imposing battlefield stance.";
+const SEVENTH_PROJECT_STILL = (n: 1 | 2 | 3 | 4 | 5 | 6, alt: string) => ({
+  src: projectCoverFromName(
+    SEVENTH_PROJECT_CDN_FOLDER,
+    `Dc comics injustice 2 the brainiac statue${n}.jpg`,
+  ),
+  alt,
+});
+const SEVENTH_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    SEVENTH_PROJECT_STILL(1, "Brainiac statue 1"),
+    SEVENTH_PROJECT_STILL(2, "Brainiac statue 2"),
+  ],
+  ratio: "100%",
+};
+const SEVENTH_PROJECT_AFTER_COVER_STILL_VIDEO_PAIR = {
+  still: SEVENTH_PROJECT_STILL(3, "Brainiac statue 3"),
+  video: {
+    primary: projectCoverFromName(
+      SEVENTH_PROJECT_CDN_FOLDER,
+      "Dc comics injustice 2 the brainiac statue11.mp4",
+    ),
+    alt: "Brainiac statue clip",
+  },
+  ratio: "100%",
+} as const;
+const SEVENTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      SEVENTH_PROJECT_STILL(5, "Brainiac statue 5"),
+      SEVENTH_PROJECT_STILL(4, "Brainiac statue 4"),
+      SEVENTH_PROJECT_STILL(6, "Brainiac statue 6"),
+    ],
+    ratio: "100%",
+  },
+];
 
 /** 「第八个项目」— grid card cover only until detail media / copy are ready */
 const EIGHTH_PROJECT_NAME = "Recore Collector's Edition Statue";
@@ -767,6 +1004,73 @@ const EIGHTH_PROJECT_COVER_VIDEO = projectCoverFromName(
   EIGHTH_PROJECT_CDN_FOLDER,
   "Recore collector's edition statue.mp4",
 );
+/** Case detail first-screen hero */
+const EIGHTH_PROJECT_HERO_VIDEO = projectCoverFromName(
+  EIGHTH_PROJECT_CDN_FOLDER,
+  "Recore Collector's Edition Statue.mp4.mp4",
+);
+const EIGHTH_PROJECT_HOVER_STILLS = [
+  projectCoverFromName(
+    EIGHTH_PROJECT_CDN_FOLDER,
+    "Recore Collector's Edition Statue1.jpg",
+  ),
+  projectCoverFromName(
+    EIGHTH_PROJECT_CDN_FOLDER,
+    "Recore Collector's Edition Statue2.jpg",
+  ),
+  projectCoverFromName(
+    EIGHTH_PROJECT_CDN_FOLDER,
+    "Recore Collector's Edition Statue31.jpg",
+  ),
+] as [string, string, string];
+
+const EIGHTH_PROJECT_STILL = (n: 1 | 2 | 3 | 4 | 5, alt: string) => ({
+  src: projectCoverFromName(
+    EIGHTH_PROJECT_CDN_FOLDER,
+    `Recore Collector's Edition Statue-${n}.jpg`,
+  ),
+  alt,
+});
+
+/** Detail gallery: 1 full → -1|-2 → 1mp4|2mp4 → 3|4|5 */
+const EIGHTH_PROJECT_GALLERY_LEAD = projectCoverFromName(
+  EIGHTH_PROJECT_CDN_FOLDER,
+  "Recore Collector's Edition Statue1.jpg",
+);
+const EIGHTH_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    EIGHTH_PROJECT_STILL(1, "Recore statue 1"),
+    EIGHTH_PROJECT_STILL(2, "Recore statue 2"),
+  ],
+  ratio: "100%",
+};
+const EIGHTH_PROJECT_AFTER_COVER_VIDEO_PAIR = {
+  left: {
+    primary: projectCoverFromName(
+      EIGHTH_PROJECT_CDN_FOLDER,
+      "Recore Collector's Edition Statue1.mp4",
+    ),
+    alt: "Recore statue clip 1",
+  },
+  right: {
+    primary: projectCoverFromName(
+      EIGHTH_PROJECT_CDN_FOLDER,
+      "Recore Collector's Edition Statue2.mp4",
+    ),
+    alt: "Recore statue clip 2",
+  },
+  ratio: "100%",
+} as const;
+const EIGHTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      EIGHTH_PROJECT_STILL(3, "Recore statue 3"),
+      EIGHTH_PROJECT_STILL(4, "Recore statue 4"),
+      EIGHTH_PROJECT_STILL(5, "Recore statue 5"),
+    ],
+    ratio: "100%",
+  },
+];
 
 /** 「第九个项目」— grid card cover only until detail media / copy are ready */
 const NINTH_PROJECT_NAME =
@@ -785,6 +1089,85 @@ const TENTH_PROJECT_COVER_VIDEO = projectCoverFromName(
   "video.mp4",
 );
 
+/** 「第十一个项目」— Specialized; card cover + hover stills */
+const ELEVENTH_PROJECT_NAME = "Fallout Tunnel Snakes Rule Patch";
+/** CDN folder casing — keep exact */
+const ELEVENTH_PROJECT_CDN_FOLDER = "Fallout tunnel snakes rule patch";
+const ELEVENTH_PROJECT_SLUG = projectSlugFromName(ELEVENTH_PROJECT_NAME);
+const ELEVENTH_PROJECT_COVER_VIDEO = projectCoverFromName(
+  ELEVENTH_PROJECT_CDN_FOLDER,
+  "Fallout tunnel snakes rule patch.mp4",
+);
+const ELEVENTH_PROJECT_HERO_VIDEO = projectCoverFromName(
+  ELEVENTH_PROJECT_CDN_FOLDER,
+  "Fallout tunnel snakes rule patch hero.mp4",
+);
+const ELEVENTH_PROJECT_HOVER_STILLS = [
+  projectCoverFromName(
+    ELEVENTH_PROJECT_CDN_FOLDER,
+    "Fallout tunnel snakes rule patch1.jpg",
+  ),
+  projectCoverFromName(
+    ELEVENTH_PROJECT_CDN_FOLDER,
+    "Fallout tunnel snakes rule patch2.jpg",
+  ),
+  projectCoverFromName(
+    ELEVENTH_PROJECT_CDN_FOLDER,
+    "Fallout tunnel snakes rule patch3.jpg",
+  ),
+] as [string, string, string];
+
+const ELEVENTH_PROJECT_STILL = (n: 1 | 2 | 3, alt: string) => ({
+  src: projectCoverFromName(
+    ELEVENTH_PROJECT_CDN_FOLDER,
+    `Fallout tunnel snakes rule patch-${n}.jpg`,
+  ),
+  alt,
+});
+
+/** Detail gallery: 1 full → 2|3 → 11 full */
+const ELEVENTH_PROJECT_GALLERY_LEAD = ELEVENTH_PROJECT_STILL(
+  1,
+  "Tunnel Snakes patch 1",
+).src;
+const ELEVENTH_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    ELEVENTH_PROJECT_STILL(2, "Tunnel Snakes patch 2"),
+    ELEVENTH_PROJECT_STILL(3, "Tunnel Snakes patch 3"),
+  ],
+  ratio: "100%",
+};
+const ELEVENTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      {
+        src: projectCoverFromName(
+          ELEVENTH_PROJECT_CDN_FOLDER,
+          "Fallout tunnel snakes rule patch11.jpg",
+        ),
+        alt: "Tunnel Snakes patch 11",
+      },
+    ],
+    ratio: "56.25%",
+  },
+];
+
+const ELEVENTH_PROJECT_SPECIAL_THANKS: SpecialThanksEntry[] = [
+  {
+    company: "DPI Merchandising Inc.",
+    names: ["Michelle Wu"],
+  },
+  {
+    company: "Best Link (USA) Corp. Ltd.",
+    names: ["Andy Sun", "Hugo"],
+  },
+];
+
+const ELEVENTH_PROJECT_COLLABORATORS: CollaboratorCredits = {
+  names: ["Mr. Li"],
+};
+
+/** Default / home lead — End-to-End featured (NECROM Look Book Bundle) */
 export const projectsFeaturedLead: ProjectsFeaturedLead = {
   slug: FIFTH_PROJECT_SLUG,
   title: FIFTH_PROJECT_NAME,
@@ -792,6 +1175,7 @@ export const projectsFeaturedLead: ProjectsFeaturedLead = {
   categories: involvementTags("end-to-end"),
   coverImage: FIFTH_PROJECT_COVER_VIDEO,
   coverVideo: FIFTH_PROJECT_COVER_VIDEO,
+  coverHoverStills: FIFTH_PROJECT_HOVER_STILLS,
   coverWidth: 1920,
   coverHeight: 1080,
 };
@@ -817,6 +1201,8 @@ export const projects: Project[] = [
     ],
     involvement: "end-to-end",
     coverImage: FIRST_PROJECT_FEATURED_COVER,
+    coverVideo: FIRST_PROJECT_COVER_VIDEO,
+    coverHoverStills: FIRST_PROJECT_HOVER_STILLS,
     coverWidth: 1920,
     coverHeight: 1080,
     galleryLeadImage: FIRST_PROJECT_COVER,
@@ -829,6 +1215,8 @@ export const projects: Project[] = [
     afterVideoStills: FIRST_PROJECT_AFTER_VIDEO_STILLS,
     afterVideoRow: FIRST_PROJECT_AFTER_VIDEO_ROW,
     endVideoPair: FIRST_PROJECT_END_VIDEOS,
+    specialThanks: FIRST_PROJECT_SPECIAL_THANKS,
+    collaborators: FIRST_PROJECT_COLLABORATORS,
     overview: [
       "This project was a character-themed collectible set based on the Mass Effect IP. It was designed to bring the character to life through several physical components and create a complete collectible experience. The set included a wooden display box, a resin sculpture, a metal necklace, and a themed letter. Different materials and manufacturing processes had to be brought together while keeping the overall look and quality consistent.",
       "The set was developed around the Mass Effect character Tali’Zorah. The goal was to turn the original IP design into a product that could actually be manufactured at scale, combining woodworking, resin casting, metal accessories, and other production processes into one finished collectible set.",
@@ -875,6 +1263,8 @@ export const projects: Project[] = [
     ],
     involvement: "end-to-end",
     coverImage: SECOND_PROJECT_COVER,
+    coverVideo: SECOND_PROJECT_COVER_VIDEO,
+    coverHoverStills: SECOND_PROJECT_HOVER_STILLS,
     coverWidth: SHOWCASE_COVER_W,
     coverHeight: SHOWCASE_COVER_H,
     heroImage: SECOND_PROJECT_COVER,
@@ -885,6 +1275,8 @@ export const projects: Project[] = [
     afterVideoRow: SECOND_PROJECT_AFTER_VIDEO_ROW,
     afterVideoStills: SECOND_PROJECT_AFTER_VIDEO_STILLS,
     beforeEndRow: SECOND_PROJECT_BEFORE_END_ROW,
+    specialThanks: SECOND_PROJECT_SPECIAL_THANKS,
+    collaborators: SECOND_PROJECT_COLLABORATORS,
     overview: [
       "This project was a writing-themed collector’s gift set developed around Varric Tethras from Dragon Age.",
       "In the game, Varric is not only an adventurer, but also a writer and storyteller. Hard in Hightown is one of the works closely connected to his character. Based on that idea, the set was built around his identity as a writer, using items such as a quill, ink, notebook, ribbon, and metal details to turn that part of the game world into something fans could actually use and collect.",
@@ -952,6 +1344,7 @@ export const projects: Project[] = [
     involvement: "contribution",
     coverImage: THIRD_PROJECT_COVER,
     coverVideo: THIRD_PROJECT_COVER_VIDEO,
+    coverHoverStills: THIRD_PROJECT_HOVER_STILLS,
     coverWidth: SHOWCASE_COVER_W,
     coverHeight: SHOWCASE_COVER_H,
     galleryLeadImage: THIRD_PROJECT_GALLERY_LEAD,
@@ -1007,6 +1400,8 @@ export const projects: Project[] = [
     ],
     involvement: "specialized",
     coverImage: FOURTH_PROJECT_COVER,
+    coverVideo: FOURTH_PROJECT_COVER_VIDEO,
+    coverHoverStills: FOURTH_PROJECT_HOVER_STILLS,
     coverWidth: 1920,
     coverHeight: 1080,
     galleryLeadImage: FOURTH_PROJECT_GALLERY_LEAD,
@@ -1053,6 +1448,7 @@ export const projects: Project[] = [
     involvement: "end-to-end",
     coverImage: FIFTH_PROJECT_COVER_VIDEO,
     coverVideo: FIFTH_PROJECT_COVER_VIDEO,
+    coverHoverStills: FIFTH_PROJECT_HOVER_STILLS,
     coverWidth: SHOWCASE_COVER_W,
     coverHeight: SHOWCASE_COVER_H,
     galleryLeadImage: FIFTH_PROJECT_GALLERY_LEAD,
@@ -1060,6 +1456,8 @@ export const projects: Project[] = [
     afterCoverStills: FIFTH_PROJECT_AFTER_COVER_STILLS,
     afterCoverExtraRows: FIFTH_PROJECT_AFTER_COVER_EXTRA_ROWS,
     afterCoverVideo: FIFTH_PROJECT_AFTER_COVER_VIDEO,
+    specialThanks: FIFTH_PROJECT_SPECIAL_THANKS,
+    collaborators: FIFTH_PROJECT_COLLABORATORS,
     overview: [
       "Inspired by the forbidden knowledge hidden within Apocrypha, The Elder Scrolls Online: Necrom Look Book Bundle was created as a collector’s piece that brings the mystery and magic of the Arcanist class from Tamriel into the real world. In the game’s universe, Arcanists draw their power from ancient secrets preserved within forgotten tomes, and this set was designed to transform that lore into a tangible collectible experience.",
       "The collection features a book-shaped display box inspired by the Arcanist’s tome of power, paired with an Ouroboros necklace featuring the iconic three-headed symbol from the world of The Elder Scrolls Online. Through the combination of storytelling, material selection, and craftsmanship, the set recreates the feeling of uncovering an ancient artifact — allowing fans to experience not only a physical collectible, but also a deeper connection to the atmosphere, lore, and magical identity of the Arcanist.",
@@ -1118,14 +1516,21 @@ export const projects: Project[] = [
     materials: ["resin"],
     ips: ["injustice"],
     tags: involvementTags("contribution"),
-    summary: "",
-    tagline: "",
+    summary: SEVENTH_PROJECT_TAGLINE,
+    tagline: SEVENTH_PROJECT_TAGLINE,
     role: [],
     involvement: "contribution",
     coverImage: SEVENTH_PROJECT_COVER_VIDEO,
     coverVideo: SEVENTH_PROJECT_COVER_VIDEO,
+    coverHoverStills: SEVENTH_PROJECT_HOVER_STILLS,
     coverWidth: SHOWCASE_COVER_W,
     coverHeight: SHOWCASE_COVER_H,
+    heroVideo: SEVENTH_PROJECT_HERO_VIDEO,
+    galleryLeadImage: SEVENTH_PROJECT_GALLERY_LEAD,
+    afterCoverStills: SEVENTH_PROJECT_AFTER_COVER_STILLS,
+    afterCoverStillVideoPair: SEVENTH_PROJECT_AFTER_COVER_STILL_VIDEO_PAIR,
+    afterCoverExtraRows: SEVENTH_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    afterCoverStillVideoBeforeExtraRows: true,
     year: 2024,
     featured: false,
     challenge: "",
@@ -1137,14 +1542,22 @@ export const projects: Project[] = [
     materials: ["resin"],
     ips: ["recore"],
     tags: involvementTags("contribution"),
-    summary: "",
-    tagline: "",
+    summary:
+      "Bringing the world of ReCore into reality, this collectible statue captures the journey of Joule Adams and her robotic companion Mack, transforming an iconic in-game moment into a premium physical experience for fans.",
+    tagline:
+      "Bringing the world of ReCore into reality, this collectible statue captures the journey of Joule Adams and her robotic companion Mack, transforming an iconic in-game moment into a premium physical experience for fans.",
     role: [],
     involvement: "contribution",
     coverImage: EIGHTH_PROJECT_COVER_VIDEO,
     coverVideo: EIGHTH_PROJECT_COVER_VIDEO,
+    coverHoverStills: EIGHTH_PROJECT_HOVER_STILLS,
     coverWidth: SHOWCASE_COVER_W,
     coverHeight: SHOWCASE_COVER_H,
+    heroVideo: EIGHTH_PROJECT_HERO_VIDEO,
+    galleryLeadImage: EIGHTH_PROJECT_GALLERY_LEAD,
+    afterCoverStills: EIGHTH_PROJECT_AFTER_COVER_STILLS,
+    afterCoverVideoPair: EIGHTH_PROJECT_AFTER_COVER_VIDEO_PAIR,
+    afterCoverExtraRows: EIGHTH_PROJECT_AFTER_COVER_EXTRA_ROWS,
     year: 2024,
     featured: false,
     challenge: "",
@@ -1188,10 +1601,96 @@ export const projects: Project[] = [
     challenge: "",
     result: "",
   },
+  {
+    slug: ELEVENTH_PROJECT_SLUG,
+    title: ELEVENTH_PROJECT_NAME,
+    materials: ["fabric"],
+    ips: ["fallout"],
+    tags: involvementTags("specialized"),
+    summary:
+      "A custom embroidered patch inspired by Fallout’s iconic Tunnel Snakes gang, bringing an in-game faction symbol into a collectible physical product.",
+    tagline:
+      "A custom embroidered patch inspired by Fallout’s iconic Tunnel Snakes gang, bringing an in-game faction symbol into a collectible physical product.",
+    role: [],
+    involvement: "specialized",
+    coverImage: ELEVENTH_PROJECT_COVER_VIDEO,
+    coverVideo: ELEVENTH_PROJECT_COVER_VIDEO,
+    coverHoverStills: ELEVENTH_PROJECT_HOVER_STILLS,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    heroVideo: ELEVENTH_PROJECT_HERO_VIDEO,
+    galleryLeadImage: ELEVENTH_PROJECT_GALLERY_LEAD,
+    afterCoverStills: ELEVENTH_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: ELEVENTH_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    overview: [
+      "Inspired by Fallout’s infamous Tunnel Snakes gang, this patch is more than a design—it’s a tribute to rebellion. Known for their motto \"Tunnel Snakes Rule,\" Butch and his gang have been the embodiment of toughness and loyalty. Whether you’re reliving the adventures of Vault 101 or making your mark in the world, this patch lets you carry that untamed spirit wherever you go. Wear it with pride, but as Butch would say, \"you gotta be hard\" to live up to it!",
+    ],
+    challengesBody: [
+      "The main challenge of this embroidered patch was achieving accurate reproduction of a highly detailed and complex design.",
+      "The product contained multiple color areas with intricate graphic elements. If the patch was produced using a standard embroidery approach without further analysis, many details could lose their definition, and the final result would not fully match the original design intent.",
+      "Before production, the artwork needed to be carefully analyzed and divided into different sections. This included identifying which areas required the highest level of detail and visual emphasis; determining the appropriate stitch density for each section; and selecting the most suitable filling techniques based on the characteristics of each graphic element.",
+      "The key challenge was finding the right balance between design accuracy, embroidery techniques, and manufacturing feasibility to achieve the best possible visual result within the limitations of the production process.",
+    ],
+    executionBody: [
+      "To improve the final outcome, I focused on both understanding the embroidery process and improving communication with the factory.",
+      "First, I studied the fundamentals of embroidery production and worked closely with experienced embroidery technicians on-site to understand how different stitch types, stitch densities, and filling methods affect the final appearance. I then applied this knowledge to optimize the production approach.",
+      "Second, I carefully divided the artwork into different sections digitally and created detailed production guidelines for the factory. These materials clearly explained the processing requirements, visual priorities, and expected effects for each area of the design.",
+      "This approach helped the factory better understand the client’s expectations, reduced potential misunderstandings during production, and improved the overall quality and accuracy of the final embroidered patch.",
+    ],
+    specialThanks: ELEVENTH_PROJECT_SPECIAL_THANKS,
+    collaborators: ELEVENTH_PROJECT_COLLABORATORS,
+    year: 2024,
+    featured: false,
+    challenge: "",
+    result: "",
+  },
 ];
 
 export function getProjectBySlug(slug: string) {
   return projects.find((project) => project.slug === slug);
+}
+
+/**
+ * Featured lead by involvement filter on `/projects`.
+ * `all` uses the End-to-End lead. Only change a lead when the user asks.
+ */
+const PROJECTS_FEATURED_LEAD_BY_INVOLVEMENT: Record<
+  Involvement | "all",
+  string
+> = {
+  /* All / End-to-End — NECROM Look Book Bundle */
+  all: FIFTH_PROJECT_SLUG,
+  "end-to-end": FIFTH_PROJECT_SLUG,
+  /* Project Contribution — Horizon Zero Dawn Thunderjaw */
+  contribution: THIRD_PROJECT_SLUG,
+  /* Specialized — 10-Year Coin Shadowbox until user picks another */
+  specialized: FOURTH_PROJECT_SLUG,
+};
+
+function projectToFeaturedLead(project: Project): ProjectsFeaturedLead {
+  return {
+    slug: project.slug,
+    title: project.title,
+    tagline: project.tagline ?? project.summary,
+    categories: involvementTags(project.involvement),
+    coverImage: project.coverImage,
+    coverVideo: project.coverVideo,
+    coverHoverStills: project.coverHoverStills,
+    coverWidth: project.coverWidth,
+    coverHeight: project.coverHeight,
+  };
+}
+
+/** Resolve the full-width lead for the active involvement filter on `/projects`. */
+export function getProjectsFeaturedLead(
+  involvement: Involvement | "all" = "all",
+): ProjectsFeaturedLead {
+  const slug =
+    PROJECTS_FEATURED_LEAD_BY_INVOLVEMENT[involvement] ??
+    PROJECTS_FEATURED_LEAD_BY_INVOLVEMENT.all;
+  const project = projects.find((entry) => entry.slug === slug);
+  if (!project) return projectsFeaturedLead;
+  return projectToFeaturedLead(project);
 }
 
 export function getFeaturedProjects(limit = 3) {

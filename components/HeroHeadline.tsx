@@ -29,10 +29,10 @@ const KEYWORDS = [
   { word: "Proactive", color: "#4D9FFF" },
 ] as const;
 
-/* Half of previous: clamp(2.2rem − 2px, 6.2vw − 2px, 5.25rem − 2px) */
+/* Half of previous + 20px */
 const FONT_SIZE =
-  "clamp(calc((2.2rem - 2px) * 0.5), calc((6.2vw - 2px) * 0.5), calc((5.25rem - 2px) * 0.5))";
-const FONT_WEIGHT = 700;
+  "clamp(calc((2.2rem - 2px) * 0.5 + 20px), calc((6.2vw - 2px) * 0.5 + 20px), calc((5.25rem - 2px) * 0.5 + 20px))";
+const FONT_WEIGHT = 600;
 const TEXT_COLOR = "#ffffff";
 /** Pause after buttons appear before the first keyword change */
 const FIRST_HOLD_MS = 2000;

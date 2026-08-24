@@ -42,9 +42,13 @@ function ProjectShowcaseCard({
   const reduceMotion = useReducedMotion();
   const tagline = project.tagline ?? project.summary;
   const tag = getInvolvementLabel(project.involvement);
+  const hoverStills = project.coverHoverStills;
+  const hasHoverStills = Boolean(hoverStills && hoverStills.length === 3);
   const useSwap = enableHoverSwap && !reduceMotion;
   const mediaClass = useSwap
-    ? "project-showcase__media project-showcase__media--swap project-showcase__media--swap-3"
+    ? hasHoverStills
+      ? "project-showcase__media project-showcase__media--swap project-showcase__media--swap-3 project-showcase__media--swap-images"
+      : "project-showcase__media project-showcase__media--swap project-showcase__media--swap-3"
     : "project-showcase__media";
 
   return (
@@ -69,17 +73,36 @@ function ProjectShowcaseCard({
                 />
               )}
             </div>
-            <div
-              className="project-showcase__swap-layer project-showcase__swap-layer--cycle"
-              aria-hidden="true"
-              style={
-                {
-                  "--swap-color-1": HOVER_SWAP_FRAME_COLORS[0],
-                  "--swap-color-2": HOVER_SWAP_FRAME_COLORS[1],
-                  "--swap-color-3": HOVER_SWAP_FRAME_COLORS[2],
-                } as CSSProperties
-              }
-            />
+            {hasHoverStills ? (
+              <div
+                className="project-showcase__swap-layer project-showcase__swap-layer--cycle project-showcase__swap-layer--images"
+                aria-hidden="true"
+              >
+                {hoverStills!.map((src, index) => (
+                  <Image
+                    key={src}
+                    src={src}
+                    alt=""
+                    width={project.coverWidth}
+                    height={project.coverHeight}
+                    sizes={sizes}
+                    className={`project-showcase__swap-frame project-showcase__swap-frame--${index + 1}`}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div
+                className="project-showcase__swap-layer project-showcase__swap-layer--cycle"
+                aria-hidden="true"
+                style={
+                  {
+                    "--swap-color-1": HOVER_SWAP_FRAME_COLORS[0],
+                    "--swap-color-2": HOVER_SWAP_FRAME_COLORS[1],
+                    "--swap-color-3": HOVER_SWAP_FRAME_COLORS[2],
+                  } as CSSProperties
+                }
+              />
+            )}
           </>
         ) : project.coverVideo ? (
           <CoverLoopVideo
@@ -112,7 +135,7 @@ function ProjectShowcaseCard({
 
 export function ProjectMasonry({
   projects,
-  emptyLabel = "No projects in this category yet.",
+  emptyLabel = "No more projects in this category yet.",
   layout = "tri",
   enableHoverSwap = false,
 }: ProjectMasonryProps) {

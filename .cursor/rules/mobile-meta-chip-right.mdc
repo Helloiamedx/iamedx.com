@@ -41,12 +41,12 @@ Title up to **65%** | type label end-aligned / top-aligned | description full wi
 1. Title ≤ **65%** | type label **end-aligned / top-aligned**.
 2. Description on the next row, **full** card width, left-aligned.
 
-Leads stay visible above the filter on mobile (do not hide).
+Leads stay visible with the filter on mobile (do not hide).
 
 # Project detail hero meta (mobile ≤800px)
 
-`.project-case-demo__hero-copy` matches the card stack (not the desktop nav-align recipe):
+`.project-case-demo__hero-copy` (not the filter-card recipe):
 
-1. Title ≤ **65%** | type label **end-aligned / top-aligned** (gap between).
-2. Description on the next row, **full** usable width, left-aligned.
+1. Row 1 — title **60%** | **10%** spacer | type label **30%** (**right-aligned**).
+2. Row 2 — description **full** usable width, left-aligned.
 ---

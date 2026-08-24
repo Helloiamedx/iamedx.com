@@ -17,9 +17,13 @@ export const siteFaqCategories: FAQCategories = {
 
 export const siteFaqTitle = "Questions You May Ask";
 
-/** Prompt under the FAQ title — plain copy, no link chrome */
-export const siteFaqSupportNote =
-  "Can't find what you're looking for? Reach out at hi@iamedx.com — you'll get a reply within 18 hours.";
+/** Prompt under the FAQ title */
+export const siteFaqSupportEmail = "hi@iamedx.com";
+
+export const siteFaqSupportNote = {
+  before: "Can't find what you're looking for? Reach out at",
+  after: "— you'll get a reply within 18 hours.",
+} as const;
 
 export const siteFaqData: FAQData = {
   experience: [

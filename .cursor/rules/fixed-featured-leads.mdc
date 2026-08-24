@@ -1,28 +1,37 @@
 ---
-description: Fixed featured leads on Projects / Insights index — never filter-driven
+description: Featured leads on Projects / Insights index — filter-aware on Projects
 globs: app/projects/**/*.{tsx,ts}, app/thoughts/**/*.{tsx,ts}, components/ProjectFeaturedLead.tsx, components/InsightsLead.tsx, content/projects.ts, lib/insights.ts
 alwaysApply: true
 ---
 
-# Fixed featured leads (index pages)
+# Featured leads (index pages)
 
-On `/projects` and `/thoughts`, the **first full-width featured item sits above the filter** and stays pinned there. It **also appears in the filtered grid** when it matches the active filter (including “all”).
+## Projects (`/projects`)
 
-## Rules
+Layout order: **Hero → Filter → Featured lead → filtered grid**.
 
-1. **Always visible above the filter** — changing involvement / IP / insight tag must not hide or swap the lead.
-2. **Above the filter** — layout order: Hero → Featured lead → Filter → filtered grid.
-3. **Also in filter results** — do **not** exclude the lead’s slug from the masonry / grid. When the lead matches the active filter (or filter is “all”), it shows again in the results.
-4. **Do not change the lead** unless the user **explicitly** asks to replace which project or insight is featured.
+1. **Filter first** — involvement / IP pills sit above the full-width lead.
+2. **Lead follows involvement** — each involvement tab has a fixed featured project (via `getProjectsFeaturedLead(activeInvolvement)`). Do not auto-pick from sort order or “most recent”.
+3. **Deduplicate from grid** — exclude the lead’s slug from the masonry / filter results. It only appears once as the full-width lead.
+4. **Only change a lead** when the user **explicitly** asks to replace which project is featured for that involvement.
 
-## Sources of truth
+### Sources of truth (`PROJECTS_FEATURED_LEAD_BY_INVOLVEMENT`)
 
-- **Projects —「第一个项目」:** full-width lead above the filter = `projectsFeaturedLead`. Name drives **title**, **slug** (`projectSlugFromName`), and cover media (`projectCoverFromName`). Currently **The Elder Scrolls Online NECROM Look Book Bundle** (card cover: `…Look Book.mp4`; detail hero: `…Look hero.mp4`). Only change when the user explicitly asks.
-- **Insights:** featured lead is the fixed first insight on the index (`INSIGHTS_FEATURED_LEAD_SLUG` / `getInsightsFeaturedLead()`). Same permanence — do not reassign from filter state. Currently **When Game Merchandise Needs More Than Just a Logo** (cover: `video.mp4`). Only change when the user explicitly asks.
+| Filter | Featured lead |
+|--------|----------------|
+| **All** / **End-to-End** | The Elder Scrolls Online NECROM Look Book Bundle |
+| **Project Contribution** | Horizon Zero Dawn The Thunderjaw Collection Statue |
+| **Specialized Services** | The Elder Scrolls Online 10-Year Coin Shadowbox (interim until user picks another) |
+
+Home page (`projectsFeaturedLead`) stays the **All / End-to-End** lead (NECROM).
+
+## Insights (`/thoughts`)
+
+Featured lead stays **above** the filter and is **not** filter-driven (`INSIGHTS_FEATURED_LEAD_SLUG` / `getInsightsFeaturedLead()`). Currently **When Game Merchandise Needs More Than Just a Logo**. Only change when the user explicitly asks.
 
 ## Do not
 
-- Gate the lead behind `active === "all"` or empty search params
-- Move the lead inside `FilterResults`
-- Auto-pick a new lead from filter matches, sort order, or “most recent”
-- Strip the lead out of filter results for deduplication
+- Auto-pick a new lead from filter matches, shuffle, or “most recent”
+- Show the same project again in the filtered grid after it already appears as the featured lead
+- Move the Projects lead back above the filter without an explicit ask
+- Change Insights to filter-driven leads without an explicit ask
