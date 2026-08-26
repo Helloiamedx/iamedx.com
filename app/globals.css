@@ -2173,22 +2173,6 @@ body.is-mobile-menu-open .project-case-demo__toggle-pin {
   inset: 0;
 }
 
-.hero__media::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  /* Soft low feather — keep the bottom readable without a tall veil */
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0.14) 0%,
-    rgba(0, 0, 0, 0.1) 45%,
-    rgba(0, 0, 0, 0) 58%,
-    rgba(0, 0, 0, 0.28) 84%,
-    rgba(0, 0, 0, 0.52) 100%
-  );
-  pointer-events: none;
-}
-
 .hero__video {
   position: absolute;
   inset: 0;
@@ -7174,20 +7158,6 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   inset: -1px;
   z-index: 2;
   background: #0a0a0a;
-}
-
-.project-case-demo__hero-scrim {
-  position: absolute;
-  inset: 0;
-  /* Soft low feather under hero copy — avoid a tall heavy veil */
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0.18) 0%,
-    rgba(0, 0, 0, 0.06) 48%,
-    rgba(0, 0, 0, 0) 62%,
-    rgba(0, 0, 0, 0.28) 86%,
-    rgba(0, 0, 0, 0.5) 100%
-  );
 }
 
 /* Meta bar — title | tagline | type

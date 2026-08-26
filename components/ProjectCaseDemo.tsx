@@ -573,7 +573,6 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
               preload="metadata"
             />
           )}
-          <div className="project-case-demo__hero-scrim" />
         </div>
 
         <div className="project-case-demo__hero-copy">

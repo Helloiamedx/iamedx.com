@@ -1329,6 +1329,31 @@ const ELEVENTH_PROJECT_COLLABORATORS: CollaboratorCredits = {
   names: ["Mr. Li"],
 };
 
+/** 「第十二个项目」— End-to-End; card cover + hover stills */
+const TWELFTH_PROJECT_NAME = "Cyberpunk 2077 Systems Banner";
+/** CDN folder — keep exact (double space before Banner) */
+const TWELFTH_PROJECT_CDN_FOLDER = "Cyberpunk 2077 Systems  Banner";
+const TWELFTH_PROJECT_SLUG = projectSlugFromName(TWELFTH_PROJECT_NAME);
+const TWELFTH_PROJECT_TAGLINE =
+  "It brings the game's futuristic atmosphere into a physical display piece, giving fans a way to personalize their own space with recognizable Cyberpunk aesthetics.";
+const TWELFTH_PROJECT_COVER = projectCoverFromName(
+  TWELFTH_PROJECT_CDN_FOLDER,
+  "1.jpg",
+);
+const TWELFTH_PROJECT_COVER_VIDEO = projectCoverFromName(
+  TWELFTH_PROJECT_CDN_FOLDER,
+  "video.mp4",
+);
+const TWELFTH_PROJECT_HERO_VIDEO = projectCoverFromName(
+  TWELFTH_PROJECT_CDN_FOLDER,
+  "video2.mp4",
+);
+const TWELFTH_PROJECT_HOVER_STILLS = [
+  projectCoverFromName(TWELFTH_PROJECT_CDN_FOLDER, "1.jpg"),
+  projectCoverFromName(TWELFTH_PROJECT_CDN_FOLDER, "2.jpg"),
+  projectCoverFromName(TWELFTH_PROJECT_CDN_FOLDER, "3.jpg"),
+] as [string, string, string];
+
 /** Default / home lead — End-to-End featured (NECROM Look Book Bundle) */
 export const projectsFeaturedLead: ProjectsFeaturedLead = {
   slug: FIFTH_PROJECT_SLUG,
@@ -1926,6 +1951,32 @@ export const projects: Project[] = [
     specialThanks: ELEVENTH_PROJECT_SPECIAL_THANKS,
     collaborators: ELEVENTH_PROJECT_COLLABORATORS,
     year: 2024,
+    featured: false,
+    challenge: "",
+    result: "",
+  },
+  {
+    slug: TWELFTH_PROJECT_SLUG,
+    title: TWELFTH_PROJECT_NAME,
+    materials: ["fabric"],
+    ips: ["cyberpunk-2077"],
+    tags: involvementTags("end-to-end"),
+    summary: TWELFTH_PROJECT_TAGLINE,
+    tagline: TWELFTH_PROJECT_TAGLINE,
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "end-to-end",
+    coverImage: TWELFTH_PROJECT_COVER,
+    coverVideo: TWELFTH_PROJECT_COVER_VIDEO,
+    coverHoverStills: TWELFTH_PROJECT_HOVER_STILLS,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    heroVideo: TWELFTH_PROJECT_HERO_VIDEO,
+    year: 2024,
+    client: "Cyberpunk 2077",
     featured: false,
     challenge: "",
     result: "",
