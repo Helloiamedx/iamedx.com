@@ -5,7 +5,8 @@ import { ProjectMasonry } from "@/components/ProjectMasonry";
 import { OriginButton } from "@/components/ui/origin-button";
 import type { Project } from "@/content/projects";
 
-const INITIAL_VISIBLE = 8;
+/** Grid cards only — featured lead sits above; 9 + lead = 10 results by default. */
+const INITIAL_VISIBLE = 9;
 const LOAD_MORE_STEP = 5;
 
 type ProjectsFilterGridProps = {

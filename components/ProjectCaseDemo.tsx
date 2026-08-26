@@ -379,6 +379,16 @@ function buildCaseMedia(project: Project): MediaItem[] {
     });
   }
 
+  if (project.endVideo) {
+    media.push({
+      kind: "video",
+      primary: project.endVideo.primary,
+      fallback: project.endVideo.fallback,
+      alt: project.endVideo.alt,
+      ratio: project.endVideo.ratio ?? "56.25%",
+    });
+  }
+
   return media;
 }
 

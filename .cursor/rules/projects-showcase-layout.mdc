@@ -58,9 +58,12 @@ This is the **only** case-detail pattern. Do not revive the old always-on Backgr
 1. **Featured lead (first)** — `1920 × 1080` (exact 16:9).
 2. **Filter / related cards** — `3000 × 1687` (~16:9; use `aspect-ratio: 3000 / 1687`). Index filter grids are **three** equal columns; Related strips stay two.
 
-## Featured lead meta
+## Featured lead + filter card meta
 
-Projects「第一个项目」、Insights featured lead、and case-detail hero meta share one desktop recipe (`.project-featured__meta` / `.insights-lead__meta` / `.project-case-demo__hero-copy`): type label end-aligned; description left-aligned with `.site-nav`; title→desc **5.5vw**; desc→tag **10vw**. Type chips use the **unified −3%** size tokens — see `mobile-meta-chip-right.mdc`. Do **not** apply this recipe to filter/Related cards.
+- **Featured leads** (Projects「第一个项目」、Insights lead): prior nav-align recipe — see `mobile-meta-chip-right.mdc` (not the three-row card stack).
+- **Filter / Related / home cards:** stack **title → description → type label** with equal row gaps; title + description black on light; type gray.
+
+**Exception:** case-detail hero meta (`.project-case-demo__hero-copy`) keeps the overlay recipe. Do not restack it unless the user asks.
 
 ## Two-column card meta (match reference)
 

@@ -164,6 +164,20 @@
   );
   --project-meta-title-size-mobile: calc(0.9375rem * 0.5 + 7px);
   --project-meta-title-weight: 500;
+  /*
+   * Filter-result cards only (not featured lead / case hero):
+   * shared title↔desc gap and desc↔type gap for Projects + Insights.
+   */
+  --card-meta-row-gap: 0.5rem;
+  --card-meta-type-gap: 0.55rem;
+  --card-meta-desc-size: clamp(
+    calc(0.75rem * 0.5 + 7px),
+    calc((0.7rem + 0.2vw) * 0.5 + 7px),
+    calc(0.875rem * 0.5 + 7px)
+  );
+  --card-meta-desc-size-mobile: calc(0.6875rem * 0.5 + 7px);
+  --card-meta-desc-lh: 1.35;
+  --card-meta-desc-lh-mobile: 1.25;
   /* Bar + iOS status/notch when viewport-fit=cover */
   --header-offset: calc(var(--header-bar-h) + env(safe-area-inset-top, 0px));
 }
@@ -2542,7 +2556,7 @@ html[data-hero-copy-ready="1"] .hero__content {
 .home-page .project-featured__tagline,
 .home-page .insight-showcase__excerpt,
 .home-page .insights-lead__excerpt {
-  color: rgba(10, 10, 10, 0.55);
+  color: #0a0a0a;
 }
 
 .home-page .project-type-chip,
@@ -3672,7 +3686,7 @@ html[data-hero-copy-ready="1"] .hero__content {
 .projects-page .project-window__tagline,
 .projects-page .project-window__meta--stack .project-window__tagline,
 .projects-page .project-featured__tagline {
-  color: rgba(10, 10, 10, 0.55);
+  color: #0a0a0a;
 }
 
 .projects-page .project-type-chip {
@@ -3753,12 +3767,13 @@ html[data-hero-copy-ready="1"] .hero__content {
   height: auto !important;
 }
 
-/* Featured lead meta — projects + insights (+ case hero uses same gaps) */
+/* Featured lead meta — projects + insights (restore nav-align recipe) */
 .project-featured__meta,
 .insights-lead__meta {
   /*
    * Desktop: description starts at legacy centered-nav left edge;
    * 5.5vw after title; 10vw before tag. Not tied to live header nav.
+   * Case-detail hero uses .project-case-demo__hero-copy separately.
    */
   --nav-inset: calc(50% - var(--featured-meta-nav-half));
   --title-desc-gap: 5.5vw;
@@ -3798,7 +3813,7 @@ html[data-hero-copy-ready="1"] .hero__content {
   letter-spacing: -0.015em;
   line-height: 1.15;
   text-transform: none;
-  color: #fff;
+  color: #0a0a0a;
   text-wrap: balance;
 }
 
@@ -3816,7 +3831,7 @@ html[data-hero-copy-ready="1"] .hero__content {
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.35;
-  color: #fff;
+  color: #0a0a0a;
   text-wrap: pretty;
 }
 
@@ -3833,7 +3848,6 @@ html[data-hero-copy-ready="1"] .hero__content {
   min-width: max-content;
   margin: 0;
   height: auto;
-  /* Size locked by unified type-chip rule */
   display: inline-flex;
   align-items: flex-start;
   white-space: nowrap;
@@ -3842,32 +3856,10 @@ html[data-hero-copy-ready="1"] .hero__content {
 }
 
 @media (max-width: 800px) {
-  /*
-   * Mobile filter cards: chip max-content first; title takes remaining.
-   */
-  .project-window__meta--stack,
-  .insight-showcase__meta {
-    grid-template-columns: minmax(0, 65%) minmax(0, 35%);
-    justify-content: space-between;
-    column-gap: 1.25rem;
-    align-items: start;
-  }
-
-  .project-window__meta--stack,
-  .insight-showcase__meta {
-    padding-inline: 0;
-  }
-
-  .project-window__meta--stack .project-type-chip,
-  .insight-showcase__meta > .insight-chip {
-    justify-self: end;
-    align-self: start;
-  }
-
   .project-featured__meta,
   .insights-lead__meta {
     /*
-     * Mobile featured lead — same stack as filter cards:
+     * Mobile featured lead:
      *   TITLE (≤65%) ........ TYPE (right)
      *   Description full card width
      */
@@ -3877,7 +3869,7 @@ html[data-hero-copy-ready="1"] .hero__content {
       "desc desc";
     justify-content: space-between;
     column-gap: 1.25rem;
-    row-gap: 0.12rem;
+    row-gap: 0.5rem;
     margin-top: 0.75rem;
     padding: 0;
     align-items: start;
@@ -3972,21 +3964,35 @@ html[data-hero-copy-ready="1"] .hero__content {
 
 /*
  * Card meta (Projects + Insights):
- *   TITLE (65%) .............. TYPE (right, top-aligned)
- *   Description full width
+ *   Title
+ *   Description
+ *   Type label
  */
 .project-window__meta--stack {
   display: grid;
-  grid-template-columns: minmax(0, 65%) minmax(0, 35%);
+  grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
-    "title cats"
-    "tagline tagline";
+    "title"
+    "tagline"
+    "cats";
   align-items: start;
-  column-gap: 1.25rem;
-  row-gap: 0.35rem;
+  column-gap: 0;
+  /* Title ↔ description */
+  row-gap: var(--card-meta-row-gap);
   /* margin-top inherited from .project-window__meta (0.75rem) */
   padding-inline: 0.05rem;
   min-width: 0;
+}
+
+.project-window__meta--stack .project-window__categories,
+.project-window__meta--stack .project-window__chips {
+  grid-area: cats;
+  justify-self: start;
+  align-self: start;
+  text-align: left;
+  min-width: 0;
+  max-width: 100%;
+  width: max-content;
 }
 
 .project-window__meta--stack .project-window__title {
@@ -3995,23 +4001,14 @@ html[data-hero-copy-ready="1"] .hero__content {
   font-size: var(--project-meta-title-size);
   font-weight: var(--project-meta-title-weight);
   letter-spacing: -0.015em;
-  line-height: 1.15; /* match type-label lh — optical top align */
+  line-height: 1.15;
   text-transform: none;
+  color: #0a0a0a;
   min-width: 0;
+  max-width: 100%;
   align-self: start;
   margin: 0;
   padding: 0;
-}
-
-.project-window__meta--stack .project-window__categories,
-.project-window__meta--stack .project-window__chips {
-  grid-area: cats;
-  justify-self: end;
-  align-self: start;
-  text-align: right;
-  min-width: 0;
-  max-width: 100%;
-  width: max-content;
 }
 
 .project-window__meta--stack .project-window__categories {
@@ -4036,7 +4033,7 @@ html[data-hero-copy-ready="1"] .hero__content {
 }
 
 .project-window__chips--end {
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 .project-window__chips li {
@@ -4083,17 +4080,6 @@ html[data-hero-copy-ready="1"] .hero__content {
   --font-type-label: var(--font-label);
 }
 
-.projects-page .project-type-chip,
-.project-detail .project-type-chip,
-.project-detail .project-case-demo__tag,
-.insights-page .insight-chip,
-.insight-detail .insight-chip,
-.home-page .project-type-chip,
-.home-page .insight-chip,
-.home-page .project-featured__meta > .project-type-chip,
-.home-page .insights-lead__meta > .insight-chip,
-.projects-page .project-featured__meta > .project-type-chip,
-.insights-page .insights-lead__meta > .insight-chip,
 .projects-page .project-window__meta--stack .project-type-chip,
 .insights-page .insight-showcase__meta > .insight-chip,
 .home-page .project-window__meta--stack .project-type-chip,
@@ -4104,7 +4090,7 @@ html[data-hero-copy-ready="1"] .hero__content {
   font-size: var(--type-chip-font) !important;
   font-weight: 500;
   letter-spacing: 0.04em;
-  line-height: 1.15 !important;
+  line-height: 1 !important;
   text-transform: uppercase;
   color: var(--type-label-color) !important;
   background: transparent !important;
@@ -4120,8 +4106,45 @@ html[data-hero-copy-ready="1"] .hero__content {
   display: inline-flex;
   align-items: flex-start;
   align-self: start;
-  margin-top: 0;
-  padding-top: 0;
+  /* Type↔desc gap set on card meta below — do not zero here */
+  padding-top: 0 !important;
+  transform: none !important;
+}
+
+.projects-page .project-type-chip,
+.project-detail .project-type-chip,
+.project-detail .project-case-demo__tag,
+.insights-page .insight-chip,
+.insight-detail .insight-chip,
+.home-page .project-type-chip,
+.home-page .insight-chip,
+.home-page .project-featured__meta > .project-type-chip,
+.home-page .insights-lead__meta > .insight-chip,
+.projects-page .project-featured__meta > .project-type-chip,
+.insights-page .insights-lead__meta > .insight-chip {
+  font-family: var(--font-label);
+  font-size: var(--type-chip-font) !important;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1 !important;
+  text-transform: uppercase;
+  color: var(--type-label-color) !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: flex-start;
+  align-self: start;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  transform: none !important;
 }
 
 /*
@@ -4152,15 +4175,35 @@ html[data-hero-copy-ready="1"] .hero__content {
 .project-featured__meta > .project-featured__chip-slot,
 .insights-lead__meta > .insight-chip,
 .insights-lead__meta > .insights-lead__chip-slot,
-.project-window__meta--stack .project-window__chips,
-.project-window__meta--stack .project-window__categories,
-.project-window__meta--stack .project-type-chip,
-.insight-showcase__meta > .insight-chip,
 .project-case-demo__tags,
 .project-case-demo__tag {
   align-self: start !important;
   margin-top: 0 !important;
+  margin-bottom: 0 !important;
   padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  transform: none !important;
+}
+
+/*
+ * Filter cards only: desc↔type gap (shared token).
+ * Higher specificity than the global type-label `margin-top: 0`.
+ */
+.projects-page .project-window__meta--stack .project-window__chips,
+.projects-page .project-window__meta--stack .project-window__categories,
+.home-page .project-window__meta--stack .project-window__chips,
+.home-page .project-window__meta--stack .project-window__categories,
+.project-detail .project-window__meta--stack .project-window__chips,
+.project-detail .project-window__meta--stack .project-window__categories,
+.insights-page .insight-showcase__meta > .insight-chip,
+.home-page .insight-showcase__meta > .insight-chip,
+.insight-detail .insight-showcase__meta > .insight-chip {
+  align-self: start !important;
+  margin-top: var(--card-meta-type-gap) !important;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  transform: none !important;
 }
 
 .project-window__chips,
@@ -4183,9 +4226,11 @@ html[data-hero-copy-ready="1"] .hero__content {
   justify-self: start;
   text-align: left;
   max-width: 100%;
-  font-size: clamp(calc(0.75rem * 0.5 + 7px), calc((0.7rem + 0.2vw) * 0.5 + 7px), calc(0.875rem * 0.5 + 7px));
+  font-size: var(--card-meta-desc-size);
   font-weight: 400;
-  color: rgba(29, 29, 31, 0.72);
+  letter-spacing: -0.01em;
+  line-height: var(--card-meta-desc-lh);
+  color: #0a0a0a;
 }
 
 @media (max-width: 800px) {
@@ -4206,39 +4251,39 @@ html[data-hero-copy-ready="1"] .hero__content {
     justify-content: flex-start;
   }
 
-  /* Showcase cards: title 65% | type; description full width */
+  /* Showcase cards: title → description → type */
   .project-window__meta--stack {
     /* Re-assert after .project-window__meta { 1fr } in this same query */
-    grid-template-columns: minmax(0, 65%) minmax(0, 35%);
-    justify-content: space-between;
-    column-gap: 1.25rem;
+    grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
-      "title cats"
-      "tagline tagline";
+      "title"
+      "tagline"
+      "cats";
     align-items: start;
-    row-gap: 0.12rem;
+    column-gap: 0;
+    row-gap: var(--card-meta-row-gap);
     padding-inline: 0;
   }
 
   .project-window__meta--stack .project-window__title {
     font-size: var(--project-meta-title-size-mobile);
     font-weight: var(--project-meta-title-weight);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
     line-height: 1.15;
     text-transform: none;
   }
 
   .project-window__meta--stack .project-window__tagline {
-    font-size: calc(0.6875rem * 0.5 + 7px);
-    line-height: 1.25;
+    font-size: var(--card-meta-desc-size-mobile);
+    line-height: var(--card-meta-desc-lh-mobile);
     max-width: 100%;
   }
 
   .project-window__meta--stack .project-window__categories,
   .project-window__meta--stack .project-window__chips {
-    justify-self: end;
+    justify-self: start;
     align-self: start;
-    text-align: right;
+    text-align: left;
     white-space: nowrap;
     max-width: 100%;
     min-width: 0;
@@ -6619,15 +6664,21 @@ html[data-hero-copy-ready="1"] .hero__content {
 }
 
 .insights-page .insight-showcase__title,
-.insights-page .insights-lead__title,
-.insight-detail .insight-showcase__title {
+.insights-page .insights-lead__title {
   color: #0a0a0a;
 }
 
 .insights-page .insight-showcase__excerpt,
-.insights-page .insights-lead__excerpt,
+.insights-page .insights-lead__excerpt {
+  color: #0a0a0a;
+}
+
 .insight-detail .insight-showcase__excerpt {
-  color: rgba(10, 10, 10, 0.55);
+  color: #fff;
+}
+
+.insight-detail .insight-showcase__title {
+  color: #fff;
 }
 
 .insights-shell {
@@ -6802,13 +6853,15 @@ html[data-hero-copy-ready="1"] .hero__content {
 
 .insight-showcase__meta {
   display: grid;
-  grid-template-columns: minmax(0, 65%) minmax(0, 35%);
+  grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
-    "title chip"
-    "excerpt excerpt";
+    "title"
+    "excerpt"
+    "chip";
   align-items: start;
-  column-gap: 1.25rem;
-  row-gap: 0.35rem;
+  column-gap: 0;
+  /* Title ↔ description — same tokens as project cards */
+  row-gap: var(--card-meta-row-gap);
   margin-top: 0.75rem;
   padding-inline: 0.05rem;
   min-width: 0;
@@ -6819,24 +6872,24 @@ html[data-hero-copy-ready="1"] .hero__content {
   margin: 0;
   padding: 0;
   min-width: 0;
+  max-width: 100%;
   align-self: start;
   font-family: var(--font-title);
   font-size: var(--project-meta-title-size);
   font-weight: var(--project-meta-title-weight);
-  letter-spacing: -0.01em;
-  line-height: 1.15; /* match type-label lh — optical top align */
-  color: #fff;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  color: #0a0a0a;
 }
 
 .insight-showcase__meta > .insight-chip {
   grid-area: chip;
-  justify-self: end;
+  justify-self: start;
   align-self: start;
   box-sizing: border-box;
   max-width: 100%;
   width: max-content;
   min-width: 0;
-  /* Keep a single-line pill — wrapping inside 999px looks broken on iPad/laptop */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -6847,60 +6900,64 @@ html[data-hero-copy-ready="1"] .hero__content {
   margin: 0;
   max-width: 100%;
   font-family: var(--font-sans);
-  font-size: clamp(calc(0.8125rem * 0.5 + 7px), calc((0.76rem + 0.2vw) * 0.5 + 7px), calc(0.9375rem * 0.5 + 7px));
+  font-size: var(--card-meta-desc-size);
   font-weight: 400;
   letter-spacing: -0.01em;
-  line-height: 1.4;
-  color: #fff;
+  line-height: var(--card-meta-desc-lh);
+  color: #0a0a0a;
 }
 
 @media (max-width: 800px) {
-  /* Same as project cards: title 65% | type; excerpt full width */
+  /* Same as project cards: title → description → type */
   .insight-showcase__meta {
-    grid-template-columns: minmax(0, 65%) minmax(0, 35%);
-    justify-content: space-between;
-    column-gap: 1.25rem;
+    grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
-      "title chip"
-      "excerpt excerpt";
+      "title"
+      "excerpt"
+      "chip";
     align-items: start;
-    row-gap: 0.12rem;
+    column-gap: 0;
+    row-gap: var(--card-meta-row-gap);
     padding-inline: 0;
   }
 
   .insight-showcase__title {
     font-size: var(--project-meta-title-size-mobile);
     font-weight: var(--project-meta-title-weight);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
     line-height: 1.15;
     text-transform: none;
   }
 
   .insight-showcase__meta > .insight-chip {
     max-width: 100%;
+    justify-self: start;
     align-self: start;
     white-space: nowrap;
   }
 
   .insight-showcase__excerpt {
     max-width: 100%;
-    font-size: calc(0.6875rem * 0.5 + 7px);
-    line-height: 1.25;
+    font-size: var(--card-meta-desc-size-mobile);
+    line-height: var(--card-meta-desc-lh-mobile);
   }
 }
 
 /* Projects + Insights (index, home, detail related): more air between title and description on phone */
 @media (max-width: 800px) {
-  .home-page .project-featured__meta,
   .home-page .project-window__meta--stack,
-  .home-page .insights-lead__meta,
   .home-page .insight-showcase__meta,
-  .projects-page .project-featured__meta,
   .projects-page .project-window__meta--stack,
-  .insights-page .insights-lead__meta,
   .insights-page .insight-showcase__meta,
   .project-detail .project-window__meta--stack,
   .insight-detail .insight-showcase__meta {
+    row-gap: var(--card-meta-row-gap);
+  }
+
+  .home-page .project-featured__meta,
+  .home-page .insights-lead__meta,
+  .projects-page .project-featured__meta,
+  .insights-page .insights-lead__meta {
     row-gap: 0.5rem;
   }
 }
@@ -6909,14 +6966,13 @@ html[data-hero-copy-ready="1"] .hero__content {
 .home-page .insight-chip {
   border: 0;
   background: transparent;
-  letter-spacing: -0.01em;
+  /* letter-spacing from unified type-label rule (0.04em) — match project chips */
 }
 
 /* Related strip lives on detail (black) — same plain label as the index */
 .insight-detail .insight-chip {
   border: 0;
   background: transparent;
-  letter-spacing: -0.01em;
 }
 
 .insight-chips {
@@ -6926,9 +6982,9 @@ html[data-hero-copy-ready="1"] .hero__content {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
-  justify-content: flex-end;
+  justify-content: flex-start;
   flex: 0 1 auto;
-  max-width: 55%;
+  max-width: 100%;
 }
 
 .insight-chips--end {
@@ -6953,11 +7009,13 @@ html[data-hero-copy-ready="1"] .hero__content {
   white-space: nowrap;
 }
 
-/* Featured chips share the title top edge — size stays on unified type-chip rule */
+/* Featured / lead chips — flush to title row; no optical offset */
 .insights-lead__meta > .insight-chip,
 .project-featured__meta > .project-type-chip {
   align-self: start;
   margin-top: 0;
+  padding-top: 0;
+  transform: none;
 }
 
 @media (max-width: 700px) {
@@ -7164,7 +7222,6 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
 }
 
 @media (min-width: 801px) {
-  /* Title | description | type — shared top edge (cap-height row) */
   .project-case-demo__hero-copy .project-case-demo__title,
   .project-case-demo__hero-copy .project-case-demo__summary,
   .project-case-demo__hero-copy .project-case-demo__tags {
@@ -7173,16 +7230,12 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
     padding-block: 0;
   }
 
-  .project-case-demo__hero-copy .project-case-demo__summary {
-    line-height: 1.15;
-  }
-
   .project-case-demo__hero .project-case-demo__tags {
     align-items: flex-start;
   }
 }
 
-/* Hero copy — natural wraps; mono tag optical top nudge */
+/* Hero copy — natural wraps */
 .project-case-demo__hero-copy .project-case-demo__title,
 .project-case-demo__hero-copy .project-case-demo__summary {
   text-wrap: wrap;
@@ -7192,15 +7245,8 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
 
 .project-case-demo__hero .project-case-demo__tag {
   display: block;
-  line-height: 1.15;
+  line-height: 1;
   align-items: unset;
-}
-
-@media (min-width: 801px) {
-  /* FK Grotesk Mono caps sit ~1px high vs Grtsk title/desc */
-  .project-case-demo__hero .project-case-demo__tag {
-    padding-top: 0.1em !important;
-  }
 }
 
 @media (max-width: 800px) {
@@ -7235,7 +7281,7 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   font-size: var(--project-meta-title-size);
   font-weight: var(--project-meta-title-weight);
   letter-spacing: -0.015em;
-  line-height: 1.15; /* match type-label lh — optical top align */
+  line-height: 1.15;
   text-transform: none;
   color: #fff;
 }
@@ -7317,9 +7363,7 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   }
 
   .project-case-demo__hero .project-case-demo__tag {
-    line-height: 1.15;
-    /* Mono caps read high vs mobile title — manual optical nudge */
-    padding-top: 0.17em !important;
+    line-height: 1;
   }
 }
 

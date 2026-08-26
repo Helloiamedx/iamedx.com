@@ -214,6 +214,17 @@ export type Project = {
     right: { primary: string; fallback?: string; alt: string };
     ratio?: string;
   };
+  /**
+   * Optional full-width closing video — always the last gallery row,
+   * after `endVideoPair` and any stills added above.
+   */
+  endVideo?: {
+    primary: string;
+    fallback?: string;
+    alt: string;
+    /** CSS padding-bottom ratio; default 16:9 */
+    ratio?: string;
+  };
   year: number;
   client?: string;
   featured: boolean;
@@ -891,6 +902,16 @@ const SIXTH_PROJECT_HERO_VIDEO = projectCoverFromName(
   SIXTH_PROJECT_NAME,
   "Ghost Recon Wildlands Statue6.mp4",
 );
+const SIXTH_PROJECT_HOVER_STILLS = [
+  projectCoverFromName(
+    SIXTH_PROJECT_NAME,
+    "Ghost Recon Wildlands Statue1.jpg",
+  ),
+  projectCoverFromName(SIXTH_PROJECT_NAME, "hover2.jpg"),
+  projectCoverFromName(SIXTH_PROJECT_NAME, "hover1.jpg"),
+] as [string, string, string];
+const SIXTH_PROJECT_TAGLINE =
+  "Capture the squad leader in a crouched tactical pose with realistic gear, weathered details, and a rugged battlefield-inspired base.";
 const SIXTH_PROJECT_STILL = (n: 1 | 2 | 3, alt: string) => ({
   src: projectCoverFromName(
     SIXTH_PROJECT_NAME,
@@ -898,7 +919,7 @@ const SIXTH_PROJECT_STILL = (n: 1 | 2 | 3, alt: string) => ({
   ),
   alt,
 });
-/** Detail gallery: 1 full → 2|3 → 4|7 video pair */
+/** Detail gallery: 1 full → 2|3 → 1|2|3 → video.mp4 */
 const SIXTH_PROJECT_GALLERY_LEAD = SIXTH_PROJECT_STILL(1, "Statue 1").src;
 const SIXTH_PROJECT_AFTER_COVER_STILLS = {
   items: [
@@ -907,23 +928,31 @@ const SIXTH_PROJECT_AFTER_COVER_STILLS = {
   ],
   ratio: "100%",
 };
-const SIXTH_PROJECT_END_VIDEOS = {
-  left: {
-    primary: projectCoverFromName(
-      SIXTH_PROJECT_NAME,
-      "Ghost Recon Wildlands Statue4.mp4",
-    ),
-    alt: "Statue clip 4",
+const SIXTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      {
+        src: projectCoverFromName(SIXTH_PROJECT_NAME, "1.jpg"),
+        alt: "Statue detail 1",
+      },
+      {
+        src: projectCoverFromName(SIXTH_PROJECT_NAME, "2.jpg"),
+        alt: "Statue detail 2",
+      },
+      {
+        src: projectCoverFromName(SIXTH_PROJECT_NAME, "3.jpg"),
+        alt: "Statue detail 3",
+      },
+    ],
+    ratio: "100%",
   },
-  right: {
-    primary: projectCoverFromName(
-      SIXTH_PROJECT_NAME,
-      "Ghost Recon Wildlands Statue7.mp4",
-    ),
-    alt: "Statue clip 7",
-  },
-  ratio: "100%",
-} as const;
+];
+const SIXTH_PROJECT_AFTER_COVER_VIDEO = {
+  primary: projectCoverFromName(SIXTH_PROJECT_NAME, "video.mp4"),
+  alt: "Statue clip",
+  /* Native 1920×800 — do not force square / stretch */
+  ratio: `${(800 / 1920) * 100}%`,
+};
 
 /** 「第七个项目」— DC Comics Injustice 2 The Brainiac Statue */
 const SEVENTH_PROJECT_NAME = "DC Comics Injustice 2 The Brainiac Statue";
@@ -988,9 +1017,15 @@ const SEVENTH_PROJECT_AFTER_COVER_STILL_VIDEO_PAIR = {
 const SEVENTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
   {
     items: [
-      SEVENTH_PROJECT_STILL(5, "Brainiac statue 5"),
-      SEVENTH_PROJECT_STILL(4, "Brainiac statue 4"),
+      {
+        src: projectCoverFromName(SEVENTH_PROJECT_CDN_FOLDER, "22.jpg"),
+        alt: "Brainiac statue 22",
+      },
       SEVENTH_PROJECT_STILL(6, "Brainiac statue 6"),
+      {
+        src: projectCoverFromName(SEVENTH_PROJECT_CDN_FOLDER, "3333.jpg"),
+        alt: "Brainiac statue 3333",
+      },
     ],
     ratio: "100%",
   },
@@ -1080,14 +1115,141 @@ const NINTH_PROJECT_COVER_VIDEO = projectCoverFromName(
   NINTH_PROJECT_NAME,
   "video.mp4",
 );
+const NINTH_PROJECT_HOVER_STILLS = [
+  projectCoverFromName(NINTH_PROJECT_NAME, "1.jpg"),
+  projectCoverFromName(NINTH_PROJECT_NAME, "2.jpg"),
+  projectCoverFromName(NINTH_PROJECT_NAME, "3.jpg"),
+] as [string, string, string];
+/** Case detail first-screen hero */
+const NINTH_PROJECT_HERO_VIDEO = projectCoverFromName(
+  NINTH_PROJECT_NAME,
+  "video1.mp4",
+);
+/** Detail gallery lead still */
+const NINTH_PROJECT_GALLERY_LEAD = projectCoverFromName(
+  NINTH_PROJECT_NAME,
+  "1.jpg",
+);
+/** Detail gallery: lead → 21|22 → 31|32|33 → l1|r2 → endVideo last */
+const NINTH_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    {
+      src: projectCoverFromName(NINTH_PROJECT_NAME, "21.jpg"),
+      alt: "Halo statue 21",
+    },
+    {
+      src: projectCoverFromName(NINTH_PROJECT_NAME, "22.jpg"),
+      alt: "Halo statue 22",
+    },
+  ],
+  ratio: "100%",
+};
+const NINTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      {
+        src: projectCoverFromName(NINTH_PROJECT_NAME, "31.jpg"),
+        alt: "Halo statue 31",
+      },
+      {
+        src: projectCoverFromName(NINTH_PROJECT_NAME, "32.jpg"),
+        alt: "Halo statue 32",
+      },
+      {
+        src: projectCoverFromName(NINTH_PROJECT_NAME, "33.jpg"),
+        alt: "Halo statue 33",
+      },
+    ],
+    ratio: "100%",
+  },
+  {
+    items: [
+      {
+        src: projectCoverFromName(NINTH_PROJECT_NAME, "l1.jpg"),
+        alt: "Halo statue left",
+      },
+      {
+        src: projectCoverFromName(NINTH_PROJECT_NAME, "r2.jpg"),
+        alt: "Halo statue right",
+      },
+    ],
+    ratio: `${(2000 / 1500) * 100}%`,
+  },
+];
+const NINTH_PROJECT_END_VIDEO = {
+  primary: projectCoverFromName(NINTH_PROJECT_NAME, "video2.mp4"),
+  alt: "Halo statue clip",
+  /* Native 1920×800 */
+  ratio: `${(800 / 1920) * 100}%`,
+};
+const NINTH_PROJECT_TAGLINE =
+  "A commemorative Halo 5: Guardians statue featuring Master Chief and Spartan Locke in a dynamic face-off, created as the centerpiece of the Limited Collector’s Edition.";
 
-/** 「第十个项目」— grid card cover only until detail media / copy are ready */
+/** 「第十个项目」— grid card cover + hover stills; detail media / copy TBD */
 const TENTH_PROJECT_NAME = "Gears of War Fenix Statue Figure";
 const TENTH_PROJECT_SLUG = projectSlugFromName(TENTH_PROJECT_NAME);
 const TENTH_PROJECT_COVER_VIDEO = projectCoverFromName(
   TENTH_PROJECT_NAME,
   "video.mp4",
 );
+const TENTH_PROJECT_HOVER_STILLS = [
+  projectCoverFromName(TENTH_PROJECT_NAME, "111.jpg"),
+  projectCoverFromName(TENTH_PROJECT_NAME, "222.jpg"),
+  projectCoverFromName(TENTH_PROJECT_NAME, "333.jpg"),
+] as [string, string, string];
+/** Case detail first-screen hero */
+const TENTH_PROJECT_HERO_VIDEO = projectCoverFromName(
+  TENTH_PROJECT_NAME,
+  "video2.mp4",
+);
+/** Detail gallery lead still */
+const TENTH_PROJECT_GALLERY_LEAD = projectCoverFromName(
+  TENTH_PROJECT_NAME,
+  "111.jpg",
+);
+/** Detail gallery row 2 — 3l | 3r (native 1500×2000 per cell) */
+const TENTH_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    {
+      src: projectCoverFromName(TENTH_PROJECT_NAME, "3l.jpg"),
+      alt: "JD Fenix bike statue left",
+    },
+    {
+      src: projectCoverFromName(TENTH_PROJECT_NAME, "3r.jpg"),
+      alt: "JD Fenix bike statue right",
+    },
+  ],
+  ratio: `${(2000 / 1500) * 100}%`,
+};
+/** Detail gallery row 3 — 22l; row 4 — 22r */
+const TENTH_PROJECT_LANDSCAPE_RATIO = `${(800 / 1920) * 100}%`;
+const TENTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      {
+        src: projectCoverFromName(TENTH_PROJECT_NAME, "22l.jpg"),
+        alt: "JD Fenix bike statue detail left",
+      },
+    ],
+    ratio: TENTH_PROJECT_LANDSCAPE_RATIO,
+  },
+  {
+    items: [
+      {
+        src: projectCoverFromName(TENTH_PROJECT_NAME, "22r.jpg"),
+        alt: "JD Fenix bike statue detail right",
+      },
+    ],
+    ratio: TENTH_PROJECT_LANDSCAPE_RATIO,
+  },
+];
+/** Detail gallery — always last row */
+const TENTH_PROJECT_END_VIDEO = {
+  primary: projectCoverFromName(TENTH_PROJECT_NAME, "video3.mp4"),
+  alt: "JD Fenix bike statue clip",
+};
+const TENTH_PROJECT_TAGLINE =
+  "A Gears of War 4 Collector’s Edition statue featuring JD Fenix with his armored bike, combining character, vehicle, and battlefield weathering into one detailed combat scene.";
 
 /** 「第十一个项目」— Specialized; card cover + hover stills */
 const ELEVENTH_PROJECT_NAME = "Fallout Tunnel Snakes Rule Patch";
@@ -1493,22 +1655,45 @@ export const projects: Project[] = [
     materials: ["resin"],
     ips: ["ghost-recon"],
     tags: involvementTags("contribution"),
-    summary: "",
-    tagline: "",
+    summary: SIXTH_PROJECT_TAGLINE,
+    tagline: SIXTH_PROJECT_TAGLINE,
     role: [],
     involvement: "contribution",
     coverImage: SIXTH_PROJECT_COVER_VIDEO,
     coverVideo: SIXTH_PROJECT_COVER_VIDEO,
+    coverHoverStills: SIXTH_PROJECT_HOVER_STILLS,
     coverWidth: SHOWCASE_COVER_W,
     coverHeight: SHOWCASE_COVER_H,
     galleryLeadImage: SIXTH_PROJECT_GALLERY_LEAD,
     heroVideo: SIXTH_PROJECT_HERO_VIDEO,
     afterCoverStills: SIXTH_PROJECT_AFTER_COVER_STILLS,
-    endVideoPair: SIXTH_PROJECT_END_VIDEOS,
+    afterCoverExtraRows: SIXTH_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    afterCoverVideo: SIXTH_PROJECT_AFTER_COVER_VIDEO,
+    overview: [
+      "This project was a collectible statue of Nomad, the team leader from Tom Clancy’s Ghost Recon Wildlands, developed by Ubisoft in collaboration with TriForce.",
+      "Standing approximately 12 inches (30 cm) tall, the statue captures Nomad in a crouched tactical pose with his weapon drawn, positioned on a rugged rocky base inspired by the environments of the game.",
+      "The base features the iconic Ghost insignia, while the overall sculpt and paintwork focus on realistic military equipment, layered tactical gear, and weathered surface details to reflect the grounded visual style of Ghost Recon Wildlands.",
+    ],
+    challengesBody: [
+      "One of the main challenges was the structure and assembly of such a complex pose. Nomad is crouching while carrying a large backpack, weapons, and multiple pieces of tactical equipment. With so many parts positioned around the body, we needed to carefully consider how the figure should be broken down, how the backpack and legs should be supported, how the figure should connect to the base, and how smaller parts such as weapons and accessories could be protected from deformation or breakage.",
+      "Another challenge was material allocation. The body, weapons, backpack, tactical gear, and smaller accessories all had different requirements for rigidity, flexibility, detail, and durability. Rather than using one material throughout the entire product, we needed to select and combine PVC, resin, ABS, and metal based on the function of each part while balancing appearance, strength, and production cost.",
+      "Paint and weathering were also important challenges. The visual quality of the statue depended less on strong colors and more on the relationship between skin tones, clothing, tactical equipment, weapons, dirt, and the rocky environment. Weathering needed to look natural and irregular, but at the same time it had to be controlled well enough to remain consistent during mass production.",
+    ],
+    executionBody: [
+      "I participated in reviewing the part breakdown and structural solutions for the figure, including the backpack attachment, leg support, connection to the base, and reinforcement of weapons and smaller components. Where necessary, we adjusted vulnerable areas to improve production and transportation stability without noticeably affecting the original design.",
+      "I also took part in discussions around material selection, assigning PVC, resin, ABS, and metal to different components based on their requirements for detail, strength, flexibility, and cost.",
+      "A major part of my involvement was reviewing the master sample and defining the visual standard for production. This included color references, skin tones, clothing weathering, equipment wear, and dirt effects. I worked with the factory to adjust areas where the weathering appeared too heavy or too light, helping turn a naturally irregular visual effect into a more controlled and repeatable production standard.",
+    ],
+    impactBody: [
+      "The final product was able to retain a high level of tactical detail while achieving stable mass production and consistent assembly across the figure, backpack, weapons, and smaller components.",
+      "Visually, Nomad’s crouched tactical pose, layered equipment, and battlefield weathering were preserved well in the final statue. Although different materials and finishing methods were used across the figure, clothing, weapons, equipment, and rocky base, the final result maintained a consistent and realistic military style.",
+    ],
     year: 2024,
     featured: false,
-    challenge: "",
-    result: "",
+    challenge:
+      "Solve complex crouch assembly, mixed PVC/resin/ABS/metal allocation, and controlled battlefield weathering for mass production.",
+    result:
+      "Stable mass production with consistent assembly, while preserving Nomad’s tactical detail and realistic military weathering.",
   },
   {
     slug: SEVENTH_PROJECT_SLUG,
@@ -1531,10 +1716,32 @@ export const projects: Project[] = [
     afterCoverStillVideoPair: SEVENTH_PROJECT_AFTER_COVER_STILL_VIDEO_PAIR,
     afterCoverExtraRows: SEVENTH_PROJECT_AFTER_COVER_EXTRA_ROWS,
     afterCoverStillVideoBeforeExtraRows: true,
+    overview: [
+      "This project was part of the Injustice 2 Versus Collection, with Brainiac released alongside Batman as a paired collectible set designed to recreate the confrontation between the two characters.",
+      "Brainiac was the more visually complex figure of the pair, especially because of the six large mechanical tentacles extending from his back. These tentacles played a major role in creating the size, presence, and threatening appearance needed for the character to stand against Batman as part of the same display.",
+      "To achieve the right visual quality, the tentacles needed to be made from metal. However, due to cost limitations, the body and base could not use the same material, which introduced additional challenges around weight balance and structural stability.",
+    ],
+    challengesBody: [
+      "The first challenge was weight distribution. The six metal tentacles were concentrated behind the character, while the body and base were made from lighter materials. Once fully assembled, the center of gravity shifted backward, making the statue more likely to lean or become unstable.",
+      "The second challenge was the facial expression. Most of Brainiac’s face is covered by mechanical armor, leaving the eyes as one of the few areas capable of communicating his cold and threatening personality. Because the eye area is so small, even minor differences in the pupils, highlights, or surrounding shadows could make the character look lifeless. Final market feedback reflected this issue, with one reviewer describing the eyes as relatively flat and dull compared with the character’s appearance in the game.",
+    ],
+    executionBody: [
+      "To solve the balance issue, I avoided changing the material of the entire body or base, as this would have significantly increased the cost. Instead, I proposed adding hidden metal counterweights to the rear section of the base.",
+      "This allowed us to redistribute the overall weight and lower the center of gravity with minimal additional cost, helping the statue remain stable even after all six metal tentacles were installed.",
+      "For the facial expression, we also worked on the eyes and surrounding details to strengthen Brainiac’s threatening appearance. However, looking back at the final result, I believe this part could have been handled better. The eyes did not fully capture the intensity and character presence we originally wanted.",
+    ],
+    impactBody: [
+      "Structurally, the additional counterweights successfully improved the balance of the statue without requiring a major change in materials or a significant increase in production cost.",
+      "Overall feedback on the sculpt, mechanical details, and paintwork was positive. The reviewer particularly appreciated the leg sculpt and the overall appearance, noting that Brainiac still came across as dangerous and threatening. She also described the overall sculpt and paintwork as very strong.",
+      "The eyes, however, remained one of the weaker parts of the final product. I agree with that feedback and believe there was still room for improvement.",
+      "For me, this project was a good reminder that successful product development is not only about solving structural and cost problems. In character collectibles, very small details—especially around the face and eyes—can have a major impact on whether the character truly feels alive.",
+    ],
     year: 2024,
     featured: false,
-    challenge: "",
-    result: "",
+    challenge:
+      "Balance six metal tentacles against a lighter body and base, while preserving Brainiac’s threatening presence in a small eye area.",
+    result:
+      "Hidden base counterweights stabilized the statue at minimal cost; sculpt and paint were well received, though the eyes still fell short of the intended intensity.",
   },
   {
     slug: EIGHTH_PROJECT_SLUG,
@@ -1558,10 +1765,32 @@ export const projects: Project[] = [
     afterCoverStills: EIGHTH_PROJECT_AFTER_COVER_STILLS,
     afterCoverVideoPair: EIGHTH_PROJECT_AFTER_COVER_VIDEO_PAIR,
     afterCoverExtraRows: EIGHTH_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    overview: [
+      "ReCore is an action-adventure game developed by Comcept and Armature Studio, published by Microsoft Studios. Set on the distant planet of Far Eden, the game follows Joule Adams, one of the last remaining human colonists, as she awakens from cryosleep and discovers a world devastated by unknown events.",
+      "Alongside her robotic companion Mack, a loyal CoreBot designed to assist humanity’s survival, Joule begins exploring the abandoned planet and uncovering the secrets behind the failed colonization mission.",
+      "To celebrate this unique sci-fi adventure, the Collector’s Edition introduced a detailed statue featuring Joule and Mack — bringing the bond between human and machine from the digital world into a physical collectible experience.",
+    ],
+    challengesBody: [
+      "The biggest challenge of this project was balancing the visual proportion and structural stability of the collectible, especially around the relationship between Joule and her robotic companion Mack.",
+      "During the early development stage, we went through multiple iterations to find the most suitable proportion between the characters. The goal was to make their interaction feel natural while ensuring the overall composition looked balanced from different viewing angles.",
+      "However, the biggest challenge came from Mack’s complex mechanical structure. Many of its upper components were relatively heavy, while the supporting structures underneath were small and delicate. We needed to carefully evaluate the material selection, reinforcement methods, and structural design to improve stability without affecting the original appearance.",
+      "In addition, the small mechanical parts created difficulties during assembly, as some components were fragile and could easily break during handling. This required continuous refinement of the structure and assembly process to ensure the final product could achieve both the desired level of detail and reliable production quality.",
+    ],
+    executionBody: [
+      "A large part of my work focused on improving Mack’s structure without changing the appearance of the original design.",
+      "For the leg structure, we found a way to use the blue energy cables that were already part of Mack’s design as additional support. Instead of adding an obvious reinforcement piece, we integrated the support into these existing visual elements, helping the legs carry the weight of the upper body while keeping the original look intact.",
+      "Another issue was the small mechanical components, which could easily break during assembly. I suggested adding a thin resin-based reinforcement coating to some of the more fragile parts before assembly. This gave the components additional surface strength and made them less likely to break during handling and installation, while adding very little visible thickness to the parts.",
+    ],
+    impactBody: [
+      "The statue became a key component of the ReCore Collector’s Edition, helping extend the game experience beyond the digital world.",
+      "By transforming Joule and Mack’s partnership into a physical collectible, the project gave fans a tangible way to connect with the characters and preserve a memorable part of the ReCore universe.",
+    ],
     year: 2024,
     featured: false,
-    challenge: "",
-    result: "",
+    challenge:
+      "Balance character proportion and Mack’s top-heavy mechanical structure without compromising detail or assembly reliability.",
+    result:
+      "A stable Collector’s Edition centerpiece that brought Joule and Mack’s partnership into a physical collectible for fans.",
   },
   {
     slug: NINTH_PROJECT_SLUG,
@@ -1569,18 +1798,48 @@ export const projects: Project[] = [
     materials: ["resin"],
     ips: ["halo-guardians"],
     tags: involvementTags("contribution"),
-    summary: "",
-    tagline: "",
+    summary: NINTH_PROJECT_TAGLINE,
+    tagline: NINTH_PROJECT_TAGLINE,
     role: [],
     involvement: "contribution",
     coverImage: NINTH_PROJECT_COVER_VIDEO,
     coverVideo: NINTH_PROJECT_COVER_VIDEO,
+    coverHoverStills: NINTH_PROJECT_HOVER_STILLS,
     coverWidth: SHOWCASE_COVER_W,
     coverHeight: SHOWCASE_COVER_H,
+    heroVideo: NINTH_PROJECT_HERO_VIDEO,
+    galleryLeadImage: NINTH_PROJECT_GALLERY_LEAD,
+    afterCoverStills: NINTH_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: NINTH_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    endVideo: NINTH_PROJECT_END_VIDEO,
+    overview: [
+      "This project was part of the Halo 5: Guardians Limited Collector’s Edition, released for Xbox One in collaboration with Microsoft, 343 Industries, and TriForce.",
+      "The centerpiece of the collector’s edition was a commemorative statue featuring Master Chief and Spartan Locke, presented together in a large environmental display base. The composition was designed around the tension between the two central characters of Halo 5: Guardians, with both figures shown in dynamic combat-ready poses.",
+      "The collector’s edition also included a SteelBook case, a Metal Earth Guardian model, classified orders and dossiers for Blue Team and Fireteam Osiris, as well as additional digital content and game-related bonuses.",
+    ],
+    challengesBody: [
+      "The biggest challenge came before tooling.",
+      "The body poses could still be adjusted during development, but the final sense of tension depended heavily on small changes in head angle and viewing direction. Even a minor shift could make one character appear to be looking in the wrong direction and weaken the relationship between the two figures.",
+      "Once the tooling was finalized, changing these poses would become much more expensive.",
+      "So the challenge was to determine the final body positions, head angles, and sightlines before tooling, while keeping the adjustment process as efficient and low-cost as possible.",
+    ],
+    executionBody: [
+      "To make the viewing direction easier to evaluate, I introduced a directional projection method using infrared light.",
+      "The light was projected from the rear of each character’s head toward the front, allowing us to visualize the direction the character was effectively facing. Instead of relying only on subjective visual judgment, we could use the projected direction as a clear reference when adjusting the head angle and overall pose.",
+      "By placing both characters back into the full scene and repeatedly comparing their projected sightlines with the intended combat composition, we were able to fine-tune the poses before finalizing the tooling.",
+      "This gave us a simple and low-cost way to test different viewing directions without repeatedly modifying production molds.",
+    ],
+    impactBody: [
+      "The final composition created a clearer relationship between the two characters: Master Chief appears to be advancing forward while Spartan Locke provides side coverage, helping the two figures read as part of the same combat moment rather than as two separate statues.",
+      "More importantly, the key poses and viewing directions were confirmed before tooling, reducing the risk of expensive mold changes later in development.",
+      "This project reinforced one important lesson for me: in a multi-character statue, where a character is looking can be just as important as how accurately the character is sculpted. A very small change in head angle can completely change the story of the scene.",
+    ],
     year: 2024,
     featured: false,
-    challenge: "",
-    result: "",
+    challenge:
+      "Lock body poses, head angles, and sightlines before tooling without costly trial-and-error mold changes.",
+    result:
+      "Infrared sightline checks confirmed the Chief–Locke combat composition before tooling, avoiding expensive late pose revisions.",
   },
   {
     slug: TENTH_PROJECT_SLUG,
@@ -1588,18 +1847,45 @@ export const projects: Project[] = [
     materials: ["resin"],
     ips: ["gears-of-war"],
     tags: involvementTags("contribution"),
-    summary: "",
-    tagline: "",
+    summary: TENTH_PROJECT_TAGLINE,
+    tagline: TENTH_PROJECT_TAGLINE,
     role: [],
     involvement: "contribution",
     coverImage: TENTH_PROJECT_COVER_VIDEO,
     coverVideo: TENTH_PROJECT_COVER_VIDEO,
+    coverHoverStills: TENTH_PROJECT_HOVER_STILLS,
     coverWidth: SHOWCASE_COVER_W,
     coverHeight: SHOWCASE_COVER_H,
+    heroVideo: TENTH_PROJECT_HERO_VIDEO,
+    galleryLeadImage: TENTH_PROJECT_GALLERY_LEAD,
+    afterCoverStills: TENTH_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: TENTH_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    endVideo: TENTH_PROJECT_END_VIDEO,
+    overview: [
+      "This project was the JD Fenix Bike Statue created for the Gears of War 4 Collector’s Edition.",
+      "The statue captures JD Fenix alongside a heavily armored military motorcycle, combining the character, vehicle, weaponry, and environmental base into a single battlefield scene. The overall direction focused on the gritty visual language of Gears of War, with heavy mechanical structures, worn tactical equipment, and extensive weathering used to communicate a vehicle and character shaped by repeated combat.",
+    ],
+    challengesBody: [
+      "One of the main challenges was integrating the character naturally with such a large and mechanically complex vehicle. JD’s body, hands, legs, weapon, and equipment all needed to interact correctly with the bike, while the final pose still had to feel natural and believable rather than appearing as though the figure had simply been placed on top of the vehicle.",
+      "The motorcycle itself also contained a large number of mechanical details, including suspension components, exposed structures, tires, weapons, and armored panels. These elements required careful part breakdown and structural consideration to preserve detail while remaining practical for molding, assembly, and mass production.",
+      "Another major challenge was the weathering. The character, bike, weapon, and base all needed different surface treatments, but they still had to feel as though they belonged to the same battlefield environment. The challenge was to make dirt, wear, scratches, and battle damage look natural while keeping those effects controlled and repeatable during production.",
+    ],
+    executionBody: [
+      "I participated in reviewing the structural breakdown and assembly of the statue, particularly the relationship between JD and the motorcycle. This included evaluating the character’s contact points with the bike, the stability of the overall pose, the connection between major components, and the reinforcement of smaller or more vulnerable mechanical parts.",
+      "I also worked with the factory on material and production decisions for different components, balancing detail, structural strength, manufacturability, and cost across the character, vehicle, weapon, and smaller mechanical parts.",
+      "A major part of my involvement was the master sample and finishing review. I helped define the visual standard for the olive-green vehicle body, metallic mechanical components, character clothing, armor, dirt, scratches, and battle damage. I also reviewed the intensity and placement of weathering effects, asking the factory to increase or reduce certain areas so that the final production would retain the gritty, war-worn appearance without becoming visually inconsistent or overdone.",
+    ],
+    impactBody: [
+      "The final statue successfully brought the character and vehicle together as one complete scene rather than two separate elements. JD’s posture, weapon, and interaction with the motorcycle created a believable relationship between the character and the machine, while the detailed mechanical structure remained clearly visible throughout the final product.",
+      "The combination of armor wear, dirt, scratches, exposed mechanical details, and environmental textures also helped maintain the distinctive gritty visual style of Gears of War 4.",
+      "From a production perspective, the project retained a high level of mechanical and surface detail while achieving a structure that could be consistently assembled and reproduced in mass production.",
+    ],
     year: 2024,
     featured: false,
-    challenge: "",
-    result: "",
+    challenge:
+      "Integrate JD Fenix with a complex motorcycle while balancing mechanical detail, structural practicality, and consistent battlefield weathering across production.",
+    result:
+      "A cohesive combat scene that united character, vehicle, and weathering at production-ready detail for the Gears of War 4 Collector’s Edition.",
   },
   {
     slug: ELEVENTH_PROJECT_SLUG,

@@ -1,5 +1,5 @@
 ---
-description: Type labels — SF Pro Medium (match filter), no fill, gray; projects meta aligns to nav
+description: Type labels — Mono Medium, no fill, gray; cards stack title → desc → type; featured leads keep nav-align
 alwaysApply: true
 ---
 
@@ -8,45 +8,42 @@ alwaysApply: true
 On `.projects-page`, `.project-detail`, `.insights-page`, `.insight-detail`:
 
 1. **No fill** — no border, background, or capsule padding on type labels.
-2. **Font** — SF Pro Display Medium (`var(--font-sans)`, weight `500`) — same as filter pills. CSS: `--font-type-label`.
+2. **Font** — FK Grotesk Mono Medium (`var(--font-label)`, weight `500`). CSS: `--font-type-label`.
 3. **Size** — shared `--type-chip-font` (current size, −3% recipe). Same everywhere: featured, cards, Related, case hero tag.
-4. **Color** — gray (`--type-label-color`, ~50% white).
-5. **Title + description** in card/lead meta — **white** (`#fff`).
-6. **Top-align with title** — every type label (and its chip list wrapper) uses `align-self: start` / `align-items: start`. Never baseline or vertical-center labels against titles.
+4. **Color** — gray (`--type-label-color`).
+5. **Card / lead title + description** on light surfaces — **black** (`#0a0a0a`). Type label stays gray. Dark detail Related stays white title/desc.
 
 Applies to `.project-type-chip`, `.insight-chip`, `.project-case-demo__tag`.
 
 Filter involvement pills are separate UI — not this recipe.
 
-# Featured / case hero meta (desktop)
+# Filter / Related / home cards (all breakpoints)
 
-**Scope:** `.project-featured__meta`, `.insights-lead__meta`, and `.project-case-demo__hero-copy` (desktop). Same recipe.
+**Scope:** `.project-window__meta--stack`, `.insight-showcase__meta`.
 
-1. Type label `max-content`, **end-aligned**, top-aligned.
-2. Description **left-aligned with** centered `.site-nav` (primary links). `--site-nav-inset` / `--site-nav-half` from Header.
-3. Title → description gap: **5.5vw**.
-4. Description → tag gap: **10vw**; description takes the remaining width between nav-left and that spacer.
-5. Title size: shared `--project-meta-title-size`.
+Stack in three rows (full width). **Projects and Insights share the same tokens** (`:root`):
 
-Do **not** apply this recipe to filter/Related cards.
+- `--card-meta-row-gap` — title ↔ description
+- `--card-meta-type-gap` — description ↔ type label
+- `--card-meta-desc-size` / `--card-meta-desc-lh` (+ mobile variants)
+- Title: `--project-meta-title-size` / `--project-meta-title-weight` (same on both)
 
-# Filter / Related cards
+1. **Title** (black on light)
+2. **Description** (black on light)
+3. **Type label** (gray, left-aligned; same Mono / size / tracking as all type labels)
 
-Title up to **65%** | type label end-aligned / top-aligned | description full width under. Label **size** still comes from the unified tokens above.
+Do **not** put the type label on the same row as the title.
+Do **not** give Insights a different letter-spacing or size than Projects for these cards.
 
-# Featured lead meta (mobile ≤800px)
+# Featured leads (Projects + Insights)
 
-`.project-featured__meta` and `.insights-lead__meta` match the filter card stack (not the desktop nav-align recipe):
+**Scope:** `.project-featured__meta`, `.insights-lead__meta`.
 
-1. Title ≤ **65%** | type label **end-aligned / top-aligned**.
-2. Description on the next row, **full** card width, left-aligned.
+Restore / keep the prior recipe (not the three-row card stack):
 
-Leads stay visible with the filter on mobile (do not hide).
+- **Desktop:** type label end-aligned; description left-aligned with centered-nav inset; title→desc **5.5vw**; desc→tag **10vw**.
+- **Mobile ≤800px:** title ≤65% | type end-aligned; description full width on the next row.
 
-# Project detail hero meta (mobile ≤800px)
+# Exception — project detail case hero
 
-`.project-case-demo__hero-copy` (not the filter-card recipe):
-
-1. Row 1 — title **60%** | **10%** spacer | type label **30%** (**right-aligned**).
-2. Row 2 — description **full** usable width, left-aligned.
----
+`.project-case-demo__hero-copy` keeps the existing overlay recipe. Do **not** restack it unless the user explicitly asks.
