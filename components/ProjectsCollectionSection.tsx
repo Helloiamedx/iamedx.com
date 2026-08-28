@@ -131,7 +131,7 @@ export function ProjectsCollectionSection({
       typeof ResizeObserver !== "undefined" && panelField
         ? new ResizeObserver(schedule)
         : null;
-    ro?.observe(panelField);
+    if (ro && panelField) ro.observe(panelField);
 
     return () => {
       if (raf) window.cancelAnimationFrame(raf);

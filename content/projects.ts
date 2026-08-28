@@ -213,18 +213,18 @@ export type Project = {
    * `afterIndex` = how many `afterVideoStills` come before this row (default: all → end).
    */
   afterVideoRow?: {
-    items: { src: string; alt: string }[];
+    items: { src: string; alt: string; ratio?: string }[];
     ratio?: string;
     afterIndex?: number;
   };
   /** Still row just above the closing video pair (second-to-last). */
   beforeEndRow?: {
-    items: { src: string; alt: string }[];
+    items: { src: string; alt: string; ratio?: string }[];
     ratio?: string;
   };
   /** Still row after `beforeEndRow` — last gallery stills before end videos. */
   afterEndRow?: {
-    items: { src: string; alt: string }[];
+    items: { src: string; alt: string; ratio?: string }[];
     ratio?: string;
   };
   /**
@@ -1601,7 +1601,7 @@ const FOURTEENTH_PROJECT_COVER = projectCoverFromName(
 );
 const FOURTEENTH_PROJECT_COVER_VIDEO = projectCoverFromName(
   FOURTEENTH_PROJECT_CDN_FOLDER,
-  "video.mp4",
+  "video12.mp4",
 );
 const FOURTEENTH_PROJECT_HERO_VIDEO = projectCoverFromName(
   FOURTEENTH_PROJECT_CDN_FOLDER,
