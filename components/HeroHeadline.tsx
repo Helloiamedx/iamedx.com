@@ -69,7 +69,7 @@ export function HeroHeadline() {
     setReady(true);
   }, []);
 
-  /* Hold copy until home video is playing (after chrome + buffer). */
+  /* Copy gate — set early by HeroBackgroundVideo (not tied to video buffer). */
   useEffect(() => {
     let cancelled = false;
     void whenHeroFlag(HERO_COPY_ATTR).then(() => {

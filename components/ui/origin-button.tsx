@@ -64,6 +64,8 @@ function usePressFlash() {
   const [pressed, setPressed] = React.useState(false);
   const timerRef = React.useRef<number | null>(null);
   const startYRef = React.useRef(0);
+  /** Suppress the synthetic click that follows a handled touch */
+  const ignoreClickRef = React.useRef(false);
 
   const clearTimer = React.useCallback(() => {
     if (timerRef.current != null) {
@@ -96,16 +98,20 @@ function usePressFlash() {
     (fn: () => void) => {
       clearTimer();
       setPressed(true);
+      ignoreClickRef.current = true;
       timerRef.current = window.setTimeout(() => {
         timerRef.current = null;
         setPressed(false);
         fn();
+        window.requestAnimationFrame(() => {
+          ignoreClickRef.current = false;
+        });
       }, TOUCH_PRESS_MS);
     },
     [clearTimer],
   );
 
-  return { pressed, arm, release, afterFlash, movedTooFar };
+  return { pressed, arm, release, afterFlash, movedTooFar, ignoreClickRef };
 }
 
 const OriginButton = React.forwardRef<
@@ -128,7 +134,8 @@ const OriginButton = React.forwardRef<
   ) => {
     const isDisabled = Boolean(disabled || loading);
     const coarse = useCoarsePointer();
-    const { pressed, arm, release, afterFlash, movedTooFar } = usePressFlash();
+    const { pressed, arm, release, afterFlash, movedTooFar, ignoreClickRef } =
+      usePressFlash();
     const classes = cn(
       "origin-button",
       pressed && "is-pressed",
@@ -270,16 +277,38 @@ const OriginButton = React.forwardRef<
           disabled={isDisabled}
           ref={ref as React.Ref<HTMLButtonElement>}
           type={type}
-          onTouchStart={() => {
-            if (!isDisabled) arm();
+          onTouchStart={(event) => {
+            if (isDisabled) return;
+            if (event.touches.length > 1) return;
+            arm(event.touches[0]?.clientY);
           }}
           onTouchCancel={release}
-          onTouchEnd={() => {
-            if (!isDisabled) {
-              window.setTimeout(release, TOUCH_PRESS_MS);
+          onTouchEnd={(event) => {
+            if (isDisabled) return;
+            const y = event.changedTouches[0]?.clientY ?? 0;
+            if (movedTooFar(y)) {
+              release();
+              return;
             }
+            /* Coarse: flash solid hover, then run click (label may swap after) */
+            if (coarse) {
+              event.preventDefault();
+              afterFlash(() => {
+                onClick?.(
+                  event as unknown as React.MouseEvent<HTMLButtonElement>,
+                );
+              });
+              return;
+            }
+            window.setTimeout(release, TOUCH_PRESS_MS);
           }}
-          onClick={onClick}
+          onClick={(event) => {
+            if (ignoreClickRef.current) {
+              event.preventDefault();
+              return;
+            }
+            onClick?.(event);
+          }}
         >
           {children}
         </button>

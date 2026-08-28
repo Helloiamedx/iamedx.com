@@ -181,10 +181,15 @@
   --font-label: "FK Grotesk Mono", ui-monospace, Menlo, monospace;
   --font-type-label: var(--font-label);
   /*
-   * Space before footer — applied as page padding-bottom, never as footer margin
-   * (footer outer margin caused canvas 露白).
+   * Footer top pad ↔ body→footer gap — same token, all breakpoints.
+   * Applied as main padding-bottom (never footer margin — avoids canvas 露白).
    */
-  --content-footer-gap: 80px;
+  --footer-top-gap: clamp(3.25rem, 5.75vw, 4.5rem);
+  --content-footer-gap: var(--footer-top-gap);
+  /*
+   * Projects + Insights index card row gap (vertical). Projects is source of truth.
+   */
+  --projects-index-row-gap: clamp(2.35rem, 4.75vw, 3.5rem);
   /*
    * Content shell — desktop trial cap at 1440 (was 1792).
    * Fluid to viewport minus outer gutters; hard cap on wide screens.
@@ -366,15 +371,22 @@ button.origin-button {
 }
 
 .projects-cover__title,
-.projects-related__title,
 .support-know__title,
 .hero__title,
 .case-cover__headline,
 .case-cover__title,
-.project-case-hero__title,
-.project-case-demo__credits-label {
+.project-case-hero__title {
   font-family: var(--font-title);
   font-weight: 700;
+}
+
+/* Special thanks + Related — Grtsk Tera Medium (mobile + desktop) */
+.projects-related__title,
+.insights-related__title,
+.project-case-demo__credits-label {
+  font-family: var(--font-desc);
+  font-weight: 500;
+  font-synthesis: none;
 }
 
 .insights-opening__headline,
@@ -419,36 +431,20 @@ button.origin-button {
   overflow: visible;
 }
 
+.site-main > main {
+  flex: 1 0 auto;
+  box-sizing: border-box;
+  background: var(--site-bg);
+  /* Every page: body → footer edge = footer inner top pad */
+  padding-bottom: var(--content-footer-gap);
+}
+
 /*
  * Footer stack — no outer margin above the footer (avoids canvas 露白).
  */
 .site-end {
   flex-shrink: 0;
   margin: 0;
-}
-
-.site-main > main {
-  flex: 1 0 auto;
-  box-sizing: border-box;
-  background: var(--site-bg);
-  /* Every page: same inward space above the footer (not footer margin) */
-  padding-bottom: var(--content-footer-gap);
-}
-
-/* Home last section already has --home-section-pad; don’t stack an extra gap. */
-.site-main > main.home-page {
-  background: var(--site-bg);
-  padding-bottom: 0;
-}
-
-/* About: sheet meets black footer — no gap strip between */
-.site-main > main.about-page {
-  padding-bottom: 0;
-}
-
-/* Services: last stage meets footer — no extra content-footer gap */
-.site-main > main.services-page {
-  padding-bottom: 0;
 }
 
 /*
@@ -862,7 +858,8 @@ body.is-mobile-menu-open .mobile-menu a {
   color: #0a0a0a;
   /* Nav spacer is already in the layout — page itself needs no top offset */
   padding-top: 0;
-  padding-bottom: clamp(3rem, 8vw, 5.5rem);
+  /* Footer air from .site-main > main (--content-footer-gap) */
+  padding-bottom: 0;
   overflow-x: clip;
 }
 
@@ -1335,12 +1332,12 @@ body.is-mobile-menu-open .mobile-menu a {
 
 .site-footer__shell {
   --footer-edge-gap: clamp(2.25rem, 4.25vw, 3.15rem);
-  --footer-top-gap: clamp(3.25rem, 5.75vw, 4.5rem);
   position: relative;
   z-index: 4;
   box-sizing: border-box;
   width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
   margin-inline: auto;
+  /* Top pad = :root --footer-top-gap (= --content-footer-gap) */
   padding: var(--footer-top-gap) 0 clamp(2.5rem, 6vw, 4rem);
 }
 
@@ -2200,10 +2197,24 @@ body.is-mobile-menu-open .project-case-demo__toggle-pin {
 }
 
 @media (max-width: 899px) {
+  .site-header-chrome {
+    /* Phone chrome: one size for logo + Menu/Close (−2px from 0.8125rem) */
+    --nav-type-size: calc(0.8125rem - 2px);
+  }
+
+  .site-header-chrome .site-logo,
+  .site-header-chrome .nav-menu-toggle {
+    font-size: var(--nav-type-size);
+  }
+
   .site-header-chrome .site-logo {
     display: block;
     margin: 0;
     padding: 0;
+  }
+
+  .site-header-chrome .site-logo .roll-char {
+    font-size: 1em;
   }
 
   .site-header__actions {
@@ -2244,20 +2255,20 @@ body.is-mobile-menu-open .project-case-demo__toggle-pin {
   height: 100%;
   object-fit: cover;
   object-position: center;
-  /* Stay dark until logo/menu chrome has painted — never beat the wordmark */
+  /* Stay dark until first frame (or play) — never flash empty */
   opacity: 0;
   animation: none;
   user-select: none;
   -webkit-user-drag: none;
 }
 
-html[data-chrome-ready="1"] .hero__video.is-loaded {
-  animation: hero-video-in 560ms cubic-bezier(0.22, 1, 0.36, 1) 80ms forwards;
+/* First decoded frame — visible behind copy (no loading pill on home) */
+.hero__video.is-framed {
+  opacity: 1;
 }
 
-/* Progress above idle content stacking; logos (z-index 2) stay on top */
-.hero__video-wrap .video-loading-cover {
-  z-index: 2;
+html[data-chrome-ready="1"] .hero__video.is-loaded:not(.is-framed) {
+  animation: hero-video-in 560ms cubic-bezier(0.22, 1, 0.36, 1) 80ms forwards;
 }
 
 @keyframes hero-video-in {
@@ -2291,7 +2302,7 @@ html[data-chrome-ready="1"] .hero__video.is-loaded {
   justify-content: center;
   text-align: center;
   gap: clamp(1.35rem, 3.2vw, 2rem);
-  /* Hidden until video plays — otherwise copy covers the progress bar */
+  /* Hidden until copy gate — set early; does not wait for video */
   visibility: hidden;
   pointer-events: none;
 }
@@ -2393,19 +2404,21 @@ html[data-hero-copy-ready="1"] .hero__content {
   .hero__content {
     width: 72.675vw; /* 85vw × 0.9 × 0.95 */
     max-width: 72.675vw;
+    /* Optical nudge — centered block reads low under the header / logo rail */
+    transform: translateY(-30px);
   }
 
   /*
    * Mobile size must be a full clamp — calc(var(--fold-text-font-size) - Npx)
    * is invalid when the var token is itself a clamp() from the inline style.
-   * Desktop keeps +20px; mobile = +20px − 18px → +2px.
+   * Desktop keeps +20px; mobile = +7px (half-size base + 7).
    */
   .hero-headline__fold-text.fold-text,
   .hero-headline .fold-text.hero-headline__fold-text {
     font-size: clamp(
-      calc((2.2rem - 2px) * 0.5 + 2px),
-      calc((6.2vw - 2px) * 0.5 + 2px),
-      calc((5.25rem - 2px) * 0.5 + 2px)
+      calc((2.2rem - 2px) * 0.5 + 7px),
+      calc((6.2vw - 2px) * 0.5 + 7px),
+      calc((5.25rem - 2px) * 0.5 + 7px)
     ) !important;
   }
 
@@ -2429,14 +2442,6 @@ html[data-hero-copy-ready="1"] .hero__content {
   .insight-detail .insights-related {
     padding-bottom: 0;
     margin-bottom: 0;
-  }
-
-  .project-detail .detail-index-cta {
-    margin-block-start: clamp(4rem, 9vw, 5.75rem);
-  }
-
-  .insight-detail .detail-index-cta {
-    margin-block-start: clamp(2rem, 5vw, 3rem);
   }
 }
 
@@ -2632,6 +2637,11 @@ html[data-hero-copy-ready="1"] .hero__content {
 
 .home-page__section {
   padding-block: var(--home-section-pad);
+}
+
+/* Footer air from main --content-footer-gap — don’t stack section bottom pad */
+.home-page > .section.home-page__section:last-child {
+  padding-bottom: 0;
 }
 
 /* Full-bleed band; keep children on the content shell */
@@ -3693,9 +3703,10 @@ html[data-hero-copy-ready="1"] .hero__content {
 .projects-page .section.projects-body {
   /*
    * Intro band handles top air — body only spaces featured + grid.
+   * Footer air comes from .site-main > main (--content-footer-gap).
    */
   --filter-band-gap: clamp(1.75rem, 3.25vw, 2.5rem);
-  padding: 0 0 4rem;
+  padding: 0;
 }
 
 /* Projects / Services / Thoughts / About — shared index intro band */
@@ -3703,7 +3714,8 @@ html[data-hero-copy-ready="1"] .hero__content {
 .svc-demo__hero,
 .projects-index-intro,
 .insights-opening__plate,
-.about-index-intro {
+.about-index-intro,
+.collection-detail__intro {
   box-sizing: border-box;
   height: 50svh;
   min-height: 50svh;
@@ -3766,7 +3778,8 @@ html[data-hero-copy-ready="1"] .hero__content {
   .svc-demo__hero,
   .projects-index-intro,
   .insights-opening__plate,
-  .about-index-intro {
+  .about-index-intro,
+  .collection-detail__intro {
     --page-index-intro-gap-below: calc(2rem + clamp(2.75rem, 7vw, 3.5rem));
     height: auto;
     min-height: 0;
@@ -3781,7 +3794,8 @@ html[data-hero-copy-ready="1"] .hero__content {
 
   .page-index-intro__inner,
   .projects-index-intro__inner,
-  .insights-opening__plate-inner {
+  .insights-opening__plate-inner,
+  .collection-detail__intro-inner {
     align-items: center;
   }
 
@@ -4124,7 +4138,6 @@ html[data-hero-copy-ready="1"] .hero__content {
   margin-top: calc(-1 * var(--header-offset));
   background: var(--site-bg);
   color: #0a0a0a;
-  --projects-index-row-gap: clamp(2.35rem, 4.75vw, 3.5rem);
   --card-meta-type-font: var(--font-title);
   --card-meta-type-weight: 400;
   --portfolio-card-radius: 0;
@@ -5115,7 +5128,8 @@ html[data-hero-copy-ready="1"] .hero__content {
 }
 
 /* Projects index — row rhythm (featured → grid, grid rows, full-width breaks) */
-.projects-page .project-showcase--related {
+.projects-page .project-showcase--related,
+.home-page .project-showcase--related {
   row-gap: var(--projects-index-row-gap);
 }
 
@@ -5327,7 +5341,6 @@ html[data-hero-copy-ready="1"] .hero__content {
   margin: 0;
   padding: 0;
   font-family: var(--font-fine);
-  font-size: var(--collection-headline-size);
   font-weight: 100;
   font-synthesis: none;
   letter-spacing: 0.04em;
@@ -5341,6 +5354,7 @@ html[data-hero-copy-ready="1"] .hero__content {
 }
 
 .projects-collection__headline {
+  font-size: var(--collection-headline-size);
   width: 100%;
   max-width: 100%;
   color: #fff;
@@ -5399,13 +5413,16 @@ html[data-hero-copy-ready="1"] .hero__content {
   }
 }
 
-/* Collection detail — intro matches /projects Work eyebrow + collection headline */
+/* Collection detail — intro shares Services / Projects index hero rhythm */
 .collection-detail {
   margin-top: calc(-1 * var(--header-offset));
-  padding-top: var(--header-offset);
+  /* Hero owns header offset via .page-index-intro padding (same as Services) */
+  padding-top: 0;
   min-height: 100svh;
   background: var(--site-bg);
   color: #0a0a0a;
+  /* Break headline was 95px — detail title at least −35px */
+  --collection-detail-title-size: calc(95px - 35px);
   --type-label-color: rgba(10, 10, 10, 0.5);
   --type-chip-font: clamp(
     calc(0.5625rem * 0.97),
@@ -5416,49 +5433,33 @@ html[data-hero-copy-ready="1"] .hero__content {
 }
 
 .collection-detail__intro {
-  box-sizing: border-box;
-  min-height: 50svh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(3.5rem, 7vw, 6rem) 0 clamp(5rem, 10vw, 8rem);
-  text-align: center;
-  -webkit-user-select: text;
-  user-select: text;
+  background: var(--site-bg);
 }
 
 .collection-detail__intro-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(0.55rem, 1.2vw, 0.85rem);
-  box-sizing: border-box;
-  width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
-  margin-inline: auto;
+  max-width: min(52rem, 100%);
+}
+
+.collection-detail__intro .svc-demo__hero-eyebrow {
+  text-align: center;
+  width: 100%;
 }
 
 .collection-detail__title {
   width: var(--collection-detail-intro-width);
   max-width: var(--collection-detail-intro-width);
+  margin: 0;
+  font-size: var(--collection-detail-title-size);
+  text-align: center;
   color: #0a0a0a;
 }
 
 @media (max-width: 800px) {
-  .collection-detail__intro {
-    min-height: 0;
-    align-items: flex-start;
-    padding: clamp(4rem, 9vw, 6rem) 0 clamp(3.5rem, 7vw, 5rem);
-    text-align: left;
-  }
-
-  .collection-detail__intro-inner {
-    align-items: flex-start;
-  }
-
   .collection-detail__title {
     width: 100%;
     max-width: 100%;
-    text-align: left;
+    font-size: clamp(2rem, 8vw, var(--collection-detail-title-size));
+    text-align: center;
   }
 }
 
@@ -5472,13 +5473,21 @@ html[data-hero-copy-ready="1"] .hero__content {
   box-sizing: border-box;
   width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
   margin-inline: auto;
-  padding-bottom: clamp(4rem, 10vw, 6rem);
+  /* Footer air from main --content-footer-gap */
+  padding-bottom: 0;
+}
+
+.collection-detail__entry {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.5rem, 3vw, 2.25rem);
 }
 
 .collection-detail__rule {
-  margin: 0 0 clamp(2.5rem, 5vw, 4rem);
+  margin: 0;
   border: 0;
   border-top: 1px solid rgba(10, 10, 10, 0.22);
+  width: 100%;
 }
 
 .collection-detail__entries {
@@ -5500,6 +5509,7 @@ html[data-hero-copy-ready="1"] .hero__content {
   align-items: flex-start;
   gap: clamp(1rem, 2vw, 1.35rem);
   max-width: 100%;
+  min-width: 0;
 }
 
 .collection-detail__entry-media-frame {
@@ -5589,8 +5599,31 @@ html[data-hero-copy-ready="1"] .hero__content {
 }
 
 @media (max-width: 800px) {
+  .collection-detail__entries {
+    gap: clamp(2.25rem, 6vw, 3.25rem);
+  }
+
+  .collection-detail__entry {
+    gap: clamp(0.85rem, 2.5vw, 1.15rem);
+  }
+
+  /* Phone: stack media + CTA above copy */
   .collection-detail__entry-grid {
     grid-template-columns: 1fr;
+    gap: clamp(1.25rem, 4vw, 1.75rem);
+  }
+
+  .collection-detail__entry-media-frame {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .collection-detail__entry-copy .project-case-demo__panel-title {
+    font-size: calc(1.375rem - 3px - 5px);
+  }
+
+  .collection-detail__quote {
+    margin-top: clamp(2rem, 6vw, 3.5rem);
   }
 }
 
@@ -6020,19 +6053,27 @@ html[data-hero-copy-ready="1"] .hero__content {
 }
 
 .projects-related__title {
-  font-family: var(--font-title);
+  font-family: var(--font-desc);
   margin: 0 0 clamp(1.25rem, 2.5vw, 1.75rem);
   font-size: clamp(
     calc(1.5rem - 13px),
     calc(2.8vw - 13px),
     calc(2rem - 13px)
   );
-  font-weight: 700;
+  font-weight: 500;
+  font-synthesis: none;
   letter-spacing: -0.03em;
 }
 
 .project-detail__related {
   margin-top: clamp(2.5rem, 5vw, 4rem);
+}
+
+/* Footer air from main — related strip must not stack section bottom pad */
+.project-detail .project-detail__related.section,
+.insight-detail .insights-related {
+  padding-bottom: 0;
+  margin-bottom: 0;
 }
 
 /* Legacy uniform grid (home / elsewhere) */
@@ -6581,9 +6622,9 @@ html[data-hero-copy-ready="1"] .hero__content {
   padding-top: 0;
 }
 
-/* Match inter-phase rhythm: between stages = top + bottom pad; last needs both before footer */
+/* Footer air from main --content-footer-gap — strip stage bottom pad */
 .svc-demo__stage:last-of-type {
-  padding-bottom: calc(2 * clamp(4.5rem, 10vw, 7.5rem));
+  padding-bottom: 0;
 }
 
 .svc-demo__stage--1,
@@ -7383,7 +7424,7 @@ html[data-hero-copy-ready="1"] .hero__content {
   }
 
   .svc-demo__stage:last-of-type {
-    padding-bottom: calc(2 * clamp(2.5rem, 6vw, 3.5rem));
+    padding-bottom: 0;
   }
 
   .svc-strips {
@@ -7720,13 +7761,14 @@ html[data-hero-copy-ready="1"] .hero__content {
 
 .insights-related__title {
   margin: 0 0 clamp(1.25rem, 2.5vw, 1.75rem);
-  font-family: var(--font-sans);
+  font-family: var(--font-desc);
   font-size: clamp(
     calc(1.5rem - 13px),
     calc(2.8vw - 13px),
     calc(2rem - 13px)
   );
-  font-weight: 700;
+  font-weight: 500;
+  font-synthesis: none;
   letter-spacing: -0.03em;
   color: #0a0a0a;
 }
@@ -7885,7 +7927,8 @@ html[data-hero-copy-ready="1"] .hero__content {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: clamp(1.5rem, 3vw, 2.25rem) clamp(0.85rem, 1.6vw, 1.25rem);
+  /* Row gap matches Projects (--projects-index-row-gap); column gap stays Insights */
+  gap: var(--projects-index-row-gap) clamp(0.85rem, 1.6vw, 1.25rem);
 }
 
 .insight-showcase--tri {
@@ -8504,6 +8547,26 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   }
 }
 
+/* Mobile press — same cut as hover (no hover on touch) */
+.project-case-demo__toggle-pin:has(.origin-button:active),
+.project-case-demo__toggle-pin:has(.origin-button.is-pressed) {
+  mix-blend-mode: normal;
+  color: #0a0a0a;
+}
+
+/* Sheet open: float over dark panel — white fill like other dark bands */
+.project-case-demo__toggle-pin.is-sheet-float:has(.origin-button:active),
+.project-case-demo__toggle-pin.is-sheet-float:has(.origin-button.is-pressed) {
+  color: #fff;
+}
+
+.project-case-demo__toggle-pin.is-sheet-float .origin-button:active,
+.project-case-demo__toggle-pin.is-sheet-float .origin-button.is-pressed {
+  background: #fff !important;
+  color: #0a0a0a !important;
+  border-color: #fff !important;
+}
+
 /*
  * Touch phones: 2.5× desktop nudge only — extra tablet offset sat on the
  * Safari / Chrome bottom chrome.
@@ -8552,6 +8615,16 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   display: flex;
   justify-content: center;
   margin-block-start: clamp(4rem, 8vw, 6.5rem);
+}
+
+/*
+ * Insight / project detail index CTA:
+ * space above the button = space below to footer (--content-footer-gap).
+ */
+.insight-detail .detail-index-cta,
+.project-detail .detail-index-cta {
+  margin-block-start: var(--content-footer-gap);
+  margin-block-end: 0;
 }
 
 .detail-index-cta__link {
@@ -8718,6 +8791,11 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   transition:
     opacity 0.35s ease,
     visibility 0s linear 0.35s;
+}
+
+/* First frame already showing — drop the black plate, keep the pill */
+.video-loading-cover.is-framed:not(.is-ready) {
+  background: transparent;
 }
 
 /* Pill track — rounded outer ends; fill clipped for a sharp mid cut */
@@ -8925,9 +9003,10 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   margin: 0;
   min-width: 0;
   text-align: left;
-  font-family: var(--font-title);
+  font-family: var(--font-desc);
   font-size: var(--detail-related-label-size, 1rem);
-  font-weight: 700;
+  font-weight: 500;
+  font-synthesis: none;
   letter-spacing: -0.01em;
   line-height: 1.15;
   text-transform: uppercase;
@@ -8998,8 +9077,11 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   }
 
   .project-case-demo__credits-grid {
-    --credits-mid-gap: clamp(0.85rem, 3vw, 1.35rem);
-    grid-template-columns: minmax(0, 1fr) var(--credits-mid-gap) max-content;
+    /*
+     * Mobile: names claim intrinsic width (no wrap) → 12% gutter →
+     * leftover width to company (may wrap).
+     */
+    grid-template-columns: minmax(0, 1fr) 12% max-content;
     column-gap: 0;
     row-gap: 1.15rem;
     width: 100%;
@@ -9020,17 +9102,19 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   .project-case-demo__credits-company {
     grid-column: 1;
     max-width: none;
+    min-width: 0;
     text-wrap: pretty;
   }
 
   .project-case-demo__credits-name {
     grid-column: 3;
     gap: 0.35rem;
+    min-width: max-content;
   }
 
   .project-case-demo__credits-name-line {
-    white-space: normal;
-    overflow-wrap: anywhere;
+    white-space: nowrap;
+    overflow-wrap: normal;
   }
 
   .project-detail .project-window__meta--stack .project-window__tagline {
@@ -9203,9 +9287,9 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   margin-top: 0;
   background: var(--about-bg);
   color: var(--about-ink);
-  /* Hero owns the gap above first section (same rhythm as Services) */
+  /* Hero owns gap above first section; footer air from main --content-footer-gap */
   padding-top: 0;
-  padding-bottom: clamp(3rem, 8vw, 6rem);
+  padding-bottom: 0;
   isolation: isolate;
 }
 

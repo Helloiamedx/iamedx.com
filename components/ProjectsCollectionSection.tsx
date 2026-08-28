@@ -13,10 +13,13 @@ const PANEL_H = 300;
 /** Desktop: keep images clear of title / button chrome */
 const PANEL_IMAGE_GAP_MIN = 44;
 const PARALLAX_FACTOR = 0.45;
-/** Mobile: opposite drift — between “too far” and “barely moves” */
-const PARALLAX_FACTOR_MOBILE = 0.75;
-const MOBILE_TRAVEL_MIN = 48;
-const MOBILE_TRAVEL_MAX = 96;
+/** Mobile: soft one-way drift after center — shorter than before */
+const PARALLAX_FACTOR_MOBILE = 0.38;
+const MOBILE_TRAVEL_MIN = 28;
+const MOBILE_TRAVEL_MAX = 52;
+/** Lerp toward scroll target — softens hard cut on touch scroll */
+const SMOOTH_MOBILE = 0.14;
+const SMOOTH_DESKTOP = 0.22;
 
 type ProjectsCollectionSectionProps = {
   collection: ProjectCollection;
@@ -41,7 +44,7 @@ function getMaxImageTravel(section: HTMLElement): number {
   if (isCollectionMobile()) {
     return Math.min(
       MOBILE_TRAVEL_MAX,
-      Math.max(MOBILE_TRAVEL_MIN, fieldHeight * 0.2),
+      Math.max(MOBILE_TRAVEL_MIN, fieldHeight * 0.12),
     );
   }
 
@@ -114,35 +117,68 @@ export function ProjectsCollectionSection({
     const panels = panelsRef.current;
     if (!section || !panels) return;
 
-    let raf = 0;
+    if (reduceMotion) {
+      panels.style.transform = "translate3d(0, 0, 0)";
+      return;
+    }
 
-    const paint = () => {
-      raf = 0;
+    let raf = 0;
+    let current = 0;
+    let target = 0;
+    let running = false;
+
+    const readTarget = () => {
       const rect = section.getBoundingClientRect();
       const vh = window.innerHeight || 1;
       const sectionCenter = rect.top + rect.height / 2;
       const viewportCenter = vh / 2;
       const mobile = isCollectionMobile();
-      const factor = mobile ? PARALLAX_FACTOR_MOBILE : PARALLAX_FACTOR;
       const maxTravel = getMaxImageTravel(section);
-      /*
-       * Scroll down → section rises in the viewport → images move down
-       * (opposite direction to the section’s motion on screen).
-       */
       const delta = viewportCenter - sectionCenter;
-      const offset = Math.max(
+
+      if (mobile) {
+        /*
+         * Entering from below → keep centered (no negative offset / top park).
+         * Past viewport center → soft drift down only (shorter travel).
+         */
+        const raw = delta * PARALLAX_FACTOR_MOBILE;
+        return Math.max(0, Math.min(maxTravel, raw));
+      }
+
+      return Math.max(
         -maxTravel,
-        Math.min(maxTravel, delta * factor),
+        Math.min(maxTravel, delta * PARALLAX_FACTOR),
       );
-      panels.style.transform = `translate3d(0, ${offset}px, 0)`;
+    };
+
+    const tick = () => {
+      raf = 0;
+      target = readTarget();
+      const mobile = isCollectionMobile();
+      const smooth = mobile ? SMOOTH_MOBILE : SMOOTH_DESKTOP;
+      current += (target - current) * smooth;
+
+      if (Math.abs(target - current) < 0.15) {
+        current = target;
+        running = false;
+      } else {
+        running = true;
+      }
+
+      panels.style.transform = `translate3d(0, ${current.toFixed(2)}px, 0)`;
+
+      if (running) {
+        raf = window.requestAnimationFrame(tick);
+      }
     };
 
     const schedule = () => {
+      target = readTarget();
       if (raf) return;
-      raf = window.requestAnimationFrame(paint);
+      raf = window.requestAnimationFrame(tick);
     };
 
-    paint();
+    schedule();
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("touchmove", schedule, { passive: true });
     window.addEventListener("resize", schedule, { passive: true });
@@ -170,7 +206,7 @@ export function ProjectsCollectionSection({
       window.visualViewport?.removeEventListener("resize", schedule);
       ro?.disconnect();
     };
-  }, []);
+  }, [reduceMotion]);
 
   return (
     <section

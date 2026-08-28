@@ -33,8 +33,11 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
 
   return (
     <main className="collection-detail">
-      <header className="collection-detail__intro" aria-label={collection.title}>
-        <div className="collection-detail__intro-inner">
+      <header
+        className="collection-detail__intro page-index-intro"
+        aria-label={collection.title}
+      >
+        <div className="collection-detail__intro-inner page-index-intro__inner">
           <p className="svc-demo__hero-eyebrow">Collection</p>
           <h1 className="collection-detail__title">{collection.headline}</h1>
         </div>

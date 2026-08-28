@@ -1,8 +1,8 @@
 /**
  * Home hero playback sequence (documentElement data attrs):
- * 1. data-chrome-ready — header logo/menu painted (Header)
- * 2. data-hero-video-ready — video can play + revealed (HeroBackgroundVideo)
- * 3. data-hero-copy-ready — headline/CTAs may fold in (short delay after playable)
+ * 1. data-hero-copy-ready — headline/CTAs (immediate; do not wait for video)
+ * 2. data-chrome-ready — header logo/menu painted (Header)
+ * 3. data-hero-video-ready — video can play + revealed (HeroBackgroundVideo)
  */
 
 export const HERO_CHROME_ATTR = "chromeReady";

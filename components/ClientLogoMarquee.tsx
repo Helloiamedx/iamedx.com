@@ -58,7 +58,20 @@ export function ClientLogoMarquee() {
     const viewport: HTMLDivElement = viewportEl;
     const rail: HTMLDivElement = railEl;
 
+    const imgs = rail.querySelectorAll<HTMLImageElement>(
+      ".client-logo-marquee__track:first-child .client-logo-marquee__img",
+    );
+
+    /*
+     * Bootstrap Disney-centered delay once images are ready. Do not re-run
+     * on resize — mobile URL-bar show/hide fires resize while scrolling and
+     * would restart the CSS animation from the sync point every time.
+     */
+    let bootstrapped = false;
+
     function syncCenterInMotion() {
+      if (bootstrapped) return;
+
       /* Measure at rest so offsetLeft is not polluted by live transform */
       rail.classList.add("is-measuring");
       void rail.offsetWidth;
@@ -97,27 +110,26 @@ export function ClientLogoMarquee() {
       void rail.offsetWidth;
       rail.style.removeProperty("animation");
       rail.style.animationDelay = `${delayMs}ms`;
+
+      const imgsReady = Array.from(imgs).every((img) => img.complete);
+      if (imgsReady) bootstrapped = true;
     }
 
     let syncRaf = 0;
     function scheduleSync() {
+      if (bootstrapped) return;
       cancelAnimationFrame(syncRaf);
       syncRaf = requestAnimationFrame(() => syncCenterInMotion());
     }
 
     syncCenterInMotion();
 
-    const imgs = rail.querySelectorAll<HTMLImageElement>(
-      ".client-logo-marquee__track:first-child .client-logo-marquee__img",
-    );
     imgs.forEach((img) => {
       if (!img.complete) img.addEventListener("load", scheduleSync);
     });
 
-    window.addEventListener("resize", scheduleSync);
     return () => {
       cancelAnimationFrame(syncRaf);
-      window.removeEventListener("resize", scheduleSync);
       imgs.forEach((img) => img.removeEventListener("load", scheduleSync));
     };
   }, []);

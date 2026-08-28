@@ -11,6 +11,8 @@ type VideoLoadingCoverProps = {
   progress: number;
   /** True when load reached 100% and playback may start */
   ready: boolean;
+  /** First frame is painted — keep pill, clear solid black plate */
+  framed?: boolean;
 };
 
 function clampProgress(value: number) {
@@ -22,12 +24,16 @@ function clampProgress(value: number) {
  * Dark cover + pill progress bar (no copy).
  * Track is dark gray with rounded ends; fill is white.
  */
-export function VideoLoadingCover({ progress, ready }: VideoLoadingCoverProps) {
+export function VideoLoadingCover({
+  progress,
+  ready,
+  framed = false,
+}: VideoLoadingCoverProps) {
   const pct = ready ? 100 : clampProgress(progress);
 
   return (
     <div
-      className={`video-loading-cover${ready ? " is-ready" : ""}`}
+      className={`video-loading-cover${ready ? " is-ready" : ""}${framed ? " is-framed" : ""}`}
       aria-hidden={ready}
       aria-busy={!ready}
       role="progressbar"

@@ -15,7 +15,6 @@ export function CollectionDetailBody({ collection }: CollectionDetailBodyProps) 
 
   return (
     <div className="collection-detail__body">
-      <hr className="collection-detail__rule" aria-hidden="true" />
       <div className="collection-detail__entries">
         {entries.map(({ project, gameTitle, gameInfo, testimonial }) => (
           <CollectionDetailEntry

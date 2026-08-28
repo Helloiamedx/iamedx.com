@@ -1,6 +1,8 @@
 import { ClientLogoMarquee } from "@/components/ClientLogoMarquee";
 import { FrostIndexLink } from "@/components/FrostIndexLink";
-import { HeroBackgroundVideo } from "@/components/HeroBackgroundVideo";
+import {
+  HeroBackgroundVideo,
+} from "@/components/HeroBackgroundVideo";
 import { HeroHeadline } from "@/components/HeroHeadline";
 import { HomeDifferentCards } from "@/components/HomeDifferentCards";
 import { HomeSomeoneLikeThis } from "@/components/HomeSomeoneLikeThis";
@@ -10,6 +12,7 @@ import { ProjectFeaturedLead } from "@/components/ProjectFeaturedLead";
 import { ProjectMasonry } from "@/components/ProjectMasonry";
 import { SupportBento } from "@/components/SupportBento";
 import { projects, projectsFeaturedLead } from "@/content/projects";
+import { HERO_VIDEO_SRC } from "@/lib/heroMedia";
 import { getAllInsights, getInsightsFeaturedLead } from "@/lib/insights";
 import { shuffleArray } from "@/lib/utils";
 
@@ -27,6 +30,14 @@ export default function HomePage() {
 
   return (
     <main className="home-page">
+      {/* Kick hero bytes as early as the document head allows */}
+      <link
+        rel="preload"
+        as="video"
+        href={HERO_VIDEO_SRC}
+        type="video/mp4"
+        fetchPriority="high"
+      />
       <section className="hero">
         <div className="hero__media" aria-hidden="true">
           <HeroBackgroundVideo />

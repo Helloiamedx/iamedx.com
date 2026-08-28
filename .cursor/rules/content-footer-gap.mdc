@@ -1,0 +1,37 @@
+---
+description: Body→footer spacing equals footer top padding on every page
+alwaysApply: true
+---
+
+# Content ↔ footer gap
+
+Body content and the footer share **one** vertical rhythm token.
+
+## Tokens (`:root` in `app/globals.css`)
+
+- `--footer-top-gap` — footer shell inner `padding-top` (`.site-footer__shell`)
+- `--content-footer-gap: var(--footer-top-gap)` — space from last body content to the footer’s top edge
+
+Applied as:
+
+```css
+.site-main > main {
+  padding-bottom: var(--content-footer-gap);
+}
+```
+
+Never as margin on `.site-footer` / `.site-end` (outer footer margin caused canvas 露白).
+
+## Rule
+
+**Footer top padding = body→footer gap.** Same value on mobile and desktop. Change `--footer-top-gap` once → both sides update.
+
+## Do not
+
+- Zero out `main` `padding-bottom` on individual pages (home / about / services / etc.) to “meet” the footer
+- Add a second footer-oriented bottom pad on the last section that stacks on top of `--content-footer-gap`
+- Invent a page-local gap that differs from `--footer-top-gap`
+
+Last sections may keep **internal** bottom padding for in-page rhythm only when it is clearly not the footer spacer; prefer `padding-bottom: 0` on the last band and let `main` own the footer air.
+
+Known last-band zeros: `.svc-demo__stage:last-of-type`, `.home-page > .section.home-page__section:last-child`, `.about-content-sheet`, `.collection-detail__body`, `.faq-page`.
