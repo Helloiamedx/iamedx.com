@@ -4,8 +4,8 @@ const HERO_DESC =
   "An experienced specialist who excels at leveraging physical mediums to connect IP value with fans through radical collaboration";
 
 /**
- * About index hero — same pin + desc recipe as Services.
- * Eyebrow + delayed hard-cut title; description hangs below title.
+ * About index hero — same recipe as Services:
+ * eyebrow + title + in-flow description, shared index intro rhythm.
  */
 export function AboutPageHero() {
   return (

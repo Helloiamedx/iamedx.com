@@ -3729,16 +3729,20 @@ html[data-hero-copy-ready="1"] .hero__content {
   background: transparent;
 }
 
-/* Services — eyebrow + title + desc are one hero block; gap sits below desc */
-.svc-demo__hero {
+/* Services + About — eyebrow + title + desc are one hero block; gap sits below desc */
+.svc-demo__hero,
+.about-index-intro {
   position: relative;
-  background: #eaeae1;
   height: auto;
   min-height: 50svh;
   max-height: none;
   margin-bottom: 0;
   /* Same below-gap token as mobile index intros (Insights reference) */
   padding-bottom: calc(2rem + clamp(2.75rem, 7vw, 3.5rem));
+}
+
+.svc-demo__hero {
+  background: #eaeae1;
 }
 
 .page-index-intro__inner,
@@ -3755,7 +3759,7 @@ html[data-hero-copy-ready="1"] .hero__content {
 
 @media (max-width: 800px) {
   /*
-   * Index intros (Projects / Services / Thoughts): same top + bottom rhythm.
+   * Index intros (Projects / Services / Thoughts / About): same top + bottom rhythm.
    * Bottom = Insights reference (shared pad-bottom + former lead margin-top 2rem).
    */
   .page-index-intro,
@@ -3797,8 +3801,9 @@ html[data-hero-copy-ready="1"] .hero__content {
     text-align: center;
   }
 
-  /* Services hero already owns gap-below (incl. desc); don't double pad */
-  .svc-demo__hero {
+  /* Services / About hero already owns gap-below (incl. desc); don't double pad */
+  .svc-demo__hero,
+  .about-index-intro {
     margin-bottom: 0;
   }
 
@@ -6541,26 +6546,9 @@ html[data-hero-copy-ready="1"] .hero__content {
   }
 }
 
-/* About — desc hangs below title so eyebrow + title pin match Projects / Thoughts */
+/* Services + About — desc is in-flow, part of the hero; gap is padding-bottom after it */
+.svc-demo__hero .svc-demo__hero-desc,
 .about-index-intro .svc-demo__hero-desc {
-  position: absolute;
-  top: calc(100% + clamp(1.48rem, 3.2vw, 2.2rem));
-  left: 50%;
-  transform: translateX(-50%);
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  width: min(48rem, 100vw - var(--shell-gutter) * 2);
-  font-family: var(--font-sans);
-  font-size: var(--svc-body-size, clamp(0.8125rem, 0.95vw, 0.9rem));
-  font-weight: 400;
-  line-height: var(--svc-body-lh, 1.5);
-  text-align: center;
-  color: #0a0a0a;
-}
-
-/* Services — desc is in-flow, part of the hero; gap is padding-bottom after it */
-.svc-demo__hero .svc-demo__hero-desc {
   position: static;
   left: auto;
   top: auto;
@@ -9215,7 +9203,8 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   margin-top: 0;
   background: var(--about-bg);
   color: var(--about-ink);
-  padding-top: clamp(2.5rem, 5vw, 4rem);
+  /* Hero owns the gap above first section (same rhythm as Services) */
+  padding-top: 0;
   padding-bottom: clamp(3rem, 8vw, 6rem);
   isolation: isolate;
 }
