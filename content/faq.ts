@@ -15,15 +15,12 @@ export const siteFaqCategories: FAQCategories = {
   logistics: "Logistics",
 };
 
-export const siteFaqTitle = "Questions You May Ask";
+export const siteFaqEyebrow = "FAQ";
 
-/** Prompt under the FAQ title */
+export const siteFaqTitle = "You May Have Questions";
+
+/** Support email used in the FAQ hero description */
 export const siteFaqSupportEmail = "hi@iamedx.com";
-
-export const siteFaqSupportNote = {
-  before: "Can't find what you're looking for? Reach out at",
-  after: "— you'll get a reply within 18 hours.",
-} as const;
 
 export const siteFaqData: FAQData = {
   experience: [

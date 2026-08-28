@@ -8,7 +8,6 @@ import {
 } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Minus, Plus } from "lucide-react";
-import { BackgroundBeams } from "@/components/ui/background-beams";
 import { cn } from "@/lib/utils";
 
 export type FAQItemData = {
@@ -20,27 +19,20 @@ export type FAQCategories = Record<string, string>;
 export type FAQData = Record<string, FAQItemData[]>;
 
 export type FAQProps = HTMLAttributes<HTMLElement> & {
-  title?: string;
   categories: FAQCategories;
   faqData: FAQData;
-  /** Support copy under the title — pair with `supportEmail` for a mailto link */
-  supportNote?: { before: string; after: string };
-  supportEmail?: string;
   tocLabel?: string;
 };
 
 const EASE = [0.455, 0.03, 0.515, 0.955] as const;
 
 /**
- * FAQ page layout — title + support note on top, category TOC left,
- * accordion right (reference: MyClean-style two-column FAQ).
+ * FAQ body — category TOC left, accordion right.
+ * Hero (eyebrow / title / desc) lives on the page via FaqPageHero.
  */
 export function FAQ({
-  title = "FAQs",
   categories,
   faqData,
-  supportNote,
-  supportEmail,
   tocLabel = "Table of Contents",
   className,
   ...props
@@ -57,28 +49,6 @@ export function FAQ({
 
   return (
     <section className={cn("faq-shell", className)} {...props}>
-      <header className="faq-shell__header">
-        <div className="faq-shell__hero-bg" aria-hidden="true">
-          <BackgroundBeams />
-          <div className="faq-shell__hero-fade" />
-        </div>
-        <div className="faq-shell__hero-copy">
-          <h1 className="faq-shell__title">{title}</h1>
-          {supportNote ? (
-            <p className="faq-shell__support">
-              {supportNote.before}
-              {supportEmail ? (
-                <>
-                  {" "}
-                  <a href={`mailto:${supportEmail}`}>{supportEmail}</a>{" "}
-                </>
-              ) : null}
-              {supportNote.after}
-            </p>
-          ) : null}
-        </div>
-      </header>
-
       <div className="faq-shell__body">
         <nav className="faq-shell__toc" aria-labelledby={tocId}>
           <p id={tocId} className="faq-shell__toc-label">
@@ -136,8 +106,6 @@ function FAQItem({ question, answer }: FAQItemData) {
   const reduceMotion = useReducedMotion();
   const panelId = useId();
   const buttonId = useId();
-
-  /* Close when parent remounts on category change (new key tree) — local state resets */
 
   useEffect(() => {
     if (!isOpen) return;
