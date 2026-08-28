@@ -17,8 +17,7 @@ type InsightsLeadProps = {
 
 /**
  * Insights featured lead — cover only in media.
- * Meta shares projects featured / case-hero desktop recipe: desc at fixed centered-nav inset;
- * 5.5vw after title; 10vw before the type label.
+ * Meta: TITLE 40% | 10% | DESC (rest) | 10% | TAG — same as projects featured / case hero.
  */
 export function InsightsLead({ insight }: InsightsLeadProps) {
   const tagLabel = getInsightTagLabels(insight.tags).at(0) ?? null;

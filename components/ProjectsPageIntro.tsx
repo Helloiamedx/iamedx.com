@@ -1,13 +1,18 @@
+import { PageIndexTitle } from "@/components/PageIndexTitle";
+
 /**
  * Projects index hero — WORK eyebrow + title.
- * Typography matches Services hero (`.svc-demo__hero-*`).
+ * Same classes / spacing as Services + Thoughts (`.svc-demo__hero-*`).
  */
 export function ProjectsPageIntro() {
   return (
-    <section className="projects-index-intro" aria-label="Projects introduction">
-      <div className="projects-index-intro__inner">
+    <section
+      className="projects-index-intro page-index-intro"
+      aria-label="Projects introduction"
+    >
+      <div className="projects-index-intro__inner page-index-intro__inner">
         <p className="svc-demo__hero-eyebrow">Work</p>
-        <h1 className="svc-demo__hero-title">Explore Achievement Moments</h1>
+        <PageIndexTitle>Explore Achievement Moments</PageIndexTitle>
       </div>
     </section>
   );

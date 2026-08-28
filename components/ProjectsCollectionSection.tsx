@@ -1,7 +1,7 @@
 "use client";
 
 import { useReducedMotion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { OriginButton } from "@/components/ui/origin-button";
 import type {
   CollectionPanel,
@@ -10,32 +10,47 @@ import type {
 
 const PANEL_W = 240;
 const PANEL_H = 300;
-/**
- * Minimum px between image edges and the panel-field clip (title / button zone).
- * Raise this value → less parallax travel + more clearance.
- */
+/** Desktop: keep images clear of title / button chrome */
 const PANEL_IMAGE_GAP_MIN = 44;
-/** Scroll-linked drift on the image canvas only */
-const PARALLAX_FACTOR = 0.4;
+const PARALLAX_FACTOR = 0.45;
+/** Mobile: opposite drift — between “too far” and “barely moves” */
+const PARALLAX_FACTOR_MOBILE = 0.75;
+const MOBILE_TRAVEL_MIN = 48;
+const MOBILE_TRAVEL_MAX = 96;
 
 type ProjectsCollectionSectionProps = {
   collection: ProjectCollection;
 };
 
-function getMaxImageTravel(section: HTMLElement, gapMin: number): number {
+function isCollectionMobile() {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia("(max-width: 899px)").matches
+  );
+}
+
+function getMaxImageTravel(section: HTMLElement): number {
   const panelField = section.querySelector<HTMLElement>(
     ".projects-collection__panel-field",
   );
-  const panel = section.querySelector<HTMLElement>(
-    ".projects-collection__panel",
-  );
-  if (!panelField || !panel) return 0;
+  if (!panelField) return 0;
 
   const fieldHeight = panelField.clientHeight;
-  const panelHeight = panel.offsetHeight || PANEL_H;
-  if (fieldHeight <= panelHeight) return 0;
+  if (fieldHeight <= 0) return 0;
 
-  return Math.max(0, (fieldHeight - panelHeight) / 2 - gapMin);
+  if (isCollectionMobile()) {
+    return Math.min(
+      MOBILE_TRAVEL_MAX,
+      Math.max(MOBILE_TRAVEL_MIN, fieldHeight * 0.2),
+    );
+  }
+
+  const panel =
+    section.querySelector<HTMLElement>(".projects-collection__panel") ?? null;
+  const panelHeight = panel?.offsetHeight || PANEL_H;
+  if (fieldHeight <= panelHeight) return 0;
+  const slack = (fieldHeight - panelHeight) / 2;
+  return Math.max(0, slack - PANEL_IMAGE_GAP_MIN);
 }
 
 function CollectionPanelMedia({
@@ -91,30 +106,35 @@ export function ProjectsCollectionSection({
 }: ProjectsCollectionSectionProps) {
   const titleId = `collection-${collection.slug}-title`;
   const sectionRef = useRef<HTMLElement>(null);
+  const panelsRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
-  const [canvasOffset, setCanvasOffset] = useState(0);
 
   useEffect(() => {
-    if (reduceMotion) {
-      setCanvasOffset(0);
-      return;
-    }
-
     const section = sectionRef.current;
-    if (!section) return;
+    const panels = panelsRef.current;
+    if (!section || !panels) return;
 
     let raf = 0;
 
     const paint = () => {
       raf = 0;
       const rect = section.getBoundingClientRect();
-      const vh = window.innerHeight;
+      const vh = window.innerHeight || 1;
       const sectionCenter = rect.top + rect.height / 2;
       const viewportCenter = vh / 2;
-      const maxTravel = getMaxImageTravel(section, PANEL_IMAGE_GAP_MIN);
-      const raw = (sectionCenter - viewportCenter) * PARALLAX_FACTOR;
-      /* Scroll down → images drift down (opposite to section rise) */
-      setCanvasOffset(Math.max(-maxTravel, Math.min(maxTravel, -raw)));
+      const mobile = isCollectionMobile();
+      const factor = mobile ? PARALLAX_FACTOR_MOBILE : PARALLAX_FACTOR;
+      const maxTravel = getMaxImageTravel(section);
+      /*
+       * Scroll down → section rises in the viewport → images move down
+       * (opposite direction to the section’s motion on screen).
+       */
+      const delta = viewportCenter - sectionCenter;
+      const offset = Math.max(
+        -maxTravel,
+        Math.min(maxTravel, delta * factor),
+      );
+      panels.style.transform = `translate3d(0, ${offset}px, 0)`;
     };
 
     const schedule = () => {
@@ -124,7 +144,14 @@ export function ProjectsCollectionSection({
 
     paint();
     window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("touchmove", schedule, { passive: true });
     window.addEventListener("resize", schedule, { passive: true });
+    document.addEventListener("scroll", schedule, {
+      passive: true,
+      capture: true,
+    });
+    window.visualViewport?.addEventListener("scroll", schedule);
+    window.visualViewport?.addEventListener("resize", schedule);
 
     const panelField = section.querySelector(".projects-collection__panel-field");
     const ro =
@@ -136,10 +163,14 @@ export function ProjectsCollectionSection({
     return () => {
       if (raf) window.cancelAnimationFrame(raf);
       window.removeEventListener("scroll", schedule);
+      window.removeEventListener("touchmove", schedule);
       window.removeEventListener("resize", schedule);
+      document.removeEventListener("scroll", schedule, true);
+      window.visualViewport?.removeEventListener("scroll", schedule);
+      window.visualViewport?.removeEventListener("resize", schedule);
       ro?.disconnect();
     };
-  }, [reduceMotion]);
+  }, []);
 
   return (
     <section
@@ -150,12 +181,8 @@ export function ProjectsCollectionSection({
       <p className="projects-collection__eyebrow">Collection</p>
 
       <div className="projects-collection__panel-field">
-        <div
-          className="projects-collection__canvas"
-          aria-hidden="true"
-          style={{ transform: `translate3d(0, ${canvasOffset}px, 0)` }}
-        >
-          <div className="projects-collection__panels">
+        <div className="projects-collection__canvas" aria-hidden="true">
+          <div ref={panelsRef} className="projects-collection__panels">
             {collection.panels.map((panel, index) => (
               <div
                 key={`${collection.slug}-panel-${index}`}

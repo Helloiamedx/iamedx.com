@@ -11,10 +11,8 @@ import {
   filterCardListVariantsReduced,
 } from "@/components/filterCardMotion";
 import { CoverLoopVideo } from "@/components/CoverLoopVideo";
-import {
-  getInvolvementLabel,
-  type Project,
-} from "@/content/projects";
+import { ProjectCardTags } from "@/components/ProjectCardTags";
+import { type Project } from "@/content/projects";
 
 type ProjectMasonryProps = {
   projects: Project[];
@@ -41,7 +39,6 @@ function ProjectShowcaseCard({
 }: ProjectShowcaseCardProps) {
   const reduceMotion = useReducedMotion();
   const tagline = project.tagline ?? project.summary;
-  const tag = getInvolvementLabel(project.involvement);
   const hoverStills = project.coverHoverStills;
   const hasHoverStills = Boolean(hoverStills && hoverStills.length === 3);
   const useSwap = enableHoverSwap && !reduceMotion;
@@ -123,11 +120,7 @@ function ProjectShowcaseCard({
       <div className="project-window__meta project-window__meta--stack">
         <div className="card-meta__head">
           <h3 className="project-window__title">{project.title}</h3>
-          <ul className="project-window__chips" aria-label="Categories">
-            <li>
-              <span className="project-type-chip">{tag}</span>
-            </li>
-          </ul>
+          <ProjectCardTags project={project} />
         </div>
         <p className="project-window__tagline">{tagline}</p>
       </div>

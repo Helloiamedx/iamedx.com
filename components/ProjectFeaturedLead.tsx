@@ -5,6 +5,7 @@ import Link from "next/link";
 import { type CSSProperties } from "react";
 import { useReducedMotion } from "motion/react";
 import { CoverLoopVideo } from "@/components/CoverLoopVideo";
+import { ProjectCardTags } from "@/components/ProjectCardTags";
 import type { ProjectsFeaturedLead } from "@/content/projects";
 
 type ProjectFeaturedLeadProps = {
@@ -16,12 +17,10 @@ const HOVER_SWAP_FRAME_COLORS = ["#0a0a0a", "#0076dd", "#86868b"] as const;
 
 /**
  * Full-width featured lead on /projects (below the involvement filter).
- * Meta shares the case-hero desktop recipe: desc at fixed centered-nav inset;
- * 5.5vw after title; 10vw before the type label.
+ * Meta: TITLE (remaining) | gap | DESC | gap | TAGS — mobile stacks tags like cards.
  */
 export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
   const reduceMotion = useReducedMotion();
-  const typeLabel = project.categories.at(0) ?? null;
   const hoverStills = project.coverHoverStills;
   const hasHoverStills = Boolean(hoverStills && hoverStills.length === 3);
   const useSwap = !reduceMotion;
@@ -117,11 +116,7 @@ export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
           ) : (
             <span className="project-featured__tagline" aria-hidden="true" />
           )}
-          {typeLabel ? (
-            <span className="project-type-chip">{typeLabel}</span>
-          ) : (
-            <span className="project-featured__chip-slot" aria-hidden="true" />
-          )}
+          <ProjectCardTags project={project} />
         </div>
       </Link>
     </article>

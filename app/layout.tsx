@@ -37,9 +37,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* Chrome first — logo + menu weight before hero video competes for bandwidth */}
         <link
           rel="preload"
-          href={asset("/brand/iamedwardxu-logo-black.svg")}
-          as="image"
-          type="image/svg+xml"
+          href="/fonts/GrtskTera-Regular.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
           fetchPriority="high"
         />
         <link

@@ -14,6 +14,7 @@ import {
   getProjectSpecialThanks,
 } from "@/content/projectCredits";
 import type { Project } from "@/content/projects";
+import { ProjectCardTags } from "@/components/ProjectCardTags";
 import { asset } from "@/lib/assets";
 
 type StillFrame = {
@@ -372,7 +373,6 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
   const copySections = getCaseCopySections(project);
   const specialThanks = getProjectSpecialThanks(project);
   const collaborators = getProjectCollaborators(project);
-  const tags = project.tags.length > 0 ? project.tags : [project.involvement];
   const media = buildCaseMedia(project);
 
   const [open, setOpen] = useState(false);
@@ -400,6 +400,26 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
     sync();
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  /* Mobile hero: sync CSS --app-vvh to visualViewport so first paint fills the screen */
+  useEffect(() => {
+    const root = document.documentElement;
+    const paint = () => {
+      const h = window.visualViewport?.height ?? window.innerHeight;
+      root.style.setProperty("--app-vvh", `${Math.round(h)}px`);
+    };
+    paint();
+    window.visualViewport?.addEventListener("resize", paint);
+    window.visualViewport?.addEventListener("scroll", paint);
+    window.addEventListener("resize", paint);
+    window.addEventListener("orientationchange", paint);
+    return () => {
+      window.visualViewport?.removeEventListener("resize", paint);
+      window.visualViewport?.removeEventListener("scroll", paint);
+      window.removeEventListener("resize", paint);
+      window.removeEventListener("orientationchange", paint);
+    };
   }, []);
 
   const scrollCopyToStart = (opts?: { smooth?: boolean }) => {
@@ -556,13 +576,10 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
           <p className="project-case-demo__summary">
             {project.tagline ?? project.summary}
           </p>
-          <ul className="project-case-demo__tags">
-            {tags.map((tag) => (
-              <li key={tag}>
-                <span className="project-case-demo__tag">{tag}</span>
-              </li>
-            ))}
-          </ul>
+          <ProjectCardTags
+            project={project}
+            className="project-case-demo__tag"
+          />
         </div>
       </section>
 

@@ -9,7 +9,10 @@ import {
   featuredLeadInvolvementKey,
   filterProjects,
   getProjectsFeaturedLead,
+  parseCountrySelection,
   parseInvolvementSelection,
+  parseMaterialSelection,
+  projectsFilterSelectionCount,
 } from "@/content/projects";
 import { shuffleArray } from "@/lib/utils";
 
@@ -20,7 +23,12 @@ export const metadata: Metadata = {
 };
 
 type ProjectsPageProps = {
-  searchParams: Promise<{ involvement?: string; ip?: string }>;
+  searchParams: Promise<{
+    involvement?: string;
+    material?: string;
+    country?: string;
+    ip?: string;
+  }>;
 };
 
 const ipSlugs = projectIps.map((label) =>
@@ -37,37 +45,67 @@ function isIp(value?: string): value is string {
 export default async function ProjectsPage({ searchParams }: ProjectsPageProps) {
   const params = await searchParams;
   const activeInvolvement = parseInvolvementSelection(params.involvement);
+  const activeMaterial = parseMaterialSelection(params.material);
+  const activeCountry = parseCountrySelection(params.country);
   const activeIp = isIp(params.ip) ? params.ip : null;
+
+  const hasExplicitFilters =
+    projectsFilterSelectionCount({
+      involvement: activeInvolvement,
+      material: activeMaterial,
+      country: activeCountry,
+    }) > 0 || Boolean(activeIp);
 
   const featuredLead = getProjectsFeaturedLead(
     featuredLeadInvolvementKey(activeInvolvement),
   );
 
-  /* Lead is already shown above — omit it from the filtered grid */
+  const filtered = filterProjects({
+    involvement: activeInvolvement,
+    material: activeMaterial,
+    country: activeCountry,
+    ip: activeIp,
+  });
+
+  /* Explicit tags: only keep 首推 if it still matches; never list it in results */
+  const featuredMatchesFilters = filtered.some(
+    (project) => project.slug === featuredLead.slug,
+  );
+  const showFeaturedLead = !hasExplicitFilters || featuredMatchesFilters;
+
   const listed = shuffleArray(
-    filterProjects({
-      involvement: activeInvolvement,
-      ip: activeIp,
-    }).filter((project) => project.slug !== featuredLead.slug),
+    filtered.filter((project) => project.slug !== featuredLead.slug),
   );
 
-  const filterKey =
-    activeInvolvement === "all"
-      ? activeIp
-        ? `all:${activeIp}`
-        : "all"
-      : activeIp
-        ? `${activeInvolvement.join(",")}:${activeIp}`
-        : activeInvolvement.join(",");
+  const filterKey = [
+    activeInvolvement === "all" ? "all" : activeInvolvement.join(","),
+    activeMaterial === "all" ? "all" : activeMaterial.join(","),
+    activeCountry === "all" ? "all" : activeCountry.join(","),
+    activeIp ?? "",
+  ].join(":");
 
   return (
     <main className="projects-page">
       <ProjectsPageIntro />
 
       <section className="section projects-body">
-        <div className="project-featured-band">
-          <ProjectFilter active={activeInvolvement} activeIp={activeIp} />
-          <ProjectFeaturedLead project={featuredLead} />
+        <div
+          className={
+            showFeaturedLead
+              ? "project-featured-band"
+              : "project-featured-band project-featured-band--filter-only"
+          }
+        >
+          <ProjectFilter
+            activeInvolvement={activeInvolvement}
+            activeMaterial={activeMaterial}
+            activeCountry={activeCountry}
+            activeIp={activeIp}
+            matchCount={filtered.length}
+          />
+          {showFeaturedLead ? (
+            <ProjectFeaturedLead project={featuredLead} />
+          ) : null}
         </div>
         <FilterResults filterKey={filterKey}>
           <ProjectsFilterGrid
@@ -75,6 +113,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
             filterKey={filterKey}
             layout="related"
             enableHoverSwap
+            interleaveCollections={!hasExplicitFilters}
           />
         </FilterResults>
       </section>

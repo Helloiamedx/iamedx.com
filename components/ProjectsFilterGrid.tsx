@@ -24,6 +24,8 @@ type ProjectsFilterGridProps = {
   /** `tri` = 3-col (legacy). `related` = 2-col index grid. */
   layout?: "tri" | "related";
   enableHoverSwap?: boolean;
+  /** Interleave collection breaks — only on the unfiltered index. */
+  interleaveCollections?: boolean;
 };
 
 export function ProjectsFilterGrid({
@@ -31,6 +33,7 @@ export function ProjectsFilterGrid({
   filterKey,
   layout = "related",
   enableHoverSwap = false,
+  interleaveCollections = true,
 }: ProjectsFilterGridProps) {
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
   const [isSingleColumn, setIsSingleColumn] = useState(false);
@@ -51,14 +54,14 @@ export function ProjectsFilterGrid({
   const hasMore = visibleCount < projects.length;
 
   const segments = useMemo(() => {
-    if (layout !== "related") {
+    if (layout !== "related" || !interleaveCollections) {
       return [{ grid: visibleProjects, collection: null }];
     }
     return segmentProjectsForIndex(
       visibleProjects,
       gridSlotsPerBreak(isSingleColumn),
     );
-  }, [visibleProjects, layout, isSingleColumn]);
+  }, [visibleProjects, layout, isSingleColumn, interleaveCollections]);
 
   if (layout !== "related") {
     return (

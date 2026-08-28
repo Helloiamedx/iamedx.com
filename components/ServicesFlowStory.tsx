@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { CoverLoopVideo } from "@/components/CoverLoopVideo";
+import { PageIndexTitle } from "@/components/PageIndexTitle";
 import { PanelImageStack } from "@/components/PanelImageStack";
 import { ServiceWorkflowDialog } from "@/components/ServiceWorkflowDialog";
 import { OriginButton } from "@/components/ui/origin-button";
@@ -13,7 +14,7 @@ import {
 } from "@/content/servicePackages";
 import { cn } from "@/lib/utils";
 
-const HERO_EYEBROW = "What I Do";
+const HERO_EYEBROW = "My focus";
 const HERO_TITLE = "My capabilities";
 const HERO_DESC =
   "From initial idea to final delivery, I provide hands-on support throughout your product journey, helping you source suppliers, optimize designs, manage production, and ensure quality.";
@@ -23,30 +24,20 @@ const PHASE_PLACEHOLDER_IMAGE =
   "https://cdn.prod.website-files.com/6849da698cb78e39e81215a8/68877d2e008df5cf9536b877_Orangetheorytest.avif";
 
 /**
- * Services page — half-viewport hero, then three phase bands.
- * Each phase: left = stage name; right = phase intro + one block per small service.
+ * Services page — half-viewport hero pin matches Projects / Thoughts
+ * (eyebrow + title only). Description sits in the lower half of that band.
  */
 export function ServicesFlowStory() {
   return (
     <div className="svc-demo">
-      <section className="svc-demo__hero" aria-label="Services introduction">
-        <div className="svc-demo__hero-inner">
-          <div className="svc-demo__hero-rule" aria-hidden="true">
-            {Array.from({ length: 12 }, (_, i) => (
-              <span
-                key={i}
-                className={cn(
-                  "svc-demo__hero-rule-tick",
-                  (i === 0 || i === 11) && "is-edge",
-                )}
-              />
-            ))}
-          </div>
-          <div className="svc-demo__hero-copy">
-            <p className="svc-demo__hero-eyebrow">{HERO_EYEBROW}</p>
-            <h1 className="svc-demo__hero-title">{HERO_TITLE}</h1>
-            <p className="svc-demo__hero-desc">{HERO_DESC}</p>
-          </div>
+      <section
+        className="svc-demo__hero page-index-intro"
+        aria-label="Services introduction"
+      >
+        <div className="page-index-intro__inner">
+          <p className="svc-demo__hero-eyebrow">{HERO_EYEBROW}</p>
+          <PageIndexTitle>{HERO_TITLE}</PageIndexTitle>
+          <p className="svc-demo__hero-desc">{HERO_DESC}</p>
         </div>
       </section>
 

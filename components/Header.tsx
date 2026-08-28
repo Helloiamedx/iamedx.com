@@ -1,7 +1,5 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   useEffect,
@@ -14,42 +12,12 @@ import { createPortal } from "react-dom";
 import { MobileBubbleNav } from "@/components/MobileBubbleNav";
 import { RollLink } from "@/components/RollLink";
 import { primaryNav } from "@/content/nav";
-import { asset } from "@/lib/assets";
 
 const MOBILE_CURTAIN_MS = 400;
 /** Past this Y, down-scroll may tuck the chrome */
 const NAV_HIDE_AFTER_Y = 48;
 /** Ignore tiny scroll jitter */
 const NAV_SCROLL_DELTA = 4;
-
-function SiteLogo() {
-  return (
-    <>
-      <Image
-        src={asset("/brand/iamedwardxu-logo-white.svg")}
-        alt=""
-        width={200}
-        height={24}
-        priority
-        fetchPriority="high"
-        unoptimized
-        className="site-logo__img site-logo__img--white"
-        aria-hidden="true"
-      />
-      <Image
-        src={asset("/brand/iamedwardxu-logo-black.svg")}
-        alt=""
-        width={200}
-        height={24}
-        priority
-        fetchPriority="high"
-        unoptimized
-        className="site-logo__img site-logo__img--black"
-        aria-hidden="true"
-      />
-    </>
-  );
-}
 
 export function Header() {
   const pathname = usePathname();
@@ -245,16 +213,9 @@ export function Header() {
     >
       {/* Same horizontal edges as page `.shell` content */}
       <div className="shell site-header__bar">
-        <Link
-          href="/"
-          className="site-logo"
-          aria-label="Edward Xu home"
-          onClick={() => {
-            setMobileOpen(false);
-          }}
-        >
-          <SiteLogo />
-        </Link>
+        <RollLink href="/" className="site-logo">
+          Edward Xu
+        </RollLink>
 
         <nav className="site-nav" aria-label="Primary">
           {primaryNav.map((item) => (

@@ -13,7 +13,11 @@ export type Material =
   | "resin"
   | "fabric"
   | "leather"
-  | "paper";
+  | "paper"
+  | "abs"
+  | "pvc";
+
+export type ProjectCountry = "usa" | "global";
 
 export type Involvement =
   | "end-to-end"
@@ -21,14 +25,23 @@ export type Involvement =
   | "specialized";
 
 export const materials: { id: Material | "all"; label: string }[] = [
-  { id: "all", label: "All" },
+  { id: "all", label: "All Materials" },
   { id: "wood", label: "Wood" },
   { id: "metal", label: "Metal" },
   { id: "resin", label: "Resin" },
   { id: "fabric", label: "Fabric" },
   { id: "leather", label: "Leather" },
   { id: "paper", label: "Paper" },
+  { id: "abs", label: "ABS" },
+  { id: "pvc", label: "PVC" },
 ];
+
+export const countryFilters: { id: ProjectCountry | "all"; label: string }[] =
+  [
+    { id: "all", label: "All Regions" },
+    { id: "usa", label: "USA" },
+    { id: "global", label: "Global" },
+  ];
 
 export const involvementFilters: {
   id: Involvement | "all";
@@ -47,15 +60,51 @@ export function getInvolvementLabel(id: Involvement): string {
   );
 }
 
+export function getMaterialLabel(id: Material): string {
+  return materials.find((item) => item.id === id)?.label ?? id;
+}
+
+export function getCountryLabel(id: ProjectCountry): string {
+  return countryFilters.find((item) => item.id === id)?.label ?? id;
+}
+
 /** Tags always mirror involvement — Brand / Travel chips are retired */
 export function involvementTags(id: Involvement): string[] {
   return [getInvolvementLabel(id)];
+}
+
+/** Index / case chips — type, then materials, then country */
+export function getProjectDisplayTags(project: {
+  involvement: Involvement;
+  materials?: Material[] | null;
+  country?: ProjectCountry | null;
+}): string[] {
+  const tags = [getInvolvementLabel(project.involvement)];
+  for (const material of project.materials ?? []) {
+    tags.push(getMaterialLabel(material));
+  }
+  if (project.country) {
+    tags.push(getCountryLabel(project.country));
+  }
+  return tags;
+}
+
+/** Gap between type / material / country in the horizontal label */
+export const PROJECT_TAG_SEPARATOR = ",\u00A0\u00A0";
+
+/** Single horizontal label: `Type,   Material,   Region` */
+export function formatProjectDisplayTags(
+  project: Parameters<typeof getProjectDisplayTags>[0],
+): string {
+  return getProjectDisplayTags(project).join(PROJECT_TAG_SEPARATOR);
 }
 
 export type Project = {
   slug: string;
   title: string;
   materials: Material[];
+  /** Market / region tag for cards + filter */
+  country: ProjectCountry;
   /** IP franchise slugs, e.g. cyberpunk-2077 */
   ips: string[];
   /**
@@ -266,6 +315,9 @@ export type ProjectsFeaturedLead = {
   title: string;
   tagline: string;
   categories: string[];
+  involvement: Involvement;
+  materials: Material[];
+  country: ProjectCountry;
   coverImage: string;
   /** When set, featured media plays this muted loop instead of `coverImage` */
   coverVideo?: string;
@@ -460,7 +512,20 @@ const FIRST_PROJECT_END_VIDEOS = {
   },
 } as const;
 
-const FIRST_PROJECT_SPECIAL_THANKS = WOODEN_BOX_SPECIAL_THANKS;
+const FIRST_PROJECT_SPECIAL_THANKS: SpecialThanksEntry[] = [
+  {
+    company: "DPI Merchandising Inc.",
+    names: ["Angela McReynolds", "Michelle Wu", "Nikki Petraitis"],
+  },
+  {
+    company: "Best Link (USA) Corp. Ltd.",
+    names: ["Charlotte Tam", "Cola"],
+  },
+  {
+    company: "Wenzhou Xianrui Packaging Co., Ltd.",
+    names: ["Mr Ling", "Bo Yang"],
+  },
+];
 
 const FIRST_PROJECT_COLLABORATORS = WOODEN_BOX_COLLABORATORS;
 
@@ -1816,7 +1881,14 @@ export const projectsFeaturedLead: ProjectsFeaturedLead = {
   slug: FIFTH_PROJECT_SLUG,
   title: FIFTH_PROJECT_NAME,
   tagline: FIFTH_PROJECT_TAGLINE,
-  categories: involvementTags("end-to-end"),
+  involvement: "end-to-end",
+  materials: ["leather"],
+  country: "global",
+  categories: getProjectDisplayTags({
+    involvement: "end-to-end",
+    materials: ["leather"],
+    country: "global",
+  }),
   coverImage: FIFTH_PROJECT_COVER_VIDEO,
   coverVideo: FIFTH_PROJECT_COVER_VIDEO,
   coverHoverStills: FIFTH_PROJECT_HOVER_STILLS,
@@ -1828,7 +1900,8 @@ export const projects: Project[] = [
   {
     slug: FIRST_PROJECT_SLUG,
     title: FIRST_PROJECT_NAME,
-    materials: ["wood", "resin", "metal", "paper"],
+    materials: ["metal"],
+    country: "usa",
     ips: ["mass-effect"],
     tags: involvementTags("end-to-end"),
     summary:
@@ -1893,7 +1966,8 @@ export const projects: Project[] = [
   {
     slug: SECOND_PROJECT_SLUG,
     title: SECOND_PROJECT_NAME,
-    materials: ["metal", "leather", "paper", "fabric"],
+    materials: ["paper"],
+    country: "global",
     ips: ["dragon-age"],
     tags: involvementTags("end-to-end"),
     summary: SECOND_PROJECT_TAGLINE,
@@ -1973,7 +2047,8 @@ export const projects: Project[] = [
   {
     slug: THIRD_PROJECT_SLUG,
     title: THIRD_PROJECT_NAME,
-    materials: ["resin"],
+    materials: ["abs"],
+    country: "global",
     ips: ["horizon-zero-dawn"],
     tags: involvementTags("contribution"),
     summary: THIRD_PROJECT_TAGLINE,
@@ -2030,7 +2105,8 @@ export const projects: Project[] = [
   {
     slug: FOURTH_PROJECT_SLUG,
     title: FOURTH_PROJECT_NAME,
-    materials: ["metal", "wood"],
+    materials: ["wood"],
+    country: "global",
     ips: ["the-elder-scrolls"],
     tags: involvementTags("specialized"),
     summary: FOURTH_PROJECT_TAGLINE,
@@ -2077,7 +2153,8 @@ export const projects: Project[] = [
   {
     slug: FIFTH_PROJECT_SLUG,
     title: FIFTH_PROJECT_NAME,
-    materials: ["paper", "metal", "fabric"],
+    materials: ["leather"],
+    country: "global",
     ips: ["the-elder-scrolls"],
     tags: involvementTags("end-to-end"),
     summary: FIFTH_PROJECT_TAGLINE,
@@ -2135,6 +2212,7 @@ export const projects: Project[] = [
     slug: SIXTH_PROJECT_SLUG,
     title: SIXTH_PROJECT_NAME,
     materials: ["resin"],
+    country: "global",
     ips: ["ghost-recon"],
     tags: involvementTags("contribution"),
     summary: SIXTH_PROJECT_TAGLINE,
@@ -2181,6 +2259,7 @@ export const projects: Project[] = [
     slug: SEVENTH_PROJECT_SLUG,
     title: SEVENTH_PROJECT_NAME,
     materials: ["resin"],
+    country: "usa",
     ips: ["injustice"],
     tags: involvementTags("contribution"),
     summary: SEVENTH_PROJECT_TAGLINE,
@@ -2228,7 +2307,8 @@ export const projects: Project[] = [
   {
     slug: EIGHTH_PROJECT_SLUG,
     title: EIGHTH_PROJECT_NAME,
-    materials: ["resin"],
+    materials: ["abs"],
+    country: "usa",
     ips: ["recore"],
     tags: involvementTags("contribution"),
     summary:
@@ -2278,6 +2358,7 @@ export const projects: Project[] = [
     slug: NINTH_PROJECT_SLUG,
     title: NINTH_PROJECT_NAME,
     materials: ["resin"],
+    country: "global",
     ips: ["halo-guardians"],
     tags: involvementTags("contribution"),
     summary: NINTH_PROJECT_TAGLINE,
@@ -2327,6 +2408,7 @@ export const projects: Project[] = [
     slug: TENTH_PROJECT_SLUG,
     title: TENTH_PROJECT_NAME,
     materials: ["resin"],
+    country: "global",
     ips: ["gears-of-war"],
     tags: involvementTags("contribution"),
     summary: TENTH_PROJECT_TAGLINE,
@@ -2373,6 +2455,7 @@ export const projects: Project[] = [
     slug: ELEVENTH_PROJECT_SLUG,
     title: ELEVENTH_PROJECT_NAME,
     materials: ["fabric"],
+    country: "usa",
     ips: ["fallout"],
     tags: involvementTags("specialized"),
     summary:
@@ -2416,6 +2499,7 @@ export const projects: Project[] = [
     slug: TWELFTH_PROJECT_SLUG,
     title: TWELFTH_PROJECT_NAME,
     materials: ["fabric"],
+    country: "global",
     ips: ["cyberpunk-2077"],
     tags: involvementTags("end-to-end"),
     summary: TWELFTH_PROJECT_TAGLINE,
@@ -2452,7 +2536,8 @@ export const projects: Project[] = [
   {
     slug: THIRTEENTH_PROJECT_SLUG,
     title: THIRTEENTH_PROJECT_NAME,
-    materials: ["resin"],
+    materials: ["pvc"],
+    country: "global",
     ips: ["the-elder-scrolls"],
     tags: involvementTags("end-to-end"),
     summary: THIRTEENTH_PROJECT_TAGLINE,
@@ -2499,7 +2584,8 @@ export const projects: Project[] = [
   {
     slug: FOURTEENTH_PROJECT_SLUG,
     title: FOURTEENTH_PROJECT_NAME,
-    materials: ["leather", "fabric"],
+    materials: ["leather"],
+    country: "usa",
     ips: ["the-elder-scrolls"],
     tags: involvementTags("end-to-end"),
     summary: FOURTEENTH_PROJECT_TAGLINE,
@@ -2536,7 +2622,8 @@ export const projects: Project[] = [
   {
     slug: FIFTEENTH_PROJECT_SLUG,
     title: FIFTEENTH_PROJECT_NAME,
-    materials: ["wood", "metal", "fabric"],
+    materials: ["wood"],
+    country: "usa",
     ips: ["dragon-age"],
     tags: involvementTags("end-to-end"),
     summary: FIFTEENTH_PROJECT_TAGLINE,
@@ -2601,7 +2688,10 @@ function projectToFeaturedLead(project: Project): ProjectsFeaturedLead {
     slug: project.slug,
     title: project.title,
     tagline: project.tagline ?? project.summary,
-    categories: involvementTags(project.involvement),
+    involvement: project.involvement,
+    materials: project.materials,
+    country: project.country,
+    categories: getProjectDisplayTags(project),
     coverImage: project.coverImage,
     coverVideo: project.coverVideo,
     coverHoverStills: project.coverHoverStills,
@@ -2627,17 +2717,30 @@ export function getFeaturedProjects(limit = 3) {
 }
 
 export function filterProjects(options?: {
-  material?: Material | "all" | null;
+  material?: Material | "all" | Material[] | null;
+  country?: ProjectCountry | "all" | ProjectCountry[] | null;
   ip?: string | null;
   involvement?: Involvement | "all" | Involvement[] | null;
 }) {
   const material = options?.material;
+  const country = options?.country;
   const ip = options?.ip;
   const involvement = options?.involvement;
 
   return projects.filter((project) => {
     const materialOk =
-      !material || material === "all" || project.materials.includes(material);
+      !material ||
+      material === "all" ||
+      (Array.isArray(material)
+        ? material.length === 0 ||
+          material.some((entry) => project.materials.includes(entry))
+        : project.materials.includes(material));
+    const countryOk =
+      !country ||
+      country === "all" ||
+      (Array.isArray(country)
+        ? country.length === 0 || country.includes(project.country)
+        : project.country === country);
     const ipOk = !ip || project.ips.includes(ip);
     const involvementOk =
       !involvement ||
@@ -2646,14 +2749,24 @@ export function filterProjects(options?: {
         ? involvement.length === 0 ||
           involvement.includes(project.involvement)
         : project.involvement === involvement);
-    return materialOk && ipOk && involvementOk;
+    return materialOk && countryOk && ipOk && involvementOk;
   });
 }
 
-const INVOLVEMENT_IDS: Involvement[] = ["end-to-end", "contribution", "specialized"];
+const INVOLVEMENT_IDS: Involvement[] = [
+  "end-to-end",
+  "contribution",
+  "specialized",
+];
+const MATERIAL_IDS: Material[] = materials
+  .map((item) => item.id)
+  .filter((id): id is Material => id !== "all");
+const COUNTRY_IDS: ProjectCountry[] = ["usa", "global"];
 
 /** Parsed involvement filter — `all` or one-or-more involvement ids (excludes `all` pill id). */
 export type InvolvementSelection = Involvement[] | "all";
+export type MaterialSelection = Material[] | "all";
+export type CountrySelection = ProjectCountry[] | "all";
 
 export function parseInvolvementSelection(value?: string): InvolvementSelection {
   if (!value || value === "all") return "all";
@@ -2671,8 +2784,60 @@ export function parseInvolvementSelection(value?: string): InvolvementSelection 
   return ids;
 }
 
+export function parseMaterialSelection(value?: string): MaterialSelection {
+  if (!value || value === "all") return "all";
+  const ids = [
+    ...new Set(
+      value
+        .split(",")
+        .map((part) => part.trim())
+        .filter((part): part is Material =>
+          MATERIAL_IDS.includes(part as Material),
+        ),
+    ),
+  ];
+  if (ids.length === 0 || ids.length === MATERIAL_IDS.length) return "all";
+  return ids;
+}
+
+export function parseCountrySelection(value?: string): CountrySelection {
+  if (!value || value === "all") return "all";
+  const ids = [
+    ...new Set(
+      value
+        .split(",")
+        .map((part) => part.trim())
+        .filter((part): part is ProjectCountry =>
+          COUNTRY_IDS.includes(part as ProjectCountry),
+        ),
+    ),
+  ];
+  if (ids.length === 0 || ids.length === COUNTRY_IDS.length) return "all";
+  return ids;
+}
+
 export function involvementSelectionCount(selection: InvolvementSelection): number {
   return selection === "all" ? 0 : selection.length;
+}
+
+export function materialSelectionCount(selection: MaterialSelection): number {
+  return selection === "all" ? 0 : selection.length;
+}
+
+export function countrySelectionCount(selection: CountrySelection): number {
+  return selection === "all" ? 0 : selection.length;
+}
+
+export function projectsFilterSelectionCount(options: {
+  involvement: InvolvementSelection;
+  material: MaterialSelection;
+  country: CountrySelection;
+}): number {
+  return (
+    involvementSelectionCount(options.involvement) +
+    materialSelectionCount(options.material) +
+    countrySelectionCount(options.country)
+  );
 }
 
 /** Single involvement → featured lead key; multi / all → `all` lead. */
@@ -2688,6 +2853,22 @@ export function buildInvolvementQueryValue(
 ): string | null {
   if (selection === "all" || selection.length === 0) return null;
   if (selection.length === INVOLVEMENT_IDS.length) return null;
+  return selection.join(",");
+}
+
+export function buildMaterialQueryValue(
+  selection: MaterialSelection,
+): string | null {
+  if (selection === "all" || selection.length === 0) return null;
+  if (selection.length === MATERIAL_IDS.length) return null;
+  return selection.join(",");
+}
+
+export function buildCountryQueryValue(
+  selection: CountrySelection,
+): string | null {
+  if (selection === "all" || selection.length === 0) return null;
+  if (selection.length === COUNTRY_IDS.length) return null;
   return selection.join(",");
 }
 
