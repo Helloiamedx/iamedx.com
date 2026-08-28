@@ -1,4 +1,10 @@
-import type { CollaboratorCredits, SpecialThanksEntry } from "@/content/projectCredits";
+import {
+  type CollaboratorCredits,
+  type SpecialThanksEntry,
+  SGS_CREDIT_COMPANY,
+  WOODEN_BOX_COLLABORATORS,
+  WOODEN_BOX_SPECIAL_THANKS,
+} from "@/content/projectCredits";
 import { asset } from "@/lib/assets";
 
 export type Material =
@@ -87,6 +93,8 @@ export type Project = {
    * supplies a dedicated detail still.
    */
   galleryLeadImage?: string;
+  /** Case detail — padding-bottom ratio for `galleryLeadImage` (default 16:9). */
+  galleryLeadRatio?: string;
   /** Case detail first-screen still (used when no hero video) — not the index card cover */
   heroImage?: string;
   /**
@@ -131,14 +139,24 @@ export type Project = {
    * Video (`afterCoverVideo`) follows as the next row.
    */
   afterCoverStills?: {
-    items: { src: string; alt: string }[];
-    /** CSS padding-bottom ratio per cell / full frame */
+    items: { src: string; alt: string; ratio?: string }[];
+    /** CSS padding-bottom ratio per cell; omit for native asset dimensions */
     ratio?: string;
   };
   /** Extra still rows after `afterCoverStills`, before the process video. */
   afterCoverExtraRows?: {
-    items: { src: string; alt: string }[];
+    items: { src: string; alt: string; ratio?: string }[];
+    /** Omit for native asset dimensions */
     ratio?: string;
+    /** Column `fr` weights (e.g. `[2, 1]` → ⅔ | ⅓) */
+    columnWidths?: number[];
+    /**
+     * Paired stills with the same native height — lock row height so left/right
+     * align; requires `columnWidths` + `rowAspect` (see `caseSplitRowAspect`).
+     */
+    equalRowHeight?: boolean;
+    /** CSS `aspect-ratio` for equal-height split rows (width / height). */
+    rowAspect?: string;
   }[];
   /**
    * Full-width video under the after-cover stills (or under cover if no stills).
@@ -204,6 +222,11 @@ export type Project = {
     items: { src: string; alt: string }[];
     ratio?: string;
   };
+  /** Still row after `beforeEndRow` — last gallery stills before end videos. */
+  afterEndRow?: {
+    items: { src: string; alt: string }[];
+    ratio?: string;
+  };
   /**
    * Optional closing two-up videos on the case page.
    * Each side tries `primary` first; `fallback` only when the user supplies a CDN mp4.
@@ -212,6 +235,11 @@ export type Project = {
   endVideoPair?: {
     left: { primary: string; fallback?: string; alt: string };
     right: { primary: string; fallback?: string; alt: string };
+    ratio?: string;
+  };
+  /** Still row after `endVideoPair` (e.g. closing photo pair under process clips). */
+  afterEndVideoPairRow?: {
+    items: { src: string; alt: string; ratio?: string }[];
     ratio?: string;
   };
   /**
@@ -270,6 +298,17 @@ export function projectCoverFromName(
   const folder = encodeURIComponent(name);
   const file = encodeURIComponent(fileName);
   return asset(`/images/projects/${folder}/${file}`);
+}
+
+/** Equal-height split row — `columnWidths` + left still native width / height. */
+export function caseSplitRowAspect(
+  columnWidths: number[],
+  leadNativeWidth: number,
+  sharedNativeHeight: number,
+) {
+  const sum = columnWidths.reduce((total, weight) => total + weight, 0);
+  const leadWeight = columnWidths[0];
+  return `${(sum * leadNativeWidth) / leadWeight} / ${sharedNativeHeight}`;
 }
 
 /** Mass Effect Tali — grid / detail (no longer the projects featured lead) */
@@ -421,33 +460,9 @@ const FIRST_PROJECT_END_VIDEOS = {
   },
 } as const;
 
-const FIRST_PROJECT_SPECIAL_THANKS: SpecialThanksEntry[] = [
-  {
-    company: "DPI Merchandising Inc.",
-    names: ["Angela McReynolds", "Michelle Wu", "Nikki Petraitis"],
-  },
-  {
-    company: "Best Link (USA) Corp. Ltd.",
-    names: ["Charlotte Tam", "Cola"],
-  },
-  {
-    company: "Wenzhou Xianrui Packaging Co., Ltd.",
-    names: ["Mr Ling", "Bo Yang"],
-  },
-];
+const FIRST_PROJECT_SPECIAL_THANKS = WOODEN_BOX_SPECIAL_THANKS;
 
-const FIRST_PROJECT_COLLABORATORS: CollaboratorCredits = {
-  names: [
-    "Jian Chen",
-    "Yuchen Wang",
-    "Haoran Liu",
-    "Zihan Zhang",
-    "Kai Xu",
-    "Ruihao Zhou",
-    "Xinyi Li",
-    "Yuting Zhao",
-  ],
-};
+const FIRST_PROJECT_COLLABORATORS = WOODEN_BOX_COLLABORATORS;
 
 /** 「第二个项目」— grid card under the featured lead */
 const SECOND_PROJECT_NAME = "Dragon Age Writing Bundle";
@@ -1354,6 +1369,448 @@ const TWELFTH_PROJECT_HOVER_STILLS = [
   projectCoverFromName(TWELFTH_PROJECT_CDN_FOLDER, "3.jpg"),
 ] as [string, string, string];
 
+const TWELFTH_PROJECT_GALLERY_LEAD = projectCoverFromName(
+  TWELFTH_PROJECT_CDN_FOLDER,
+  "1.jpg",
+);
+
+const TWELFTH_PROJECT_STILL = (fileName: string, alt: string) => ({
+  src: projectCoverFromName(TWELFTH_PROJECT_CDN_FOLDER, fileName),
+  alt,
+});
+
+/** Detail gallery row 2 — 2L | 2R (native asset dimensions) */
+const TWELFTH_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    TWELFTH_PROJECT_STILL("2l.jpg", "Cyberpunk 2077 Systems Banner 2L"),
+    TWELFTH_PROJECT_STILL("2r.jpg", "Cyberpunk 2077 Systems Banner 2R"),
+  ],
+};
+
+/** Detail gallery row 3 — 4 | 5 | 6 */
+const TWELFTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      TWELFTH_PROJECT_STILL("4.jpg", "Cyberpunk 2077 Systems Banner 4"),
+      TWELFTH_PROJECT_STILL("5.jpg", "Cyberpunk 2077 Systems Banner 5"),
+      TWELFTH_PROJECT_STILL("6.jpg", "Cyberpunk 2077 Systems Banner 6"),
+    ],
+  },
+];
+
+const TWELFTH_PROJECT_SPECIAL_THANKS: SpecialThanksEntry[] = [
+  {
+    company: "DPI Merchandising Inc.",
+    names: ["Michelle Wu"],
+  },
+  {
+    company: "Best Link (USA) Corp. Ltd.",
+    names: ["Karyn Leung", "Susan Hu"],
+  },
+];
+
+const TWELFTH_PROJECT_COLLABORATORS: CollaboratorCredits = {
+  names: ["Mr. Chen Hua Xing"],
+};
+
+const TWELFTH_PROJECT_OVERVIEW = [
+  "This project was developed as a Cyberpunk 2077–inspired wall banner, designed to bring the visual language of Night City into fans’ personal spaces. The product combines thick felt, screen-printed graphics, and a Velcro panel to create a functional piece of merchandise for decorating a gaming setup or personal den.",
+];
+
+const TWELFTH_PROJECT_CHALLENGES_BODY = [
+  "The first challenge was achieving the right weight balance. The banner was made from three separate felt panels in black, yellow, and cyan, each with a different shape and size. Because the panels had different weights, even a small imbalance could cause the finished banner to tilt when hung.",
+  "The second challenge was the printing alignment. Each panel had different graphics and printing positions, and the graphics needed to remain visible and properly aligned after the three pieces were stitched together. Even small stitching tolerances could affect the final result, so the printing positions had to be carefully considered in advance.",
+  "The third challenge was the rough texture of the felt itself. The uneven surface made detailed printing difficult, especially for small text. Large graphics were easier to print because their larger areas could cover the underlying texture, while smaller text could easily become distorted or lose definition.",
+];
+
+const TWELFTH_PROJECT_EXECUTION_BODY = [
+  "To solve the weight balance issue, I calculated the weight of each individual panel and adjusted the material distribution accordingly. By selectively adding or reducing material in different areas, I was able to achieve a balanced structure so the finished banner would hang vertically without tilting.",
+  "For the printing alignment, I created multiple prototypes to test the relationship between the printing positions and the stitching process. By studying stitching tolerances and potential overlaps, I identified the safer printing areas before moving into final sampling. This allowed me to validate the details early while keeping development and sampling costs under control.",
+  "To improve the printing quality on the rough felt surface, I developed a pre-treatment process. I applied a thin adhesive base layer to the printing areas first, creating a smoother and more even surface before printing. This was particularly important for the small text, while the same treatment was also applied to the larger graphics to achieve a more consistent finish.",
+];
+
+const TWELFTH_PROJECT_IMPACT_BODY = [
+  "The final banner achieved a stable, balanced hanging position while maintaining the intended layered design and detailed graphics. The improved printing process also ensured that both large graphics and small text remained clear despite the rough felt surface.",
+  "The product performed very well commercially and sold out quickly, demonstrating strong demand from fans.",
+];
+
+/** 「第十三个项目」— End-to-End; card cover + hover stills */
+const THIRTEENTH_PROJECT_NAME =
+  "The Elder Scrolls Online Forgotten Daedric Prince Statue";
+const THIRTEENTH_PROJECT_CDN_FOLDER = THIRTEENTH_PROJECT_NAME;
+const THIRTEENTH_PROJECT_SLUG = projectSlugFromName(THIRTEENTH_PROJECT_NAME);
+const THIRTEENTH_PROJECT_TAGLINE =
+  "A limited-edition The Elder Scrolls Online statue bringing Ithelia, the forgotten Daedric Prince, back to life through intricate sculpting, hand-painted details, and her iconic Threads of Fate.";
+const THIRTEENTH_PROJECT_COVER = projectCoverFromName(
+  THIRTEENTH_PROJECT_CDN_FOLDER,
+  "1.jpg",
+);
+const THIRTEENTH_PROJECT_COVER_VIDEO = projectCoverFromName(
+  THIRTEENTH_PROJECT_CDN_FOLDER,
+  "video.mp4",
+);
+const THIRTEENTH_PROJECT_HERO_VIDEO = projectCoverFromName(
+  THIRTEENTH_PROJECT_CDN_FOLDER,
+  "video1.mp4",
+);
+const THIRTEENTH_PROJECT_HOVER_STILLS = [
+  projectCoverFromName(THIRTEENTH_PROJECT_CDN_FOLDER, "1.jpg"),
+  projectCoverFromName(THIRTEENTH_PROJECT_CDN_FOLDER, "2.jpg"),
+  projectCoverFromName(THIRTEENTH_PROJECT_CDN_FOLDER, "3.jpg"),
+] as [string, string, string];
+/** Detail gallery lead still — 1920×1080 */
+const THIRTEENTH_PROJECT_GALLERY_LEAD = projectCoverFromName(
+  THIRTEENTH_PROJECT_CDN_FOLDER,
+  "1.jpg",
+);
+const THIRTEENTH_PROJECT_LANDSCAPE_RATIO = `${(1080 / 1920) * 100}%`;
+/** 1500×2000 portrait pair cells */
+const THIRTEENTH_PROJECT_PORTRAIT_RATIO = `${(2000 / 1500) * 100}%`;
+/** Detail gallery row 2 — 3L | 3R */
+const THIRTEENTH_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    {
+      src: projectCoverFromName(THIRTEENTH_PROJECT_CDN_FOLDER, "3L.jpg"),
+      alt: "Ithelia statue left",
+    },
+    {
+      src: projectCoverFromName(THIRTEENTH_PROJECT_CDN_FOLDER, "3R.jpg"),
+      alt: "Ithelia statue right",
+    },
+  ],
+  ratio: THIRTEENTH_PROJECT_PORTRAIT_RATIO,
+};
+const THIRTEENTH_PROJECT_AFTER_COVER_VIDEO = {
+  primary: projectCoverFromName(
+    THIRTEENTH_PROJECT_CDN_FOLDER,
+    "The Elder Scrolls Online Forgotten Daedric Prince Statue.mp4",
+  ),
+  alt: "Ithelia statue process clip",
+  ratio: THIRTEENTH_PROJECT_LANDSCAPE_RATIO,
+};
+/** Detail gallery row 4 — 5 | 6 | 7 (1200×1200 each) */
+const THIRTEENTH_PROJECT_AFTER_VIDEO_ROW = {
+  items: [
+    {
+      src: projectCoverFromName(THIRTEENTH_PROJECT_CDN_FOLDER, "5.jpg"),
+      alt: "Ithelia statue 5",
+    },
+    {
+      src: projectCoverFromName(THIRTEENTH_PROJECT_CDN_FOLDER, "6.jpg"),
+      alt: "Ithelia statue 6",
+    },
+    {
+      src: projectCoverFromName(THIRTEENTH_PROJECT_CDN_FOLDER, "7.jpg"),
+      alt: "Ithelia statue 7",
+    },
+  ],
+  ratio: "100%",
+};
+/** Detail gallery row 5 — 7 | 8 | 9 (1200×1200 each) */
+const THIRTEENTH_PROJECT_BEFORE_END_ROW = {
+  items: [
+    {
+      src: projectCoverFromName(THIRTEENTH_PROJECT_CDN_FOLDER, "7.jpg"),
+      alt: "Ithelia statue 7",
+    },
+    {
+      src: projectCoverFromName(THIRTEENTH_PROJECT_CDN_FOLDER, "8.jpg"),
+      alt: "Ithelia statue 8",
+    },
+    {
+      src: projectCoverFromName(THIRTEENTH_PROJECT_CDN_FOLDER, "9.jpg"),
+      alt: "Ithelia statue 9",
+    },
+  ],
+  ratio: "100%",
+};
+/** Detail gallery row 6 — 2L | 2R (1800×1800 each) */
+const THIRTEENTH_PROJECT_AFTER_END_ROW = {
+  items: [
+    {
+      src: projectCoverFromName(THIRTEENTH_PROJECT_CDN_FOLDER, "2L.jpg"),
+      alt: "Ithelia statue detail left",
+    },
+    {
+      src: projectCoverFromName(THIRTEENTH_PROJECT_CDN_FOLDER, "2R.jpg"),
+      alt: "Ithelia statue detail right",
+    },
+  ],
+  ratio: "100%",
+};
+
+const THIRTEENTH_PROJECT_SPECIAL_THANKS: SpecialThanksEntry[] = [
+  {
+    company: "DPI Merchandising Inc.",
+    names: [
+      "Angela McReynolds",
+      "Michelle Wu",
+      "Nikki Petraitis",
+      "Daisy Grice",
+      "Hayley Cumming",
+      "Emilia Gribbin",
+      "Diane Dear",
+      "Adam Witton",
+      "Kirsty Deacon",
+      "Hayden Shields",
+      "Jonathan Reed",
+    ],
+  },
+  {
+    company: "Best Link (USA) Corp. Ltd.",
+    names: [
+      "Charlotte Tam",
+      "Cola Li",
+      "Susan Hu",
+      "Grace Yang",
+      "Karyn Leung",
+      "Andy Sun",
+      "Hugo",
+      "Candy",
+    ],
+  },
+  {
+    company: "Dongguan Bo Hong Plastic Products Co., Ltd.",
+    names: [
+      "Mr. Peng",
+      "Chen Yu",
+      "Liu Yang",
+      "Zhao Kai",
+      "Xu Jie",
+      "Lin Chen",
+    ],
+  },
+];
+
+const THIRTEENTH_PROJECT_COLLABORATORS: CollaboratorCredits = {
+  leadPartners: [
+    { company: SGS_CREDIT_COMPANY, name: "XIAOPENG LI" },
+  ],
+  names: ["Zhang Wei", "Li Ming", "Wang Hao"],
+};
+
+/** 「第十四个项目」— End-to-End; card cover + hover stills */
+const FOURTEENTH_PROJECT_NAME = "Skyrim Dragon Hunter Messenger Bag";
+const FOURTEENTH_PROJECT_CDN_FOLDER = FOURTEENTH_PROJECT_NAME;
+const FOURTEENTH_PROJECT_SLUG = projectSlugFromName(FOURTEENTH_PROJECT_NAME);
+const FOURTEENTH_PROJECT_TAGLINE =
+  "A rugged Dragon Hunter messenger bag combining cowhide leather and canvas, featuring embossed dragon artwork, antiqued metal hardware, and a practical multi-pocket interior designed for everyday carry.";
+const FOURTEENTH_PROJECT_COVER = projectCoverFromName(
+  FOURTEENTH_PROJECT_CDN_FOLDER,
+  "1.jpg",
+);
+const FOURTEENTH_PROJECT_COVER_VIDEO = projectCoverFromName(
+  FOURTEENTH_PROJECT_CDN_FOLDER,
+  "video.mp4",
+);
+const FOURTEENTH_PROJECT_HERO_VIDEO = projectCoverFromName(
+  FOURTEENTH_PROJECT_CDN_FOLDER,
+  "video1.mp4",
+);
+const FOURTEENTH_PROJECT_HOVER_STILLS = [
+  projectCoverFromName(FOURTEENTH_PROJECT_CDN_FOLDER, "1.jpg"),
+  projectCoverFromName(FOURTEENTH_PROJECT_CDN_FOLDER, "2.jpg"),
+  projectCoverFromName(FOURTEENTH_PROJECT_CDN_FOLDER, "3.jpg"),
+] as [string, string, string];
+/** Detail gallery — first row still (index card cover stays separate) */
+const FOURTEENTH_PROJECT_GALLERY_LEAD = projectCoverFromName(
+  FOURTEENTH_PROJECT_CDN_FOLDER,
+  "1.jpg",
+);
+
+const FOURTEENTH_PROJECT_STILL = (fileName: string, alt: string) => ({
+  src: projectCoverFromName(FOURTEENTH_PROJECT_CDN_FOLDER, fileName),
+  alt,
+});
+
+/** Detail gallery row 2 — 1L | 1R (native asset dimensions — omit ratio) */
+const FOURTEENTH_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    FOURTEENTH_PROJECT_STILL("1L.jpg", "Skyrim Dragon Hunter messenger bag 1L"),
+    FOURTEENTH_PROJECT_STILL("1r.jpg", "Skyrim Dragon Hunter messenger bag 1R"),
+  ],
+};
+
+/** Detail gallery rows 3–7 */
+const FOURTEENTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      FOURTEENTH_PROJECT_STILL("2l.jpg", "Skyrim Dragon Hunter messenger bag 2L"),
+      FOURTEENTH_PROJECT_STILL("2m.jpg", "Skyrim Dragon Hunter messenger bag 2M"),
+      FOURTEENTH_PROJECT_STILL("2r.jpg", "Skyrim Dragon Hunter messenger bag 2R"),
+    ],
+  },
+  {
+    items: [
+      FOURTEENTH_PROJECT_STILL("3l.jpg", "Skyrim Dragon Hunter messenger bag 3L"),
+      FOURTEENTH_PROJECT_STILL("3r.jpg", "Skyrim Dragon Hunter messenger bag 3R"),
+    ],
+  },
+  {
+    items: [
+      FOURTEENTH_PROJECT_STILL("4f.jpg", "Skyrim Dragon Hunter messenger bag 4"),
+    ],
+  },
+  {
+    items: [
+      FOURTEENTH_PROJECT_STILL("5l.jpg", "Skyrim Dragon Hunter messenger bag 5L"),
+      FOURTEENTH_PROJECT_STILL("5m.jpg", "Skyrim Dragon Hunter messenger bag 5M"),
+      FOURTEENTH_PROJECT_STILL("5r.jpg", "Skyrim Dragon Hunter messenger bag 5R"),
+    ],
+  },
+  {
+    items: [
+      FOURTEENTH_PROJECT_STILL("6l.jpg", "Skyrim Dragon Hunter messenger bag 6L"),
+      FOURTEENTH_PROJECT_STILL("6r.jpg", "Skyrim Dragon Hunter messenger bag 6R"),
+    ],
+  },
+];
+
+const FOURTEENTH_PROJECT_SPECIAL_THANKS: SpecialThanksEntry[] = [
+  {
+    company: "DPI Merchandising Inc.",
+    names: ["Michelle Wu"],
+  },
+  {
+    company: "Best Link (USA) Corp. Ltd.",
+    names: ["Karyn Leung"],
+  },
+  {
+    company: SGS_CREDIT_COMPANY,
+    names: ["Liu Xinyu"],
+  },
+];
+
+const FOURTEENTH_PROJECT_COLLABORATORS: CollaboratorCredits = {
+  names: ["Mr. Chen Hua Xing"],
+};
+
+const FOURTEENTH_PROJECT_OVERVIEW = [
+  "This project was one of the new product categories DPI Merchandising Inc. wanted to explore, using elements from Dragon Age to develop an IP-inspired messenger bag. The initial order quantity was only 300 units, making supplier sourcing and product development particularly challenging.",
+];
+
+const FOURTEENTH_PROJECT_CHALLENGES_BODY = [
+  "The biggest challenge was turning a very vague product idea into a design that genuinely belonged to the game and its character. At the same time, the project had a limited budget and an initial order of only 300 units, making it difficult to find a supplier willing to develop a genuine leather product at the required quality and quantity.",
+];
+
+const FOURTEENTH_PROJECT_EXECUTION_BODY = [
+  "I started with extensive product and game research rather than jumping straight into the design. I played the game myself to understand its world, visual style, and the character's story, while also researching more than 20 potential messenger bag styles. For each direction, I evaluated the estimated budget, prototyping time, and delivery timeline, and analyzed why the style, functionality, and overall look would fit the game and character.",
+  "Based on this research, I defined a vintage, aged aesthetic with brown tones that matched the game's visual language. I then developed the final bag design around this direction and worked through the material selection, focusing on genuine leather while balancing its appearance, quality, and cost. I also helped identify a suitable supplier who was willing to take on the relatively small initial order while meeting the required quality standards.",
+];
+
+const FOURTEENTH_PROJECT_IMPACT_BODY = [
+  "The bag quickly gained popularity among customers and fans and sold through rapidly. The initial order was conservatively set at 300 units, but strong demand led to repeated increases, eventually reaching 2,000 units.",
+  "The success of this product also gave the client a proven design direction. Using the same style, materials, and manufacturing approach as the foundation, they went on to develop several other products in the same product line.",
+];
+
+/** 「第十五个项目」— End-to-End; wooden-box collection */
+const FIFTEENTH_PROJECT_NAME = "Dragon Age Dreadwolf Keepsake Box";
+const FIFTEENTH_PROJECT_CDN_FOLDER = FIFTEENTH_PROJECT_NAME;
+const FIFTEENTH_PROJECT_SLUG = projectSlugFromName(FIFTEENTH_PROJECT_NAME);
+const FIFTEENTH_PROJECT_TAGLINE =
+  "A Solas-inspired keepsake box designed to preserve precious memories from Dragon Age.";
+const FIFTEENTH_PROJECT_COVER = projectCoverFromName(
+  FIFTEENTH_PROJECT_CDN_FOLDER,
+  "1.jpg",
+);
+const FIFTEENTH_PROJECT_COVER_VIDEO = projectCoverFromName(
+  FIFTEENTH_PROJECT_CDN_FOLDER,
+  "video1.mp4",
+);
+const FIFTEENTH_PROJECT_HERO_VIDEO = projectCoverFromName(
+  FIFTEENTH_PROJECT_CDN_FOLDER,
+  "video.mp4",
+);
+const FIFTEENTH_PROJECT_HOVER_STILLS = [
+  projectCoverFromName(FIFTEENTH_PROJECT_CDN_FOLDER, "1.jpg"),
+  projectCoverFromName(FIFTEENTH_PROJECT_CDN_FOLDER, "2.jpg"),
+  projectCoverFromName(FIFTEENTH_PROJECT_CDN_FOLDER, "3.jpg"),
+] as [string, string, string];
+
+const FIFTEENTH_PROJECT_GALLERY_LEAD = projectCoverFromName(
+  FIFTEENTH_PROJECT_CDN_FOLDER,
+  "1.jpg",
+);
+
+const FIFTEENTH_PROJECT_STILL = (fileName: string, alt: string) => ({
+  src: projectCoverFromName(FIFTEENTH_PROJECT_CDN_FOLDER, fileName),
+  alt,
+});
+
+/** Detail gallery row 2 — 2L | 2R */
+const FIFTEENTH_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    FIFTEENTH_PROJECT_STILL("2l.jpg", "Dragon Age Dreadwolf Keepsake Box 2L"),
+    FIFTEENTH_PROJECT_STILL("2r.jpg", "Dragon Age Dreadwolf Keepsake Box 2R"),
+  ],
+};
+
+/** Detail gallery rows 3–4 */
+const FIFTEENTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      FIFTEENTH_PROJECT_STILL("3l.jpg", "Dragon Age Dreadwolf Keepsake Box 3L"),
+      FIFTEENTH_PROJECT_STILL("3m.jpg", "Dragon Age Dreadwolf Keepsake Box 3M"),
+      FIFTEENTH_PROJECT_STILL("3r.jpg", "Dragon Age Dreadwolf Keepsake Box 3R"),
+    ],
+  },
+  {
+    items: [
+      FIFTEENTH_PROJECT_STILL("4l.jpg", "Dragon Age Dreadwolf Keepsake Box 4L"),
+      FIFTEENTH_PROJECT_STILL("4r.jpg", "Dragon Age Dreadwolf Keepsake Box 4R"),
+    ],
+  },
+];
+
+/** Detail gallery row 5 — full-width process clip */
+const FIFTEENTH_PROJECT_AFTER_COVER_VIDEO = {
+  primary: projectCoverFromName(FIFTEENTH_PROJECT_CDN_FOLDER, "5f.mov"),
+  alt: "Dragon Age Dreadwolf Keepsake Box process",
+  ratio: "56.25%",
+} as const;
+
+/** Detail gallery row 6 — 6L | 6R */
+const FIFTEENTH_PROJECT_END_VIDEO_PAIR = {
+  left: {
+    primary: projectCoverFromName(FIFTEENTH_PROJECT_CDN_FOLDER, "6l.mp4"),
+    alt: "Dragon Age Dreadwolf Keepsake Box 6L",
+  },
+  right: {
+    primary: projectCoverFromName(FIFTEENTH_PROJECT_CDN_FOLDER, "6r.mp4"),
+    alt: "Dragon Age Dreadwolf Keepsake Box 6R",
+  },
+  ratio: "100%",
+} as const;
+
+/** Detail gallery row 7 — 7L | 7R */
+const FIFTEENTH_PROJECT_AFTER_END_VIDEO_PAIR_ROW = {
+  items: [
+    FIFTEENTH_PROJECT_STILL("7l.jpg", "Dragon Age Dreadwolf Keepsake Box 7L"),
+    FIFTEENTH_PROJECT_STILL("7r.jpg", "Dragon Age Dreadwolf Keepsake Box 7R"),
+  ],
+};
+
+const FIFTEENTH_PROJECT_OVERVIEW = [
+  "This project was developed as a Dragon Age-inspired keepsake box featuring Solas. Designed to preserve fans’ precious memories, the box combines laser-etched artwork, metallic gold printing, antique hardware, and a green velvet interior to create an ornate, character-driven collectible piece.",
+];
+
+const FIFTEENTH_PROJECT_CHALLENGES_BODY = [
+  "The biggest challenge was the amount of hardware involved. Each piece had to match the original design in style, size, and color, while also fitting the overall proportions of the box.",
+  "The gold-painted character details created another challenge. The edges had to be painted precisely without staining the surrounding areas, making the process highly sensitive to positioning and brush control.",
+  "The box also had to maintain a stable weight balance. If the lid was too heavy, opening it could cause the entire box to tip backward.",
+];
+
+const FIFTEENTH_PROJECT_EXECUTION_BODY = [
+  "I spent several days sourcing off-the-shelf hardware that closely matched the design, then coordinated the sizes and finishes with suppliers. I tested different combinations and used the hardware dimensions to optimize the overall box size before bulk purchasing.",
+  "Instead of committing to a large hardware order immediately, I built samples first to verify how each component looked and fitted on the box. This allowed me to adjust the box dimensions and avoid hardware that looked too small or disproportionate.",
+  "I worked with the factory through multiple trials to identify a safe edge width for the gold-painted areas, giving workers more room for error and improving the yield. I also developed a simple painting template that worked together with the brush, helping workers apply the gold more accurately.",
+  "To prevent the lid from making the box tip backward, I adjusted the weight distribution. I used heavier hardware on the lower section and added a bottom plate to increase the base weight and improve stability.",
+];
+
+const FIFTEENTH_PROJECT_IMPACT_BODY = [
+  "The final box maintained the visual proportions of the original design while using commercially available hardware. Through early sampling, hardware optimization, process testing, and structural adjustments, I helped turn a design-heavy concept into a stable and production-ready collectible box.",
+];
+
 /** Default / home lead — End-to-End featured (NECROM Look Book Bundle) */
 export const projectsFeaturedLead: ProjectsFeaturedLead = {
   slug: FIFTH_PROJECT_SLUG,
@@ -1975,11 +2432,146 @@ export const projects: Project[] = [
     coverWidth: SHOWCASE_COVER_W,
     coverHeight: SHOWCASE_COVER_H,
     heroVideo: TWELFTH_PROJECT_HERO_VIDEO,
+    galleryLeadImage: TWELFTH_PROJECT_GALLERY_LEAD,
+    afterCoverStills: TWELFTH_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: TWELFTH_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    specialThanks: TWELFTH_PROJECT_SPECIAL_THANKS,
+    collaborators: TWELFTH_PROJECT_COLLABORATORS,
+    overview: TWELFTH_PROJECT_OVERVIEW,
+    challengesBody: TWELFTH_PROJECT_CHALLENGES_BODY,
+    executionBody: TWELFTH_PROJECT_EXECUTION_BODY,
+    impactBody: TWELFTH_PROJECT_IMPACT_BODY,
     year: 2024,
     client: "Cyberpunk 2077",
     featured: false,
+    challenge:
+      "Balance three differently weighted felt panels, keep print alignment after stitching, and print clean detail on rough felt.",
+    result:
+      "A stable hanging banner with clear layered graphics that sold out quickly.",
+  },
+  {
+    slug: THIRTEENTH_PROJECT_SLUG,
+    title: THIRTEENTH_PROJECT_NAME,
+    materials: ["resin"],
+    ips: ["the-elder-scrolls"],
+    tags: involvementTags("end-to-end"),
+    summary: THIRTEENTH_PROJECT_TAGLINE,
+    tagline: THIRTEENTH_PROJECT_TAGLINE,
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "end-to-end",
+    coverImage: THIRTEENTH_PROJECT_COVER,
+    coverVideo: THIRTEENTH_PROJECT_COVER_VIDEO,
+    coverHoverStills: THIRTEENTH_PROJECT_HOVER_STILLS,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    heroVideo: THIRTEENTH_PROJECT_HERO_VIDEO,
+    galleryLeadImage: THIRTEENTH_PROJECT_GALLERY_LEAD,
+    galleryLeadRatio: THIRTEENTH_PROJECT_LANDSCAPE_RATIO,
+    afterCoverStills: THIRTEENTH_PROJECT_AFTER_COVER_STILLS,
+    afterCoverVideo: THIRTEENTH_PROJECT_AFTER_COVER_VIDEO,
+    afterVideoRow: THIRTEENTH_PROJECT_AFTER_VIDEO_ROW,
+    beforeEndRow: THIRTEENTH_PROJECT_BEFORE_END_ROW,
+    afterEndRow: THIRTEENTH_PROJECT_AFTER_END_ROW,
+    specialThanks: THIRTEENTH_PROJECT_SPECIAL_THANKS,
+    collaborators: THIRTEENTH_PROJECT_COLLABORATORS,
+    overview: [
+      "Ithelia, the forgotten Daedric Prince, has finally been remembered. Known as the Mistress of the Untraveled Road, she commands the Threads of Fate, bending reality to her will. Once hidden as Hermaeus Mora's best-kept secret, her existence was erased even from the memories of the other Daedric Princes.",
+      "To bring her story back to life, Bethesda Gear Store created The Elder Scrolls Online Forgotten Daedric Prince Statue. Limited to just 3,300 pieces worldwide, this collectible recreates Ithelia with her intricate crystal wings, detailed costume, and the iconic Threads of Fate. The hand-painted polyresin statue also includes a Letter of Authenticity, making it a true collector's piece for fans of The Elder Scrolls Online.",
+    ],
+    challengesBody: [
+      "The main challenge was achieving a translucent crystal effect on the wings without making the material look like ordinary painted plastic. The design required a gradual transition from deeper blue and purple at the outer edges to lighter, more transparent tones toward the center, with small silver accents to enhance the reflective crystal appearance. However, applying too much paint or using an overly concentrated color would cover the natural transparency of the clear material and make the wings look opaque, flat, and visually heavy.",
+    ],
+    executionBody: [
+      "I worked with the factory to adjust the coloring process instead of relying on conventional full-surface painting. I separated the color areas and controlled the paint density layer by layer, keeping the central areas lighter to preserve transparency while gradually increasing the color toward the edges.",
+      "I also tested different color concentrations on crystal samples before moving to production, comparing the transparency and color transition under different lighting conditions. Based on the results, I adjusted the paint ratio and spraying coverage until the blue and purple tones could be seen without covering the crystal's natural depth and reflections.",
+      "This allowed us to achieve the layered crystal appearance shown in the final product while keeping the wings visually transparent rather than simply painted.",
+    ],
+    year: 2024,
+    client: "The Elder Scrolls Online",
+    featured: false,
     challenge: "",
     result: "",
+  },
+  {
+    slug: FOURTEENTH_PROJECT_SLUG,
+    title: FOURTEENTH_PROJECT_NAME,
+    materials: ["leather", "fabric"],
+    ips: ["the-elder-scrolls"],
+    tags: involvementTags("end-to-end"),
+    summary: FOURTEENTH_PROJECT_TAGLINE,
+    tagline: FOURTEENTH_PROJECT_TAGLINE,
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "end-to-end",
+    coverImage: FOURTEENTH_PROJECT_COVER,
+    coverVideo: FOURTEENTH_PROJECT_COVER_VIDEO,
+    coverHoverStills: FOURTEENTH_PROJECT_HOVER_STILLS,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    heroVideo: FOURTEENTH_PROJECT_HERO_VIDEO,
+    galleryLeadImage: FOURTEENTH_PROJECT_GALLERY_LEAD,
+    afterCoverStills: FOURTEENTH_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: FOURTEENTH_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    specialThanks: FOURTEENTH_PROJECT_SPECIAL_THANKS,
+    collaborators: FOURTEENTH_PROJECT_COLLABORATORS,
+    overview: FOURTEENTH_PROJECT_OVERVIEW,
+    challengesBody: FOURTEENTH_PROJECT_CHALLENGES_BODY,
+    executionBody: FOURTEENTH_PROJECT_EXECUTION_BODY,
+    impactBody: FOURTEENTH_PROJECT_IMPACT_BODY,
+    year: 2024,
+    client: "Skyrim",
+    featured: false,
+    challenge:
+      "Turn an open brief into a game-authentic leather bag at small-run scale and limited budget.",
+    result:
+      "Sold through from 300 to 2,000 units and established a repeatable product line direction.",
+  },
+  {
+    slug: FIFTEENTH_PROJECT_SLUG,
+    title: FIFTEENTH_PROJECT_NAME,
+    materials: ["wood", "metal", "fabric"],
+    ips: ["dragon-age"],
+    tags: involvementTags("end-to-end"),
+    summary: FIFTEENTH_PROJECT_TAGLINE,
+    tagline: FIFTEENTH_PROJECT_TAGLINE,
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "end-to-end",
+    coverImage: FIFTEENTH_PROJECT_COVER,
+    coverVideo: FIFTEENTH_PROJECT_COVER_VIDEO,
+    coverHoverStills: FIFTEENTH_PROJECT_HOVER_STILLS,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    heroVideo: FIFTEENTH_PROJECT_HERO_VIDEO,
+    galleryLeadImage: FIFTEENTH_PROJECT_GALLERY_LEAD,
+    afterCoverStills: FIFTEENTH_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: FIFTEENTH_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    afterCoverVideo: FIFTEENTH_PROJECT_AFTER_COVER_VIDEO,
+    endVideoPair: FIFTEENTH_PROJECT_END_VIDEO_PAIR,
+    afterEndVideoPairRow: FIFTEENTH_PROJECT_AFTER_END_VIDEO_PAIR_ROW,
+    specialThanks: WOODEN_BOX_SPECIAL_THANKS,
+    collaborators: WOODEN_BOX_COLLABORATORS,
+    overview: FIFTEENTH_PROJECT_OVERVIEW,
+    challengesBody: FIFTEENTH_PROJECT_CHALLENGES_BODY,
+    executionBody: FIFTEENTH_PROJECT_EXECUTION_BODY,
+    impactBody: FIFTEENTH_PROJECT_IMPACT_BODY,
+    year: 2024,
+    client: "Dragon Age",
+    featured: false,
+    challenge:
+      "Match design-heavy hardware, keep gold paint edges clean, and stop the box tipping when the lid opens.",
+    result:
+      "A proportionally faithful, stable collectible box ready for production with commercially available hardware.",
   },
 ];
 
@@ -2037,7 +2629,7 @@ export function getFeaturedProjects(limit = 3) {
 export function filterProjects(options?: {
   material?: Material | "all" | null;
   ip?: string | null;
-  involvement?: Involvement | "all" | null;
+  involvement?: Involvement | "all" | Involvement[] | null;
 }) {
   const material = options?.material;
   const ip = options?.ip;
@@ -2050,9 +2642,53 @@ export function filterProjects(options?: {
     const involvementOk =
       !involvement ||
       involvement === "all" ||
-      project.involvement === involvement;
+      (Array.isArray(involvement)
+        ? involvement.length === 0 ||
+          involvement.includes(project.involvement)
+        : project.involvement === involvement);
     return materialOk && ipOk && involvementOk;
   });
+}
+
+const INVOLVEMENT_IDS: Involvement[] = ["end-to-end", "contribution", "specialized"];
+
+/** Parsed involvement filter — `all` or one-or-more involvement ids (excludes `all` pill id). */
+export type InvolvementSelection = Involvement[] | "all";
+
+export function parseInvolvementSelection(value?: string): InvolvementSelection {
+  if (!value || value === "all") return "all";
+  const ids = [
+    ...new Set(
+      value
+        .split(",")
+        .map((part) => part.trim())
+        .filter((part): part is Involvement =>
+          INVOLVEMENT_IDS.includes(part as Involvement),
+        ),
+    ),
+  ];
+  if (ids.length === 0 || ids.length === INVOLVEMENT_IDS.length) return "all";
+  return ids;
+}
+
+export function involvementSelectionCount(selection: InvolvementSelection): number {
+  return selection === "all" ? 0 : selection.length;
+}
+
+/** Single involvement → featured lead key; multi / all → `all` lead. */
+export function featuredLeadInvolvementKey(
+  selection: InvolvementSelection,
+): Involvement | "all" {
+  if (selection === "all" || selection.length !== 1) return "all";
+  return selection[0];
+}
+
+export function buildInvolvementQueryValue(
+  selection: InvolvementSelection,
+): string | null {
+  if (selection === "all" || selection.length === 0) return null;
+  if (selection.length === INVOLVEMENT_IDS.length) return null;
+  return selection.join(",");
 }
 
 /** Related strip: same involvement-tag projects only (stable order), capped. */

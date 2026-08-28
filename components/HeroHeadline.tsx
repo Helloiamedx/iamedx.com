@@ -16,7 +16,7 @@ import {
 import "./FoldText.css";
 
 const PREFIX =
-  "Help You Establish a Supply Chain in China Tailored to Your Business with a";
+  "Help You Establish a Supply Chain from Scratch Tailored to Your Business with a";
 const SUFFIX = "Approach";
 
 const KEYWORDS = [

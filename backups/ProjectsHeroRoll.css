@@ -1,0 +1,225 @@
+.projects-cover--roll {
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: #050506;
+}
+
+.projects-hero-roll {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.projects-hero-roll__stage {
+  position: absolute;
+  inset: 0;
+  /* Single 2-stop dissolve — smoothest on wide / 8-bit panels */
+  -webkit-mask-image: linear-gradient(to bottom, #000 52%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 52%, transparent 100%);
+}
+
+.projects-hero-roll__stage.is-ready {
+  opacity: 1;
+}
+
+.projects-hero-roll__frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  border-radius: 2px;
+  /* Clip filter fringe — blur/brightness on <img> otherwise paints a 1px magenta hairline */
+  overflow: hidden;
+  background: transparent;
+  pointer-events: auto;
+  will-change: transform;
+  animation-name: projects-hero-roll-up;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+  isolation: isolate;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.projects-hero-roll__frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Full image — scale via width only, never crop */
+  object-fit: contain;
+  object-position: center;
+  opacity: 1;
+  vertical-align: top;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+  border-radius: inherit;
+  /* Avoid subpixel AA rim against the dark stage */
+  transform: translateZ(0);
+}
+
+.projects-hero-roll__frame-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  pointer-events: auto;
+}
+
+/*
+ * Depth: brightness only — CSS blur on bitmaps paints a chroma fringe
+ * (reads as a pink/red hairline on the top edge while scrolling).
+ */
+.projects-hero-roll__frame--far {
+  box-shadow: none;
+}
+
+.projects-hero-roll__frame--far img {
+  filter: brightness(0.72) contrast(0.92) saturate(0.92);
+}
+
+.projects-hero-roll__frame--mid {
+  box-shadow: none;
+}
+
+.projects-hero-roll__frame--mid img {
+  filter: brightness(0.9) contrast(0.96);
+}
+
+.projects-hero-roll__frame--near {
+  box-shadow: none;
+}
+
+.projects-hero-roll__frame--near img {
+  filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .projects-hero-roll__frame--far img {
+    filter: brightness(0.72) contrast(0.92) saturate(0.92);
+  }
+}
+
+@keyframes projects-hero-roll-up {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(var(--roll-drift, 0px), var(--roll-travel, -200vh), 0);
+  }
+}
+
+.projects-hero-roll__frame--static {
+  animation: none;
+  width: min(22vw, 280px);
+  will-change: auto;
+}
+
+.projects-hero-roll__frame--s0 { left: 2%; top: 12%; width: min(24vw, 300px); z-index: 3; }
+.projects-hero-roll__frame--s1 { left: 28%; top: 8%; width: min(18vw, 220px); z-index: 2; }
+.projects-hero-roll__frame--s2 { left: 48%; top: 22%; width: min(20vw, 260px); z-index: 4; }
+.projects-hero-roll__frame--s3 { left: 70%; top: 10%; width: min(22vw, 280px); z-index: 2; }
+.projects-hero-roll__frame--s4 { left: 8%; top: 48%; width: min(16vw, 200px); z-index: 1; }
+.projects-hero-roll__frame--s5 { left: 38%; top: 52%; width: min(19vw, 240px); z-index: 3; }
+.projects-hero-roll__frame--s6 { left: 62%; top: 44%; width: min(17vw, 210px); z-index: 2; }
+.projects-hero-roll__frame--s7 { right: 0; left: auto; top: 58%; width: min(23vw, 290px); z-index: 3; }
+
+.projects-hero-roll__veil {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  pointer-events: none;
+  /* Page seal only — 2 stops, long run into solid footer color */
+  height: min(36vh, 18rem);
+  background: linear-gradient(to top, #050506 0%, transparent 100%);
+}
+
+.projects-hero-roll__grain {
+  position: absolute;
+  inset: 0;
+  z-index: 11;
+  pointer-events: none;
+  opacity: 0.07;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  -webkit-mask-image: linear-gradient(to bottom, #000 50%, transparent 82%);
+  mask-image: linear-gradient(to bottom, #000 50%, transparent 82%);
+}
+
+.projects-hero-roll__copy {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--header-bar-h) + 0.5rem) var(--shell-gutter) 2rem;
+  text-align: center;
+  pointer-events: auto;
+  -webkit-user-select: text;
+  user-select: text;
+  /*
+   * Same invert contrast as the clear header — white type differences
+   * against whatever art sits behind it.
+   */
+  mix-blend-mode: difference;
+}
+
+.projects-hero-roll__line {
+  margin: 0;
+  max-width: min(26ch, 100%);
+  min-height: 1.2em;
+  font-family: var(--font-title);
+  font-size: clamp(
+    calc(0.825rem + 20px),
+    calc(0.55rem + 1.2vw + 20px),
+    calc(1.5rem + 20px)
+  );
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: #fff;
+  text-wrap: pretty;
+  opacity: 0;
+  transform: translateY(0.35rem);
+  transition:
+    opacity 520ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 520ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.projects-hero-roll__line-row {
+  display: inline;
+}
+
+.projects-hero-roll__line.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 700px) {
+  .projects-hero-roll__line {
+    max-width: min(20ch, 100%);
+    font-size: clamp(
+      calc(0.775rem + 20px),
+      calc(0.525rem + 1.9vw + 20px),
+      calc(1.075rem + 20px)
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .projects-hero-roll__frame {
+    animation: none !important;
+  }
+
+  .projects-hero-roll__line {
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+}

@@ -3,13 +3,13 @@ import { FilterResults } from "@/components/FilterResults";
 import { ProjectFeaturedLead } from "@/components/ProjectFeaturedLead";
 import { ProjectFilter } from "@/components/ProjectFilter";
 import { ProjectsFilterGrid } from "@/components/ProjectsFilterGrid";
-import { ProjectsHeroRoll } from "@/components/ProjectsHeroRoll";
+import { ProjectsPageIntro } from "@/components/ProjectsPageIntro";
 import { projectIps } from "@/content/nav";
 import {
+  featuredLeadInvolvementKey,
   filterProjects,
   getProjectsFeaturedLead,
-  involvementFilters,
-  type Involvement,
+  parseInvolvementSelection,
 } from "@/content/projects";
 import { shuffleArray } from "@/lib/utils";
 
@@ -23,10 +23,6 @@ type ProjectsPageProps = {
   searchParams: Promise<{ involvement?: string; ip?: string }>;
 };
 
-const involvementIds = involvementFilters
-  .map((item) => item.id)
-  .filter((id): id is Involvement => id !== "all");
-
 const ipSlugs = projectIps.map((label) =>
   label
     .toLowerCase()
@@ -34,24 +30,18 @@ const ipSlugs = projectIps.map((label) =>
     .replace(/(^-|-$)/g, ""),
 );
 
-function isInvolvement(value?: string): value is Involvement {
-  return !!value && involvementIds.includes(value as Involvement);
-}
-
 function isIp(value?: string): value is string {
   return !!value && ipSlugs.includes(value);
 }
 
 export default async function ProjectsPage({ searchParams }: ProjectsPageProps) {
   const params = await searchParams;
-  const activeInvolvement: Involvement | "all" = isInvolvement(
-    params.involvement,
-  )
-    ? params.involvement
-    : "all";
+  const activeInvolvement = parseInvolvementSelection(params.involvement);
   const activeIp = isIp(params.ip) ? params.ip : null;
 
-  const featuredLead = getProjectsFeaturedLead(activeInvolvement);
+  const featuredLead = getProjectsFeaturedLead(
+    featuredLeadInvolvementKey(activeInvolvement),
+  );
 
   /* Lead is already shown above — omit it from the filtered grid */
   const listed = shuffleArray(
@@ -61,21 +51,29 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
     }).filter((project) => project.slug !== featuredLead.slug),
   );
 
-  const filterKey = activeIp
-    ? `${activeInvolvement}:${activeIp}`
-    : activeInvolvement;
+  const filterKey =
+    activeInvolvement === "all"
+      ? activeIp
+        ? `all:${activeIp}`
+        : "all"
+      : activeIp
+        ? `${activeInvolvement.join(",")}:${activeIp}`
+        : activeInvolvement.join(",");
 
   return (
     <main className="projects-page">
-      <ProjectsHeroRoll />
+      <ProjectsPageIntro />
 
       <section className="section projects-body">
-        <ProjectFilter active={activeInvolvement} activeIp={activeIp} />
-        <ProjectFeaturedLead project={featuredLead} />
+        <div className="project-featured-band">
+          <ProjectFilter active={activeInvolvement} activeIp={activeIp} />
+          <ProjectFeaturedLead project={featuredLead} />
+        </div>
         <FilterResults filterKey={filterKey}>
           <ProjectsFilterGrid
             projects={listed}
             filterKey={filterKey}
+            layout="related"
             enableHoverSwap
           />
         </FilterResults>

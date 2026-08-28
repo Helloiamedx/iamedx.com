@@ -12,21 +12,30 @@ import { getCaseCopySections } from "@/content/caseCopy";
 import {
   getProjectCollaborators,
   getProjectSpecialThanks,
-  SITE_CREDIT_ROW,
 } from "@/content/projectCredits";
 import type { Project } from "@/content/projects";
 import { asset } from "@/lib/assets";
 
+type StillFrame = {
+  src: string;
+  alt: string;
+  /** CSS padding-bottom ratio; omit for native asset dimensions */
+  ratio?: string;
+};
+
 type MediaItem =
-  | { kind: "full"; src: string; alt: string; ratio: string }
+  | { kind: "full"; src: string; alt: string; ratio?: string }
   | {
       kind: "pair";
-      left: { src: string; alt: string; ratio: string };
-      right: { src: string; alt: string; ratio: string };
+      left: StillFrame;
+      right: StillFrame;
     }
   | {
       kind: "row";
-      items: { src: string; alt: string; ratio: string }[];
+      items: StillFrame[];
+      columnTemplate?: string;
+      equalRowHeight?: boolean;
+      rowAspect?: string;
     }
   | {
       kind: "video";
@@ -37,7 +46,7 @@ type MediaItem =
     }
   | {
       kind: "still-video-pair";
-      still: { src: string; alt: string; ratio: string };
+      still: StillFrame;
       video: {
         primary: string;
         fallback?: string;
@@ -51,85 +60,6 @@ type MediaItem =
       right: { primary: string; fallback?: string; alt: string };
       ratio?: string;
     };
-
-const PLACEHOLDER_MEDIA: MediaItem[] = [
-  {
-    kind: "full",
-    src: asset("/images/projects/homeroll - 1.jpg"),
-    alt: "Demo hero still",
-    ratio: "56.25%",
-  },
-  {
-    kind: "pair",
-    left: {
-      src: asset("/images/projects/homeroll - 2.jpg"),
-      alt: "Demo frame A",
-      ratio: "133.6%",
-    },
-    right: {
-      src: asset("/images/projects/homeroll - 3.jpg"),
-      alt: "Demo frame B",
-      ratio: "133.6%",
-    },
-  },
-  {
-    kind: "full",
-    src: asset("/images/projects/homeroll - 4.jpg"),
-    alt: "Demo featured still",
-    ratio: "56.25%",
-  },
-  {
-    kind: "pair",
-    left: {
-      src: asset("/images/projects/homeroll - 5.jpg"),
-      alt: "Demo frame C",
-      ratio: "100%",
-    },
-    right: {
-      src: asset("/images/projects/homeroll - 6.jpg"),
-      alt: "Demo frame D",
-      ratio: "100%",
-    },
-  },
-  {
-    kind: "full",
-    src: asset("/images/projects/homeroll - 7.jpg"),
-    alt: "Demo landscape still",
-    ratio: "56.25%",
-  },
-  {
-    kind: "pair",
-    left: {
-      src: asset("/images/projects/homeroll - 8.jpg"),
-      alt: "Demo frame E",
-      ratio: "133.6%",
-    },
-    right: {
-      src: asset("/images/projects/homeroll - 9.jpg"),
-      alt: "Demo frame F",
-      ratio: "133.6%",
-    },
-  },
-  {
-    kind: "full",
-    src: asset("/images/projects/homeroll - 10.jpg"),
-    alt: "Demo closing still",
-    ratio: "56.25%",
-  },
-  {
-    kind: "pair",
-    left: {
-      src: asset("/images/projects/homeroll - 11.jpg"),
-      alt: "Demo frame G",
-      ratio: "100%",
-    },
-    right: {
-      src: asset("/images/projects/homeroll - 12.jpg"),
-      alt: "Demo frame H",
-      ratio: "100%",
-    },
-  },
-];
 
 function readCssPx(name: string, fallback: number) {
   if (typeof window === "undefined") return fallback;
@@ -166,18 +96,47 @@ function Frame({
   src,
   alt,
   ratio,
+  fillCell = false,
 }: {
   src: string;
   alt: string;
-  ratio: string;
+  ratio?: string;
+  fillCell?: boolean;
 }) {
+  const useNative = !fillCell && !ratio;
+
+  if (useNative) {
+    return (
+      <div className="project-case-demo__frame project-case-demo__frame--native">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={src}
+          alt={alt}
+          className="project-case-demo__img project-case-demo__img--native"
+          draggable={false}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="project-case-demo__frame" style={{ paddingBottom: ratio }}>
+    <div
+      className={
+        fillCell
+          ? "project-case-demo__frame project-case-demo__frame--fill"
+          : "project-case-demo__frame"
+      }
+      style={fillCell ? undefined : { paddingBottom: ratio }}
+    >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}
         alt={alt}
-        className="project-case-demo__img"
+        className={
+          fillCell
+            ? "project-case-demo__img project-case-demo__img--contain"
+            : "project-case-demo__img"
+        }
         draggable={false}
       />
     </div>
@@ -194,14 +153,14 @@ type ProjectCaseDemoProps = {
 
 function buildCaseMedia(project: Project): MediaItem[] {
   const media: MediaItem[] = [];
-  const stillRatio = project.afterCoverStills?.ratio ?? "56.25%";
+  const stillRowRatio = project.afterCoverStills?.ratio;
 
   if (project.galleryLeadImage) {
     media.push({
       kind: "full",
       src: project.galleryLeadImage,
       alt: project.title,
-      ratio: "56.25%",
+      ratio: project.galleryLeadRatio,
     });
   }
 
@@ -212,7 +171,7 @@ function buildCaseMedia(project: Project): MediaItem[] {
         kind: "full",
         src: item.src,
         alt: item.alt,
-        ratio: stillRatio,
+        ratio: item.ratio ?? stillRowRatio,
       });
     } else {
       media.push({
@@ -220,7 +179,7 @@ function buildCaseMedia(project: Project): MediaItem[] {
         items: project.afterCoverStills.items.map((item) => ({
           src: item.src,
           alt: item.alt,
-          ratio: stillRatio,
+          ratio: item.ratio ?? stillRowRatio,
         })),
       });
     }
@@ -237,22 +196,29 @@ function buildCaseMedia(project: Project): MediaItem[] {
 
   const pushAfterCoverExtraRows = () => {
     for (const row of project.afterCoverExtraRows ?? []) {
-      const ratio = row.ratio ?? "100%";
+      const rowRatio = row.ratio;
       if (row.items.length === 1) {
+        const item = row.items[0];
         media.push({
           kind: "full",
-          src: row.items[0].src,
-          alt: row.items[0].alt,
-          ratio,
+          src: item.src,
+          alt: item.alt,
+          ratio: item.ratio ?? rowRatio,
         });
       } else {
+        const columnTemplate = row.columnWidths
+          ? row.columnWidths.map((w) => `${w}fr`).join(" ")
+          : undefined;
         media.push({
           kind: "row",
           items: row.items.map((item) => ({
             src: item.src,
             alt: item.alt,
-            ratio,
+            ratio: item.ratio ?? rowRatio,
           })),
+          columnTemplate,
+          equalRowHeight: row.equalRowHeight,
+          rowAspect: row.rowAspect,
         });
       }
     }
@@ -312,14 +278,14 @@ function buildCaseMedia(project: Project): MediaItem[] {
     Math.max(afterVideoRow?.afterIndex ?? stills.length, 0),
     stills.length,
   );
-  const rowRatio = afterVideoRow?.ratio ?? "100%";
+  const rowRatio = afterVideoRow?.ratio;
 
   for (const still of stills.slice(0, split)) {
     media.push({
       kind: "full",
       src: still.src,
       alt: still.alt,
-      ratio: still.ratio ?? "56.25%",
+      ratio: still.ratio,
     });
   }
   if (afterVideoRow) {
@@ -328,18 +294,31 @@ function buildCaseMedia(project: Project): MediaItem[] {
       items: afterVideoRow.items.map((item) => ({
         src: item.src,
         alt: item.alt,
-        ratio: rowRatio,
+        ratio: item.ratio ?? rowRatio,
       })),
     });
   }
 
   if (project.beforeEndRow) {
+    const beforeEndRatio = project.beforeEndRow.ratio;
     media.push({
       kind: "row",
       items: project.beforeEndRow.items.map((item) => ({
         src: item.src,
         alt: item.alt,
-        ratio: project.beforeEndRow!.ratio ?? "100%",
+        ratio: item.ratio ?? beforeEndRatio,
+      })),
+    });
+  }
+
+  if (project.afterEndRow) {
+    const afterEndRatio = project.afterEndRow.ratio;
+    media.push({
+      kind: "row",
+      items: project.afterEndRow.items.map((item) => ({
+        src: item.src,
+        alt: item.alt,
+        ratio: item.ratio ?? afterEndRatio,
       })),
     });
   }
@@ -350,24 +329,8 @@ function buildCaseMedia(project: Project): MediaItem[] {
       kind: "full",
       src: still.src,
       alt: still.alt,
-      ratio: still.ratio ?? "56.25%",
+      ratio: still.ratio,
     });
-  }
-
-  const hasRealGallery = Boolean(
-    project.galleryLeadImage ||
-      project.afterCoverStills ||
-      project.afterCoverExtraRows?.length ||
-      project.afterCoverVideoPair ||
-      project.afterCoverStillVideoPair ||
-      project.afterCoverVideo ||
-      project.afterCoverVideos?.length ||
-      project.afterVideoStills ||
-      project.afterVideoRow ||
-      project.beforeEndRow,
-  );
-  if (!hasRealGallery) {
-    media.push(...PLACEHOLDER_MEDIA);
   }
 
   if (project.endVideoPair) {
@@ -376,6 +339,19 @@ function buildCaseMedia(project: Project): MediaItem[] {
       left: project.endVideoPair.left,
       right: project.endVideoPair.right,
       ratio: project.endVideoPair.ratio ?? "177.78%",
+    });
+  }
+
+  if (project.afterEndVideoPairRow) {
+    const row = project.afterEndVideoPairRow;
+    const rowRatio = row.ratio;
+    media.push({
+      kind: "row",
+      items: row.items.map((item) => ({
+        src: item.src,
+        alt: item.alt,
+        ratio: item.ratio ?? rowRatio,
+      })),
     });
   }
 
@@ -654,9 +630,18 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
                   return (
                     <div
                       key={`row-${index}`}
-                      className="project-case-demo__row"
+                      className={
+                        item.equalRowHeight
+                          ? "project-case-demo__row project-case-demo__row--equal-height"
+                          : "project-case-demo__row"
+                      }
                       style={{
-                        gridTemplateColumns: `repeat(${item.items.length}, 1fr)`,
+                        gridTemplateColumns:
+                          item.columnTemplate ??
+                          `repeat(${item.items.length}, 1fr)`,
+                        aspectRatio: item.equalRowHeight
+                          ? item.rowAspect
+                          : undefined,
                       }}
                     >
                       {item.items.map((frame) => (
@@ -665,6 +650,7 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
                           src={frame.src}
                           alt={frame.alt}
                           ratio={frame.ratio}
+                          fillCell={item.equalRowHeight}
                         />
                       ))}
                     </div>
@@ -749,21 +735,6 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
                 </span>
               </div>
             ))}
-            <div className="project-case-demo__credits-row">
-              <span className="project-case-demo__credits-company">
-                {SITE_CREDIT_ROW.company}
-              </span>
-              <span className="project-case-demo__credits-name">
-                {SITE_CREDIT_ROW.names.map((name) => (
-                  <span
-                    key={name}
-                    className="project-case-demo__credits-name-line"
-                  >
-                    {name}
-                  </span>
-                ))}
-              </span>
-            </div>
             {collaborators.leadPartners?.map((item) => (
               <div
                 key={`${item.company}-${item.name}`}

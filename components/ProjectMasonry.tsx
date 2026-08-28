@@ -121,12 +121,14 @@ function ProjectShowcaseCard({
         )}
       </div>
       <div className="project-window__meta project-window__meta--stack">
-        <h3 className="project-window__title">{project.title}</h3>
-        <ul className="project-window__chips" aria-label="Categories">
-          <li>
-            <span className="project-type-chip">{tag}</span>
-          </li>
-        </ul>
+        <div className="card-meta__head">
+          <h3 className="project-window__title">{project.title}</h3>
+          <ul className="project-window__chips" aria-label="Categories">
+            <li>
+              <span className="project-type-chip">{tag}</span>
+            </li>
+          </ul>
+        </div>
         <p className="project-window__tagline">{tagline}</p>
       </div>
     </Link>

@@ -21,6 +21,38 @@ export const SITE_CREDIT_ROW: SpecialThanksEntry = {
 export const SGS_CREDIT_COMPANY =
   "SGS-CSTC Standards Technical Services Co., Ltd.";
 
+/** Shared Special thanks for wooden-box collection projects */
+export const WOODEN_BOX_SPECIAL_THANKS: SpecialThanksEntry[] = [
+  {
+    company: "DPI Merchandising Inc.",
+    names: ["Michelle Wu"],
+  },
+  {
+    company: "Best Link (USA) Corp. Ltd.",
+    names: ["Karyn Leung", "Susan Hu"],
+  },
+  {
+    company: SGS_CREDIT_COMPANY,
+    names: ["Liu Xinyu"],
+  },
+  {
+    company: "Wenzhou Xianrui Packaging Co., Ltd.",
+    names: ["Vincent"],
+  },
+];
+
+/** Shared Collaborators for wooden-box collection projects */
+export const WOODEN_BOX_COLLABORATORS: CollaboratorCredits = {
+  names: [
+    "Mr. Zhang",
+    "Zhang Wei",
+    "Li Qiang",
+    "Wang Jianguo",
+    "Chen Zhiyuan",
+    "Liu Haifeng",
+  ],
+};
+
 const END_TO_END_SGS_NAME = "Liu Xinyu";
 const CONTRIBUTION_SGS_NAME = "Chen Wei";
 
@@ -144,7 +176,7 @@ function applyInvolvementSgs(
 
 export function getProjectSpecialThanks(project: Project): SpecialThanksEntry[] {
   if (project.specialThanks && project.specialThanks.length > 0) {
-    return normalizeSpecialThanks(project.specialThanks);
+    return sortSpecialThanksDpiFirst(project.specialThanks);
   }
   if (project.involvement === "contribution") {
     return normalizeSpecialThanks(CONTRIBUTION_SPECIAL_THANKS);
@@ -160,6 +192,12 @@ export function getProjectCollaborators(project: Project): CollaboratorCredits {
     credits = CONTRIBUTION_COLLABORATORS;
   } else {
     credits = DEFAULT_COLLABORATORS;
+  }
+  const sgsInSpecialThanks = project.specialThanks?.some(
+    (item) => item.company === SGS_CREDIT_COMPANY,
+  );
+  if (sgsInSpecialThanks) {
+    return credits;
   }
   return applyInvolvementSgs(project.involvement, credits);
 }

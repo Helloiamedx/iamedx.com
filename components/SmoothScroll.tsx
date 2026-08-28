@@ -2,38 +2,96 @@
 
 import { ReactLenis, useLenis } from "lenis/react";
 import { usePathname } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import "lenis/dist/lenis.css";
 
 type SmoothScrollProps = {
   children: ReactNode;
 };
 
-/** Native + document scroll to top — used when Lenis is not mounted (touch). */
-function NativeRouteScrollReset() {
+const SCROLL_STORAGE_PREFIX = "iamedx:scroll:";
+
+function scrollStorageKey(pathname: string) {
+  return `${SCROLL_STORAGE_PREFIX}${pathname}`;
+}
+
+function readWindowScrollY() {
+  return window.scrollY || document.documentElement.scrollTop || 0;
+}
+
+function applyScrollY(
+  y: number,
+  lenis?: { scrollTo: (value: number, opts?: { immediate?: boolean }) => void } | null,
+) {
+  const target = Math.max(0, y);
+  window.scrollTo(0, target);
+  document.documentElement.scrollTop = target;
+  document.body.scrollTop = target;
+  lenis?.scrollTo(target, { immediate: true });
+}
+
+/**
+ * Push navigations → top.
+ * Back/forward (popstate) → restore the saved position for that pathname.
+ * Next App Router uses manual scroll restoration, so we own both behaviors.
+ */
+function useRouteScrollBehavior(
+  lenis?: { scrollTo: (value: number, opts?: { immediate?: boolean }) => void } | null,
+) {
   const pathname = usePathname();
+  const isPopRef = useRef(false);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-  }, [pathname]);
+    const onPopState = () => {
+      isPopRef.current = true;
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
 
+  useEffect(() => {
+    const key = scrollStorageKey(pathname);
+    const isPop = isPopRef.current;
+    isPopRef.current = false;
+
+    if (isPop) {
+      const raw = sessionStorage.getItem(key);
+      const parsed = raw == null ? 0 : Number.parseFloat(raw);
+      const y = Number.isFinite(parsed) ? parsed : 0;
+
+      applyScrollY(y, lenis);
+      const raf1 = requestAnimationFrame(() => {
+        applyScrollY(y, lenis);
+        requestAnimationFrame(() => applyScrollY(y, lenis));
+      });
+      /* Filter grids / media can shift height after first paint */
+      const timeoutId = window.setTimeout(() => applyScrollY(y, lenis), 120);
+
+      return () => {
+        cancelAnimationFrame(raf1);
+        window.clearTimeout(timeoutId);
+        sessionStorage.setItem(key, String(readWindowScrollY()));
+      };
+    }
+
+    applyScrollY(0, lenis);
+
+    return () => {
+      sessionStorage.setItem(key, String(readWindowScrollY()));
+    };
+  }, [pathname, lenis]);
+}
+
+/** Native + document scroll — used when Lenis is not mounted (touch). */
+function NativeRouteScrollReset() {
+  useRouteScrollBehavior(null);
   return null;
 }
 
-/** Kill Lenis inertia and snap to top on every App Router navigation. */
+/** Keep Lenis in sync with push → top / pop → restore. */
 function LenisRouteScrollReset() {
-  const pathname = usePathname();
   const lenis = useLenis();
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-    lenis?.scrollTo(0, { immediate: true });
-  }, [pathname, lenis]);
-
+  useRouteScrollBehavior(lenis);
   return null;
 }
 
