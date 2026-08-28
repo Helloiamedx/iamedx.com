@@ -115,40 +115,6 @@ export function resolveCollectionTestimonial(
 }
 
 export const projectCollections: ProjectCollection[] = [
-  /*
-   * TEMP preview order — wooden-box first so it appears after the first
-   * 6-card break. Restore banner → messenger-bag → wooden-box when the
-   * project count is high enough for the normal rotation.
-   */
-  {
-    slug: "wooden-box",
-    title: "Wooden Box",
-    headline: "Defining How Souvenirs Are Stored",
-    panels: [
-      panelFromProjectImages("41.jpg", "42.jpg"),
-      panelFromProjectImages("51.jpg", "52.jpg"),
-      panelFromProjectImages("61.jpg", "62.jpg"),
-    ],
-    entries: [
-      {
-        slug: MASS_EFFECT_TALI_SLUG,
-        gameTitle: "Mass Effect",
-        gameInfo:
-          "A science-fiction action RPG series following Commander Shepard and their crew — including Tali'Zorah — across a galaxy of alliances, loyalty, and high-stakes decision-making.",
-        testimonial: COLLECTION_TESTIMONIAL_PLACEHOLDER,
-      },
-      {
-        slug: DRAGON_AGE_KEEPSAKE_BOX_SLUG,
-        gameTitle: "Dragon Age",
-        gameInfo:
-          "A dark fantasy action RPG series set in Thedas — a world of magic, political intrigue, and characters whose choices leave lasting marks on the story.",
-        testimonial: {
-          quote:
-            "Really pretty! I loved the attention to detail on the hinges and metal on the corners, none of it is left plain. Feels quite sturdy as well!",
-        },
-      },
-    ],
-  },
   {
     slug: "banner",
     title: "Banner",
@@ -184,6 +150,35 @@ export const projectCollections: ProjectCollection[] = [
         gameInfo:
           "An open-world fantasy RPG set in the northern province of Skyrim — a world of dragons, ancient ruins, and rugged frontier culture.",
         testimonial: COLLECTION_TESTIMONIAL_PLACEHOLDER,
+      },
+    ],
+  },
+  {
+    slug: "wooden-box",
+    title: "Wooden Box",
+    headline: "Defining How Souvenirs Are Stored",
+    panels: [
+      panelFromProjectImages("41.jpg", "42.jpg"),
+      panelFromProjectImages("51.jpg", "52.jpg"),
+      panelFromProjectImages("61.jpg", "62.jpg"),
+    ],
+    entries: [
+      {
+        slug: MASS_EFFECT_TALI_SLUG,
+        gameTitle: "Mass Effect",
+        gameInfo:
+          "A science-fiction action RPG series following Commander Shepard and their crew — including Tali'Zorah — across a galaxy of alliances, loyalty, and high-stakes decision-making.",
+        testimonial: COLLECTION_TESTIMONIAL_PLACEHOLDER,
+      },
+      {
+        slug: DRAGON_AGE_KEEPSAKE_BOX_SLUG,
+        gameTitle: "Dragon Age",
+        gameInfo:
+          "A dark fantasy action RPG series set in Thedas — a world of magic, political intrigue, and characters whose choices leave lasting marks on the story.",
+        testimonial: {
+          quote:
+            "Really pretty! I loved the attention to detail on the hinges and metal on the corners, none of it is left plain. Feels quite sturdy as well!",
+        },
       },
     ],
   },
