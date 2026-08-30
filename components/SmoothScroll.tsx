@@ -7,6 +7,7 @@ import {
   clearAllProjectsVisibleStorage,
   clearProjectsExpandRestore,
   markProjectsExpandRestore,
+  SCROLL_RESTORE_EVENT,
 } from "@/lib/projectsListRestore";
 import "lenis/dist/lenis.css";
 
@@ -66,6 +67,12 @@ function readSavedScrollY(pathname: string) {
 
 function saveScrollY(pathname: string, y = readWindowScrollY()) {
   if (performance.now() < restoreLockUntil) return;
+  /*
+   * After pushState/popstate, location updates before React pathname + before
+   * scroll listeners detach. Saving then would stamp Y=0 onto the page we left.
+   * Only persist when the live location still matches the path we’re attributing.
+   */
+  if (pathname !== window.location.pathname) return;
   try {
     sessionStorage.setItem(scrollStorageKey(pathname), String(Math.max(0, y)));
   } catch {
@@ -164,6 +171,10 @@ function ensureHistoryScrollHooks() {
     },
     true,
   );
+
+  window.addEventListener(SCROLL_RESTORE_EVENT, () => {
+    scheduleRestore(window.location.pathname, lenisForRestore);
+  });
 
   /* Belt-and-suspenders: persist before internal navigations */
   document.addEventListener(

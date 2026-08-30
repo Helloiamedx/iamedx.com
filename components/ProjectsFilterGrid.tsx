@@ -18,6 +18,7 @@ import {
   peekProjectsExpandRestore,
   PROJECTS_COLLAPSE_EVENT,
   projectsVisibleStorageKey,
+  requestScrollRestore,
 } from "@/lib/projectsListRestore";
 import {
   gridSlotsPerBreak,
@@ -106,8 +107,14 @@ export function ProjectsFilterGrid({
       const restored = readStoredVisibleCount(filterKey, projects.length);
       setVisibleCount(restored);
       prevCountRef.current = restored;
+      /* Height grows after expand — re-apply saved Y once layout settles */
+      requestAnimationFrame(() => {
+        requestScrollRestore();
+        window.setTimeout(() => requestScrollRestore(), 80);
+        window.setTimeout(() => requestScrollRestore(), 320);
+      });
       /* Delay clear so React Strict Mode double-invoke still sees the flag */
-      window.setTimeout(() => clearProjectsExpandRestore(), 250);
+      window.setTimeout(() => clearProjectsExpandRestore(), 400);
     } else {
       setVisibleCount(INITIAL_VISIBLE);
       prevCountRef.current = INITIAL_VISIBLE;

@@ -4,20 +4,36 @@
  */
 
 const VISIBLE_STORAGE_PREFIX = "iamedx:projects-visible:";
+const EXPAND_RESTORE_KEY = "iamedx:projects-expand-restore";
 export const PROJECTS_COLLAPSE_EVENT = "iamedx:projects-collapse";
 
 let expandRestorePending = false;
 
 export function markProjectsExpandRestore() {
   expandRestorePending = true;
+  try {
+    sessionStorage.setItem(EXPAND_RESTORE_KEY, "1");
+  } catch {
+    /* private mode / quota */
+  }
 }
 
 export function peekProjectsExpandRestore() {
-  return expandRestorePending;
+  if (expandRestorePending) return true;
+  try {
+    return sessionStorage.getItem(EXPAND_RESTORE_KEY) === "1";
+  } catch {
+    return false;
+  }
 }
 
 export function clearProjectsExpandRestore() {
   expandRestorePending = false;
+  try {
+    sessionStorage.removeItem(EXPAND_RESTORE_KEY);
+  } catch {
+    /* private mode / quota */
+  }
 }
 
 export function projectsVisibleStorageKey(filterKey: string) {
@@ -51,4 +67,12 @@ export function clearProjectsVisibleStorage(filterKey: string) {
   } catch {
     /* private mode / quota */
   }
+}
+
+/** Ask SmoothScroll to re-apply saved Y after expand restores document height. */
+export const SCROLL_RESTORE_EVENT = "iamedx:scroll-restore";
+
+export function requestScrollRestore() {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(SCROLL_RESTORE_EVENT));
 }
