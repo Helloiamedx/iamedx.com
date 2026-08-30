@@ -6,7 +6,7 @@ import { whatsAppCta } from "@/content/nav";
 import { asset } from "@/lib/assets";
 import { cn } from "@/lib/utils";
 
-const WORDMARK_GIF = asset("/3D_SpinningWordmark.gif");
+const WORDMARK_GIF = asset("/3D_SpinningWordmark_optimize.gif");
 
 type ChallengeCtaProps = {
   className?: string;
