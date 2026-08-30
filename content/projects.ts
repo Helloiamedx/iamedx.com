@@ -220,6 +220,11 @@ export type Project = {
     ratio?: string;
   };
   /**
+   * When true, render `afterCoverVideo` / `afterCoverVideos` as the first
+   * gallery row(s), before stills / video pairs.
+   */
+  afterCoverVideoFirst?: boolean;
+  /**
    * Full-width videos after stills, in order.
    * When set, used instead of a single `afterCoverVideo`.
    */
@@ -1667,7 +1672,7 @@ const FOURTEENTH_PROJECT_COVER = projectCoverFromName(
 );
 const FOURTEENTH_PROJECT_COVER_VIDEO = projectCoverFromName(
   FOURTEENTH_PROJECT_CDN_FOLDER,
-  "video12.mp4",
+  "video.mp4",
 );
 const FOURTEENTH_PROJECT_HERO_VIDEO = projectCoverFromName(
   FOURTEENTH_PROJECT_CDN_FOLDER,
@@ -2019,11 +2024,15 @@ const SEVENTEENTH_PROJECT_IMPACT_BODY = [
   "After launch, many players shared unboxing videos of the product online. The amount of user-generated content showed that the product was not only being purchased, but genuinely enjoyed and appreciated by the fans.",
 ];
 
-/** Same as Halo 5 (contribution defaults), minus David Smith / James Brown / Emily Johnson */
+/** DPI + Best Link (shared by Cyberpunk dog + Dead Space statue) */
 const SEVENTEENTH_PROJECT_SPECIAL_THANKS: SpecialThanksEntry[] = [
   {
-    company: "TriForce Sales, LLC",
-    names: ["Michael Johnson", "Sarah Williams"],
+    company: "DPI Merchandising Inc.",
+    names: ["Angela McReynolds"],
+  },
+  {
+    company: "Best Link (USA) Corp. Ltd.",
+    names: ["Charlotte Tem"],
   },
 ];
 
@@ -2089,17 +2098,37 @@ const SEVENTEENTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
   },
 ];
 
-/** 「第十八个项目」— scaffold; media + copy TBD */
+/** 「第十八个项目」— card video1 + hover; hero video2; first row video3 */
 const EIGHTEENTH_PROJECT_NAME = "Dead Space Black Marker LED Statue";
-const EIGHTEENTH_PROJECT_CDN_FOLDER = EIGHTEENTH_PROJECT_NAME;
+/** CDN folder casing matches uploaded assets (not Title Case display name) */
+const EIGHTEENTH_PROJECT_CDN_FOLDER = "Dead space Black marker LED Statue";
 const EIGHTEENTH_PROJECT_SLUG = projectSlugFromName(EIGHTEENTH_PROJECT_NAME);
+const EIGHTEENTH_PROJECT_TAGLINE =
+  "Double helix shape. Alien writing. What could this alien object be?";
+const EIGHTEENTH_PROJECT_OVERVIEW = [
+  "Dead Space is a sci-fi survival horror game developed by Motive Studios and released in 2023. At the center of its story is the mysterious Black Marker, an alien artifact believed to hold the secrets of human evolution and eternal life. This project recreates the Black Marker as a 10-inch Polyresin LED statue, capturing its distinctive double-helix form, alien markings, and eerie glow. Limited to 1,000 pieces worldwide, it was designed as a collectible that brings one of Dead Space’s most iconic artifacts into the physical world.",
+];
+
+const EIGHTEENTH_PROJECT_CHALLENGES_BODY = [
+  "The main challenge was balancing light distribution and internal stability. Because the light source was hidden inside the resin sculpture, the LEDs needed to illuminate the intended areas evenly without creating visible hot spots or unwanted bright areas. At the same time, the light strip had to be securely fixed inside the hollow structure. Any movement during handling or transportation could cause the strip to shift, creating unwanted noise or even affecting the lighting effect.",
+];
+
+const EIGHTEENTH_PROJECT_EXECUTION_BODY = [
+  "I worked closely with the factory to test different LED configurations and spacing. We tested the distance between individual LEDs and determined when to use larger or smaller LEDs in different areas. This allowed us to concentrate more light where it was needed while keeping other areas darker, creating a more controlled and even lighting effect.",
+  "To prevent the LED strip from moving or rattling inside the resin body, I tested multiple adhesives against both the strip material and the resin surface. I ultimately selected a flexible RTV silicone adhesive that provided sufficient adhesion while also absorbing vibration and movement. This helped keep the light strip firmly in place without introducing unnecessary stress to the components.",
+];
+
+const EIGHTEENTH_PROJECT_IMPACT_BODY = [
+  "This project demonstrated our ability to work with light and resin as an integrated engineering and manufacturing challenge. Through the development and testing process, we proved that we could effectively control light distribution within a resin structure and achieve the intended visual effect.",
+  "The product was also highly valued by Dead Space fans, with strong demand on the secondary market and resale prices significantly above its original retail price. For collectors who love the IP, it became a particularly sought-after piece.",
+];
 const EIGHTEENTH_PROJECT_COVER = projectCoverFromName(
   EIGHTEENTH_PROJECT_CDN_FOLDER,
   "h1.jpg",
 );
 const EIGHTEENTH_PROJECT_COVER_VIDEO = projectCoverFromName(
   EIGHTEENTH_PROJECT_CDN_FOLDER,
-  "video.mp4",
+  "video1.mp4",
 );
 const EIGHTEENTH_PROJECT_HOVER_STILLS = [
   projectCoverFromName(EIGHTEENTH_PROJECT_CDN_FOLDER, "h1.jpg"),
@@ -2110,6 +2139,61 @@ const EIGHTEENTH_PROJECT_HERO_VIDEO = projectCoverFromName(
   EIGHTEENTH_PROJECT_CDN_FOLDER,
   "video2.mp4",
 );
+/** First gallery row under the hero */
+const EIGHTEENTH_PROJECT_AFTER_COVER_VIDEO = {
+  primary: projectCoverFromName(EIGHTEENTH_PROJECT_CDN_FOLDER, "video3.mp4"),
+  alt: "Dead Space Black Marker LED Statue",
+  ratio: "56.25%",
+} as const;
+
+const EIGHTEENTH_PROJECT_STILL = (fileName: string, alt: string) => ({
+  src: projectCoverFromName(EIGHTEENTH_PROJECT_CDN_FOLDER, fileName),
+  alt,
+});
+
+/** Row 2 — 1L | 1R (after video3) */
+const EIGHTEENTH_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    EIGHTEENTH_PROJECT_STILL("1l.jpg", "Dead Space Black Marker LED Statue 1L"),
+    EIGHTEENTH_PROJECT_STILL("1r.jpg", "Dead Space Black Marker LED Statue 1R"),
+  ],
+};
+
+/** Row 3 — 2L | 2R video pair (1500×2000 native) */
+const EIGHTEENTH_PROJECT_AFTER_COVER_VIDEO_PAIR = {
+  left: {
+    primary: projectCoverFromName(EIGHTEENTH_PROJECT_CDN_FOLDER, "2l.mp4"),
+    alt: "Dead Space Black Marker LED Statue 2L",
+  },
+  right: {
+    primary: projectCoverFromName(EIGHTEENTH_PROJECT_CDN_FOLDER, "2r.mp4"),
+    alt: "Dead Space Black Marker LED Statue 2R",
+  },
+  ratio: `${(2000 / 1500) * 100}%`,
+} as const;
+
+/** Rows 4–6 — 3L|3M|3R, 4L|4R, 5L|5R */
+const EIGHTEENTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      EIGHTEENTH_PROJECT_STILL("3l.jpg", "Dead Space Black Marker LED Statue 3L"),
+      EIGHTEENTH_PROJECT_STILL("3m.jpg", "Dead Space Black Marker LED Statue 3M"),
+      EIGHTEENTH_PROJECT_STILL("3r.jpg", "Dead Space Black Marker LED Statue 3R"),
+    ],
+  },
+  {
+    items: [
+      EIGHTEENTH_PROJECT_STILL("4l.jpg", "Dead Space Black Marker LED Statue 4L"),
+      EIGHTEENTH_PROJECT_STILL("4r.jpg", "Dead Space Black Marker LED Statue 4R"),
+    ],
+  },
+  {
+    items: [
+      EIGHTEENTH_PROJECT_STILL("5l.jpg", "Dead Space Black Marker LED Statue 5L"),
+      EIGHTEENTH_PROJECT_STILL("5r.jpg", "Dead Space Black Marker LED Statue 5R"),
+    ],
+  },
+];
 
 
 /** Default / home lead — End-to-End featured (NECROM Look Book Bundle) */
@@ -2976,12 +3060,12 @@ export const projects: Project[] = [
   {
     slug: EIGHTEENTH_PROJECT_SLUG,
     title: EIGHTEENTH_PROJECT_NAME,
-    materials: ["abs"],
+    materials: ["resin"],
     country: "global",
     ips: ["dead-space"],
     tags: involvementTags("end-to-end"),
-    summary: "",
-    tagline: "",
+    summary: EIGHTEENTH_PROJECT_TAGLINE,
+    tagline: EIGHTEENTH_PROJECT_TAGLINE,
     role: [
       "product-development",
       "sample-development",
@@ -2994,13 +3078,24 @@ export const projects: Project[] = [
     coverWidth: SHOWCASE_COVER_W,
     coverHeight: SHOWCASE_COVER_H,
     heroVideo: EIGHTEENTH_PROJECT_HERO_VIDEO,
+    afterCoverVideoFirst: true,
+    afterCoverVideo: EIGHTEENTH_PROJECT_AFTER_COVER_VIDEO,
+    afterCoverStills: EIGHTEENTH_PROJECT_AFTER_COVER_STILLS,
+    afterCoverVideoPair: EIGHTEENTH_PROJECT_AFTER_COVER_VIDEO_PAIR,
+    afterCoverExtraRows: EIGHTEENTH_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    overview: EIGHTEENTH_PROJECT_OVERVIEW,
+    challengesBody: EIGHTEENTH_PROJECT_CHALLENGES_BODY,
+    executionBody: EIGHTEENTH_PROJECT_EXECUTION_BODY,
+    impactBody: EIGHTEENTH_PROJECT_IMPACT_BODY,
     specialThanks: SEVENTEENTH_PROJECT_SPECIAL_THANKS,
     collaborators: SEVENTEENTH_PROJECT_COLLABORATORS,
     year: 2024,
     client: "Dead Space",
     featured: false,
-    challenge: "",
-    result: "",
+    challenge:
+      "Balance even LED light inside the resin form and keep the strip fixed so it doesn’t shift or rattle.",
+    result:
+      "Controlled light distribution in resin, with strong fan demand and secondary-market prices well above retail.",
   },
 ];
 

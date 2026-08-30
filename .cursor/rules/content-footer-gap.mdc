@@ -1,37 +1,37 @@
 ---
-description: Body→footer spacing equals footer top padding on every page
+description: Body↔challenge GIF equal pad — fixed mobile / desktop
 alwaysApply: true
 ---
 
-# Content ↔ footer gap
+# Content ↔ challenge gap
 
-Body content and the footer share **one** vertical rhythm token.
+Body content and the light challenge band (GIF / “bring me your challenge”) share **one** vertical pad token on `.site-footer__challenge`. Top is **90%** of that token (offsets GIF transparent headroom); bottom is **100%**. The black footer stage sits below that band.
 
-## Tokens (`:root` in `app/globals.css`)
+## Tokens (`:root` / `.site-footer__challenge` in `app/globals.css`)
 
-- `--footer-top-gap` — footer shell inner `padding-top` (`.site-footer__shell`)
-- `--content-footer-gap: var(--footer-top-gap)` — space from last body content to the footer’s top edge
+- `--challenge-band-pad-y` — **5.625rem (90px)** mobile; **7.5rem (120px)** from `900px` up
+- `--content-footer-gap: var(--challenge-band-pad-y)` — alias for other equal-air uses
+- `--footer-top-gap` — black shell inner top pad only (`.site-footer__shell`)
 
 Applied as:
 
 ```css
+.site-footer__challenge {
+  padding-top: calc(var(--challenge-band-pad-y) * 0.9);
+  padding-bottom: var(--challenge-band-pad-y);
+}
+
 .site-main > main {
-  padding-bottom: var(--content-footer-gap);
+  padding-bottom: 0;
 }
 ```
 
-Never as margin on `.site-footer` / `.site-end` (outer footer margin caused canvas 露白).
-
 ## Rule
 
-**Footer top padding = body→footer gap.** Same value on mobile and desktop. Change `--footer-top-gap` once → both sides update.
+**Challenge band bottom pad = full token; top = 90%.** Change `--challenge-band-pad-y` once → both scale.
 
 ## Do not
 
-- Zero out `main` `padding-bottom` on individual pages (home / about / services / etc.) to “meet” the footer
-- Add a second footer-oriented bottom pad on the last section that stacks on top of `--content-footer-gap`
-- Invent a page-local gap that differs from `--footer-top-gap`
-
-Last sections may keep **internal** bottom padding for in-page rhythm only when it is clearly not the footer spacer; prefer `padding-bottom: 0` on the last band and let `main` own the footer air.
-
-Known last-band zeros: `.svc-demo__stage:last-of-type`, `.home-page > .section.home-page__section:last-child`, `.about-content-sheet`, `.collection-detail__body`, `.faq-page`.
+- Reintroduce `main` `padding-bottom` for footer air
+- Stack a second footer-oriented bottom pad on the last page section
+- Drop the 10% top optical trim without an explicit ask

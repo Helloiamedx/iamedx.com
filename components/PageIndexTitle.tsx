@@ -4,7 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /** Delay before index-page titles fade in after navigation */
-export const PAGE_INDEX_TITLE_DELAY_MS = 1200;
+export const PAGE_INDEX_TITLE_DELAY_MS = 650;
 
 type PageIndexTitleProps = {
   children: ReactNode;
@@ -13,8 +13,8 @@ type PageIndexTitleProps = {
 };
 
 /**
- * Shared Services / Projects / Thoughts index title —
- * reserved in layout immediately, revealed after 1.2s.
+ * Shared Services / Projects / Thoughts / About / FAQ index title —
+ * reserved in layout immediately, revealed after 0.65s.
  */
 export function PageIndexTitle({
   children,

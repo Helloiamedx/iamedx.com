@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { FilterResults } from "@/components/FilterResults";
 import { ProjectFeaturedLead } from "@/components/ProjectFeaturedLead";
 import { ProjectFilter } from "@/components/ProjectFilter";
@@ -14,13 +15,16 @@ import {
   parseMaterialSelection,
   projectsFilterSelectionCount,
 } from "@/content/projects";
-import { shuffleArray } from "@/lib/utils";
+import { projectsOrderSeed, shuffleArrayWithSeed } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Projects",
   description:
     "Selected projects showcasing challenges, solutions, and value created throughout the manufacturing journey.",
 };
+
+/** Visitor-IP seed — must not statically cache one shuffle for everyone. */
+export const dynamic = "force-dynamic";
 
 type ProjectsPageProps = {
   searchParams: Promise<{
@@ -40,6 +44,19 @@ const ipSlugs = projectIps.map((label) =>
 
 function isIp(value?: string): value is string {
   return !!value && ipSlugs.includes(value);
+}
+
+function visitorIpFromHeaders(headerList: Headers): string {
+  const forwarded = headerList.get("x-forwarded-for");
+  if (forwarded) {
+    const first = forwarded.split(",")[0]?.trim();
+    if (first) return first;
+  }
+  return (
+    headerList.get("cf-connecting-ip") ??
+    headerList.get("x-real-ip") ??
+    "unknown"
+  );
 }
 
 export default async function ProjectsPage({ searchParams }: ProjectsPageProps) {
@@ -73,8 +90,11 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
   );
   const showFeaturedLead = !hasExplicitFilters || featuredMatchesFilters;
 
-  const listed = shuffleArray(
+  const headerList = await headers();
+  const orderSeed = projectsOrderSeed(visitorIpFromHeaders(headerList));
+  const listed = shuffleArrayWithSeed(
     filtered.filter((project) => project.slug !== featuredLead.slug),
+    orderSeed,
   );
 
   const filterKey = [

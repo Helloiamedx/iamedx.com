@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import { HeroSegmentVideo } from "@/components/HeroSegmentVideo";
 import { OriginButton } from "@/components/ui/origin-button";
 import { ProjectFallbackVideo } from "@/components/ProjectFallbackVideo";
+import { SyncedVideoPair } from "@/components/SyncedVideoPair";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
 import { YouTubeBackground } from "@/components/YouTubeBackground";
 import { getCaseCopySections } from "@/content/caseCopy";
@@ -156,6 +157,28 @@ function buildCaseMedia(project: Project): MediaItem[] {
   const media: MediaItem[] = [];
   const stillRowRatio = project.afterCoverStills?.ratio;
 
+  const pushAfterCoverProcessVideo = () => {
+    if (project.afterCoverVideos?.length) {
+      for (const clip of project.afterCoverVideos) {
+        media.push({
+          kind: "video",
+          primary: clip.primary,
+          fallback: clip.fallback,
+          alt: clip.alt,
+          ratio: clip.ratio ?? "56.25%",
+        });
+      }
+    } else if (project.afterCoverVideo) {
+      media.push({
+        kind: "video",
+        primary: project.afterCoverVideo.primary,
+        fallback: project.afterCoverVideo.fallback,
+        alt: project.afterCoverVideo.alt,
+        ratio: project.afterCoverVideo.ratio ?? "56.25%",
+      });
+    }
+  };
+
   if (project.galleryLeadImage) {
     media.push({
       kind: "full",
@@ -163,6 +186,10 @@ function buildCaseMedia(project: Project): MediaItem[] {
       alt: project.title,
       ratio: project.galleryLeadRatio,
     });
+  }
+
+  if (project.afterCoverVideoFirst) {
+    pushAfterCoverProcessVideo();
   }
 
   if (project.afterCoverStills) {
@@ -253,24 +280,8 @@ function buildCaseMedia(project: Project): MediaItem[] {
     pushAfterCoverStillVideoPair();
   }
 
-  if (project.afterCoverVideos?.length) {
-    for (const clip of project.afterCoverVideos) {
-      media.push({
-        kind: "video",
-        primary: clip.primary,
-        fallback: clip.fallback,
-        alt: clip.alt,
-        ratio: clip.ratio ?? "56.25%",
-      });
-    }
-  } else if (project.afterCoverVideo) {
-    media.push({
-      kind: "video",
-      primary: project.afterCoverVideo.primary,
-      fallback: project.afterCoverVideo.fallback,
-      alt: project.afterCoverVideo.alt,
-      ratio: project.afterCoverVideo.ratio ?? "56.25%",
-    });
+  if (!project.afterCoverVideoFirst) {
+    pushAfterCoverProcessVideo();
   }
 
   const stills = project.afterVideoStills ?? [];
@@ -593,23 +604,12 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
               {media.map((item, index) => {
                 if (item.kind === "video-pair") {
                   return (
-                    <div
+                    <SyncedVideoPair
                       key={`video-pair-${index}`}
-                      className="project-case-demo__pair project-case-demo__pair--video"
-                    >
-                      <ProjectFallbackVideo
-                        primarySrc={item.left.primary}
-                        fallbackSrc={item.left.fallback}
-                        alt={item.left.alt}
-                        ratio={item.ratio}
-                      />
-                      <ProjectFallbackVideo
-                        primarySrc={item.right.primary}
-                        fallbackSrc={item.right.fallback}
-                        alt={item.right.alt}
-                        ratio={item.ratio}
-                      />
-                    </div>
+                      left={item.left}
+                      right={item.right}
+                      ratio={item.ratio}
+                    />
                   );
                 }
                 if (item.kind === "still-video-pair") {

@@ -188,9 +188,11 @@ export function getCollectionBySlug(slug: string): ProjectCollection | undefined
   return projectCollections.find((collection) => collection.slug === slug);
 }
 
-export function getCollectionForBreakIndex(index: number): ProjectCollection {
-  const list = projectCollections;
-  return list[index % list.length]!;
+/** One collection per break index — no cycling once the list is exhausted. */
+export function getCollectionForBreakIndex(
+  index: number,
+): ProjectCollection | null {
+  return projectCollections[index] ?? null;
 }
 
 export type CollectionProjectRow = {

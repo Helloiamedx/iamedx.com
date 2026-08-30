@@ -204,11 +204,12 @@
   --font-label: "FK Grotesk Mono", ui-monospace, Menlo, monospace;
   --font-type-label: var(--font-label);
   /*
-   * Footer top pad ↔ body→footer gap — same token, all breakpoints.
-   * Applied as main padding-bottom (never footer margin — avoids canvas 露白).
+   * Body ↔ challenge GIF band — equal top/bottom pad.
+   * Mobile / desktop fixed values (not fluid). Black shell keeps --footer-top-gap.
    */
   --footer-top-gap: clamp(3.25rem, 5.75vw, 4.5rem);
-  --content-footer-gap: var(--footer-top-gap);
+  --challenge-band-pad-y: 5.625rem; /* 90px — mobile (4.5rem × 1.25) */
+  --content-footer-gap: var(--challenge-band-pad-y);
   /*
    * Projects + Insights index card row gap (vertical). Projects is source of truth.
    */
@@ -276,6 +277,12 @@
 @media (min-width: 800px) {
   :root {
     --shell-gutter: 16px;
+  }
+}
+
+@media (min-width: 900px) {
+  :root {
+    --challenge-band-pad-y: 7.5rem; /* 120px — desktop (6rem × 1.25) */
   }
 }
 
@@ -458,8 +465,8 @@ button.origin-button {
   flex: 1 0 auto;
   box-sizing: border-box;
   background: var(--site-bg);
-  /* Every page: body → footer edge = footer inner top pad */
-  padding-bottom: var(--content-footer-gap);
+  /* Body → GIF air lives on .site-footer__challenge padding-top */
+  padding-bottom: 0;
 }
 
 /*
@@ -619,7 +626,7 @@ button.origin-button {
   .home-someone .origin-button:hover,
   .project-case-demo__hero .origin-button:hover,
   .projects-collection .origin-button:hover,
-  .site-footer .origin-button:hover {
+  .site-footer__stage .origin-button:hover {
     background: #fff;
     color: #0a0a0a;
     border-color: #fff;
@@ -629,7 +636,7 @@ button.origin-button {
   .home-someone .origin-button-wrap:has(.origin-button:hover),
   .project-case-demo__hero .origin-button-wrap:has(.origin-button:hover),
   .projects-collection .origin-button-wrap:has(.origin-button:hover),
-  .site-footer .origin-button-wrap:has(.origin-button:hover) {
+  .site-footer__stage .origin-button-wrap:has(.origin-button:hover) {
     color: #fff;
   }
 }
@@ -656,12 +663,12 @@ button.origin-button.is-pressed {
 .home-someone .origin-button:active,
 .project-case-demo__hero .origin-button:active,
 .projects-collection .origin-button:active,
-.site-footer .origin-button:active,
+.site-footer__stage .origin-button:active,
 .hero .origin-button.is-pressed,
 .home-someone .origin-button.is-pressed,
 .project-case-demo__hero .origin-button.is-pressed,
 .projects-collection .origin-button.is-pressed,
-.site-footer .origin-button.is-pressed {
+.site-footer__stage .origin-button.is-pressed {
   background: #fff !important;
   color: #0a0a0a !important;
   border-color: #fff !important;
@@ -671,12 +678,12 @@ button.origin-button.is-pressed {
 .home-someone .origin-button-wrap:has(.origin-button:active),
 .project-case-demo__hero .origin-button-wrap:has(.origin-button:active),
 .projects-collection .origin-button-wrap:has(.origin-button:active),
-.site-footer .origin-button-wrap:has(.origin-button:active),
+.site-footer__stage .origin-button-wrap:has(.origin-button:active),
 .hero .origin-button-wrap:has(.origin-button.is-pressed),
 .home-someone .origin-button-wrap:has(.origin-button.is-pressed),
 .project-case-demo__hero .origin-button-wrap:has(.origin-button.is-pressed),
 .projects-collection .origin-button-wrap:has(.origin-button.is-pressed),
-.site-footer .origin-button-wrap:has(.origin-button.is-pressed) {
+.site-footer__stage .origin-button-wrap:has(.origin-button.is-pressed) {
   color: #fff !important;
 }
 
@@ -1236,12 +1243,24 @@ body.is-mobile-menu-open .mobile-menu a {
   overflow: clip;
   flex-shrink: 0;
   margin: 0;
-  background: var(--footer-bg);
+  /* Outer shell stays clear — light challenge sits above black stage */
+  background: transparent;
   color: var(--footer-ink);
   font-size: 1.125rem;
-  /* Wordmark sits on the bottom edge; safe-area only if needed on home indicator */
   padding: 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  border: 0;
+}
+
+/* Light challenge band — outside / above the black footer stage.
+ * Bottom = full --challenge-band-pad-y; top = 90% to offset GIF transparent headroom. */
+.site-footer__challenge {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: calc(var(--challenge-band-pad-y) * 0.9) var(--shell-gutter)
+    var(--challenge-band-pad-y);
+  background: var(--site-bg);
+  color: #0a0a0a;
 }
 
 .site-footer__stage {
@@ -1250,10 +1269,12 @@ body.is-mobile-menu-open .mobile-menu a {
   width: 100%;
   margin: 0;
   overflow: hidden;
-  background: #000;
+  background: var(--footer-bg);
+  color: var(--footer-ink);
   min-height: 0;
   display: flex;
   flex-direction: column;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
 }
 
 .site-footer__shell {
@@ -6695,6 +6716,52 @@ html[data-hero-copy-ready="1"] .hero__content {
   padding-bottom: 0;
 }
 
+.svc-challenge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1.25rem, 3vw, 1.85rem);
+  width: min(var(--shell-max), 100%);
+  margin-inline: auto;
+  text-align: center;
+}
+
+.svc-challenge__mark {
+  display: block;
+  width: min(54.6vw, 22.75rem); /* mobile: prior × 1.3 */
+  height: auto;
+  margin: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (min-width: 900px) {
+  .svc-challenge__mark {
+    width: min(42vw, 35rem);
+  }
+}
+
+/* Same typeface recipe as collection break headline (.projects-collection__headline) */
+.svc-challenge__headline {
+  margin: 0;
+  padding: 0;
+  max-width: 18ch;
+  font-family: var(--font-fine);
+  font-weight: 100;
+  font-synthesis: none;
+  font-size: clamp(1.75rem, 5.5vw, 3.25rem);
+  letter-spacing: 0.04em;
+  line-height: 1.05;
+  text-transform: uppercase;
+  text-align: center;
+  text-wrap: balance;
+  color: #0a0a0a;
+}
+
+.svc-challenge .origin-button-wrap {
+  margin-top: clamp(0.15rem, 0.8vw, 0.35rem);
+}
+
 .svc-demo__stage--1,
 .svc-demo__stage--2,
 .svc-demo__stage--3 {
@@ -7086,7 +7153,7 @@ html[data-hero-copy-ready="1"] .hero__content {
   max-height: min(88svh, 52rem);
   min-height: min(58svh, 26rem);
   overflow: hidden;
-  border-radius: clamp(1.25rem, 2.8vw, 1.75rem);
+  border-radius: 0;
   background: #fff;
   color: #0a0a0a;
   box-shadow: 0 28px 100px rgba(0, 0, 0, 0.2);
@@ -7113,7 +7180,7 @@ html[data-hero-copy-ready="1"] .hero__content {
   margin: 0;
   padding: 0;
   border: 0;
-  border-radius: 999px;
+  border-radius: 0;
   background: #1d1d1f;
   color: #fff;
   cursor: pointer;
@@ -7128,6 +7195,8 @@ html[data-hero-copy-ready="1"] .hero__content {
 .svc-workflow__body {
   flex: 1;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -9391,7 +9460,7 @@ body:has(.about-page) .site-end {
   position: relative;
   z-index: 2;
   margin-top: 0;
-  background: #000;
+  background: transparent;
 }
 
 .about-boua__container {

@@ -10,9 +10,7 @@ export type ProjectsIndexSegment = {
 
 /**
  * After every `gridSlotsPerBreak` grid cards, insert a collection section
- * (not a project card).
- *
- * TEMP preview: every 4 cards. Restore desktop 6 / mobile 3 when ready.
+ * (not a project card). Each collection appears at most once — no reuse.
  */
 export function segmentProjectsForIndex(
   projects: Project[],
@@ -42,7 +40,7 @@ export function segmentProjectsForIndex(
   return segments;
 }
 
-/** TEMP preview: every 4 cards. Restore: desktop 6 / mobile 3. */
+/** One collection break after every 6 project cards. */
 export function gridSlotsPerBreak(_isSingleColumn: boolean): number {
-  return 4;
+  return 6;
 }

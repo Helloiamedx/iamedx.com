@@ -10,10 +10,9 @@ import {
   segmentProjectsForIndex,
 } from "@/lib/projectsIndexLayout";
 
-/** First screen: featured lead + grid-list projects (with interleaved collection breaks). */
-/* TEMP preview — 12 covers three 4-card breaks. Restore to 9 later. */
-const INITIAL_VISIBLE = 12;
-const LOAD_MORE_STEP = 7;
+/** First screen / each “See more”: one group = 6 cards (+ collection while any remain). */
+const INITIAL_VISIBLE = 6;
+const LOAD_MORE_STEP = 6;
 
 const SINGLE_COLUMN_MQ = "(max-width: 700px)";
 

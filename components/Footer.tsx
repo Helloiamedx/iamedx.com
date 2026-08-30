@@ -9,6 +9,7 @@ import {
   officeInfo,
   whatsAppCta,
 } from "@/content/nav";
+import { ChallengeCta } from "@/components/ServicesChallengeCta";
 import { OriginButton } from "@/components/ui/origin-button";
 import { RollLink } from "@/components/RollLink";
 import { asset } from "@/lib/assets";
@@ -18,6 +19,10 @@ export function Footer() {
 
   return (
     <footer className="site-footer">
+      <div className="site-footer__challenge">
+        <ChallengeCta />
+      </div>
+
       <div className="site-footer__stage">
         <div className="site-footer__shell">
           <div className="site-footer__top">
