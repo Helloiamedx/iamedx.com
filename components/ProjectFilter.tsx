@@ -253,7 +253,13 @@ export function ProjectFilter({
     close();
   };
 
-  const clearAll = () => {
+  /** Drawer only: reset multi-select draft options (does not change applied results). */
+  const clearDraftOptions = () => {
+    setDraft({ involvement: "all", material: "all", country: "all" });
+  };
+
+  /** Outside Clear: drop applied filters and show all projects. */
+  const clearAppliedFilters = () => {
     setDraft({ involvement: "all", material: "all", country: "all" });
     router.push("/projects", { scroll: false });
     close();
@@ -417,7 +423,7 @@ export function ProjectFilter({
                 <button
                   type="button"
                   className="project-filter-drawer__clear"
-                  onClick={clearAll}
+                  onClick={clearDraftOptions}
                 >
                   Clear all
                 </button>
@@ -430,17 +436,28 @@ export function ProjectFilter({
 
   return (
     <>
-      <button
-        ref={triggerRef}
-        type="button"
-        className="project-filter-trigger"
-        aria-expanded={open || visible}
-        aria-controls={open || visible ? panelId : undefined}
-        onClick={() => setOpen(true)}
-      >
-        Filter
-        {filtersActive ? ` (${matchCount})` : ""}
-      </button>
+      <div className="project-filter-bar">
+        <button
+          ref={triggerRef}
+          type="button"
+          className={`project-filter-trigger${filtersActive ? " is-active" : ""}`}
+          aria-expanded={open || visible}
+          aria-controls={open || visible ? panelId : undefined}
+          onClick={() => setOpen(true)}
+        >
+          Filter
+          {filtersActive ? ` (${matchCount})` : ""}
+        </button>
+        {filtersActive ? (
+          <button
+            type="button"
+            className="project-filter-clear"
+            onClick={clearAppliedFilters}
+          >
+            Clear
+          </button>
+        ) : null}
+      </div>
       {drawer}
     </>
   );

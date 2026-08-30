@@ -1,6 +1,7 @@
 import {
   type CollaboratorCredits,
   type SpecialThanksEntry,
+  CONTRIBUTION_COLLABORATORS,
   SGS_CREDIT_COMPANY,
   WOODEN_BOX_COLLABORATORS,
   WOODEN_BOX_SPECIAL_THANKS,
@@ -1876,6 +1877,241 @@ const FIFTEENTH_PROJECT_IMPACT_BODY = [
   "The final box maintained the visual proportions of the original design while using commercially available hardware. Through early sampling, hardware optimization, process testing, and structural adjustments, I helped turn a design-heavy concept into a stable and production-ready collectible box.",
 ];
 
+/** 「第十六个项目」— End-to-End; card cover + hover stills (detail media TBD) */
+const SIXTEENTH_PROJECT_NAME = "Dragon Age Grey Wardens Banner";
+const SIXTEENTH_PROJECT_CDN_FOLDER = SIXTEENTH_PROJECT_NAME;
+const SIXTEENTH_PROJECT_SLUG = projectSlugFromName(SIXTEENTH_PROJECT_NAME);
+const SIXTEENTH_PROJECT_TAGLINE =
+  "Give your banner their very own Weisshaupt Fortress.";
+const SIXTEENTH_PROJECT_COVER = projectCoverFromName(
+  SIXTEENTH_PROJECT_CDN_FOLDER,
+  "1.jpg",
+);
+const SIXTEENTH_PROJECT_COVER_VIDEO = projectCoverFromName(
+  SIXTEENTH_PROJECT_CDN_FOLDER,
+  "video.mp4",
+);
+const SIXTEENTH_PROJECT_HOVER_STILLS = [
+  projectCoverFromName(SIXTEENTH_PROJECT_CDN_FOLDER, "1.jpg"),
+  projectCoverFromName(SIXTEENTH_PROJECT_CDN_FOLDER, "2.jpg"),
+  projectCoverFromName(SIXTEENTH_PROJECT_CDN_FOLDER, "3.jpg"),
+] as [string, string, string];
+
+const SIXTEENTH_PROJECT_OVERVIEW = [
+  "In the Dragon Age series, the Grey Wardens are an ancient and mysterious group of warriors dedicated to combating and preventing the Blight, a catastrophe instigated by an ancient evil being known as the Archdemon.",
+  "The Grey Wardens' origin dates back to the first Blight, around -395 in the Dragon Age timeline. A group of brave warriors united to fight against the darkspawn, a cursed breed of beings living underground and attacking the surface world under the influence of the Archdemon.",
+];
+
+const SIXTEENTH_PROJECT_CHALLENGES_BODY = [
+  "The main challenge was in getting two small but critical details right. The Dragon Age lettering on the top had a complex cutout structure that could not be reproduced directly through laser cutting, as some parts of the letters would become disconnected after cutting. We needed to find a way to preserve the original design while still achieving a clean and complete result.",
+  "The hanging rod also required careful consideration. Since the customer would need to assemble it themselves, the connection between the rod and the lotus-shaped end pieces had to be strong enough to withstand assembly, while still being simple and intuitive to put together. The connecting parts were relatively thin, so choosing the wrong material or connection method could easily cause them to crack or break during assembly.",
+];
+
+const SIXTEENTH_PROJECT_EXECUTION_BODY = [
+  "I worked closely with the factory through multiple rounds of testing, focusing on both the connection mechanism and material selection.",
+  "For the hanging rod, we eventually developed a pin-based connection system. The rod and lotus-shaped ends were made from beech wood, while bamboo pins were used to connect them. Bamboo provided enough hardness for a secure connection, while the natural expansion of beech helped the two materials grip each other firmly. We also tested and adjusted the insertion depth of the pins to achieve a balance between stability and easy assembly.",
+  "For the Dragon Age lettering, I worked directly with the factory workers to find a practical alternative to laser cutting. We ultimately decided to apply the individual lettering pieces by hand. Although this added considerable manual work, it allowed us to preserve the original font design and achieve a clean final result.",
+];
+
+const SIXTEENTH_PROJECT_IMPACT_BODY = [
+  "The product quickly proved its market appeal, with pre-orders exceeding the initial order quantity before production was even completed. Despite a relatively high retail price of $65 per piece, demand remained strong enough that we had to restock after the initial production run sold out.",
+];
+
+const SIXTEENTH_PROJECT_STILL = (fileName: string, alt: string) => ({
+  src: projectCoverFromName(SIXTEENTH_PROJECT_CDN_FOLDER, fileName),
+  alt,
+});
+
+/** Detail gallery row 1 — 1L | 1R (native asset dimensions) */
+const SIXTEENTH_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    SIXTEENTH_PROJECT_STILL("1l.jpg", "Dragon Age Grey Wardens Banner 1L"),
+    SIXTEENTH_PROJECT_STILL("1r.jpg", "Dragon Age Grey Wardens Banner 1R"),
+  ],
+};
+
+/** Detail gallery rows after 1L|1R — native sizes (no forced ratio) */
+const SIXTEENTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      SIXTEENTH_PROJECT_STILL("2f.jpg", "Dragon Age Grey Wardens Banner 2"),
+    ],
+  },
+  {
+    items: [
+      SIXTEENTH_PROJECT_STILL("3l.jpg", "Dragon Age Grey Wardens Banner 3L"),
+      SIXTEENTH_PROJECT_STILL("3r.jpg", "Dragon Age Grey Wardens Banner 3R"),
+    ],
+  },
+];
+
+/** Detail gallery row 4 — full-width process clip under 3L|3R */
+const SIXTEENTH_PROJECT_AFTER_COVER_VIDEO = {
+  primary: projectCoverFromName(SIXTEENTH_PROJECT_CDN_FOLDER, "video3.mp4"),
+  alt: "Dragon Age Grey Wardens Banner process",
+  ratio: "56.25%",
+} as const;
+
+/** Detail gallery row 5 — 4L | 4M | 4R (native) after the process video */
+const SIXTEENTH_PROJECT_AFTER_VIDEO_ROW = {
+  items: [
+    SIXTEENTH_PROJECT_STILL("4l.jpg", "Dragon Age Grey Wardens Banner 4L"),
+    SIXTEENTH_PROJECT_STILL("4m.jpg", "Dragon Age Grey Wardens Banner 4M"),
+    SIXTEENTH_PROJECT_STILL("4r.jpg", "Dragon Age Grey Wardens Banner 4R"),
+  ],
+};
+
+/** Detail gallery last row — full-width closing clip */
+const SIXTEENTH_PROJECT_END_VIDEO = {
+  primary: projectCoverFromName(SIXTEENTH_PROJECT_CDN_FOLDER, "video4.mp4"),
+  alt: "Dragon Age Grey Wardens Banner closing",
+  ratio: "56.25%",
+} as const;
+
+const SIXTEENTH_PROJECT_HERO_VIDEO = projectCoverFromName(
+  SIXTEENTH_PROJECT_CDN_FOLDER,
+  "video2.mp4",
+);
+
+/** Same as Cyberpunk Systems Banner, plus Miss Wang */
+const SIXTEENTH_PROJECT_COLLABORATORS: CollaboratorCredits = {
+  names: ["Mr. Chen Hua Xing", "Miss Wang"],
+};
+
+/** 「第十七个项目」— End-to-End; card video + hover stills; detail hero only */
+const SEVENTEENTH_PROJECT_NAME = "Cyberpunk 2077 V's Dashboard Dog Replica";
+const SEVENTEENTH_PROJECT_CDN_FOLDER = SEVENTEENTH_PROJECT_NAME;
+const SEVENTEENTH_PROJECT_SLUG = projectSlugFromName(SEVENTEENTH_PROJECT_NAME);
+const SEVENTEENTH_PROJECT_TAGLINE = "Every Dog Has Its Ride!";
+/** Index card fallback still — same asset as hover1 until a dedicated poster lands */
+const SEVENTEENTH_PROJECT_COVER = projectCoverFromName(
+  SEVENTEENTH_PROJECT_CDN_FOLDER,
+  "h1.jpg",
+);
+const SEVENTEENTH_PROJECT_COVER_VIDEO = projectCoverFromName(
+  SEVENTEENTH_PROJECT_CDN_FOLDER,
+  "video.mp4",
+);
+const SEVENTEENTH_PROJECT_HOVER_STILLS = [
+  projectCoverFromName(SEVENTEENTH_PROJECT_CDN_FOLDER, "h1.jpg"),
+  projectCoverFromName(SEVENTEENTH_PROJECT_CDN_FOLDER, "h2.jpg"),
+  projectCoverFromName(SEVENTEENTH_PROJECT_CDN_FOLDER, "h3.jpg"),
+] as [string, string, string];
+const SEVENTEENTH_PROJECT_HERO_VIDEO = projectCoverFromName(
+  SEVENTEENTH_PROJECT_CDN_FOLDER,
+  "video2.mp4",
+);
+const SEVENTEENTH_PROJECT_OVERVIEW = [
+  "Inspired by the bobblehead pup, as seen on V’s dashboard in Cyberpunk 2077, this 1:1 scale replica is the perfect Night City souvenir. Just like the in-game version, V’s Dashboard Cyberdog is meticulously modeled and comes with a loud punk-attitude and charm. With its spiked collar, metal ear-rings, tattoos — and not to mention its cybernetic eyepiece — it’s clear this dog’s bark is every bit as badass as its bite!",
+];
+
+const SEVENTEENTH_PROJECT_CHALLENGES_BODY = [
+  "One of the biggest challenges was determining the right size for the product. It needed to work across different settings: at home, it could easily feel too small, while inside a car, it could quickly become too large. We also had to make sure the size would not interfere with the driver’s visibility, which made real-world testing especially important.",
+  "Another challenge was getting the dog’s expression right. The character needed to feel both loyal and intimidating, but as a dog, its facial expression alone was not enough to communicate a strong sense of aggression. We had to explore how other visual elements, such as its muscles, teeth, and mouth details, could strengthen that feeling without losing the character’s identity.",
+];
+
+const SEVENTEENTH_PROJECT_EXECUTION_BODY = [
+  "I arranged 3D-printed prototypes and tested them in different types of vehicles, including SUVs and sedans. By placing the model inside actual cars, I could compare its proportions in real-world environments and adjust the size accordingly. The goal was to make sure it looked substantial without becoming distracting or blocking the driver’s line of sight.",
+  "For the character expression, I used AI-generated variations to test different facial treatments and compare which ones worked best. In the end, we found that emphasizing the teeth and the color inside the mouth created the strongest sense of aggression while still keeping the dog’s overall character intact.",
+];
+
+const SEVENTEENTH_PROJECT_IMPACT_BODY = [
+  "After launch, many players shared unboxing videos of the product online. The amount of user-generated content showed that the product was not only being purchased, but genuinely enjoyed and appreciated by the fans.",
+];
+
+/** Same as Halo 5 (contribution defaults), minus David Smith / James Brown / Emily Johnson */
+const SEVENTEENTH_PROJECT_SPECIAL_THANKS: SpecialThanksEntry[] = [
+  {
+    company: "TriForce Sales, LLC",
+    names: ["Michael Johnson", "Sarah Williams"],
+  },
+];
+
+/** Halo 5 collaborators + Mr. Zhang under the same company as Mr. Mao */
+const SEVENTEENTH_PROJECT_COLLABORATORS: CollaboratorCredits = {
+  names: [...CONTRIBUTION_COLLABORATORS.names],
+  partners: [
+    {
+      company: "Zhongshan Maotai Customized Craftsmanship Co., Ltd.",
+      names: ["Mr. Mao", "Mr. Zhang"],
+    },
+  ],
+};
+
+const SEVENTEENTH_PROJECT_STILL = (fileName: string, alt: string) => ({
+  src: projectCoverFromName(SEVENTEENTH_PROJECT_CDN_FOLDER, fileName),
+  alt,
+});
+
+/**
+ * Detail gallery — row = number, l/m/r = left/middle/right.
+ * 1–3 & 6: pair; 4–5: three-up.
+ */
+const SEVENTEENTH_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    SEVENTEENTH_PROJECT_STILL("1l.jpg", "V's Dashboard Dog Replica 1L"),
+    SEVENTEENTH_PROJECT_STILL("1r.jpg", "V's Dashboard Dog Replica 1R"),
+  ],
+};
+
+const SEVENTEENTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      SEVENTEENTH_PROJECT_STILL("2l.jpg", "V's Dashboard Dog Replica 2L"),
+      SEVENTEENTH_PROJECT_STILL("2r.jpg", "V's Dashboard Dog Replica 2R"),
+    ],
+  },
+  {
+    items: [
+      SEVENTEENTH_PROJECT_STILL("3l.jpg", "V's Dashboard Dog Replica 3L"),
+      SEVENTEENTH_PROJECT_STILL("3r.jpg", "V's Dashboard Dog Replica 3R"),
+    ],
+  },
+  {
+    items: [
+      SEVENTEENTH_PROJECT_STILL("4l.jpg", "V's Dashboard Dog Replica 4L"),
+      SEVENTEENTH_PROJECT_STILL("4m.jpg", "V's Dashboard Dog Replica 4M"),
+      SEVENTEENTH_PROJECT_STILL("4r.jpg", "V's Dashboard Dog Replica 4R"),
+    ],
+  },
+  {
+    items: [
+      SEVENTEENTH_PROJECT_STILL("5l.jpg", "V's Dashboard Dog Replica 5L"),
+      SEVENTEENTH_PROJECT_STILL("5m.jpg", "V's Dashboard Dog Replica 5M"),
+      SEVENTEENTH_PROJECT_STILL("5r.jpg", "V's Dashboard Dog Replica 5R"),
+    ],
+  },
+  {
+    items: [
+      SEVENTEENTH_PROJECT_STILL("6l.jpg", "V's Dashboard Dog Replica 6L"),
+      SEVENTEENTH_PROJECT_STILL("6r.jpg", "V's Dashboard Dog Replica 6R"),
+    ],
+  },
+];
+
+/** 「第十八个项目」— scaffold; media + copy TBD */
+const EIGHTEENTH_PROJECT_NAME = "Dead Space Black Marker LED Statue";
+const EIGHTEENTH_PROJECT_CDN_FOLDER = EIGHTEENTH_PROJECT_NAME;
+const EIGHTEENTH_PROJECT_SLUG = projectSlugFromName(EIGHTEENTH_PROJECT_NAME);
+const EIGHTEENTH_PROJECT_COVER = projectCoverFromName(
+  EIGHTEENTH_PROJECT_CDN_FOLDER,
+  "h1.jpg",
+);
+const EIGHTEENTH_PROJECT_COVER_VIDEO = projectCoverFromName(
+  EIGHTEENTH_PROJECT_CDN_FOLDER,
+  "video.mp4",
+);
+const EIGHTEENTH_PROJECT_HOVER_STILLS = [
+  projectCoverFromName(EIGHTEENTH_PROJECT_CDN_FOLDER, "h1.jpg"),
+  projectCoverFromName(EIGHTEENTH_PROJECT_CDN_FOLDER, "h2.jpg"),
+  projectCoverFromName(EIGHTEENTH_PROJECT_CDN_FOLDER, "h3.jpg"),
+] as [string, string, string];
+const EIGHTEENTH_PROJECT_HERO_VIDEO = projectCoverFromName(
+  EIGHTEENTH_PROJECT_CDN_FOLDER,
+  "video2.mp4",
+);
+
+
 /** Default / home lead — End-to-End featured (NECROM Look Book Bundle) */
 export const projectsFeaturedLead: ProjectsFeaturedLead = {
   slug: FIFTH_PROJECT_SLUG,
@@ -2659,6 +2895,112 @@ export const projects: Project[] = [
       "Match design-heavy hardware, keep gold paint edges clean, and stop the box tipping when the lid opens.",
     result:
       "A proportionally faithful, stable collectible box ready for production with commercially available hardware.",
+  },
+  {
+    slug: SIXTEENTH_PROJECT_SLUG,
+    title: SIXTEENTH_PROJECT_NAME,
+    materials: ["fabric"],
+    country: "global",
+    ips: ["dragon-age"],
+    tags: involvementTags("end-to-end"),
+    summary: SIXTEENTH_PROJECT_TAGLINE,
+    tagline: SIXTEENTH_PROJECT_TAGLINE,
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "end-to-end",
+    coverImage: SIXTEENTH_PROJECT_COVER,
+    coverVideo: SIXTEENTH_PROJECT_COVER_VIDEO,
+    coverHoverStills: SIXTEENTH_PROJECT_HOVER_STILLS,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    heroVideo: SIXTEENTH_PROJECT_HERO_VIDEO,
+    afterCoverStills: SIXTEENTH_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: SIXTEENTH_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    afterCoverVideo: SIXTEENTH_PROJECT_AFTER_COVER_VIDEO,
+    afterVideoRow: SIXTEENTH_PROJECT_AFTER_VIDEO_ROW,
+    endVideo: SIXTEENTH_PROJECT_END_VIDEO,
+    overview: SIXTEENTH_PROJECT_OVERVIEW,
+    challengesBody: SIXTEENTH_PROJECT_CHALLENGES_BODY,
+    executionBody: SIXTEENTH_PROJECT_EXECUTION_BODY,
+    impactBody: SIXTEENTH_PROJECT_IMPACT_BODY,
+    specialThanks: TWELFTH_PROJECT_SPECIAL_THANKS,
+    collaborators: SIXTEENTH_PROJECT_COLLABORATORS,
+    year: 2024,
+    client: "Dragon Age",
+    featured: false,
+    challenge:
+      "Preserve complex Dragon Age lettering without laser cutouts falling apart, and keep the hanging-rod joints strong but easy to assemble.",
+    result:
+      "Pre-orders beat the initial order before production finished; sold out at $65 and required a restock.",
+  },
+  {
+    slug: SEVENTEENTH_PROJECT_SLUG,
+    title: SEVENTEENTH_PROJECT_NAME,
+    materials: ["abs"],
+    country: "global",
+    ips: ["cyberpunk-2077"],
+    tags: involvementTags("end-to-end"),
+    summary: SEVENTEENTH_PROJECT_TAGLINE,
+    tagline: SEVENTEENTH_PROJECT_TAGLINE,
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "end-to-end",
+    coverImage: SEVENTEENTH_PROJECT_COVER,
+    coverVideo: SEVENTEENTH_PROJECT_COVER_VIDEO,
+    coverHoverStills: SEVENTEENTH_PROJECT_HOVER_STILLS,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    heroVideo: SEVENTEENTH_PROJECT_HERO_VIDEO,
+    afterCoverStills: SEVENTEENTH_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: SEVENTEENTH_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    overview: SEVENTEENTH_PROJECT_OVERVIEW,
+    challengesBody: SEVENTEENTH_PROJECT_CHALLENGES_BODY,
+    executionBody: SEVENTEENTH_PROJECT_EXECUTION_BODY,
+    impactBody: SEVENTEENTH_PROJECT_IMPACT_BODY,
+    specialThanks: SEVENTEENTH_PROJECT_SPECIAL_THANKS,
+    collaborators: SEVENTEENTH_PROJECT_COLLABORATORS,
+    year: 2024,
+    client: "Cyberpunk 2077",
+    featured: false,
+    challenge:
+      "Find a size that works at home and in the car without blocking the driver’s view, and push aggression beyond facial expression alone.",
+    result:
+      "Fans shared unboxing videos widely after launch — strong UGC showed the product was bought and enjoyed.",
+  },
+  {
+    slug: EIGHTEENTH_PROJECT_SLUG,
+    title: EIGHTEENTH_PROJECT_NAME,
+    materials: ["abs"],
+    country: "global",
+    ips: ["dead-space"],
+    tags: involvementTags("end-to-end"),
+    summary: "",
+    tagline: "",
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "end-to-end",
+    coverImage: EIGHTEENTH_PROJECT_COVER,
+    coverVideo: EIGHTEENTH_PROJECT_COVER_VIDEO,
+    coverHoverStills: EIGHTEENTH_PROJECT_HOVER_STILLS,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    heroVideo: EIGHTEENTH_PROJECT_HERO_VIDEO,
+    specialThanks: SEVENTEENTH_PROJECT_SPECIAL_THANKS,
+    collaborators: SEVENTEENTH_PROJECT_COLLABORATORS,
+    year: 2024,
+    client: "Dead Space",
+    featured: false,
+    challenge: "",
+    result: "",
   },
 ];
 

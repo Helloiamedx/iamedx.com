@@ -441,15 +441,6 @@ export function SupportStack() {
 
   return (
     <section className="support-know" aria-labelledby="support-know-title">
-      <div
-        className="support-know__bg"
-        aria-hidden="true"
-        style={{
-          backgroundImage: `url("${supportBentoSection.backgroundImage}")`,
-        }}
-      />
-      <div className="support-know__frost" aria-hidden="true" />
-
       <div className="home-page__intro">
         <h2 id="support-know-title">{supportBentoSection.title}</h2>
         <p>{supportBentoSection.subtitle}</p>

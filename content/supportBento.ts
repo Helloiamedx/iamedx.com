@@ -1,3 +1,4 @@
+import { asset } from "@/lib/assets";
 import { supplierDiscoveryVerificationImages } from "@/content/serviceCoverMedia";
 
 export type SupportKnowCard = {
@@ -101,8 +102,7 @@ export const supportBentoSection = {
   title: "End-to-End Support Across Your Entire Supply Chain",
   subtitle:
     "From finding the right suppliers to delivering finished products, I manage every critical stage of the process in China — providing a single point of contact to coordinate development, production, quality, and delivery.",
-  backgroundImage:
-    "https://assets.iamedx.com/images/home/End-to-End%20Support.jpg",
+  backgroundImage: asset("/images/home/End-to-End Support.jpg"),
 } as const;
 
 /** @deprecated Prefer supportKnowCards */

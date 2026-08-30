@@ -1,12 +1,9 @@
-/* Overlaid on the home hero video — bottom edge, transparent */
+/* Full-bleed logo rail at the top of the home recognition section */
 .client-logo-marquee {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 2;
+  position: relative;
+  width: 100%;
   background: transparent;
-  padding: 0 0 clamp(1.1rem, 2.4vw, 1.75rem);
+  padding: clamp(1.5rem, 3vw, 2.25rem) 0 0;
   overflow: hidden;
   pointer-events: none;
 }
@@ -78,9 +75,9 @@
   max-width: clamp(5.17rem, 11.28vw, 7.99rem);
   object-fit: contain;
   object-position: center;
-  /* Source SVGs are dark — soft white over the video */
-  filter: brightness(0) invert(1);
-  opacity: 0.55;
+  /* Dark marks on the light recognition band */
+  filter: none;
+  opacity: 0.45;
   user-select: none;
   -webkit-user-drag: none;
   transition: opacity 220ms ease;
@@ -88,11 +85,11 @@
 }
 
 .client-logo-marquee:hover .client-logo-marquee__img {
-  opacity: 0.42;
+  opacity: 0.32;
 }
 
 .client-logo-marquee__item:hover .client-logo-marquee__img {
-  opacity: 0.88;
+  opacity: 0.85;
 }
 
 @keyframes client-logo-marquee-scroll {
@@ -107,7 +104,7 @@
 
 @media (max-width: 700px) {
   .client-logo-marquee {
-    padding-bottom: 0.95rem;
+    padding-top: 1.15rem;
   }
 
   .client-logo-marquee__track {

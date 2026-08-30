@@ -9,7 +9,8 @@ export type CollaboratorCredits = {
   /** Company + name rows above the Collaborators label */
   leadPartners?: { company: string; name: string }[];
   names: string[];
-  partners?: { company: string; name: string }[];
+  /** Company rows below Collaborators — one or more names under the same company */
+  partners?: { company: string; names: string[] }[];
 };
 
 /** Every case detail — fixed row above Collaborators */
@@ -120,7 +121,7 @@ export const CONTRIBUTION_COLLABORATORS: CollaboratorCredits = {
   partners: [
     {
       company: "Zhongshan Maotai Customized Craftsmanship Co., Ltd.",
-      name: "Mr. Mao",
+      names: ["Mr. Mao"],
     },
   ],
 };

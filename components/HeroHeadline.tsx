@@ -15,59 +15,21 @@ import {
 } from "@/lib/heroSequence";
 import "./FoldText.css";
 
-const PREFIX =
-  "Establish a Supply Chain from Scratch Tailored to Your Business with a";
-const SUFFIX = "Approach";
-
-const KEYWORDS = [
-  { word: "Transparent", color: "#00E5FF" },
-  { word: "Collaborative", color: "#FF4D9A" },
-  { word: "Dedicated", color: "#FFE566" },
-  { word: "Practical", color: "#5CFF6A" },
-  { word: "Result-Driven", color: "#FF8A3C" },
-  { word: "Accountable", color: "#B794FF" },
-  { word: "Proactive", color: "#4D9FFF" },
-] as const;
+/** Remaining hero line — approach keywords live in a later section. */
+const HEADLINE =
+  "ESTABLISH A SUPPLY CHAIN FROM SCRATCH TAILORED TO YOUR BUSINESS";
+const HEADLINE_WORDS = HEADLINE.split(" ");
 
 /* Half of previous + 20px */
 const FONT_SIZE =
   "clamp(calc((2.2rem - 2px) * 0.5 + 20px), calc((6.2vw - 2px) * 0.5 + 20px), calc((5.25rem - 2px) * 0.5 + 20px))";
 const FONT_WEIGHT = 600;
 const TEXT_COLOR = "#ffffff";
-/** Pause after buttons appear before the first keyword change */
-const FIRST_HOLD_MS = 2000;
-/** Pause after each subsequent keyword settles */
-const HOLD_MS = 2200;
-
-const PREFIX_WORDS = PREFIX.split(" ");
-
-type Phase = "idle" | "entering";
-
-function pickKeywordIndex() {
-  return Math.floor(Math.random() * KEYWORDS.length);
-}
 
 export function HeroHeadline() {
   const [complete, setComplete] = useState(false);
-  const [index, setIndex] = useState(0);
-  const [ready, setReady] = useState(false);
   const [copyGate, setCopyGate] = useState(false);
   const rootRef = useRef<HTMLSpanElement>(null);
-  const slotRef = useRef<HTMLSpanElement>(null);
-  const wordRef = useRef<HTMLSpanElement>(null);
-  const indexRef = useRef(0);
-  const swappingRef = useRef(false);
-  const phaseRef = useRef<Phase>("idle");
-  const fromWidthRef = useRef(0);
-  const scheduleRef = useRef<(delay?: number) => void>(() => {});
-
-  /* Pick the opening keyword on the client so each visit can start differently. */
-  useEffect(() => {
-    const start = pickKeywordIndex();
-    indexRef.current = start;
-    setIndex(start);
-    setReady(true);
-  }, []);
 
   /* Copy gate — set early by HeroBackgroundVideo (not tied to video buffer). */
   useEffect(() => {
@@ -80,80 +42,9 @@ export function HeroHeadline() {
     };
   }, []);
 
+  /* Fold-in entrance — only after copy gate. */
   useLayoutEffect(() => {
-    const slot = slotRef.current;
-    if (!slot) return;
-    slot.style.setProperty("--hero-keyword-color", KEYWORDS[index].color);
-  }, [index]);
-
-  /* After React commits a new word, cascade letters in (no imperative DOM edits). */
-  useLayoutEffect(() => {
-    if (phaseRef.current !== "entering") return;
-
-    const word = wordRef.current;
-    const slot = slotRef.current;
-    if (!word || !slot) return;
-
-    const reduceMotion =
-      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    const incoming = Array.from(
-      word.querySelectorAll<HTMLElement>(".hero-keyword__letter"),
-    );
-
-    if (reduceMotion || !incoming.length) {
-      phaseRef.current = "idle";
-      swappingRef.current = false;
-      slot.style.width = "";
-      scheduleRef.current(HOLD_MS);
-      return;
-    }
-
-    slot.style.width = "auto";
-    const toW = slot.getBoundingClientRect().width;
-    gsap.set(slot, { width: fromWidthRef.current });
-    gsap.set(incoming, {
-      y: 22,
-      rotateX: 62,
-      opacity: 0,
-      filter: "blur(9px)",
-      transformOrigin: "50% 100%",
-    });
-    gsap.set(word, { scale: 0.985 });
-
-    const tl = gsap.timeline({
-      onComplete: () => {
-        phaseRef.current = "idle";
-        swappingRef.current = false;
-        slot.style.width = "";
-        gsap.set(word, { clearProps: "transform" });
-        scheduleRef.current(HOLD_MS);
-      },
-    });
-
-    tl.to(slot, { width: toW, duration: 0.58, ease: "power3.inOut" }, 0);
-    tl.to(
-      incoming,
-      {
-        y: 0,
-        rotateX: 0,
-        opacity: 1,
-        filter: "blur(0px)",
-        duration: 0.62,
-        stagger: { each: 0.024, from: "start" },
-        ease: "power3.out",
-      },
-      0,
-    );
-    tl.to(word, { scale: 1, duration: 0.5, ease: "power2.out" }, 0.12);
-
-    return () => {
-      tl.kill();
-    };
-  }, [index]);
-
-  /* Fold-in entrance — only after home video is playing. */
-  useLayoutEffect(() => {
-    if (!ready || !copyGate) return undefined;
+    if (!copyGate) return undefined;
 
     const root = rootRef.current;
     if (!root) return undefined;
@@ -205,97 +96,8 @@ export function HeroHeadline() {
       tween.kill();
       gsap.killTweensOf(pieces);
     };
-  }, [ready, copyGate]);
+  }, [copyGate]);
 
-  /*
-   * Keyword rotate — wait after CTAs appear, then peel/cascade to the NEXT word.
-   * Opening keyword is random; the first swap always advances to a different word.
-   */
-  useEffect(() => {
-    if (!complete) return undefined;
-
-    const reduceMotion =
-      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    let timeoutId = 0;
-    let cancelled = false;
-
-    const schedule = (delay = HOLD_MS) => {
-      window.clearTimeout(timeoutId);
-      timeoutId = window.setTimeout(swap, delay);
-    };
-    scheduleRef.current = schedule;
-
-    const swap = () => {
-      if (cancelled || swappingRef.current) return;
-      const word = wordRef.current;
-      const slot = slotRef.current;
-      if (!word || !slot) return;
-
-      const next = (indexRef.current + 1) % KEYWORDS.length;
-      const nextItem = KEYWORDS[next];
-
-      if (reduceMotion) {
-        indexRef.current = next;
-        slot.style.width = "";
-        slot.style.setProperty("--hero-keyword-color", nextItem.color);
-        setIndex(next);
-        schedule(HOLD_MS);
-        return;
-      }
-
-      swappingRef.current = true;
-      fromWidthRef.current = slot.getBoundingClientRect().width;
-      const outgoing = Array.from(
-        word.querySelectorAll<HTMLElement>(".hero-keyword__letter"),
-      );
-
-      if (!outgoing.length) {
-        indexRef.current = next;
-        phaseRef.current = "entering";
-        slot.style.setProperty("--hero-keyword-color", nextItem.color);
-        setIndex(next);
-        return;
-      }
-
-      gsap.to(outgoing, {
-        y: -14,
-        rotateX: -78,
-        opacity: 0,
-        filter: "blur(7px)",
-        duration: 0.36,
-        stagger: { each: 0.016, from: "end" },
-        ease: "power2.in",
-        transformOrigin: "50% 80%",
-        onComplete: () => {
-          if (cancelled) return;
-          gsap.killTweensOf(outgoing);
-          indexRef.current = next;
-          phaseRef.current = "entering";
-          slot.style.setProperty("--hero-keyword-color", nextItem.color);
-          setIndex(next);
-        },
-      });
-    };
-
-    /* Buttons are up — hold the opening keyword, then move on */
-    schedule(FIRST_HOLD_MS);
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timeoutId);
-      const word = wordRef.current;
-      const slot = slotRef.current;
-      if (word) {
-        gsap.killTweensOf(word);
-        gsap.killTweensOf(word.querySelectorAll(".hero-keyword__letter"));
-      }
-      if (slot) gsap.killTweensOf(slot);
-      swappingRef.current = false;
-      phaseRef.current = "idle";
-    };
-  }, [complete]);
-
-  const active = KEYWORDS[index];
   const rootStyle = {
     "--fold-text-font-size": FONT_SIZE,
     "--fold-text-font-weight": FONT_WEIGHT,
@@ -311,12 +113,10 @@ export function HeroHeadline() {
             className="fold-text hero-headline__fold-text hero-headline__line"
             style={rootStyle}
           >
-            <span className="fold-text-sr-only">
-              {PREFIX} {active.word} {SUFFIX}
-            </span>
+            <span className="fold-text-sr-only">{HEADLINE}</span>
 
             <span className="fold-text-visual" aria-hidden="true">
-              {PREFIX_WORDS.map((word, i) => (
+              {HEADLINE_WORDS.map((word, i) => (
                 <span key={`p-${word}-${i}`}>
                   {i > 0 ? (
                     <span className="fold-text-whitespace">{"\u00A0"}</span>
@@ -328,40 +128,6 @@ export function HeroHeadline() {
                   </span>
                 </span>
               ))}
-
-              <span className="fold-text-whitespace">{"\u00A0"}</span>
-
-              <span ref={slotRef} className="hero-keyword">
-                <span className="fold-text-segment" data-fold-split="word">
-                  <span
-                    className="fold-text-piece hero-keyword__viewport"
-                    data-hero-fold=""
-                  >
-                    <span
-                      key={active.word}
-                      ref={wordRef}
-                      className="hero-keyword__word"
-                    >
-                      {active.word.split("").map((ch, i) => (
-                        <span
-                          key={`${active.word}-${i}`}
-                          className="hero-keyword__letter"
-                        >
-                          {ch}
-                        </span>
-                      ))}
-                    </span>
-                  </span>
-                </span>
-              </span>
-
-              <span className="fold-text-whitespace">{"\u00A0"}</span>
-
-              <span className="fold-text-segment" data-fold-split="word">
-                <span className="fold-text-piece" data-hero-fold="">
-                  {SUFFIX}
-                </span>
-              </span>
             </span>
           </span>
         </div>

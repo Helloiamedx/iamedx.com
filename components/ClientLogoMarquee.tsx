@@ -8,7 +8,7 @@ import {
 import "./ClientLogoMarquee.css";
 
 /**
- * Infinite logo rail overlaid on the home hero video (bottom, transparent).
+ * Infinite logo rail at the top of the home recognition section.
  * Two identical tracks — CSS translate -50% loops without a jump.
  * On every load, animation is already mid-cycle with Disney in the center.
  */

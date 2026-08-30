@@ -93,13 +93,11 @@ export function ProjectsFilterGrid({
     <>
       <div className="projects-interleaved-grid">
         {segments.map((segment, index) => {
-          const segmentKey =
-            segment.collection?.slug ??
-            segment.grid.map((project) => project.slug).join("-") ??
-            `segment-${index}`;
-
           return (
-            <div key={segmentKey} className="projects-interleaved-grid__segment">
+            <div
+              key={`segment-${index}-${segment.collection?.slug ?? "grid"}`}
+              className="projects-interleaved-grid__segment"
+            >
               {segment.grid.length > 0 ? (
                 <ProjectMasonry
                   projects={segment.grid}

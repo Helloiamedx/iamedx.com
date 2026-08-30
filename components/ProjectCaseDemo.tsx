@@ -784,16 +784,21 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
             </div>
             {collaborators.partners?.map((item) => (
               <div
-                key={`${item.company}-${item.name}`}
+                key={item.company}
                 className="project-case-demo__credits-row project-case-demo__credits-row--collaborator-partner"
               >
                 <span className="project-case-demo__credits-company">
                   {item.company}
                 </span>
                 <span className="project-case-demo__credits-name">
-                  <span className="project-case-demo__credits-name-line">
-                    {item.name}
-                  </span>
+                  {item.names.map((name) => (
+                    <span
+                      key={name}
+                      className="project-case-demo__credits-name-line"
+                    >
+                      {name}
+                    </span>
+                  ))}
                 </span>
               </div>
             ))}

@@ -9,7 +9,7 @@ All site CTAs (hero, footer, All projects / All thoughts, About the project, for
 
 Change `components/ui/origin-button.tsx` + `.origin-button` in `app/globals.css` → every CTA updates.
 
-Rest: **square corners** (`border-radius: 0`). **Uppercase** label. **Default:** transparent fill, white border + type with `mix-blend-mode: difference` (negative / adaptive contrast). **Hover:** solid fill — black bg + white type on light surfaces; white bg + black type on dark bands (hero, footer, support-know, case hero, mobile About sheet) — **instant cut** (`transition: none`), `mix-blend-mode: normal` on hover. Font: Grtsk Light (`--font-sans`, weight `300`).
+Rest: **square corners** (`border-radius: 0`). **Uppercase** label. **Default:** transparent fill, white border + type with `mix-blend-mode: difference` (negative / adaptive contrast). **Hover:** solid fill — black bg + white type on light surfaces; white bg + black type on dark bands (hero, footer, home-someone / photo bands, case hero, mobile About sheet) — **instant cut** (`transition: none`), `mix-blend-mode: normal` on hover. Font: Grtsk Light (`--font-sans`, weight `300`).
 
 ## Use
 

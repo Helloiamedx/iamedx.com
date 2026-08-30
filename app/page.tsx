@@ -1,10 +1,11 @@
-import { ClientLogoMarquee } from "@/components/ClientLogoMarquee";
 import { FrostIndexLink } from "@/components/FrostIndexLink";
 import {
   HeroBackgroundVideo,
 } from "@/components/HeroBackgroundVideo";
 import { HeroHeadline } from "@/components/HeroHeadline";
 import { HomeDifferentCards } from "@/components/HomeDifferentCards";
+import { HomeMyApproach } from "@/components/HomeMyApproach";
+import { HomeRecognitionBand } from "@/components/HomeRecognitionBand";
 import { HomeSomeoneLikeThis } from "@/components/HomeSomeoneLikeThis";
 import { InsightMasonry } from "@/components/InsightMasonry";
 import { InsightsLead } from "@/components/InsightsLead";
@@ -45,11 +46,12 @@ export default function HomePage() {
         <div className="hero__content">
           <HeroHeadline />
         </div>
-        <ClientLogoMarquee />
       </section>
 
-      {/* After hero: gray → white → gray → white → gray */}
+      {/* recognition → someone (draft) → my approach → character → support → … */}
+      <HomeRecognitionBand />
       <HomeSomeoneLikeThis />
+      <HomeMyApproach />
       <HomeDifferentCards />
       <SupportBento />
 
