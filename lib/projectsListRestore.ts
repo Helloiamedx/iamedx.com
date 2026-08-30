@@ -1,40 +1,16 @@
 /**
- * Projects index “See more” expand — restore only after browser back/forward.
- * Refresh / nav Link push must start collapsed again.
+ * Projects index “See more” expand persistence.
+ *
+ * - Visible count lives in sessionStorage (written synchronously on expand).
+ * - Returning via browser back keeps the stored count (storage is not cleared).
+ * - Hard refresh + Link/push into `/projects` clear storage → start collapsed.
  */
 
 const VISIBLE_STORAGE_PREFIX = "iamedx:projects-visible:";
-const EXPAND_RESTORE_KEY = "iamedx:projects-expand-restore";
 export const PROJECTS_COLLAPSE_EVENT = "iamedx:projects-collapse";
+export const SCROLL_RESTORE_EVENT = "iamedx:scroll-restore";
 
-let expandRestorePending = false;
-
-export function markProjectsExpandRestore() {
-  expandRestorePending = true;
-  try {
-    sessionStorage.setItem(EXPAND_RESTORE_KEY, "1");
-  } catch {
-    /* private mode / quota */
-  }
-}
-
-export function peekProjectsExpandRestore() {
-  if (expandRestorePending) return true;
-  try {
-    return sessionStorage.getItem(EXPAND_RESTORE_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
-export function clearProjectsExpandRestore() {
-  expandRestorePending = false;
-  try {
-    sessionStorage.removeItem(EXPAND_RESTORE_KEY);
-  } catch {
-    /* private mode / quota */
-  }
-}
+let reloadResetDone = false;
 
 export function projectsVisibleStorageKey(filterKey: string) {
   return `${VISIBLE_STORAGE_PREFIX}${filterKey}`;
@@ -69,8 +45,50 @@ export function clearProjectsVisibleStorage(filterKey: string) {
   }
 }
 
-/** Ask SmoothScroll to re-apply saved Y after expand restores document height. */
-export const SCROLL_RESTORE_EVENT = "iamedx:scroll-restore";
+/** Hard refresh — drop expand so the list starts collapsed. */
+export function resetProjectsExpandOnReload() {
+  if (typeof window === "undefined" || reloadResetDone) return;
+  reloadResetDone = true;
+  try {
+    const nav = performance.getEntriesByType("navigation")[0] as
+      | PerformanceNavigationTiming
+      | undefined;
+    if (nav?.type !== "reload") return;
+  } catch {
+    return;
+  }
+  clearAllProjectsVisibleStorage();
+}
+
+export function readProjectsVisibleCount(
+  filterKey: string,
+  max: number,
+  fallback: number,
+) {
+  if (typeof window === "undefined") return fallback;
+  resetProjectsExpandOnReload();
+  try {
+    const raw = sessionStorage.getItem(projectsVisibleStorageKey(filterKey));
+    if (raw == null) return fallback;
+    const parsed = Number.parseInt(raw, 10);
+    if (!Number.isFinite(parsed)) return fallback;
+    return Math.min(
+      Math.max(fallback, parsed),
+      Math.max(fallback, max),
+    );
+  } catch {
+    return fallback;
+  }
+}
+
+export function writeProjectsVisibleCount(filterKey: string, count: number) {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.setItem(projectsVisibleStorageKey(filterKey), String(count));
+  } catch {
+    /* private mode / quota */
+  }
+}
 
 export function requestScrollRestore() {
   if (typeof window === "undefined") return;

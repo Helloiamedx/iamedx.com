@@ -5,8 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   clearAllProjectsVisibleStorage,
-  clearProjectsExpandRestore,
-  markProjectsExpandRestore,
+  resetProjectsExpandOnReload,
   SCROLL_RESTORE_EVENT,
 } from "@/lib/projectsListRestore";
 import "lenis/dist/lenis.css";
@@ -16,9 +15,15 @@ type SmoothScrollProps = {
 };
 
 const SCROLL_STORAGE_PREFIX = "iamedx:scroll:";
+/** Frozen Y at leave-time — not overwritten by later scroll listeners */
+const SCROLL_PIN_PREFIX = "iamedx:scroll-pin:";
 
-/** Re-apply restore after images / “See more” grids settle */
-const RESTORE_RETRY_MS = [0, 32, 80, 160, 320, 640, 1200, 2000, 3200] as const;
+/**
+ * Keep re-applying while layout/images grow. User wheel/touch cancels immediately
+ * so we don’t fight scrolling (flicker).
+ */
+const RESTORE_RETRY_MS = [0, 32, 80, 160, 320, 640, 1200, 2000, 2800] as const;
+const RESTORE_LOCK_MS = 3200;
 
 type LenisLike = {
   scrollTo: (
@@ -37,9 +42,15 @@ const restoreTimerIds = new Set<number>();
 const restoreRafIds = new Set<number>();
 /** While true, ignore scroll persistence so a transient jump-to-0 can’t wipe Y */
 let restoreLockUntil = 0;
+let restoreHeightObserver: ResizeObserver | null = null;
+let restoreAnchorPrev: string | null = null;
 
 function scrollStorageKey(pathname: string) {
   return `${SCROLL_STORAGE_PREFIX}${pathname}`;
+}
+
+function scrollPinKey(pathname: string) {
+  return `${SCROLL_PIN_PREFIX}${pathname}`;
 }
 
 function readWindowScrollY() {
@@ -56,6 +67,12 @@ function applyScrollY(y: number, lenis?: LenisLike) {
 
 function readSavedScrollY(pathname: string) {
   try {
+    /* Prefer leave-time pin — continuous scroll must not dilute it */
+    const pinned = sessionStorage.getItem(scrollPinKey(pathname));
+    if (pinned != null) {
+      const parsedPin = Number.parseFloat(pinned);
+      if (Number.isFinite(parsedPin)) return Math.max(0, parsedPin);
+    }
     const raw = sessionStorage.getItem(scrollStorageKey(pathname));
     if (raw == null) return 0;
     const parsed = Number.parseFloat(raw);
@@ -70,11 +87,21 @@ function saveScrollY(pathname: string, y = readWindowScrollY()) {
   /*
    * After pushState/popstate, location updates before React pathname + before
    * scroll listeners detach. Saving then would stamp Y=0 onto the page we left.
-   * Only persist when the live location still matches the path we’re attributing.
    */
   if (pathname !== window.location.pathname) return;
   try {
     sessionStorage.setItem(scrollStorageKey(pathname), String(Math.max(0, y)));
+  } catch {
+    /* private mode / quota */
+  }
+}
+
+/** Snapshot Y as we leave a route — restore reads this first */
+function pinScrollY(pathname: string, y = readWindowScrollY()) {
+  try {
+    const value = String(Math.max(0, y));
+    sessionStorage.setItem(scrollPinKey(pathname), value);
+    sessionStorage.setItem(scrollStorageKey(pathname), value);
   } catch {
     /* private mode / quota */
   }
@@ -87,12 +114,87 @@ function clearRestoreTimers() {
   restoreRafIds.clear();
 }
 
+type RestoreCancelFns = {
+  onWheel: () => void;
+  onTouch: () => void;
+  onKey: (event: KeyboardEvent) => void;
+};
+
+let restoreCancelFns: RestoreCancelFns | null = null;
+
+function detachRestoreCancel() {
+  if (!restoreCancelFns) return;
+  window.removeEventListener("wheel", restoreCancelFns.onWheel);
+  window.removeEventListener("touchstart", restoreCancelFns.onTouch);
+  window.removeEventListener("keydown", restoreCancelFns.onKey);
+  restoreCancelFns = null;
+}
+
+function detachRestoreHeightObserver() {
+  if (restoreHeightObserver) {
+    restoreHeightObserver.disconnect();
+    restoreHeightObserver = null;
+  }
+  if (restoreAnchorPrev != null) {
+    document.documentElement.style.overflowAnchor = restoreAnchorPrev;
+    restoreAnchorPrev = null;
+  }
+}
+
+function endScrollRestore() {
+  clearRestoreTimers();
+  detachRestoreCancel();
+  detachRestoreHeightObserver();
+  restoreLockUntil = 0;
+}
+
 function scheduleRestore(pathname: string, lenis?: LenisLike) {
   const y = readSavedScrollY(pathname);
-  clearRestoreTimers();
-  restoreLockUntil = performance.now() + 3600;
+  endScrollRestore();
+  if (y <= 0) return;
 
-  const restore = () => applyScrollY(y, lenis ?? lenisForRestore);
+  restoreLockUntil = performance.now() + RESTORE_LOCK_MS;
+
+  let cancelled = false;
+
+  const cancelFromUser = () => {
+    if (cancelled) return;
+    cancelled = true;
+    endScrollRestore();
+  };
+
+  const onKey = (event: KeyboardEvent) => {
+    if (
+      event.key === "ArrowUp" ||
+      event.key === "ArrowDown" ||
+      event.key === "PageUp" ||
+      event.key === "PageDown" ||
+      event.key === "Home" ||
+      event.key === "End" ||
+      event.key === " "
+    ) {
+      cancelFromUser();
+    }
+  };
+
+  restoreCancelFns = {
+    onWheel: cancelFromUser,
+    onTouch: cancelFromUser,
+    onKey,
+  };
+  window.addEventListener("wheel", cancelFromUser, { passive: true });
+  window.addEventListener("touchstart", cancelFromUser, { passive: true });
+  window.addEventListener("keydown", onKey);
+
+  /* Images / expanded grids growing above must not yank scroll via anchoring */
+  restoreAnchorPrev = document.documentElement.style.overflowAnchor;
+  document.documentElement.style.overflowAnchor = "none";
+
+  const restore = () => {
+    if (cancelled) return;
+    applyScrollY(y, lenis ?? lenisForRestore);
+  };
+
   restore();
 
   const raf1 = requestAnimationFrame(() => {
@@ -106,10 +208,24 @@ function scheduleRestore(pathname: string, lenis?: LenisLike) {
     restoreTimerIds.add(window.setTimeout(restore, ms));
   }
 
+  /* As masonry/images increase scrollHeight, re-apply the pinned Y */
+  if (typeof ResizeObserver !== "undefined") {
+    let lastHeight = document.documentElement.scrollHeight;
+    restoreHeightObserver = new ResizeObserver(() => {
+      if (cancelled) return;
+      const nextHeight = document.documentElement.scrollHeight;
+      if (nextHeight === lastHeight) return;
+      lastHeight = nextHeight;
+      restore();
+    });
+    restoreHeightObserver.observe(document.documentElement);
+    if (document.body) restoreHeightObserver.observe(document.body);
+  }
+
   restoreTimerIds.add(
     window.setTimeout(() => {
-      restoreLockUntil = 0;
-    }, 3600),
+      if (!cancelled) endScrollRestore();
+    }, RESTORE_LOCK_MS),
   );
 }
 
@@ -117,13 +233,12 @@ function scheduleRestore(pathname: string, lenis?: LenisLike) {
  * Classify App Router history moves:
  * - pushState → forward Link / router.push → scroll top
  * - popstate → back/forward → restore saved Y
- *
- * Relying only on a React effect + popstate flag races Next’s pathname
- * update and wrongly treats back as a fresh page (jump to top).
  */
 function ensureHistoryScrollHooks() {
   if (historyPatched || typeof window === "undefined") return;
   historyPatched = true;
+
+  resetProjectsExpandOnReload();
 
   if ("scrollRestoration" in window.history) {
     window.history.scrollRestoration = "manual";
@@ -133,22 +248,26 @@ function ensureHistoryScrollHooks() {
   const origReplaceState = window.history.replaceState.bind(window.history);
 
   window.history.pushState = (data, unused, url) => {
-    /* Location is still the page we’re leaving */
-    saveScrollY(window.location.pathname);
+    const fromPath = window.location.pathname;
+    /* Freeze Y before Next scrolls the destination to top */
+    pinScrollY(fromPath);
     navigationKind = "push";
-    clearRestoreTimers();
-    clearProjectsExpandRestore();
+    endScrollRestore();
+
+    let nextPath: string | null = null;
     try {
       if (url != null) {
-        const next = new URL(String(url), window.location.href);
-        if (next.pathname === "/projects") {
-          /* Nav / Link into projects — start collapsed again */
-          clearAllProjectsVisibleStorage();
-        }
+        nextPath = new URL(String(url), window.location.href).pathname;
       }
     } catch {
-      /* ignore bad urls */
+      nextPath = null;
     }
+
+    if (nextPath === "/projects") {
+      /* Nav / Link into projects — start collapsed again */
+      clearAllProjectsVisibleStorage();
+    }
+
     return origPushState(data, unused, url);
   };
 
@@ -161,12 +280,6 @@ function ensureHistoryScrollHooks() {
     "popstate",
     () => {
       navigationKind = "pop";
-      if (window.location.pathname === "/projects") {
-        markProjectsExpandRestore();
-      } else {
-        clearProjectsExpandRestore();
-      }
-      /* Location already matches the destination */
       scheduleRestore(window.location.pathname, lenisForRestore);
     },
     true,
@@ -176,7 +289,6 @@ function ensureHistoryScrollHooks() {
     scheduleRestore(window.location.pathname, lenisForRestore);
   });
 
-  /* Belt-and-suspenders: persist before internal navigations */
   document.addEventListener(
     "click",
     (event) => {
@@ -202,6 +314,7 @@ function ensureHistoryScrollHooks() {
         }
       }
       saveScrollY(window.location.pathname);
+      pinScrollY(window.location.pathname);
     },
     true,
   );
@@ -225,7 +338,6 @@ function useRouteScrollBehavior(lenis?: LenisLike) {
     ensureHistoryScrollHooks();
   }, []);
 
-  /* Keep sessionStorage warm while the user scrolls this route */
   useEffect(() => {
     let ticking = false;
 
@@ -269,33 +381,30 @@ function useRouteScrollBehavior(lenis?: LenisLike) {
     if (kind === "pop") {
       scheduleRestore(pathname, lenisRef.current);
       return () => {
-        clearRestoreTimers();
+        endScrollRestore();
         saveScrollY(pathname);
       };
     }
 
     if (kind === "push") {
-      clearRestoreTimers();
+      endScrollRestore();
       applyScrollY(0, lenisRef.current);
       return () => {
         saveScrollY(pathname);
       };
     }
 
-    /* replaceState / unknown — leave scroll where it is */
     return () => {
       saveScrollY(pathname);
     };
   }, [pathname]);
 }
 
-/** Native + document scroll — used when Lenis is not mounted (touch). */
 function NativeRouteScrollReset() {
   useRouteScrollBehavior(null);
   return null;
 }
 
-/** Keep Lenis in sync with push → top / pop → restore. */
 function LenisRouteScrollReset() {
   const lenis = useLenis();
   useRouteScrollBehavior(lenis);
@@ -304,9 +413,7 @@ function LenisRouteScrollReset() {
 
 /**
  * Site-wide Lenis — weighted wheel on desktop only.
- * Touch stays native (no Lenis instance): syncTouch + low lerp feels stuck,
- * and Lenis’ html.lenis height rules can interact badly with mobile Chrome.
- * Honors prefers-reduced-motion via Lenis `respectReducedMotion`.
+ * Touch stays native (no Lenis instance).
  */
 export function SmoothScroll({ children }: SmoothScrollProps) {
   const [desktopWheel, setDesktopWheel] = useState(false);
@@ -335,11 +442,9 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
         lerp: 0.09,
         smoothWheel: true,
         syncTouch: false,
-        /* No rubber-band past document end (stops footer 漏底) */
         overscroll: false,
         autoRaf: true,
         respectReducedMotion: true,
-        /* Stop wheel lerp before Next resets scrollTop on <Link> navigations */
         stopInertiaOnNavigate: true,
       }}
     >

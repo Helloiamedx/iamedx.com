@@ -341,42 +341,6 @@ export function ProjectFilter({
 
                 <div className="project-filter-drawer__section">
                   <h2 className="project-filter-drawer__section-heading">
-                    Material
-                  </h2>
-                  <ul className="project-filter-drawer__options" role="list">
-                    {materialOptions.map((item) => {
-                      const checked = isOptionChecked(item.id, draft.material);
-                      return (
-                        <li key={item.id}>
-                          <label className="project-filter-drawer__option">
-                            <input
-                              type="checkbox"
-                              className="project-filter-drawer__checkbox"
-                              checked={checked}
-                              onChange={() =>
-                                setDraft((current) =>
-                                  normalizeDraft({
-                                    ...current,
-                                    material: selectionFromDraft(
-                                      item.id,
-                                      current.material,
-                                    ) as MaterialSelection,
-                                  }),
-                                )
-                              }
-                            />
-                            <span className="project-filter-drawer__option-label">
-                              {item.label}
-                            </span>
-                          </label>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-
-                <div className="project-filter-drawer__section">
-                  <h2 className="project-filter-drawer__section-heading">
                     Region
                   </h2>
                   <ul className="project-filter-drawer__options" role="list">
@@ -397,6 +361,42 @@ export function ProjectFilter({
                                       item.id,
                                       current.country,
                                     ) as CountrySelection,
+                                  }),
+                                )
+                              }
+                            />
+                            <span className="project-filter-drawer__option-label">
+                              {item.label}
+                            </span>
+                          </label>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+
+                <div className="project-filter-drawer__section">
+                  <h2 className="project-filter-drawer__section-heading">
+                    Material
+                  </h2>
+                  <ul className="project-filter-drawer__options" role="list">
+                    {materialOptions.map((item) => {
+                      const checked = isOptionChecked(item.id, draft.material);
+                      return (
+                        <li key={item.id}>
+                          <label className="project-filter-drawer__option">
+                            <input
+                              type="checkbox"
+                              className="project-filter-drawer__checkbox"
+                              checked={checked}
+                              onChange={() =>
+                                setDraft((current) =>
+                                  normalizeDraft({
+                                    ...current,
+                                    material: selectionFromDraft(
+                                      item.id,
+                                      current.material,
+                                    ) as MaterialSelection,
                                   }),
                                 )
                               }

@@ -13,12 +13,11 @@ import { ProjectsCollectionSection } from "@/components/ProjectsCollectionSectio
 import { OriginButton } from "@/components/ui/origin-button";
 import type { Project } from "@/content/projects";
 import {
-  clearProjectsExpandRestore,
   clearProjectsVisibleStorage,
-  peekProjectsExpandRestore,
   PROJECTS_COLLAPSE_EVENT,
-  projectsVisibleStorageKey,
+  readProjectsVisibleCount,
   requestScrollRestore,
+  writeProjectsVisibleCount,
 } from "@/lib/projectsListRestore";
 import {
   gridSlotsPerBreak,
@@ -41,30 +40,6 @@ type ProjectsFilterGridProps = {
   /** Interleave collection breaks — only on the unfiltered index. */
   interleaveCollections?: boolean;
 };
-
-function readStoredVisibleCount(filterKey: string, max: number) {
-  if (typeof window === "undefined") return INITIAL_VISIBLE;
-  try {
-    const raw = sessionStorage.getItem(projectsVisibleStorageKey(filterKey));
-    if (raw == null) return INITIAL_VISIBLE;
-    const parsed = Number.parseInt(raw, 10);
-    if (!Number.isFinite(parsed)) return INITIAL_VISIBLE;
-    return Math.min(
-      Math.max(INITIAL_VISIBLE, parsed),
-      Math.max(INITIAL_VISIBLE, max),
-    );
-  } catch {
-    return INITIAL_VISIBLE;
-  }
-}
-
-function writeStoredVisibleCount(filterKey: string, count: number) {
-  try {
-    sessionStorage.setItem(projectsVisibleStorageKey(filterKey), String(count));
-  } catch {
-    /* private mode / quota */
-  }
-}
 
 function lockWindowScrollY(
   y: number,
@@ -96,53 +71,68 @@ export function ProjectsFilterGrid({
   const prevCountRef = useRef(visibleCount);
   const pendingScrollYRef = useRef<number | null>(null);
   const filterKeyRef = useRef(filterKey);
+  const didRestoreScrollRef = useRef(false);
 
   /*
-   * Expand restore only after browser back/forward onto /projects.
-   * Refresh + nav “Projects” push stay collapsed (must click See more again).
+   * Always rehydrate from sessionStorage on mount / length change.
+   * Storage is cleared only on reload + push into /projects + filter change —
+   * so browser back keeps the expanded “See more” count.
    */
   useLayoutEffect(() => {
-    const shouldRestore = peekProjectsExpandRestore();
-    if (shouldRestore) {
-      const restored = readStoredVisibleCount(filterKey, projects.length);
-      setVisibleCount(restored);
-      prevCountRef.current = restored;
-      /* Height grows after expand — re-apply saved Y once layout settles */
-      requestAnimationFrame(() => {
-        requestScrollRestore();
-        window.setTimeout(() => requestScrollRestore(), 80);
-        window.setTimeout(() => requestScrollRestore(), 320);
-      });
-      /* Delay clear so React Strict Mode double-invoke still sees the flag */
-      window.setTimeout(() => clearProjectsExpandRestore(), 400);
-    } else {
+    const filterChanged = filterKeyRef.current !== filterKey;
+    filterKeyRef.current = filterKey;
+
+    if (filterChanged) {
+      didRestoreScrollRef.current = false;
       setVisibleCount(INITIAL_VISIBLE);
       prevCountRef.current = INITIAL_VISIBLE;
       clearProjectsVisibleStorage(filterKey);
+      writeProjectsVisibleCount(filterKey, INITIAL_VISIBLE);
+      pendingScrollYRef.current = null;
+      return;
     }
+
+    const restored = readProjectsVisibleCount(
+      filterKey,
+      projects.length,
+      INITIAL_VISIBLE,
+    );
+    setVisibleCount(restored);
+    prevCountRef.current = restored;
     pendingScrollYRef.current = null;
-    filterKeyRef.current = filterKey;
+
+    if (restored > INITIAL_VISIBLE && !didRestoreScrollRef.current) {
+      didRestoreScrollRef.current = true;
+      requestAnimationFrame(() => {
+        requestScrollRestore();
+        window.setTimeout(() => requestScrollRestore(), 120);
+        window.setTimeout(() => requestScrollRestore(), 400);
+        window.setTimeout(() => requestScrollRestore(), 900);
+        window.setTimeout(() => requestScrollRestore(), 1600);
+      });
+    }
   }, [filterKey, projects.length]);
 
   /* Nav “Projects” while already on /projects — grid may not remount */
   useEffect(() => {
     const collapse = () => {
-      if (peekProjectsExpandRestore()) return;
+      didRestoreScrollRef.current = false;
       setVisibleCount(INITIAL_VISIBLE);
       prevCountRef.current = INITIAL_VISIBLE;
       pendingScrollYRef.current = null;
+      writeProjectsVisibleCount(filterKeyRef.current, INITIAL_VISIBLE);
     };
     window.addEventListener(PROJECTS_COLLAPSE_EVENT, collapse);
     return () => window.removeEventListener(PROJECTS_COLLAPSE_EVENT, collapse);
   }, []);
 
   useEffect(() => {
-    setVisibleCount((count) => Math.min(count, Math.max(projects.length, 0)));
-  }, [projects.length]);
-
-  useEffect(() => {
-    writeStoredVisibleCount(filterKey, visibleCount);
-  }, [filterKey, visibleCount]);
+    setVisibleCount((count) => {
+      const next = Math.min(count, Math.max(projects.length, 0));
+      if (next !== count) writeProjectsVisibleCount(filterKey, next);
+      return next;
+    });
+  }, [filterKey, projects.length]);
 
   useEffect(() => {
     const mq = window.matchMedia(SINGLE_COLUMN_MQ);
@@ -188,9 +178,12 @@ export function ProjectsFilterGrid({
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
-    setVisibleCount((count) =>
-      Math.min(count + LOAD_MORE_STEP, projects.length),
-    );
+    setVisibleCount((count) => {
+      const next = Math.min(count + LOAD_MORE_STEP, projects.length);
+      /* Sync write before any navigation can unmount this tree */
+      writeProjectsVisibleCount(filterKey, next);
+      return next;
+    });
   };
 
   const visibleProjects = projects.slice(0, visibleCount);
