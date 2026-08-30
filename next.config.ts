@@ -43,6 +43,8 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    /* Dev: skip server-side image fetch — sandbox/DNS often can’t resolve CDN */
+    unoptimized: process.env.NODE_ENV === "development",
     remotePatterns: [
       {
         protocol: "https",

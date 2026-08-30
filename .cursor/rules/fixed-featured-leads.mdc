@@ -19,11 +19,11 @@ Layout order: **Hero → Filter → Featured lead → filtered grid**.
 
 | Filter | Featured lead |
 |--------|----------------|
-| **All** / **End-to-End** | The Elder Scrolls Online NECROM Look Book Bundle |
+| **All** / **End-to-End** | Dragon Age Writing Bundle |
 | **Project Contribution** | Horizon Zero Dawn The Thunderjaw Collection Statue |
 | **Specialized Services** | The Elder Scrolls Online 10-Year Coin Shadowbox (interim until user picks another) |
 
-Home page (`projectsFeaturedLead`) stays the **All / End-to-End** lead (NECROM).
+Home page (`projectsFeaturedLead`) stays the **All / End-to-End** lead (Dragon Age Writing Bundle).
 
 ## Insights (`/thoughts`)
 

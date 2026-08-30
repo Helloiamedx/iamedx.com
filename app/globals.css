@@ -5212,6 +5212,7 @@ html[data-hero-copy-ready="1"] .hero__content {
   display: flex;
   flex-direction: column;
   gap: var(--projects-index-row-gap);
+  overflow-anchor: none;
 }
 
 .projects-interleaved-grid__segment {
@@ -6729,28 +6730,25 @@ html[data-hero-copy-ready="1"] .hero__content {
 .svc-challenge__mark-slot {
   position: relative;
   box-sizing: border-box;
-  width: min(54.6vw, 22.75rem); /* mobile: prior × 1.3 */
-  aspect-ratio: 1;
+  width: min(49.14vw, 20.475rem); /* prior × 0.9 */
   margin: 0;
-  /* Quiet placeholder — holds layout, no broken-image chrome while lazy */
-  background: color-mix(in srgb, #0a0a0a 4%, var(--site-bg, #eaeae1));
-  overflow: hidden;
+  background: transparent;
+  line-height: 0;
   pointer-events: none;
   user-select: none;
 }
 
 @media (min-width: 900px) {
   .svc-challenge__mark-slot {
-    width: min(42vw, 35rem);
+    width: min(37.8vw, 31.5rem);
   }
 }
 
 .svc-challenge__mark {
   display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
   margin: 0;
-  object-fit: contain;
   opacity: 0;
   transition: opacity 420ms ease;
   pointer-events: none;
@@ -6782,6 +6780,12 @@ html[data-hero-copy-ready="1"] .hero__content {
   text-align: center;
   text-wrap: balance;
   color: #0a0a0a;
+}
+
+@media (min-width: 900px) {
+  .svc-challenge__headline {
+    font-size: calc(clamp(1.75rem, 5.5vw, 3.25rem) + 5px);
+  }
 }
 
 .svc-challenge .origin-button-wrap {
@@ -8798,6 +8802,8 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   display: flex;
   justify-content: center;
   margin-block-start: clamp(4rem, 8vw, 6.5rem);
+  /* Load-more inserts content above this control — don’t let anchoring chase it */
+  overflow-anchor: none;
 }
 
 /*

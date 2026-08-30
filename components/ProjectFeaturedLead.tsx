@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { type CSSProperties } from "react";
 import { useReducedMotion } from "motion/react";
-import { CoverLoopVideo } from "@/components/CoverLoopVideo";
 import { ProjectCardTags } from "@/components/ProjectCardTags";
 import type { ProjectsFeaturedLead } from "@/content/projects";
 
@@ -15,6 +14,11 @@ type ProjectFeaturedLeadProps = {
 /** Same placeholder cycle as filter cards when hover stills are not set yet */
 const HOVER_SWAP_FRAME_COLORS = ["#0a0a0a", "#0076dd", "#86868b"] as const;
 
+/** Featured lead cover — first hover still (no card video; that moves to case gallery). */
+function featuredCoverSrc(project: ProjectsFeaturedLead): string {
+  return project.coverHoverStills?.[0] ?? project.coverImage;
+}
+
 /**
  * Full-width featured lead on /projects (below the involvement filter).
  * Meta: TITLE (remaining) | gap | DESC | gap | TAGS — mobile stacks tags like cards.
@@ -23,6 +27,7 @@ export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
   const reduceMotion = useReducedMotion();
   const hoverStills = project.coverHoverStills;
   const hasHoverStills = Boolean(hoverStills && hoverStills.length === 3);
+  const coverSrc = featuredCoverSrc(project);
   const useSwap = !reduceMotion;
   const mediaClass = useSwap
     ? hasHoverStills
@@ -42,23 +47,15 @@ export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
           {useSwap ? (
             <>
               <div className="project-showcase__swap-layer project-showcase__swap-layer--cover">
-                {project.coverVideo ? (
-                  <CoverLoopVideo
-                    className="project-featured__cover-video"
-                    src={project.coverVideo}
-                    ariaLabel={project.title}
-                  />
-                ) : (
-                  <Image
-                    src={project.coverImage}
-                    alt={project.title}
-                    width={project.coverWidth}
-                    height={project.coverHeight}
-                    sizes={mediaSizes}
-                    priority
-                    className="project-featured__image"
-                  />
-                )}
+                <Image
+                  src={coverSrc}
+                  alt={project.title}
+                  width={project.coverWidth}
+                  height={project.coverHeight}
+                  sizes={mediaSizes}
+                  priority
+                  className="project-featured__image"
+                />
               </div>
               {hasHoverStills ? (
                 <div
@@ -91,15 +88,9 @@ export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
                 />
               )}
             </>
-          ) : project.coverVideo ? (
-            <CoverLoopVideo
-              className="project-featured__cover-video"
-              src={project.coverVideo}
-              ariaLabel={project.title}
-            />
           ) : (
             <Image
-              src={project.coverImage}
+              src={coverSrc}
               alt={project.title}
               width={project.coverWidth}
               height={project.coverHeight}

@@ -125,8 +125,13 @@ export type Project = {
   involvement: Involvement;
   coverImage: string;
   /**
-   * Index / Related card cover as muted looping video (wins over `coverImage`).
-   * Use when the user supplies an mp4 for the outside card.
+   * Index / Related / featured card resting cover.
+   * When set, wins over `coverHoverStills[0]` (hover cycle order unchanged).
+   */
+  cardCoverImage?: string;
+  /**
+   * Former index-card cover loop — unused on index and case pages for now
+   * (cards use hover stills; do not auto-inject into the gallery).
    */
   coverVideo?: string;
   /**
@@ -325,7 +330,7 @@ export type ProjectsFeaturedLead = {
   materials: Material[];
   country: ProjectCountry;
   coverImage: string;
-  /** When set, featured media plays this muted loop instead of `coverImage` */
+  /** Unused on the featured lead for now (cards use hover stills) */
   coverVideo?: string;
   /** Hover cycle stills — same recipe as filter cards */
   coverHoverStills?: [string, string, string];
@@ -560,11 +565,6 @@ const SECOND_PROJECT_HOVER_STILLS = [
     "Dragon Age Writing Bundle hover3.jpg",
   ),
 ] as [string, string, string];
-/** Detail page — closing full-width still (was first gallery row) */
-const SECOND_PROJECT_GALLERY_LEAD = projectCoverFromName(
-  SECOND_PROJECT_NAME,
-  "dragon-age-writing-bundle-banner-v1.png",
-);
 const SECOND_PROJECT_HERO_VIDEO = projectCoverFromName(
   SECOND_PROJECT_NAME,
   "VARRIC TETHRAS-monologue.mp4",
@@ -665,16 +665,8 @@ const SECOND_PROJECT_AFTER_VIDEO_ROW = {
     },
   ],
   ratio: "100%",
-  /* Lead still follows beforeEndRow — keep this row before trailing stills */
   afterIndex: 0,
 };
-const SECOND_PROJECT_AFTER_VIDEO_STILLS = [
-  {
-    src: SECOND_PROJECT_GALLERY_LEAD,
-    alt: "Writing Bundle",
-    ratio: "56.25%",
-  },
-];
 const SECOND_PROJECT_BEFORE_END_ROW = {
   items: [
     {
@@ -2196,24 +2188,23 @@ const EIGHTEENTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
 ];
 
 
-/** Default / home lead — End-to-End featured (NECROM Look Book Bundle) */
+/** Default / home lead — End-to-End featured (Dragon Age Writing Bundle) */
 export const projectsFeaturedLead: ProjectsFeaturedLead = {
-  slug: FIFTH_PROJECT_SLUG,
-  title: FIFTH_PROJECT_NAME,
-  tagline: FIFTH_PROJECT_TAGLINE,
+  slug: SECOND_PROJECT_SLUG,
+  title: SECOND_PROJECT_NAME,
+  tagline: SECOND_PROJECT_TAGLINE,
   involvement: "end-to-end",
-  materials: ["leather"],
+  materials: ["paper"],
   country: "global",
   categories: getProjectDisplayTags({
     involvement: "end-to-end",
-    materials: ["leather"],
+    materials: ["paper"],
     country: "global",
   }),
-  coverImage: FIFTH_PROJECT_COVER_VIDEO,
-  coverVideo: FIFTH_PROJECT_COVER_VIDEO,
-  coverHoverStills: FIFTH_PROJECT_HOVER_STILLS,
-  coverWidth: 1920,
-  coverHeight: 1080,
+  coverImage: SECOND_PROJECT_HOVER_STILLS[0],
+  coverHoverStills: SECOND_PROJECT_HOVER_STILLS,
+  coverWidth: SHOWCASE_COVER_W,
+  coverHeight: SHOWCASE_COVER_H,
 };
 
 export const projects: Project[] = [
@@ -2311,7 +2302,6 @@ export const projects: Project[] = [
     afterCoverExtraRows: SECOND_PROJECT_AFTER_COVER_EXTRA_ROWS,
     afterCoverVideo: SECOND_PROJECT_AFTER_COVER_VIDEO,
     afterVideoRow: SECOND_PROJECT_AFTER_VIDEO_ROW,
-    afterVideoStills: SECOND_PROJECT_AFTER_VIDEO_STILLS,
     beforeEndRow: SECOND_PROJECT_BEFORE_END_ROW,
     specialThanks: SECOND_PROJECT_SPECIAL_THANKS,
     collaborators: SECOND_PROJECT_COLLABORATORS,
@@ -2784,7 +2774,8 @@ export const projects: Project[] = [
       "A custom embroidered patch inspired by Fallout’s iconic Tunnel Snakes gang, bringing an in-game faction symbol into a collectible physical product.",
     role: [],
     involvement: "specialized",
-    coverImage: ELEVENTH_PROJECT_COVER_VIDEO,
+    coverImage: ELEVENTH_PROJECT_HOVER_STILLS[2],
+    cardCoverImage: ELEVENTH_PROJECT_HOVER_STILLS[2],
     coverVideo: ELEVENTH_PROJECT_COVER_VIDEO,
     coverHoverStills: ELEVENTH_PROJECT_HOVER_STILLS,
     coverWidth: SHOWCASE_COVER_W,
@@ -3111,9 +3102,9 @@ const PROJECTS_FEATURED_LEAD_BY_INVOLVEMENT: Record<
   Involvement | "all",
   string
 > = {
-  /* All / End-to-End — NECROM Look Book Bundle */
-  all: FIFTH_PROJECT_SLUG,
-  "end-to-end": FIFTH_PROJECT_SLUG,
+  /* All / End-to-End — Dragon Age Writing Bundle */
+  all: SECOND_PROJECT_SLUG,
+  "end-to-end": SECOND_PROJECT_SLUG,
   /* Project Contribution — Horizon Zero Dawn Thunderjaw */
   contribution: THIRD_PROJECT_SLUG,
   /* Specialized — 10-Year Coin Shadowbox until user picks another */

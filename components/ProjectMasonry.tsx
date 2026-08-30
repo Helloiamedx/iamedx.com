@@ -10,7 +10,6 @@ import {
   filterCardListVariants,
   filterCardListVariantsReduced,
 } from "@/components/filterCardMotion";
-import { CoverLoopVideo } from "@/components/CoverLoopVideo";
 import { ProjectCardTags } from "@/components/ProjectCardTags";
 import { type Project } from "@/content/projects";
 
@@ -25,6 +24,15 @@ type ProjectMasonryProps = {
 
 /** Placeholder colors for hover cycle — replace with per-project stills later. */
 const HOVER_SWAP_FRAME_COLORS = ["#0a0a0a", "#0076dd", "#86868b"] as const;
+
+/** Grid / related cards: optional override, else first hover still (no card video). */
+function cardCoverSrc(project: Project): string {
+  return (
+    project.cardCoverImage ??
+    project.coverHoverStills?.[0] ??
+    project.coverImage
+  );
+}
 
 type ProjectShowcaseCardProps = {
   project: Project;
@@ -41,6 +49,7 @@ function ProjectShowcaseCard({
   const tagline = project.tagline ?? project.summary;
   const hoverStills = project.coverHoverStills;
   const hasHoverStills = Boolean(hoverStills && hoverStills.length === 3);
+  const coverSrc = cardCoverSrc(project);
   const useSwap = enableHoverSwap && !reduceMotion;
   const mediaClass = useSwap
     ? hasHoverStills
@@ -54,21 +63,13 @@ function ProjectShowcaseCard({
         {useSwap ? (
           <>
             <div className="project-showcase__swap-layer project-showcase__swap-layer--cover">
-              {project.coverVideo ? (
-                <CoverLoopVideo
-                  className="project-showcase__cover-video"
-                  src={project.coverVideo}
-                  ariaLabel={project.title}
-                />
-              ) : (
-                <Image
-                  src={project.coverImage}
-                  alt={project.title}
-                  width={project.coverWidth}
-                  height={project.coverHeight}
-                  sizes={sizes}
-                />
-              )}
+              <Image
+                src={coverSrc}
+                alt={project.title}
+                width={project.coverWidth}
+                height={project.coverHeight}
+                sizes={sizes}
+              />
             </div>
             {hasHoverStills ? (
               <div
@@ -101,15 +102,9 @@ function ProjectShowcaseCard({
               />
             )}
           </>
-        ) : project.coverVideo ? (
-          <CoverLoopVideo
-            className="project-showcase__cover-video"
-            src={project.coverVideo}
-            ariaLabel={project.title}
-          />
         ) : (
           <Image
-            src={project.coverImage}
+            src={coverSrc}
             alt={project.title}
             width={project.coverWidth}
             height={project.coverHeight}
