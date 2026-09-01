@@ -204,10 +204,10 @@
   --font-label: "FK Grotesk Mono", ui-monospace, Menlo, monospace;
   --font-type-label: var(--font-label);
   /*
-   * Body ↔ challenge GIF band — equal top/bottom pad.
-   * Mobile / desktop fixed values (not fluid). Black shell keeps --footer-top-gap.
+   * Body ↔ challenge GIF band — equal top/bottom pad on challenge.
+   * Mobile / desktop fixed values (not fluid). Black shell --footer-top-gap = 2× prior.
    */
-  --footer-top-gap: clamp(3.25rem, 5.75vw, 4.5rem);
+  --footer-top-gap: calc(clamp(3.25rem, 5.75vw, 4.5rem) * 2);
   --challenge-band-pad-y: 5.625rem; /* 90px — mobile (4.5rem × 1.25) */
   --content-footer-gap: var(--challenge-band-pad-y);
   /*
@@ -260,6 +260,8 @@
   --card-meta-type-nudge-mobile: 1px;
   /* Bar + iOS status/notch when viewport-fit=cover */
   --header-offset: calc(var(--header-bar-h) + env(safe-area-inset-top, 0px));
+  /* Shared with header chrome — intro pad clears glyph bottom, not bar floor */
+  --nav-type-size: clamp(0.6875rem, 0.67vw, 0.8125rem);
   /* Collection break + collection detail — shared headline size */
   --collection-headline-size: 80px;
   --collection-detail-intro-width: 90%;
@@ -269,6 +271,7 @@
 @media (max-width: 899px) {
   :root {
     --header-bar-h: calc(2.925rem + 8px); /* 3.25rem × 0.9 + 8px */
+    --nav-type-size: calc(0.8125rem - 2px);
     /* Hero mobile size × 1.15 — single OriginButton scale site-wide */
     --origin-button-mobile-scale: calc(2 / 3 * 1.15 * 1.05);
   }
@@ -465,7 +468,7 @@ button.origin-button {
   flex: 1 0 auto;
   box-sizing: border-box;
   background: var(--site-bg);
-  /* Body → GIF air lives on .site-footer__challenge padding-top */
+  /* Body → footer air: .site-footer__gap (challenge lives on project detail) */
   padding-bottom: 0;
 }
 
@@ -1251,16 +1254,14 @@ body.is-mobile-menu-open .mobile-menu a {
   border: 0;
 }
 
-/* Light challenge band — outside / above the black footer stage.
- * Bottom = full --challenge-band-pad-y; top = 90% to offset GIF transparent headroom. */
-.site-footer__challenge {
+/* Content ↔ footer air (challenge CTA is on project detail, not here) */
+.site-footer__gap {
   box-sizing: border-box;
   width: 100%;
+  height: var(--content-footer-gap);
   margin: 0;
-  padding: calc(var(--challenge-band-pad-y) * 0.9) var(--shell-gutter)
-    var(--challenge-band-pad-y);
+  padding: 0;
   background: var(--site-bg);
-  color: #0a0a0a;
 }
 
 .site-footer__stage {
@@ -1284,7 +1285,7 @@ body.is-mobile-menu-open .mobile-menu a {
   box-sizing: border-box;
   width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
   margin-inline: auto;
-  /* Top pad = :root --footer-top-gap (= --content-footer-gap) */
+  /* Top pad = :root --footer-top-gap (2× prior shell air) */
   padding: var(--footer-top-gap) 0 clamp(2.5rem, 6vw, 4rem);
 }
 
@@ -2179,7 +2180,7 @@ body.is-mobile-menu-open .project-case-demo__toggle-pin {
   min-height: 100svh;
   margin-top: calc(-1 * var(--header-offset));
   display: grid;
-  align-items: center;
+  align-items: end;
   color: #f7f7f7;
   overflow: hidden;
   background: #0a0a0a;
@@ -2202,20 +2203,98 @@ body.is-mobile-menu-open .project-case-demo__toggle-pin {
   height: 100%;
   object-fit: cover;
   object-position: center;
-  /* Stay dark until first frame (or play) — never flash empty */
+  /* Stay dark until revealed — progress cover sits above */
   opacity: 0;
   animation: none;
   user-select: none;
   -webkit-user-drag: none;
 }
 
-/* First decoded frame — visible behind copy (no loading pill on home) */
-.hero__video.is-framed {
-  opacity: 1;
+html[data-chrome-ready="1"] .hero__video.is-loaded {
+  animation: hero-video-in 560ms cubic-bezier(0.22, 1, 0.36, 1) 80ms forwards;
 }
 
-html[data-chrome-ready="1"] .hero__video.is-loaded:not(.is-framed) {
-  animation: hero-video-in 560ms cubic-bezier(0.22, 1, 0.36, 1) 80ms forwards;
+/* Progress / icon load above idle content stacking */
+.hero__video-wrap .video-loading-cover,
+.hero__video-wrap .hero-video-load {
+  z-index: 2;
+}
+
+/* Home hero — site icon fills bottom → top */
+.hero-video-load {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #141414;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 0.35s ease,
+    visibility 0s linear 0s;
+  pointer-events: none;
+}
+
+.hero-video-load.is-ready {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.35s ease,
+    visibility 0s linear 0.35s;
+}
+
+.hero-video-load__mark {
+  position: relative;
+  /* Phone / desktop load-mark sizes (iterated from base) */
+  width: clamp(7.182rem, 32.832vw, 9.576rem);
+  height: clamp(7.182rem, 32.832vw, 9.576rem);
+  line-height: 0;
+  color: #fff;
+}
+
+@media (min-width: 900px) {
+  .hero-video-load__mark {
+    width: clamp(5.620625rem, 10.58vw, 7.27375rem);
+    height: clamp(5.620625rem, 10.58vw, 7.27375rem);
+  }
+}
+
+.hero-video-load__base,
+.hero-video-load__reveal svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+  pointer-events: none;
+}
+
+.hero-video-load__base {
+  opacity: 0.22;
+}
+
+.hero-video-load__reveal {
+  position: absolute;
+  inset: 0;
+  /* Bottom→top fill: reveal lower portion as --load-p rises 0–100 */
+  clip-path: inset(calc(100% - (var(--load-p, 0) * 1%)) 0 0 0);
+  transition: clip-path 0.18s ease-out;
+  will-change: clip-path;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-video-load__reveal {
+    transition: none;
+  }
+
+  .hero-video-load {
+    transition: none;
+  }
+
+  .hero-video-load.is-ready {
+    transition: none;
+  }
 }
 
 @keyframes hero-video-in {
@@ -2230,26 +2309,23 @@ html[data-chrome-ready="1"] .hero__video.is-loaded:not(.is-framed) {
 .hero__content {
   position: relative;
   z-index: 0;
-  /*
-   * Always inset more than the nav shell. Using the same --shell-gutter made
-   * headline + menu share one width once the viewport was narrower than
-   * shell-max (e.g. ~889px) — the 0.86 factor never kicked in.
-   * 0.86 × 0.9 → 10% narrower than the previous hero column.
-   */
-  --hero-gutter: clamp(1.7rem, 5.5vw, 3.75rem);
-  width: min(
-    calc(var(--shell-max) * 0.774),
-    calc((100% - var(--hero-gutter) * 2) * 0.9)
+  box-sizing: border-box;
+  /* Bottom-left: same inset as header/menu left edge on both sides; width 50% */
+  --hero-content-inset: max(
+    var(--shell-gutter),
+    calc((100% - min(var(--shell-max), calc(100% - var(--shell-gutter) * 2))) / 2)
   );
-  margin: 0 auto;
-  padding: calc(var(--header-offset) + 2rem) 0 3.5rem;
+  width: 50%;
+  max-width: 50%;
+  margin: 0 0 var(--hero-content-inset) var(--hero-content-inset);
+  padding: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+  align-items: flex-start;
   gap: clamp(1.35rem, 3.2vw, 2rem);
-  /* Hidden until copy gate — set early; does not wait for video */
+  text-align: left;
+  color: #fff;
+  /* Hidden until video pops in — otherwise copy covers the progress bar */
   visibility: hidden;
   pointer-events: none;
 }
@@ -2262,76 +2338,40 @@ html[data-hero-copy-ready="1"] .hero__content {
 
 .hero__title {
   margin: 0;
+  padding: 0;
   width: 100%;
   max-width: 100%;
-  font-size: inherit;
-  font-weight: inherit;
-  letter-spacing: inherit;
-  line-height: inherit;
+  /* Half of prior full size, then −2px from the +20px recipe */
+  font-size: clamp(
+    calc((2.2rem - 2px) * 0.5 + 18px),
+    calc((6.2vw - 2px) * 0.5 + 18px),
+    calc((5.25rem - 2px) * 0.5 + 18px)
+  );
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  text-align: left;
   color: #fff;
+  opacity: 0;
+  transform: translateY(0.55rem);
+  transition:
+    opacity 480ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 480ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.hero-headline {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  -webkit-user-select: text;
-  user-select: text;
-}
-
-.hero-headline__fold-text,
-.hero-headline .fold-text {
-  width: 100%;
-  max-width: 100%;
-  text-align: center;
-  line-height: normal;
-  -webkit-user-select: text;
-  user-select: text;
-}
-
-.hero-headline__line {
-  width: 100%;
-}
-
-.hero-keyword {
-  position: relative;
-  display: inline-block;
-  vertical-align: baseline;
-  white-space: nowrap;
-  color: var(--hero-keyword-color, #00e5ff);
-  perspective: 720px;
-}
-
-.hero-keyword__viewport {
-  display: inline-flex !important;
-  justify-content: center;
-  overflow: visible;
-  vertical-align: baseline;
-  transform-style: preserve-3d;
-}
-
-.hero-keyword__word {
-  display: inline-block;
-  white-space: nowrap;
-  will-change: transform;
-  color: inherit;
-  transform-style: preserve-3d;
-}
-
-.hero-keyword__letter {
-  display: inline-block;
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
-  will-change: transform, opacity, filter;
+.hero__title.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .hero__actions {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-start;
   gap: clamp(0.5rem, 0.35rem + 1.1vw, 0.85rem);
-  margin-top: 0.25rem;
+  margin: 0;
+  padding: 0;
   opacity: 0;
   transform: translateY(0.55rem);
   pointer-events: none;
@@ -2340,33 +2380,38 @@ html[data-hero-copy-ready="1"] .hero__content {
     transform 480ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Hero CTAs inherit global OriginButton Light */
 .hero__actions.is-revealed {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
 }
 
-@media (max-width: 899px) {
-  .hero__content {
-    width: 72.675vw; /* 85vw × 0.9 × 0.95 */
-    max-width: 72.675vw;
-    /* Optical nudge — centered block reads low under the header / logo rail */
-    transform: translateY(-30px);
+@media (prefers-reduced-motion: reduce) {
+  .hero__title,
+  .hero__actions {
+    transition: none;
+    transform: none;
   }
 
-  /*
-   * Mobile size must be a full clamp — calc(var(--fold-text-font-size) - Npx)
-   * is invalid when the var token is itself a clamp() from the inline style.
-   * Desktop keeps +20px; mobile = +7px (half-size base + 7).
-   */
-  .hero-headline__fold-text.fold-text,
-  .hero-headline .fold-text.hero-headline__fold-text {
+  .hero__title.is-revealed,
+  .hero__actions.is-revealed {
+    opacity: 1;
+  }
+
+  html[data-chrome-ready="1"] .hero__video.is-loaded {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+@media (max-width: 899px) {
+  .hero__title {
+    /* Same half-size recipe as before on mobile, then −2px from the old +7 */
     font-size: clamp(
-      calc((2.2rem - 2px) * 0.5 + 7px),
-      calc((6.2vw - 2px) * 0.5 + 7px),
-      calc((5.25rem - 2px) * 0.5 + 7px)
-    ) !important;
+      calc((2.2rem - 2px) * 0.5 + 5px),
+      calc((6.2vw - 2px) * 0.5 + 5px),
+      calc((5.25rem - 2px) * 0.5 + 5px)
+    );
   }
 
   a.origin-button,
@@ -2452,23 +2497,66 @@ html[data-hero-copy-ready="1"] .hero__content {
   --home-section-pad: clamp(3rem, 7vw, 5.5rem);
   --card-meta-type-font: var(--font-title);
   --card-meta-type-weight: 400;
-  /* Shared home section intro — eyebrow + title + description (all five bands) */
-  --home-intro-width: min(68rem, 92vw);
-  --home-intro-eyebrow-font: var(--font-label); /* FK Grotesk Mono Medium */
-  --home-intro-eyebrow-size: clamp(0.7rem, 0.85vw, 0.8rem);
-  --home-intro-eyebrow-weight: 500;
-  --home-intro-eyebrow-tracking: 0.14em;
-  --home-intro-eyebrow-color: rgba(10, 10, 10, 0.55);
-  --home-intro-title-font: var(--font-button); /* Grtsk Tera Light */
-  --home-intro-title-size: clamp(
-    calc(1.85rem * 0.5 + 5px),
-    calc(4vw * 0.5 + 5px),
-    calc(2.75rem * 0.5 + 5px)
+  /*
+   * Shared home section intro — Character is source of truth.
+   * Change these tokens → every home band label/title follows.
+   */
+  --home-section-intro-width: 55%;
+  /* Label ↔ title — slightly tighter than prior */
+  --home-section-intro-gap: clamp(0.4rem, 0.85vw, 0.6rem);
+  /* Intro (label+title) → content below — one gap for every home band (+30%) */
+  --home-section-intro-margin-bottom: calc(
+    clamp(2.5rem, 5vw, 3.75rem) * 1.3
   );
-  --home-intro-title-weight: 300;
-  --home-intro-title-tracking: -0.04em;
-  --home-intro-title-leading: 1.08;
-  --home-intro-title-color: #0a0a0a;
+  /* Label = Character / svc-demo eyebrow recipe */
+  --home-section-label-font: var(--font-label); /* FK Grotesk Mono Medium */
+  --home-section-label-size: clamp(0.7rem, 0.85vw, 0.8rem);
+  --home-section-label-weight: 500;
+  --home-section-label-tracking: 0.14em;
+  --home-section-label-color: rgba(10, 10, 10, 0.55);
+  /* Title = Grtsk Medium (+15px vs prior home size) */
+  --home-section-title-font: "Grtsk", var(--font-sans);
+  --home-section-title-size: calc(
+    clamp(
+      calc(1.25rem - 3px),
+      calc(1.05rem + 0.9vw - 3px),
+      calc(1.75rem - 3px)
+    ) - 5px + 15px
+  );
+  --home-section-title-weight: 500;
+  --home-section-title-tracking: -0.04em;
+  --home-section-title-leading: 1.05;
+  --home-section-title-color: #0a0a0a;
+  /*
+   * Shared body copy — Character cards, how i do points, main service card desc.
+   */
+  --home-point-body-font: var(--font-sans);
+  --home-point-body-size: calc(clamp(0.72rem, 0.85vw, 0.84rem) + 2px);
+  --home-point-body-weight: 400;
+  --home-point-body-leading: 1.5;
+  --home-point-body-color: rgba(255, 255, 255, 0.38);
+  /*
+   * Shared keywords — Character (Loyalty…) + how i do (I Care Your Review…).
+   */
+  --home-point-keyword-font: "Grtsk Tera Bold", "Grtsk Tera", sans-serif;
+  --home-point-keyword-size: calc(clamp(1.05rem, 1.35vw, 1.35rem) - 5px);
+  --home-point-keyword-weight: 700;
+  --home-point-keyword-tracking: 0.06em;
+  --home-point-keyword-leading: 1;
+  --home-point-keyword-color: #fff;
+  /* Legacy aliases — HomePricing / HomeCopyBlock still reference these */
+  --home-intro-width: var(--home-section-intro-width);
+  --home-intro-eyebrow-font: var(--home-section-label-font);
+  --home-intro-eyebrow-size: var(--home-section-label-size);
+  --home-intro-eyebrow-weight: var(--home-section-label-weight);
+  --home-intro-eyebrow-tracking: var(--home-section-label-tracking);
+  --home-intro-eyebrow-color: var(--home-section-label-color);
+  --home-intro-title-font: var(--home-section-title-font);
+  --home-intro-title-size: var(--home-section-title-size);
+  --home-intro-title-weight: var(--home-section-title-weight);
+  --home-intro-title-tracking: var(--home-section-title-tracking);
+  --home-intro-title-leading: var(--home-section-title-leading);
+  --home-intro-title-color: var(--home-section-title-color);
   --home-intro-desc-font: var(--font-sans);
   --home-intro-desc-size: clamp(
     calc(0.95rem - 1px),
@@ -2491,17 +2579,31 @@ html[data-hero-copy-ready="1"] .hero__content {
   --font-type-label: var(--font-label);
 }
 
-@media (max-width: 899px) {
+@media (max-width: 900px) {
   .home-page {
-    --home-intro-width: 80vw;
+    --home-point-body-size: calc(0.875rem + 2px);
+    --home-point-keyword-size: calc(1.2rem - 5px);
+    /* Label + title: same width as content shells (not the desktop 55%) */
+    --home-section-intro-width: 80vw;
+    /* Section titles — 2px smaller than desktop */
+    --home-section-title-size: calc(
+      clamp(
+        calc(1.25rem - 3px),
+        calc(1.05rem + 0.9vw - 3px),
+        calc(1.75rem - 3px)
+      ) - 5px + 15px - 2px
+    );
   }
 
-  .home-page__intro {
-    width: 100%;
-    max-width: var(--home-intro-width);
+  .home-page__intro,
+  .home-section-intro {
+    width: var(--home-section-intro-width);
+    max-width: 100%;
   }
 
-  .home-page > .section.home-page__section > *:not(.home-page__intro) {
+  .home-page > .section.home-page__section > *:not(.home-page__intro):not(
+      .home-section-intro
+    ) {
     width: 80vw;
     max-width: 100%;
   }
@@ -2514,16 +2616,11 @@ html[data-hero-copy-ready="1"] .hero__content {
     width: 80vw;
     max-width: 100%;
   }
-
-  .support-know > .home-page__intro {
-    width: 80vw;
-    max-width: 100%;
-  }
 }
 
 /*
   After hero: class bands (not nth-child — preload <link> shifts indices).
-  Recognition light | Someone draft | Approach photo | Character white | Support white | Products light | Thoughts gray
+  Recognition dark | Someone draft | Approach photo | Character white | Support photo | Products light | Thoughts gray
 */
 .home-page > .home-someone-draft {
   background: #fff;
@@ -2617,7 +2714,9 @@ html[data-hero-copy-ready="1"] .hero__content {
   box-sizing: border-box;
 }
 
-.home-page > .section.home-page__section > *:not(.home-page__intro) {
+.home-page > .section.home-page__section > *:not(.home-page__intro):not(
+    .home-section-intro
+  ) {
   width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
   margin-inline: auto;
 }
@@ -2626,38 +2725,91 @@ html[data-hero-copy-ready="1"] .hero__content {
   margin-block-start: clamp(3.5rem, 6vw, 5rem);
 }
 
-/* —— Home section intro (all editorial blocks — same container + type) —— */
-.home-page__intro {
+/*
+ * Home section intro — label + title, 55% container.
+ * Character recipe (tokens on `.home-page`); dark bands override ink vars.
+ */
+.home-section-intro {
   box-sizing: border-box;
-  width: var(--home-intro-width);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--home-section-intro-gap);
+  width: var(--home-section-intro-width);
   max-width: 100%;
   margin-inline: auto;
-  margin-bottom: clamp(2.5rem, 5vw, 3.75rem);
+  margin-bottom: var(--home-section-intro-margin-bottom);
+  text-align: center;
+}
+
+.home-section-intro__label {
+  margin: 0;
+  font-family: var(--home-section-label-font);
+  font-size: var(--home-section-label-size);
+  font-weight: var(--home-section-label-weight);
+  font-synthesis: none;
+  letter-spacing: var(--home-section-label-tracking);
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: var(--home-section-label-color);
+}
+
+.home-section-intro__title {
+  margin: 0;
+  font-family: var(--home-section-title-font);
+  font-size: var(--home-section-title-size);
+  font-weight: var(--home-section-title-weight);
+  font-synthesis: none;
+  letter-spacing: var(--home-section-title-tracking);
+  line-height: var(--home-section-title-leading);
+  text-transform: uppercase;
+  color: var(--home-section-title-color);
+  text-wrap: balance;
+  hyphens: none;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+/* Dark / photo plates — light ink */
+.home-recognition,
+.home-someone,
+.support-know {
+  --home-section-label-color: rgba(255, 255, 255, 0.55);
+  --home-section-title-color: #fff;
+}
+
+/* —— Home section intro (legacy class — same tokens; no description on home) —— */
+.home-page__intro {
+  box-sizing: border-box;
+  width: var(--home-section-intro-width);
+  max-width: 100%;
+  margin-inline: auto;
+  margin-bottom: var(--home-section-intro-margin-bottom);
   text-align: center;
 }
 
 .home-page__intro-eyebrow {
-  margin: 0 0 clamp(0.65rem, 1.4vw, 0.95rem);
-  font-family: var(--home-intro-eyebrow-font);
-  font-size: var(--home-intro-eyebrow-size);
-  font-weight: var(--home-intro-eyebrow-weight);
+  margin: 0 0 var(--home-section-intro-gap);
+  font-family: var(--home-section-label-font);
+  font-size: var(--home-section-label-size);
+  font-weight: var(--home-section-label-weight);
   font-synthesis: none;
-  letter-spacing: var(--home-intro-eyebrow-tracking);
+  letter-spacing: var(--home-section-label-tracking);
   line-height: 1.2;
   text-transform: uppercase;
-  color: var(--home-intro-eyebrow-color);
+  color: var(--home-section-label-color);
 }
 
 .home-page__intro h2 {
   margin: 0;
-  font-family: var(--home-intro-title-font);
-  font-size: var(--home-intro-title-size);
-  font-weight: var(--home-intro-title-weight);
+  font-family: var(--home-section-title-font);
+  font-size: var(--home-section-title-size);
+  font-weight: var(--home-section-title-weight);
   font-synthesis: none;
-  letter-spacing: var(--home-intro-title-tracking);
-  line-height: var(--home-intro-title-leading);
-  color: var(--home-intro-title-color);
-  text-transform: none;
+  letter-spacing: var(--home-section-title-tracking);
+  line-height: var(--home-section-title-leading);
+  color: var(--home-section-title-color);
+  text-transform: uppercase;
   text-wrap: balance;
   hyphens: none;
   word-break: normal;
@@ -2665,16 +2817,7 @@ html[data-hero-copy-ready="1"] .hero__content {
 }
 
 .home-page__intro p {
-  margin: 0.75rem 0 0;
-  font-family: var(--home-intro-desc-font);
-  font-size: var(--home-intro-desc-size);
-  font-weight: var(--home-intro-desc-weight);
-  line-height: var(--home-intro-desc-leading);
-  color: var(--home-intro-desc-color);
-  text-wrap: wrap;
-  hyphens: none;
-  word-break: normal;
-  overflow-wrap: break-word;
+  display: none;
 }
 
 .home-page .empty-state {
@@ -2719,37 +2862,43 @@ html[data-hero-copy-ready="1"] .hero__content {
   margin-inline: auto;
   padding: var(--home-section-pad) 0;
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.35fr);
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.55fr);
   column-gap: clamp(2rem, 5vw, 4.5rem);
   align-items: start;
 }
 
+/* Intro sits left — not the centered 55% home recipe */
 .home-someone__lead {
   min-width: 0;
 }
 
-.home-someone__title {
-  margin: 0;
-  font-family: var(--font-sans);
-  font-size: clamp(1.75rem, 3.2vw, 2.85rem);
-  font-weight: 500;
-  letter-spacing: -0.035em;
-  line-height: 1.15;
-  color: rgba(255, 255, 255, 0.42);
+.home-someone__lead .home-section-intro {
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+  margin-bottom: 0;
+  align-items: flex-start;
+  text-align: left;
 }
 
-.home-someone__title-em {
-  color: #fff;
+.home-someone__lead .home-section-intro__label,
+.home-someone__lead .home-section-intro__title {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  margin-inline: 0;
+  padding-inline: 0;
+  text-align: left;
 }
 
-.home-someone__subtitle {
-  margin: 1rem 0 0;
-  max-width: 22rem;
-  font-family: var(--font-sans);
-  font-size: clamp(0.875rem, 1.1vw, 1rem);
-  font-weight: 400;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.45);
+.home-someone__lead .home-section-intro__title {
+  /* Balance wrapping fights left flush on two-word titles */
+  text-wrap: wrap;
+  /*
+   * Grtsk Medium “M” has heavier left sidebearing than the mono label —
+   * pull the title so ink edges optically match “HOW I DO”.
+   */
+  margin-inline-start: -0.1em;
 }
 
 .home-someone__grid {
@@ -2757,55 +2906,68 @@ html[data-hero-copy-ready="1"] .hero__content {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: clamp(1.25rem, 2.5vw, 2.25rem);
+  /* Three per row */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: clamp(2.5rem, 5vw, 4.25rem);
   row-gap: clamp(1.75rem, 3.5vw, 2.75rem);
+  width: 100%;
+  min-width: 0;
 }
 
 .home-someone__item {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  align-items: stretch;
+  gap: 0;
 }
 
-.home-someone__item:last-child:nth-child(odd) {
-  grid-column: 1 / -1;
-}
-
+/* Shared keyword type — same tokens as Character (.home-different__feature-keyword) */
 .home-someone__item-title {
   margin: 0;
-  padding-bottom: 0.75rem;
+  padding: 0 0 0.75rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.22);
-  font-family: var(--font-sans);
-  font-size: clamp(0.95rem, 1.15vw, 1.125rem);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  line-height: 1.25;
-  color: #fff;
+  font-family: var(--home-point-keyword-font);
+  font-size: var(--home-point-keyword-size);
+  font-weight: var(--home-point-keyword-weight);
+  font-synthesis: none;
+  letter-spacing: var(--home-point-keyword-tracking);
+  line-height: var(--home-point-keyword-leading);
+  text-transform: uppercase;
+  color: var(--home-point-keyword-color);
 }
 
 .home-someone__item-body {
-  margin: 0;
-  font-family: var(--font-sans);
-  font-size: clamp(0.8125rem, 0.95vw, 0.9375rem);
-  font-weight: 400;
-  line-height: 1.55;
-  color: rgba(255, 255, 255, 0.5);
+  margin: 0.75rem 0 0;
+  font-family: var(--home-point-body-font);
+  font-size: var(--home-point-body-size);
+  font-weight: var(--home-point-body-weight);
+  line-height: var(--home-point-body-leading);
+  text-wrap: pretty;
+  color: var(--home-point-body-color);
 }
 
 @media (max-width: 900px) {
   .home-someone__inner {
     grid-template-columns: 1fr;
-    row-gap: clamp(2rem, 6vw, 3rem);
+    /* Intro→content gap comes from shared intro margin (same as other bands) */
+    row-gap: 0;
+  }
+
+  .home-someone__lead .home-section-intro {
+    margin-bottom: var(--home-section-intro-margin-bottom);
   }
 
   .home-someone__grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: clamp(1.75rem, 4vw, 2.75rem);
+    row-gap: clamp(2.75rem, 6.5vw, 3.75rem);
   }
+}
 
-  .home-someone__item:last-child:nth-child(odd) {
-    grid-column: auto;
+@media (max-width: 520px) {
+  .home-someone__grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -2877,59 +3039,31 @@ html[data-hero-copy-ready="1"] .hero__content {
   color: rgba(10, 10, 10, 0.55);
 }
 
-/* —— Client recognition / metrics band (headline + body + figures) —— */
+/* —— Client recognition / metrics band —— */
 .home-recognition {
   width: 100%;
-  background: #fff;
-  color: #0a0a0a;
+  background: #0a0a0a;
+  color: #f5f5f5;
+  /* One pad token — equal top / bottom air */
+  --home-recognition-pad-y: var(--home-section-pad);
+  --home-recognition-gap: clamp(1.75rem, 3.5vw, 2.75rem);
 }
 
 .home-recognition__shell {
   box-sizing: border-box;
   width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
   margin-inline: auto;
-  padding: var(--home-section-pad) 0;
+  padding-block: var(--home-recognition-pad-y);
+  padding-inline: 0;
   display: flex;
   flex-direction: column;
-  gap: clamp(2.5rem, 5vw, 4rem);
+  align-items: stretch;
+  gap: 0;
 }
 
-.home-recognition__top {
-  display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
-  column-gap: clamp(1.5rem, 4vw, 3.5rem);
-  align-items: start;
-}
-
-.home-recognition__headline {
-  margin: 0;
-  font-family: "Grtsk Tera", var(--font-sans);
-  font-size: clamp(2rem, 4.2vw, 3.75rem);
-  font-weight: 500;
-  letter-spacing: -0.04em;
-  line-height: 1.05;
-  color: #0a0a0a;
-}
-
-.home-recognition__portrait {
-  display: inline-block;
-  vertical-align: middle;
-  width: 0.85em;
-  height: 0.85em;
-  margin-inline: 0.12em;
-  object-fit: cover;
-  object-position: center top;
-  border-radius: 0;
-}
-
-.home-recognition__body {
-  margin: 0;
-  max-width: 28rem;
-  font-family: var(--font-sans);
-  font-size: clamp(0.875rem, 1.05vw, 1.05rem);
-  font-weight: 400;
-  line-height: 1.55;
-  color: rgba(10, 10, 10, 0.62);
+/* Metrics → logos air (intro→content uses shared --home-section-intro-margin-bottom) */
+.home-recognition__shell > .home-recognition__metrics {
+  margin-bottom: var(--home-recognition-gap);
 }
 
 .home-recognition__metrics {
@@ -2937,54 +3071,97 @@ html[data-hero-copy-ready="1"] .hero__content {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  column-gap: clamp(1rem, 2.5vw, 2rem);
-  row-gap: clamp(1.5rem, 3vw, 2rem);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.65rem, 1.2vw, 0.9rem);
 }
 
 .home-recognition__metric {
+  --metric-pad: clamp(0.65rem, 1.1vw, 0.9rem);
+  box-sizing: border-box;
+  position: relative;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
+  display: block;
+  /* Prior size × 1.15 */
+  min-height: calc(clamp(8.5rem, 14vw, 11rem) * 1.15);
+  padding: var(--metric-pad);
+  /* Frosted dark panel */
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px) saturate(1.15);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+  border-radius: 0;
 }
 
 .home-recognition__value {
   margin: 0;
-  font-family: "Grtsk Tera", var(--font-sans);
+  /* Same face as the section headline — Grtsk Medium */
+  font-family: "Grtsk", var(--font-sans);
   font-size: clamp(2rem, 3.5vw, 3.25rem);
   font-weight: 500;
   letter-spacing: -0.04em;
   line-height: 1;
-  color: #0a0a0a;
+  color: #f5f5f5;
+  /* Top-left */
+  text-align: left;
 }
 
 .home-recognition__label {
   margin: 0;
+  position: absolute;
+  inset: auto var(--metric-pad) var(--metric-pad) var(--metric-pad);
+  max-width: none;
   font-family: var(--font-label);
-  font-size: var(--type-chip-font, clamp(0.625rem, 0.58rem + 0.2vw, 0.75rem));
+  font-size: clamp(0.6875rem, 0.64rem + 0.22vw, 0.8125rem);
   font-weight: 500;
   letter-spacing: 0.08em;
-  line-height: 1.3;
+  line-height: 1.35;
   text-transform: uppercase;
-  color: #0a0a0a;
+  text-align: left;
+  color: rgba(245, 245, 245, 0.55);
 }
 
-.home-recognition__blurb {
-  margin: 0.15rem 0 0;
-  font-family: var(--font-sans);
-  font-size: clamp(0.75rem, 0.9vw, 0.875rem);
-  font-weight: 400;
-  line-height: 1.45;
-  color: rgba(10, 10, 10, 0.55);
+/* Logos under metrics — no extra pad (shell owns Y air) */
+.home-recognition__shell .client-logo-marquee {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+/* −5% vs base marquee logo size */
+.home-recognition__shell .client-logo-marquee__item {
+  height: clamp(
+    calc(1.551rem * 0.95),
+    calc(2.256vw * 0.95),
+    calc(2.021rem * 0.95)
+  );
+}
+
+.home-recognition__shell .client-logo-marquee__img {
+  max-width: clamp(
+    calc(5.17rem * 0.95),
+    calc(11.28vw * 0.95),
+    calc(7.99rem * 0.95)
+  );
+  /* Light marks on the dark recognition band */
+  filter: brightness(0) invert(1);
+  opacity: 0.42;
+}
+
+.home-recognition__shell .client-logo-marquee:hover .client-logo-marquee__img {
+  opacity: 0.28;
+}
+
+.home-recognition__shell .client-logo-marquee__item:hover .client-logo-marquee__img {
+  opacity: 0.85;
+}
+
+@media (max-width: 700px) {
+  .home-recognition__shell .client-logo-marquee__item {
+    height: calc(1.363rem * 0.95);
+  }
 }
 
 @media (max-width: 900px) {
-  .home-recognition__top {
-    grid-template-columns: 1fr;
-    row-gap: 1.25rem;
-  }
-
   .home-recognition__metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -2996,18 +3173,23 @@ html[data-hero-copy-ready="1"] .hero__content {
   }
 }
 
-/* —— Character / What Makes Me Stand Out (card columns) —— */
+
+/** —— Character / What Makes Me Stand Out (card columns) —— */
 .home-different {
   width: 100%;
   background: #fff;
   --home-different-dim: rgba(10, 10, 10, 0.38);
   --home-different-lit: #0a0a0a;
-  /* Unified top/bottom air — at least 90px */
-  --home-different-pad-block: max(90px, var(--home-section-pad));
+  /* Same block pad as every other home section */
+  --home-different-pad-block: var(--home-section-pad);
   /* Even space between the five columns */
   --home-different-col-gap: clamp(0.5rem, 1vw, 0.833rem);
-  /* Same inset on every side of each column */
-  --home-different-col-pad: clamp(0.625rem, 1vw, 0.875rem);
+  /*
+   * Card inset — equal on all sides. Body/keyword use cap-edge trim so
+   * half-leading does not make top feel tighter than the sides.
+   * Image stays anchored to the card corner (ignores this pad).
+   */
+  --home-different-col-pad: clamp(1rem, 1.45vw, 1.35rem);
 }
 
 .home-different__inner {
@@ -3015,9 +3197,13 @@ html[data-hero-copy-ready="1"] .hero__content {
   width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
   margin-inline: auto;
   padding: var(--home-different-pad-block) 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
 }
 
-/* 90% of shell — intro + five columns share this track */
+/* 90% of shell — five columns */
 .home-different__features-wrap {
   box-sizing: border-box;
   width: 90%;
@@ -3025,33 +3211,7 @@ html[data-hero-copy-ready="1"] .hero__content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(3.5rem, 7.5vw, 5.75rem);
-}
-
-/* Eyebrow + title in one box — 75% of the five-column track */
-.home-different__intro {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(0.55rem, 1.2vw, 0.85rem);
-  width: 75%;
-  margin-inline: auto;
-  text-align: center;
-}
-
-.home-different .svc-demo__hero-eyebrow {
-  color: rgba(10, 10, 10, 0.55);
-}
-
-.home-different .svc-demo__hero-title {
-  color: #0a0a0a;
-  font-size: calc(
-    clamp(
-      calc(1.25rem - 3px),
-      calc(1.05rem + 0.9vw - 3px),
-      calc(1.75rem - 3px)
-    ) - 5px
-  );
+  gap: 0;
 }
 
 .home-different__features {
@@ -3070,7 +3230,8 @@ html[data-hero-copy-ready="1"] .hero__content {
 /* One card container — copy on top; keyword + cutout share the same box */
 .home-different__feature {
   --polish: 0;
-  --home-different-dim: rgba(255, 255, 255, 0.38);
+  /* Match shared how i do / Character body ink */
+  --home-different-dim: var(--home-point-body-color);
   --home-different-lit: #fff;
   box-sizing: border-box;
   min-width: 0;
@@ -3089,26 +3250,35 @@ html[data-hero-copy-ready="1"] .hero__content {
   margin: 0;
   position: relative;
   z-index: 2;
-  font-family: var(--font-sans);
-  font-size: calc(clamp(0.72rem, 0.85vw, 0.84rem) + 2px);
-  font-weight: 400;
-  line-height: 1.5;
+  font-family: var(--home-point-body-font);
+  font-size: var(--home-point-body-size);
+  font-weight: var(--home-point-body-weight);
+  line-height: var(--home-point-body-leading);
   text-wrap: pretty;
+  /* Cards override --home-different-dim to the shared light-on-dark body ink */
   color: var(--home-different-dim);
+  /* Cap trim — optical top matches left/right pad (not half-leading) */
+  text-box-trim: trim-start;
+  text-box-edge: cap alphabetic;
 }
 
-/* Only the emphasis phrase polishes dim → black */
+@supports not (text-box-trim: trim-start) {
+  .home-different__feature-body {
+    margin-top: -0.2em;
+  }
+}
+
+/* Emphasis phrase — glyph-by-glyph dim → lit (not row wipe) */
 .home-different__feature-hl {
-  color: transparent;
-  background-image: linear-gradient(
-    180deg,
-    var(--home-different-lit) 0%,
-    var(--home-different-lit) calc(var(--polish) * 100%),
-    var(--home-different-dim) calc(var(--polish) * 100%),
-    var(--home-different-dim) 100%
+  display: inline;
+}
+
+.home-different__feature-hl-char {
+  color: color-mix(
+    in srgb,
+    var(--home-different-lit) calc(var(--char-lit, 0) * 100%),
+    var(--home-different-dim)
   );
-  -webkit-background-clip: text;
-  background-clip: text;
 }
 
 .home-different__feature-keyword {
@@ -3118,19 +3288,22 @@ html[data-hero-copy-ready="1"] .hero__content {
   z-index: 2;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
-  font-family: "Grtsk Tera Bold", "Grtsk Tera", sans-serif;
-  font-size: calc(clamp(1.05rem, 1.35vw, 1.35rem) - 3px);
-  font-weight: 700;
+  font-family: var(--home-point-keyword-font);
+  font-size: var(--home-point-keyword-size);
+  font-weight: var(--home-point-keyword-weight);
   font-synthesis: none;
-  letter-spacing: 0.06em;
-  line-height: 1;
+  letter-spacing: var(--home-point-keyword-tracking);
+  line-height: var(--home-point-keyword-leading);
   text-transform: uppercase;
-  color: #fff;
+  color: var(--home-point-keyword-color);
   white-space: nowrap;
+  /* Cap/alphabetic edges so vertical keyword sits flush to the pad */
+  text-box-trim: trim-both;
+  text-box-edge: cap alphabetic;
 }
 
 /*
-  Product cutout lives in the same card — no separate media box to clip tops.
+  Product cutout — pinned to card corner, independent of col-pad.
   Height ≈ half the card; shift right/down for the bottom-right crop.
 */
 .home-different__feature-img {
@@ -3174,24 +3347,6 @@ html[data-hero-copy-ready="1"] .hero__content {
 
   .home-different__feature {
     min-height: clamp(22rem, 58vh, 32rem);
-  }
-
-  .home-different__feature-body {
-    font-size: calc(0.875rem + 2px);
-  }
-
-  .home-different__feature-hl {
-    background-image: linear-gradient(
-      90deg,
-      var(--home-different-lit) 0%,
-      var(--home-different-lit) calc(var(--polish) * 100%),
-      var(--home-different-dim) calc(var(--polish) * 100%),
-      var(--home-different-dim) 100%
-    );
-  }
-
-  .home-different__feature-keyword {
-    font-size: calc(1.2rem - 3px);
   }
 }
 
@@ -3335,18 +3490,18 @@ html[data-hero-copy-ready="1"] .hero__content {
   }
 }
 
-/* —— Support know (End-to-End cards) — trial white plate —— */
+/* —— Support know (End-to-End cards) — blurred photo plate —— */
 .support-know {
   position: relative;
   isolation: isolate;
   width: 100%;
   padding: var(--home-section-pad) 0;
-  color: #0a0a0a;
+  color: #fff;
   overflow: hidden;
-  background: #fff;
+  background: #1a1a1a;
 }
 
-/* Kept for restore — unused while support is on white */
+/* Same blur recipe as My Approach (`.home-someone__bg`) */
 .support-know__bg {
   position: absolute;
   inset: -24px;
@@ -3367,17 +3522,10 @@ html[data-hero-copy-ready="1"] .hero__content {
   background: rgba(12, 12, 14, 0.14);
 }
 
-.support-know > .home-page__intro,
+.support-know > .home-section-intro,
 .support-know__shell {
   position: relative;
   z-index: 1;
-}
-
-/* White plate — default home intro ink */
-.support-know > .home-page__intro {
-  --home-intro-eyebrow-color: rgba(10, 10, 10, 0.55);
-  --home-intro-title-color: #0a0a0a;
-  --home-intro-desc-color: rgba(10, 10, 10, 0.55);
 }
 
 /* Same shell as intro — cards + nav share one right edge */
@@ -3560,27 +3708,31 @@ html[data-hero-copy-ready="1"] .hero__content {
 .support-know__copy {
   margin: 0;
   padding: 0 0.15rem;
-  font-family: var(--font-sans);
-  font-size: clamp(0.82rem, 0.76rem + 0.28vw, 0.95rem);
-  font-weight: 400;
-  line-height: 1.45;
+  /* Same body recipe as Character / how i do */
+  font-family: var(--home-point-body-font);
+  font-size: var(--home-point-body-size);
+  font-weight: var(--home-point-body-weight);
+  line-height: var(--home-point-body-leading);
   text-align: left;
   text-wrap: pretty;
   cursor: default;
   user-select: text;
+  color: var(--home-point-body-color);
 }
 
 .support-know__headline {
-  font-family: var(--font-title);
+  font-family: var(--home-point-body-font);
+  font-size: inherit;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: #0a0a0a;
+  color: #fff;
 }
 
 .support-know__desc {
-  font-family: var(--font-sans);
-  font-weight: 400;
-  color: rgba(10, 10, 10, 0.55);
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: var(--home-point-body-weight);
+  color: var(--home-point-body-color);
 }
 
 .support-know__controls {
@@ -3601,7 +3753,7 @@ html[data-hero-copy-ready="1"] .hero__content {
   padding: 0;
   border: 0;
   border-radius: 999px;
-  background: rgba(10, 10, 10, 0.08);
+  background: rgba(255, 255, 255, 0.88);
   color: #0a0a0a;
   cursor: pointer;
   transition: none;
@@ -3614,7 +3766,7 @@ html[data-hero-copy-ready="1"] .hero__content {
 }
 
 .support-know__nav:hover:not(:disabled) {
-  background: rgba(10, 10, 10, 0.14);
+  background: #fff;
 }
 
 .support-know__nav:disabled {
@@ -3623,7 +3775,7 @@ html[data-hero-copy-ready="1"] .hero__content {
 }
 
 .support-know__nav:focus-visible {
-  outline: 2px solid #0a0a0a;
+  outline: 2px solid #fff;
   outline-offset: 3px;
 }
 
@@ -3653,10 +3805,6 @@ html[data-hero-copy-ready="1"] .hero__content {
 
   .support-know__card--xl {
     width: calc(var(--know-unit) * 2 + var(--know-gap));
-  }
-
-  .support-know__headline {
-    font-size: calc(1em - 2px);
   }
 }
 
@@ -3747,7 +3895,9 @@ html[data-hero-copy-ready="1"] .hero__content {
   padding: 0;
 }
 
-/* Projects / Services / Thoughts / About / FAQ — shared index intro band */
+/* Projects / Services / Thoughts / About / FAQ — shared index intro
+ * Flow stack: eyebrow → title → (optional desc). Bottom pad is the gap from
+ * the LAST text block to the next page section (same with or without desc). */
 .page-index-intro,
 .svc-demo__hero,
 .projects-index-intro,
@@ -3755,16 +3905,29 @@ html[data-hero-copy-ready="1"] .hero__content {
 .about-index-intro,
 .faq-index-intro,
 .collection-detail__intro {
+  --page-index-intro-gap-below: calc(2.5rem + clamp(3.25rem, 8vw, 4.5rem));
+  /*
+   * Header has no filled floor — clear to logo/Menu glyph bottom (text is
+   * centered in the bar), then add the same air as pad-bottom.
+   */
+  --page-index-intro-header-clear: calc(
+    var(--header-offset)
+    - (var(--header-bar-h) - var(--nav-type-size) * 1.3) / 2
+  );
+  --page-index-intro-pad-top: calc(
+    var(--page-index-intro-header-clear) + var(--page-index-intro-gap-below)
+  );
   box-sizing: border-box;
-  height: 50svh;
-  min-height: 50svh;
-  max-height: 50svh;
+  height: auto;
+  min-height: 0;
+  max-height: none;
   width: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  /* Same distance from transparent header on all index pages */
-  padding: calc(var(--header-offset) * 0.55 + 1.25rem) var(--shell-gutter) 0;
+  justify-content: flex-start;
+  padding: var(--page-index-intro-pad-top) var(--shell-gutter)
+    var(--page-index-intro-gap-below);
   text-align: center;
   color: #0a0a0a;
   -webkit-user-select: text;
@@ -3781,17 +3944,9 @@ html[data-hero-copy-ready="1"] .hero__content {
   background: transparent;
 }
 
-/* Services + About + FAQ — eyebrow + title + desc are one hero block; gap sits below desc */
 .svc-demo__hero,
 .about-index-intro,
 .faq-index-intro {
-  position: relative;
-  height: auto;
-  min-height: 50svh;
-  max-height: none;
-  margin-bottom: 0;
-  /* Same below-gap token as mobile index intros (Insights reference) */
-  padding-bottom: calc(2rem + clamp(2.75rem, 7vw, 3.5rem));
   /* Match Services .svc-demo body tokens so desc size/weight/lh stay shared */
   --svc-body-size: clamp(0.8125rem, 0.95vw, 0.9rem);
   --svc-body-weight: 400;
@@ -3816,8 +3971,8 @@ html[data-hero-copy-ready="1"] .hero__content {
 
 @media (max-width: 800px) {
   /*
-   * Index intros (Projects / Services / Thoughts / About): same top + bottom rhythm.
-   * Bottom = Insights reference (shared pad-bottom + former lead margin-top 2rem).
+   * Same recipe as desktop: equal top/bottom air via shared tokens.
+   * Only layout alignment differs on narrow screens.
    */
   .page-index-intro,
   .svc-demo__hero,
@@ -3826,14 +3981,8 @@ html[data-hero-copy-ready="1"] .hero__content {
   .about-index-intro,
   .faq-index-intro,
   .collection-detail__intro {
-    --page-index-intro-gap-below: calc(2rem + clamp(2.75rem, 7vw, 3.5rem));
-    height: auto;
-    min-height: 0;
-    max-height: none;
-    align-items: flex-start;
-    justify-content: center;
-    padding: calc(var(--header-offset) + 4.2rem) var(--shell-gutter)
-      var(--page-index-intro-gap-below);
+    align-items: center;
+    justify-content: flex-start;
     text-align: center;
     overflow: visible;
   }
@@ -3845,7 +3994,7 @@ html[data-hero-copy-ready="1"] .hero__content {
     align-items: center;
   }
 
-  /* Gap now lives on intro pad-bottom — keep lead flush to that rhythm */
+  /* Gap lives on intro pad-bottom — keep lead flush */
   .insights-opening .insights-lead {
     margin-top: 0;
   }
@@ -3853,20 +4002,11 @@ html[data-hero-copy-ready="1"] .hero__content {
   .svc-demo__hero .svc-demo__hero-desc,
   .about-index-intro .svc-demo__hero-desc,
   .faq-index-intro .svc-demo__hero-desc {
-    position: static;
-    left: auto;
-    top: auto;
-    transform: none;
+    /* Same title→desc gap token as desktop */
+    margin-top: calc(
+      clamp(1.48rem, 3.2vw, 2.2rem) - clamp(0.55rem, 1.2vw, 0.85rem)
+    );
     width: 100%;
-    margin-top: clamp(1.25rem, 3vw, 1.75rem);
-    text-align: center;
-  }
-
-  /* Services / About / FAQ hero already owns gap-below (incl. desc); don't double pad */
-  .svc-demo__hero,
-  .about-index-intro,
-  .faq-index-intro {
-    margin-bottom: 0;
   }
 
   .svc-demo__stage--1 {
@@ -6151,6 +6291,24 @@ html[data-hero-copy-ready="1"] .hero__content {
   margin-top: clamp(2.5rem, 5vw, 4rem);
 }
 
+/* Challenge CTA — above Related.
+ * Bottom pad = Related rule→title gap so challenge → line → title reads even.
+ * Top pad slightly above the GIF optical-trim recipe for more air under the case. */
+.project-detail__challenge {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: calc(var(--challenge-band-pad-y) * 1.05) var(--shell-gutter)
+    var(--related-rule-gap);
+  background: var(--site-bg);
+  color: #0a0a0a;
+}
+
+/* Challenge owns the air above Related — don't stack related top margin */
+.project-detail__challenge + .project-detail__related {
+  margin-top: 0;
+}
+
 /* Footer air from main — related strip must not stack section bottom pad */
 .project-detail .project-detail__related.section,
 .insight-detail .insights-related {
@@ -6227,6 +6385,8 @@ html[data-hero-copy-ready="1"] .hero__content {
   background: var(--site-bg);
   color: #0a0a0a;
   --portfolio-card-radius: 0;
+  /* Challenge bottom ↔ Related rule ↔ Related title — equal air */
+  --related-rule-gap: clamp(1.75rem, 3.5vw, 2.75rem);
   --detail-related-label-size: clamp(
     calc(0.9375rem * 0.5 + 9px),
     calc((0.85rem + 0.35vw) * 0.5 + 9px),
@@ -6241,6 +6401,7 @@ html[data-hero-copy-ready="1"] .hero__content {
 
 .project-detail .projects-related {
   border-top-color: rgba(10, 10, 10, 0.14);
+  padding-top: var(--related-rule-gap);
 }
 
 .project-detail .projects-related__title {
@@ -6669,16 +6830,17 @@ html[data-hero-copy-ready="1"] .hero__content {
   }
 }
 
-/* Services + About + FAQ — desc is in-flow, part of the hero; gap is padding-bottom after it */
+/* Services + About + FAQ — in-flow under title; bottom gap is intro pad-bottom.
+ * Inner already has eyebrow↔title gap; subtract it so title→desc stays the prior token. */
 .svc-demo__hero .svc-demo__hero-desc,
 .about-index-intro .svc-demo__hero-desc,
 .faq-index-intro .svc-demo__hero-desc {
   position: static;
-  left: auto;
-  top: auto;
-  transform: none;
   box-sizing: border-box;
-  margin: clamp(1.48rem, 3.2vw, 2.2rem) 0 0;
+  margin: calc(
+      clamp(1.48rem, 3.2vw, 2.2rem) - clamp(0.55rem, 1.2vw, 0.85rem)
+    )
+    0 0;
   padding: 0;
   width: min(48rem, 100%);
   max-width: 100%;

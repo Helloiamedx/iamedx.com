@@ -1,11 +1,11 @@
+import { HomeSectionIntro } from "@/components/HomeSectionIntro";
 import { myApproach } from "@/content/homeCopy";
-import { supportBentoSection } from "@/content/supportBento";
 
 const POINTS = myApproach.points;
 
 /**
- * My Approach — blurred photo plate, large left title, points on the right.
- * Same shell as the former Someone Like This band.
+ * My Approach — intro left, points grid right (3 per row).
+ * Each point: keyword → rule → body.
  */
 export function HomeMyApproach() {
   return (
@@ -18,32 +18,25 @@ export function HomeMyApproach() {
         className="home-someone__bg"
         aria-hidden="true"
         style={{
-          backgroundImage: `url("${supportBentoSection.backgroundImage}")`,
+          backgroundImage: `url("${myApproach.backgroundImage}")`,
         }}
       />
       <div className="home-someone__frost" aria-hidden="true" />
 
       <div className="home-someone__inner">
         <div className="home-someone__lead">
-          <h2
-            id={`${myApproach.id}-title`}
-            className="home-someone__title"
-          >
-            <span className="home-someone__title-em">{myApproach.titleEm}</span>{" "}
-            Approach
-          </h2>
-          {myApproach.subtitle ? (
-            <p className="home-someone__subtitle">{myApproach.subtitle}</p>
-          ) : null}
+          <HomeSectionIntro
+            titleId={`${myApproach.id}-title`}
+            label={myApproach.eyebrow}
+            title={myApproach.title}
+          />
         </div>
 
         <ul className="home-someone__grid">
           {POINTS.map((item) => (
             <li key={item.id} className="home-someone__item">
               <h3 className="home-someone__item-title">{item.title}</h3>
-              {item.body ? (
-                <p className="home-someone__item-body">{item.body}</p>
-              ) : null}
+              <p className="home-someone__item-body">{item.body}</p>
             </li>
           ))}
         </ul>

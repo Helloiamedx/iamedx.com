@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { FrostIndexLink } from "@/components/FrostIndexLink";
 import { ProjectCaseDemo } from "@/components/ProjectCaseDemo";
 import { ProjectMasonry } from "@/components/ProjectMasonry";
+import { ChallengeCta } from "@/components/ServicesChallengeCta";
 import {
   getProjectBySlug,
   getRelatedProjects,
@@ -40,6 +41,14 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
     <main className="project-detail">
       {/* Living case-detail template — project-aware fields wired later */}
       <ProjectCaseDemo key={slug} project={project} />
+
+      <section
+        className="project-detail__challenge"
+        aria-label="Bring me your challenge"
+      >
+        <ChallengeCta />
+      </section>
+
       {related.length > 0 ? (
         <section className="section projects-related project-detail__related">
           <h2 className="projects-related__title">Related</h2>

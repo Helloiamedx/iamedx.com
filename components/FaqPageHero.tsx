@@ -6,8 +6,7 @@ import {
 } from "@/content/faq";
 
 /**
- * FAQ index hero — same shared intro recipe as About / Services / Projects / Thoughts
- * (`.page-index-intro` + eyebrow / title / desc). Page climb lives on `.faq-page`.
+ * FAQ index hero — shared page-index-intro stack (eyebrow + title + desc).
  */
 export function FaqPageHero() {
   return (

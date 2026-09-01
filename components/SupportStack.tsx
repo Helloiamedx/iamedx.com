@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { HomeSectionIntro } from "@/components/HomeSectionIntro";
 import { PanelImageStack } from "@/components/PanelImageStack";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
 import {
@@ -441,10 +442,20 @@ export function SupportStack() {
 
   return (
     <section className="support-know" aria-labelledby="support-know-title">
-      <div className="home-page__intro">
-        <h2 id="support-know-title">{supportBentoSection.title}</h2>
-        <p>{supportBentoSection.subtitle}</p>
-      </div>
+      <div
+        className="support-know__bg"
+        aria-hidden="true"
+        style={{
+          backgroundImage: `url("${supportBentoSection.backgroundImage}")`,
+        }}
+      />
+      <div className="support-know__frost" aria-hidden="true" />
+
+      <HomeSectionIntro
+        titleId="support-know-title"
+        label={supportBentoSection.eyebrow}
+        title={supportBentoSection.title}
+      />
 
       <div className="support-know__shell">
         <div

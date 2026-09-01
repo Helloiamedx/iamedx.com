@@ -8,7 +8,7 @@ import {
 import "./ClientLogoMarquee.css";
 
 /**
- * Infinite logo rail at the top of the home recognition section.
+ * Infinite logo rail at the bottom of the home recognition section.
  * Two identical tracks — CSS translate -50% loops without a jump.
  * On every load, animation is already mid-cycle with Disney in the center.
  */
@@ -135,8 +135,9 @@ export function ClientLogoMarquee() {
   }, []);
 
   return (
-    <section
+    <div
       className="client-logo-marquee"
+      role="region"
       aria-label="Selected clients and partners"
     >
       <div ref={viewportRef} className="client-logo-marquee__viewport">
@@ -145,6 +146,6 @@ export function ClientLogoMarquee() {
           <LogoTrack copy="b" />
         </div>
       </div>
-    </section>
+    </div>
   );
 }

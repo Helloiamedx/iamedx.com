@@ -32,7 +32,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
       <head>
         {/* Chrome first — logo + menu weight before hero video competes for bandwidth */}
         <link
@@ -46,6 +46,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <link
           rel="preload"
           href="/fonts/FKGroteskMono-Medium.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+          fetchPriority="high"
+        />
+        <link
+          rel="preload"
+          href="/fonts/Grtsk-Medium.woff2"
           as="font"
           type="font/woff2"
           crossOrigin="anonymous"

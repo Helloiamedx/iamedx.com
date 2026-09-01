@@ -24,8 +24,7 @@ const PHASE_PLACEHOLDER_IMAGE =
   "https://cdn.prod.website-files.com/6849da698cb78e39e81215a8/68877d2e008df5cf9536b877_Orangetheorytest.avif";
 
 /**
- * Services page — half-viewport hero pin matches Projects / Thoughts
- * (eyebrow + title only). Description sits in the lower half of that band.
+ * Services page — shared page-index-intro stack (eyebrow + title + desc).
  */
 export function ServicesFlowStory() {
   return (

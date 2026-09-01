@@ -1,9 +1,9 @@
-/* Full-bleed logo rail at the top of the home recognition section */
+/* Full-bleed logo rail — used at the bottom of the home recognition section */
 .client-logo-marquee {
   position: relative;
   width: 100%;
   background: transparent;
-  padding: clamp(1.5rem, 3vw, 2.25rem) 0 0;
+  padding: clamp(1.5rem, 3vw, 2.25rem) 0;
   overflow: hidden;
   pointer-events: none;
 }
@@ -104,7 +104,7 @@
 
 @media (max-width: 700px) {
   .client-logo-marquee {
-    padding-top: 1.15rem;
+    padding-block: 1.15rem;
   }
 
   .client-logo-marquee__track {

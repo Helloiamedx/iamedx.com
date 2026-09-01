@@ -13,8 +13,8 @@ type ChallengeCtaProps = {
 };
 
 /**
- * Footer challenge CTA — spinning wordmark + line + WhatsApp Contact me.
- * GIF stays lazy: reserved placeholder until near viewport, then fade in.
+ * Project-detail challenge CTA — spinning wordmark + line + WhatsApp Contact me.
+ * Sits above Related on `/projects/[slug]`. GIF stays lazy until near viewport.
  */
 export function ChallengeCta({ className }: ChallengeCtaProps) {
   const [gifReady, setGifReady] = useState(false);

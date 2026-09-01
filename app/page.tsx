@@ -6,7 +6,7 @@ import { HeroHeadline } from "@/components/HeroHeadline";
 import { HomeDifferentCards } from "@/components/HomeDifferentCards";
 import { HomeMyApproach } from "@/components/HomeMyApproach";
 import { HomeRecognitionBand } from "@/components/HomeRecognitionBand";
-import { HomeSomeoneLikeThis } from "@/components/HomeSomeoneLikeThis";
+import { HomeSectionIntro } from "@/components/HomeSectionIntro";
 import { InsightMasonry } from "@/components/InsightMasonry";
 import { InsightsLead } from "@/components/InsightsLead";
 import { ProjectFeaturedLead } from "@/components/ProjectFeaturedLead";
@@ -48,22 +48,21 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* recognition → someone (draft) → my approach → character → support → … */}
+      {/* recognition → support → my approach → character → … */}
       <HomeRecognitionBand />
-      <HomeSomeoneLikeThis />
+      <SupportBento />
       <HomeMyApproach />
       <HomeDifferentCards />
-      <SupportBento />
 
-      <section className="section home-page__section">
-        <div className="home-page__intro">
-          <h2>Products I Have Helped Bring to Life</h2>
-          <p>
-            A selection of products I have helped develop from early concepts to
-            final production, working closely with brands, designers, and
-            manufacturers to solve challenges and bring ideas into reality.
-          </p>
-        </div>
+      <section
+        className="section home-page__section"
+        aria-labelledby="home-products-title"
+      >
+        <HomeSectionIntro
+          titleId="home-products-title"
+          label="portfolio"
+          title="Products I Have Helped Bring to Life"
+        />
         <ProjectFeaturedLead project={projectsFeaturedLead} />
         <ProjectMasonry
           projects={selectedProjects}
@@ -73,15 +72,15 @@ export default function HomePage() {
         <FrostIndexLink href="/projects">All projects</FrostIndexLink>
       </section>
 
-      <section className="section home-page__section">
-        <div className="home-page__intro">
-          <h2>How I Think About My Work</h2>
-          <p>
-            Sharing my experience and perspective from years of working with
-            brands, designers, and manufacturers to turn ideas into
-            well-developed, manufacturable products.
-          </p>
-        </div>
+      <section
+        className="section home-page__section"
+        aria-labelledby="home-thoughts-title"
+      >
+        <HomeSectionIntro
+          titleId="home-thoughts-title"
+          label="thoughts"
+          title="How I Think About My Work"
+        />
         {featuredInsight ? <InsightsLead insight={featuredInsight} /> : null}
         <InsightMasonry insights={selectedInsights} layout="related" />
         <FrostIndexLink href="/thoughts">All thoughts</FrostIndexLink>

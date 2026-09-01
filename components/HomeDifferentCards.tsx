@@ -6,6 +6,7 @@ import {
   useState,
   type CSSProperties,
 } from "react";
+import { HomeSectionIntro } from "@/components/HomeSectionIntro";
 import { whatSetsMeApart, type HomeCopyPoint } from "@/content/homeCopy";
 
 const POINTS = whatSetsMeApart.points;
@@ -24,29 +25,59 @@ function columnPolish(progress: number, index: number, count: number) {
   return 1 - (1 - t) * (1 - t);
 }
 
+/** Softstep so each glyph lights before the next starts */
+function charPolish(progress: number, index: number, count: number) {
+  if (count <= 0) return 1;
+  const start = index / count;
+  const end = (index + 1) / count;
+  if (progress <= start) return 0;
+  if (progress >= end) return 1;
+  const t = (progress - start) / (end - start);
+  return 1 - (1 - t) * (1 - t);
+}
+
 function FeatureBody({
   body,
   highlight,
+  polish,
 }: {
   body: string;
   highlight?: string;
+  polish: number;
 }) {
   if (!highlight || !body.includes(highlight)) {
     return <p className="home-different__feature-body">{body}</p>;
   }
   const start = body.indexOf(highlight);
   const end = start + highlight.length;
+  const chars = Array.from(highlight);
   return (
     <p className="home-different__feature-body">
       {body.slice(0, start)}
-      <span className="home-different__feature-hl">{highlight}</span>
+      <span className="home-different__feature-hl" aria-label={highlight}>
+        {chars.map((ch, i) => (
+          <span
+            key={`${i}-${ch}`}
+            className="home-different__feature-hl-char"
+            aria-hidden="true"
+            style={
+              {
+                "--char-lit": charPolish(polish, i, chars.length),
+              } as CSSProperties
+            }
+          >
+            {ch}
+          </span>
+        ))}
+      </span>
       {body.slice(end)}
     </p>
   );
 }
 
 /**
- * Character cards — one container: copy on top, vertical keyword + cutout below.
+ * Character cards — shared intro + columns (copy on top, keyword + cutout below).
+ * Intro type recipe is the home-wide source of truth (`HomeSectionIntro`).
  */
 export function HomeDifferentCards() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -105,17 +136,13 @@ export function HomeDifferentCards() {
       aria-labelledby={`${whatSetsMeApart.id}-title`}
     >
       <div className="home-different__inner">
-        <div className="home-different__features-wrap">
-          <header className="home-different__intro">
-            <p className="svc-demo__hero-eyebrow">{whatSetsMeApart.eyebrow}</p>
-            <h2
-              id={`${whatSetsMeApart.id}-title`}
-              className="svc-demo__hero-title"
-            >
-              {whatSetsMeApart.title}
-            </h2>
-          </header>
+        <HomeSectionIntro
+          titleId={`${whatSetsMeApart.id}-title`}
+          label={whatSetsMeApart.eyebrow}
+          title={whatSetsMeApart.title}
+        />
 
+        <div className="home-different__features-wrap">
           <ul className="home-different__features">
             {POINTS.map((point: HomeCopyPoint, i) => {
               const polish = columnPolish(progress, i, CARD_COUNT);
@@ -128,6 +155,7 @@ export function HomeDifferentCards() {
                   <FeatureBody
                     body={point.body}
                     highlight={point.bodyHighlight}
+                    polish={polish}
                   />
                   <span className="home-different__feature-keyword">
                     {point.title}

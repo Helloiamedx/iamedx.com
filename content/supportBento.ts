@@ -99,10 +99,9 @@ export const supportKnowCards: SupportKnowCard[] = [
 ];
 
 export const supportBentoSection = {
+  eyebrow: "main service",
   title: "End-to-End Support Across Your Entire Supply Chain",
-  subtitle:
-    "From finding the right suppliers to delivering finished products, I manage every critical stage of the process in China — providing a single point of contact to coordinate development, production, quality, and delivery.",
-  backgroundImage: asset("/images/home/End-to-End Support.jpg"),
+  backgroundImage: asset("/images/home/home3.jpg"),
 } as const;
 
 /** @deprecated Prefer supportKnowCards */

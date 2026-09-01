@@ -1,37 +1,33 @@
 ---
-description: Body↔challenge GIF equal pad — fixed mobile / desktop
+description: Challenge above Related (equal rule gaps); footer shell top pad 2× prior
 alwaysApply: true
 ---
 
-# Content ↔ challenge gap
+# Content ↔ footer / challenge gap
 
-Body content and the light challenge band (GIF / “bring me your challenge”) share **one** vertical pad token on `.site-footer__challenge`. Top is **90%** of that token (offsets GIF transparent headroom); bottom is **100%**. The black footer stage sits below that band.
+## Project detail (`/projects/[slug]`)
 
-## Tokens (`:root` / `.site-footer__challenge` in `app/globals.css`)
+**bring me your challenge** sits **above Related** (`.project-detail__challenge`), not in the site footer.
+
+- Challenge **top** pad = `90%` of `--challenge-band-pad-y` (GIF optical trim).
+- Challenge **bottom** pad = `--related-rule-gap` — same as Related `padding-top` (line → “Related” title), so challenge → rule → title reads even.
+- Token: `--related-rule-gap: clamp(1.75rem, 3.5vw, 2.75rem)` on `.project-detail`.
+
+## Site footer (all pages)
+
+No challenge CTA. `.site-footer__gap` uses height `var(--content-footer-gap)` between page content and the black footer stage.
+
+Black shell top pad: `--footer-top-gap` = **2×** the prior clamp (`calc(clamp(3.25rem, 5.75vw, 4.5rem) * 2)`).
+
+## Tokens (`:root` in `app/globals.css`)
 
 - `--challenge-band-pad-y` — **5.625rem (90px)** mobile; **7.5rem (120px)** from `900px` up
-- `--content-footer-gap: var(--challenge-band-pad-y)` — alias for other equal-air uses
-- `--footer-top-gap` — black shell inner top pad only (`.site-footer__shell`)
-
-Applied as:
-
-```css
-.site-footer__challenge {
-  padding-top: calc(var(--challenge-band-pad-y) * 0.9);
-  padding-bottom: var(--challenge-band-pad-y);
-}
-
-.site-main > main {
-  padding-bottom: 0;
-}
-```
-
-## Rule
-
-**Challenge band bottom pad = full token; top = 90%.** Change `--challenge-band-pad-y` once → both scale.
+- `--content-footer-gap: var(--challenge-band-pad-y)`
+- `--footer-top-gap` — black shell inner top pad (`.site-footer__shell`), doubled vs prior
 
 ## Do not
 
+- Put “bring me your challenge” in the site footer or on non–project-detail pages
 - Reintroduce `main` `padding-bottom` for footer air
-- Stack a second footer-oriented bottom pad on the last page section
-- Drop the 10% top optical trim without an explicit ask
+- Stack Related `margin-top` on top of the challenge bottom pad
+- Let challenge bottom pad diverge from `--related-rule-gap` / Related `padding-top`

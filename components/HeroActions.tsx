@@ -15,7 +15,6 @@ export function HeroActions({ revealed = false }: HeroActionsProps) {
       <OriginButton href="/services" tabIndex={revealed ? undefined : -1}>
         View services
       </OriginButton>
-
       <OriginButton href="/projects" tabIndex={revealed ? undefined : -1}>
         View projects
       </OriginButton>

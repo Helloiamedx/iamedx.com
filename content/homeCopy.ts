@@ -127,7 +127,7 @@ export const someoneLikeThisLines: SomeoneLikeThisLine[] = [
   },
 ];
 
-/** My Approach — photo plate band (former someone layout). Bodies TBD. */
+/** My Approach — photo plate band (former someone layout). */
 export type MyApproachPoint = {
   id: string;
   title: string;
@@ -136,17 +136,42 @@ export type MyApproachPoint = {
 
 export const myApproach = {
   id: "my-approach",
+  /** Small label above My Approach title */
+  eyebrow: "how i do",
   title: "My Approach",
-  titleEm: "My",
-  subtitle: "",
+  /** Blurred photo plate — keep independent from End-to-End Support bg */
+  backgroundImage: asset("/images/home/End-to-End Support.jpg"),
   points: [
-    { id: "transparent", title: "Transparent", body: "" },
-    { id: "collaborative", title: "Collaborative", body: "" },
-    { id: "dedicated", title: "Dedicated", body: "" },
-    { id: "practical", title: "Practical", body: "" },
-    { id: "result-driven", title: "Result-Driven", body: "" },
-    { id: "accountable", title: "Accountable", body: "" },
-    { id: "proactive", title: "Proactive", body: "" },
+    {
+      id: "i-dont-lie",
+      title: "I Don't Lie",
+      body: "I tell you what is actually happening — even when the answer isn't good. No hiding problems, no making promises I can't keep. I'd rather tell you the truth early than make you regret trusting me later.",
+    },
+    {
+      id: "i-think-different",
+      title: "I Think Different",
+      body: "I don't always follow the obvious way. When the usual solution doesn't work, I look for another one — whether it's a different material, process, supplier, or way to solve the problem.",
+    },
+    {
+      id: "i-work-hard",
+      title: "I Work Hard",
+      body: "I don't just give instructions and wait for things to happen. I get into the details, talk to factories, check samples, solve problems, and keep things moving until the job is done.",
+    },
+    {
+      id: "i-pursue-real",
+      title: "I Pursue Real",
+      body: "Ideas are easy. Making them real is the hard part. I care about what can actually be produced, shipped, sold, and loved — not just what looks good on a screen.",
+    },
+    {
+      id: "i-care-your-review",
+      title: "I Care Your Review",
+      body: "Your feedback tells me whether I actually did a good job. I listen, I ask questions, and I make changes when something can be better. A successful project isn't just one that gets delivered — it's one you're happy to receive.",
+    },
+    {
+      id: "i-own-it",
+      title: "I Own It",
+      body: "Once I take on a project, I take responsibility for it. If something goes wrong, I don't look for someone to blame. I figure out what happened, find a solution, and stay with it until it's fixed.",
+    },
   ] satisfies MyApproachPoint[],
 };
 /** Home recognition / metrics band — layout locked; swap copy & figures when ready. */
@@ -162,23 +187,24 @@ export type HomeRecognitionMetric = {
 
 export type HomeRecognitionCopy = {
   id: string;
+  /** Small label above the headline */
+  eyebrow: string;
   /**
    * Headline as segments so an optional inline portrait can sit between words.
    * Example: ["Client recognition has always", "been the starting point…"]
    */
   headlineBefore: string;
   headlineAfter: string;
-  body: string;
-  /** Optional square cut-in inside the headline — leave empty until asset is ready */
+  /** Optional square cut-in inside the headline — unused in current layout */
   portrait?: string;
   metrics: HomeRecognitionMetric[];
 };
 
 export const homeRecognition: HomeRecognitionCopy = {
   id: "client-recognition",
-  headlineBefore: "Client recognition has always",
-  headlineAfter: "been the starting point of everything I do.",
-  body: "I care deeply about doing things right, solving problems that matter, and earning the kind of trust that makes people want to work with me again.",
+  eyebrow: "recognition",
+  headlineBefore: "Client Recognition Has Always",
+  headlineAfter: "Been The Starting Point Of Everything I Do.",
   portrait: asset(`/images/about/${encodeURIComponent("My Profile.jpg")}`),
   metrics: [
     {
@@ -203,8 +229,8 @@ export const homeRecognition: HomeRecognitionCopy = {
     },
     {
       id: "retained",
-      value: "100%",
-      label: "Client relationships retained",
+      value: "95%",
+      label: "Long-term supplier retention",
       blurb: "Built on trust, transparency, and long-term collaboration.",
     },
   ],

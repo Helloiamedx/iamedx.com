@@ -1,8 +1,9 @@
 /**
  * Home hero playback sequence (documentElement data attrs):
- * 1. data-hero-copy-ready — headline/CTAs (immediate; do not wait for video)
- * 2. data-chrome-ready — header logo/menu painted (Header)
- * 3. data-hero-video-ready — video can play + revealed (HeroBackgroundVideo)
+ * 1. data-chrome-ready — header logo/menu painted (Header)
+ * 2. data-hero-video-ready — video can play + revealed (HeroBackgroundVideo)
+ * 3. data-hero-copy-ready — headline may appear (short delay after video in)
+ *    → HeroHeadline then reveals CTAs after another short beat
  */
 
 export const HERO_CHROME_ATTR = "chromeReady";
@@ -21,10 +22,25 @@ export function setHeroFlag(attr: string) {
   getHeroRoot().dataset[attr] = "1";
 }
 
+type WhenHeroFlagOptions = {
+  /** Fail-open after this many ms; `0` = wait until the flag is set */
+  timeoutMs?: number;
+  signal?: AbortSignal;
+};
+
 /** Resolve when `data-*` becomes "1" (or immediately if already set). */
-export function whenHeroFlag(attr: string): Promise<void> {
+export function whenHeroFlag(
+  attr: string,
+  options: number | WhenHeroFlagOptions = 2500,
+): Promise<void> {
+  const opts: WhenHeroFlagOptions =
+    typeof options === "number" ? { timeoutMs: options } : options;
+  const timeoutMs = opts.timeoutMs ?? 2500;
+  const signal = opts.signal;
+
   if (typeof document === "undefined") return Promise.resolve();
   if (isHeroFlag(attr)) return Promise.resolve();
+  if (signal?.aborted) return Promise.resolve();
 
   return new Promise((resolve) => {
     const root = getHeroRoot();
@@ -34,7 +50,17 @@ export function whenHeroFlag(attr: string): Promise<void> {
       settled = true;
       obs.disconnect();
       window.clearInterval(poll);
-      window.clearTimeout(safety);
+      if (safety) window.clearTimeout(safety);
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    };
+
+    const onAbort = () => {
+      if (settled) return;
+      settled = true;
+      obs.disconnect();
+      window.clearInterval(poll);
+      if (safety) window.clearTimeout(safety);
       resolve();
     };
 
@@ -46,11 +72,14 @@ export function whenHeroFlag(attr: string): Promise<void> {
       attributeFilter: [`data-${camelToKebab(attr)}`],
     });
 
-    /* Poll + safety — MutationObserver attributeFilter can miss dataset writes */
+    /* Poll — MutationObserver attributeFilter can miss dataset writes */
     const poll = window.setInterval(() => {
       if (isHeroFlag(attr)) finish();
     }, 50);
-    const safety = window.setTimeout(finish, 2500);
+    const safety =
+      timeoutMs > 0 ? window.setTimeout(finish, timeoutMs) : 0;
+
+    signal?.addEventListener("abort", onAbort);
   });
 }
 
