@@ -2,18 +2,14 @@
 export const ASSETS_BASE = "https://assets.iamedx.com";
 
 /**
- * Optional same-origin proxy (`/__assets/*` → R2) for LAN phone preview when
- * the phone cannot reach the CDN. Opt in with NEXT_PUBLIC_DEV_ASSET_PROXY=1.
- *
- * Default is off: the browser loads CDN URLs directly. That avoids broken
- * images when the Next process cannot resolve assets.iamedx.com (common when
- * `next dev` runs inside a restricted agent/sandbox shell).
+ * Same-origin proxy (`/__assets/*` → R2) so LAN phone preview only talks to
+ * this Mac (Next rewrite fetches the CDN). On by default in development —
+ * set `NEXT_PUBLIC_DEV_ASSET_PROXY=0` to force direct CDN URLs (e.g. when
+ * the Next process itself cannot resolve assets.iamedx.com).
  */
 function useDevAssetProxy() {
-  return (
-    process.env.NODE_ENV === "development" &&
-    process.env.NEXT_PUBLIC_DEV_ASSET_PROXY === "1"
-  );
+  if (process.env.NODE_ENV !== "development") return false;
+  return process.env.NEXT_PUBLIC_DEV_ASSET_PROXY !== "0";
 }
 
 /** Build an assets URL. Pass a path like `/brand/logo.svg` or `videos/large.mp4`. */

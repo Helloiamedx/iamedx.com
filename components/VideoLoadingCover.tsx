@@ -75,6 +75,10 @@ export function readVideoBufferProgress(el: HTMLVideoElement): number {
  * Tracks HTML video until it can play, then marks ready (bar → 100%).
  * Does **not** wait for the full file to download.
  * Keep the element paused until `ready` — then call play in the parent.
+ *
+ * iOS Safari often never fires `canplay` while paused with preload=auto —
+ * treat metadata / first frame as enough, and also accept a short timeout
+ * so LAN preview isn’t stuck on the load mark forever.
  */
 export function useVideoLoadProgress(
   videoRef: RefObject<HTMLVideoElement | null>,
@@ -87,7 +91,7 @@ export function useVideoLoadProgress(
     setProgress(0);
     setReady(false);
     const el = videoRef.current;
-    if (!el) return;
+    if (!el || !resetKey) return;
 
     el.pause();
 
@@ -105,7 +109,9 @@ export function useVideoLoadProgress(
       setProgress((prev) => Math.max(prev, next));
       if (
         next >= 99.5 ||
-        el.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA
+        el.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA ||
+        /* Mobile Safari: first frame is enough to reveal + call play() */
+        el.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA
       ) {
         finish();
       }
@@ -115,22 +121,41 @@ export function useVideoLoadProgress(
     const onProgress = () => sync();
     const onLoadedData = () => sync();
     const onLoadedMetadata = () => sync();
+    const onError = () => {
+      /* Fail open so copy/CTA aren’t blocked behind a dead load mark */
+      finish();
+    };
 
     el.addEventListener("progress", onProgress);
     el.addEventListener("loadeddata", onLoadedData);
     el.addEventListener("loadedmetadata", onLoadedMetadata);
     el.addEventListener("canplay", onCanPlay);
     el.addEventListener("canplaythrough", onCanPlay);
+    el.addEventListener("error", onError);
+
+    /* Nudge the network stack — some mobile browsers idle until load() */
+    try {
+      el.load();
+    } catch {
+      /* ignore */
+    }
 
     sync();
-    if (el.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) finish();
+    if (el.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) finish();
+
+    /* Safety: don’t leave hero stuck if events never arrive */
+    const safety = window.setTimeout(() => {
+      if (!done && el.readyState >= HTMLMediaElement.HAVE_METADATA) finish();
+    }, 4000);
 
     return () => {
+      window.clearTimeout(safety);
       el.removeEventListener("progress", onProgress);
       el.removeEventListener("loadeddata", onLoadedData);
       el.removeEventListener("loadedmetadata", onLoadedMetadata);
       el.removeEventListener("canplay", onCanPlay);
       el.removeEventListener("canplaythrough", onCanPlay);
+      el.removeEventListener("error", onError);
     };
   }, [videoRef, resetKey]);
 

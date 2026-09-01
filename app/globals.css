@@ -274,6 +274,8 @@
     --nav-type-size: calc(0.8125rem - 2px);
     /* Hero mobile size × 1.15 — single OriginButton scale site-wide */
     --origin-button-mobile-scale: calc(2 / 3 * 1.15 * 1.05);
+    /* Card head (title+type) ↔ description — a bit more air on phone */
+    --card-meta-row-gap: 0.9rem;
   }
 }
 
@@ -2405,13 +2407,31 @@ html[data-hero-copy-ready="1"] .hero__content {
 }
 
 @media (max-width: 899px) {
+  .hero {
+    align-items: center;
+    justify-items: center;
+  }
+
+  .hero__content {
+    width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
+    max-width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
+    margin: 0;
+    align-items: center;
+    text-align: center;
+  }
+
   .hero__title {
-    /* Same half-size recipe as before on mobile, then −2px from the old +7 */
+    /* Prior mobile size + 5px */
     font-size: clamp(
-      calc((2.2rem - 2px) * 0.5 + 5px),
-      calc((6.2vw - 2px) * 0.5 + 5px),
-      calc((5.25rem - 2px) * 0.5 + 5px)
+      calc((2.2rem - 2px) * 0.5 + 10px),
+      calc((6.2vw - 2px) * 0.5 + 10px),
+      calc((5.25rem - 2px) * 0.5 + 10px)
     );
+    text-align: center;
+  }
+
+  .hero__actions {
+    justify-content: center;
   }
 
   a.origin-button,
@@ -6412,8 +6432,9 @@ html[data-hero-copy-ready="1"] .hero__content {
   text-transform: uppercase;
 }
 
+/* Related cards — same desc size as Projects index cards (not Special thanks body) */
 .project-detail .project-window__meta--stack .project-window__tagline {
-  font-size: var(--detail-related-body-size);
+  font-size: var(--card-meta-desc-size);
 }
 
 .project-detail .project-window__title {
@@ -8324,7 +8345,7 @@ html[data-hero-copy-ready="1"] .hero__content {
   .home-page .insights-lead__meta,
   .projects-page .project-featured__meta,
   .insights-page .insights-lead__meta {
-    row-gap: 0.5rem;
+    row-gap: 0.7rem;
   }
 }
 
@@ -9434,14 +9455,23 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
      */
     grid-template-columns: minmax(0, 1fr) 12% max-content;
     column-gap: 0;
-    row-gap: 1.15rem;
+    row-gap: 2.15rem;
     width: 100%;
     justify-content: stretch;
   }
 
-  .project-detail {
-    --detail-related-label-size: calc(0.9375rem * 0.5 + 9px);
+  .project-detail,
+  .insight-detail {
+    /* “Special thanks” / “Related” titles only — 3px smaller on mobile */
+    --detail-related-label-size: calc(0.9375rem * 0.5 + 9px - 3px);
     --detail-related-body-size: calc(0.6875rem * 0.5 + 7px);
+  }
+
+  .insight-detail .insights-related__title {
+    font-size: var(--detail-related-label-size);
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    text-transform: uppercase;
   }
 
   .project-case-demo__credits-label {
@@ -9468,8 +9498,17 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
     overflow-wrap: normal;
   }
 
+  /* Related card desc = same mobile size as Projects index */
   .project-detail .project-window__meta--stack .project-window__tagline {
-    font-size: var(--detail-related-body-size);
+    font-size: var(--card-meta-desc-size-mobile);
+    line-height: var(--card-meta-desc-lh-mobile);
+  }
+
+  /* Related stacked cards = Projects index card rhythm */
+  .project-detail .project-showcase--related,
+  .insight-detail .insight-showcase--related {
+    grid-template-columns: 1fr;
+    gap: var(--projects-index-row-gap);
   }
 }
 
