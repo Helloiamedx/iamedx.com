@@ -22,6 +22,8 @@ export type HomeCopySection = {
   subtitle: string;
   /** Points — empty array until user supplies copy */
   points: HomeCopyPoint[];
+  /** Optional blurred photo plate behind the band */
+  backgroundImage?: string;
 };
 
 /**
@@ -32,6 +34,7 @@ export const whatSetsMeApart: HomeCopySection = {
   eyebrow: "Character",
   title: "What Makes Me Stand Out From Other Candidates?",
   subtitle: "",
+  backgroundImage: asset("/images/home/End-to-End Support.jpg"),
   points: [
     {
       id: "loyalty",
@@ -139,8 +142,6 @@ export const myApproach = {
   /** Small label above My Approach title */
   eyebrow: "how i do",
   title: "My Approach",
-  /** Blurred photo plate — keep independent from End-to-End Support bg */
-  backgroundImage: asset("/images/home/End-to-End Support.jpg"),
   points: [
     {
       id: "i-dont-lie",

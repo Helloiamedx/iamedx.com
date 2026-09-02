@@ -264,7 +264,6 @@
   --nav-type-size: clamp(0.6875rem, 0.67vw, 0.8125rem);
   /* Collection break + collection detail — shared headline size */
   --collection-headline-size: 80px;
-  --collection-detail-intro-width: 90%;
 }
 
 /* Phone / tablet curtain: bar ~10% shorter than desktop, then +8px */
@@ -2309,7 +2308,7 @@ html[data-chrome-ready="1"] .hero__video.is-loaded {
 }
 
 .hero__content {
-  position: relative;
+  position: absolute;
   z-index: 0;
   box-sizing: border-box;
   /* Bottom-left: same inset as header/menu left edge on both sides; width 50% */
@@ -2317,9 +2316,11 @@ html[data-chrome-ready="1"] .hero__video.is-loaded {
     var(--shell-gutter),
     calc((100% - min(var(--shell-max), calc(100% - var(--shell-gutter) * 2))) / 2)
   );
+  left: var(--hero-content-inset);
+  bottom: var(--hero-content-inset);
   width: 50%;
   max-width: 50%;
-  margin: 0 0 var(--hero-content-inset) var(--hero-content-inset);
+  margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -2413,6 +2414,9 @@ html[data-hero-copy-ready="1"] .hero__content {
   }
 
   .hero__content {
+    position: relative;
+    left: auto;
+    bottom: auto;
     width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
     max-width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
     margin: 0;
@@ -2640,7 +2644,7 @@ html[data-hero-copy-ready="1"] .hero__content {
 
 /*
   After hero: class bands (not nth-child — preload <link> shifts indices).
-  Recognition dark | Someone draft | Approach photo | Character white | Support photo | Products light | Thoughts gray
+  Recognition dark | Someone draft | Approach black | Character photo | Support photo | Products light | Thoughts gray
 */
 .home-page > .home-someone-draft {
   background: #fff;
@@ -2648,13 +2652,13 @@ html[data-hero-copy-ready="1"] .hero__content {
 }
 
 .home-page > .home-someone {
-  background: #1a1a1a;
+  background: #000;
   color: #fff;
 }
 
 .home-page > .home-different {
-  background: #fff;
-  color: #0a0a0a;
+  background: #1a1a1a;
+  color: #fff;
 }
 
 .home-page > .section.home-page__section {
@@ -2793,6 +2797,7 @@ html[data-hero-copy-ready="1"] .hero__content {
 /* Dark / photo plates — light ink */
 .home-recognition,
 .home-someone,
+.home-different,
 .support-know {
   --home-section-label-color: rgba(255, 255, 255, 0.55);
   --home-section-title-color: #fff;
@@ -2844,34 +2849,14 @@ html[data-hero-copy-ready="1"] .hero__content {
   color: rgba(10, 10, 10, 0.55);
 }
 
-/* —— My Approach (blurred photo plate — former Someone layout) —— */
+/* —— My Approach (solid black plate) —— */
 .home-someone {
   position: relative;
   isolation: isolate;
   width: 100%;
   overflow: hidden;
-  background: #1a1a1a;
+  background: #000;
   color: #fff;
-}
-
-.home-someone__bg {
-  position: absolute;
-  inset: -24px;
-  z-index: 0;
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-  filter: blur(12px) saturate(1.06);
-  transform: scale(1.03);
-  pointer-events: none;
-}
-
-.home-someone__frost {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: rgba(12, 12, 14, 0.14);
 }
 
 .home-someone__inner {
@@ -2881,57 +2866,24 @@ html[data-hero-copy-ready="1"] .hero__content {
   width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
   margin-inline: auto;
   padding: var(--home-section-pad) 0;
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.55fr);
-  column-gap: clamp(2rem, 5vw, 4.5rem);
-  align-items: start;
-}
-
-/* Intro sits left — not the centered 55% home recipe */
-.home-someone__lead {
-  min-width: 0;
-}
-
-.home-someone__lead .home-section-intro {
-  width: 100%;
-  max-width: none;
-  margin-inline: 0;
-  margin-bottom: 0;
-  align-items: flex-start;
-  text-align: left;
-}
-
-.home-someone__lead .home-section-intro__label,
-.home-someone__lead .home-section-intro__title {
-  display: block;
-  width: max-content;
-  max-width: 100%;
-  margin-inline: 0;
-  padding-inline: 0;
-  text-align: left;
-}
-
-.home-someone__lead .home-section-intro__title {
-  /* Balance wrapping fights left flush on two-word titles */
-  text-wrap: wrap;
-  /*
-   * Grtsk Medium “M” has heavier left sidebearing than the mono label —
-   * pull the title so ink edges optically match “HOW I DO”.
-   */
-  margin-inline-start: -0.1em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
 }
 
 .home-someone__grid {
   list-style: none;
-  margin: 0;
+  margin: 0 auto;
   padding: 0;
   display: grid;
-  /* Three per row */
+  /* Three per row — same outer width as Character five-card wrap */
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  column-gap: clamp(2.5rem, 5vw, 4.25rem);
+  column-gap: clamp(3.5rem, 7vw, 6rem);
   row-gap: clamp(1.75rem, 3.5vw, 2.75rem);
-  width: 100%;
+  width: 90%;
   min-width: 0;
+  box-sizing: border-box;
 }
 
 .home-someone__item {
@@ -2968,19 +2920,10 @@ html[data-hero-copy-ready="1"] .hero__content {
 }
 
 @media (max-width: 900px) {
-  .home-someone__inner {
-    grid-template-columns: 1fr;
-    /* Intro→content gap comes from shared intro margin (same as other bands) */
-    row-gap: 0;
-  }
-
-  .home-someone__lead .home-section-intro {
-    margin-bottom: var(--home-section-intro-margin-bottom);
-  }
-
   .home-someone__grid {
+    width: 100%;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: clamp(1.75rem, 4vw, 2.75rem);
+    column-gap: clamp(2.5rem, 6vw, 4rem);
     row-gap: clamp(2.75rem, 6.5vw, 3.75rem);
   }
 }
@@ -3194,10 +3137,14 @@ html[data-hero-copy-ready="1"] .hero__content {
 }
 
 
-/** —— Character / What Makes Me Stand Out (card columns) —— */
+/** —— Character / What Makes Me Stand Out (blurred photo plate + card columns) —— */
 .home-different {
+  position: relative;
+  isolation: isolate;
   width: 100%;
-  background: #fff;
+  overflow: hidden;
+  background: #1a1a1a;
+  color: #fff;
   --home-different-dim: rgba(10, 10, 10, 0.38);
   --home-different-lit: #0a0a0a;
   /* Same block pad as every other home section */
@@ -3209,10 +3156,36 @@ html[data-hero-copy-ready="1"] .hero__content {
    * half-leading does not make top feel tighter than the sides.
    * Image stays anchored to the card corner (ignores this pad).
    */
-  --home-different-col-pad: clamp(1rem, 1.45vw, 1.35rem);
+  --home-different-col-pad: clamp(0.7rem, 1vw, 0.95rem);
+  /* Frosted card plate — slightly darker than Recognition metrics */
+  --home-different-frost-bg: rgba(8, 8, 10, 0.44);
+  --home-different-frost-border: rgba(255, 255, 255, 0.07);
+  --home-different-frost-filter: blur(20px) saturate(1.1);
+}
+
+.home-different__bg {
+  position: absolute;
+  inset: -24px;
+  z-index: 0;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  filter: blur(12px) saturate(1.06);
+  transform: scale(1.03);
+  pointer-events: none;
+}
+
+.home-different__frost {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: rgba(12, 12, 14, 0.14);
 }
 
 .home-different__inner {
+  position: relative;
+  z-index: 1;
   box-sizing: border-box;
   width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
   margin-inline: auto;
@@ -3260,10 +3233,20 @@ html[data-hero-copy-ready="1"] .hero__content {
   padding: var(--home-different-col-pad);
   overflow: hidden;
   min-height: clamp(30rem, 68vh, 44rem);
-  background: #0a0a0a;
-  border: none;
+  background: rgba(8, 8, 10, 0.62);
+  border: 1px solid var(--home-different-frost-border);
+  backdrop-filter: var(--home-different-frost-filter);
+  -webkit-backdrop-filter: var(--home-different-frost-filter);
   border-radius: 0;
   box-shadow: none;
+}
+
+@supports (
+  (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+) {
+  .home-different__feature {
+    background: var(--home-different-frost-bg);
+  }
 }
 
 .home-different__feature-body {
@@ -3521,7 +3504,7 @@ html[data-hero-copy-ready="1"] .hero__content {
   background: #1a1a1a;
 }
 
-/* Same blur recipe as My Approach (`.home-someone__bg`) */
+/* Same blur recipe as Character (`.home-different__bg`) */
 .support-know__bg {
   position: absolute;
   inset: -24px;
@@ -4527,14 +4510,18 @@ html[data-hero-copy-ready="1"] .hero__content {
   align-self: start;
   text-align: left;
   width: 100%;
-  max-width: 100%;
+  max-width: none;
   font-family: var(--font-sans);
   font-size: clamp(calc(0.8125rem * 0.5 + 7px), calc((0.75rem + 0.25vw) * 0.5 + 7px), calc(0.9375rem * 0.5 + 7px));
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.35;
   color: #0a0a0a;
-  text-wrap: pretty;
+  /* Natural wrap at the container edge — no pretty/balance reshaping */
+  text-wrap: wrap;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: none;
 }
 
 .project-featured__meta > .project-type-chip,
@@ -4607,9 +4594,10 @@ html[data-hero-copy-ready="1"] .hero__content {
   .project-featured__tagline,
   .insights-lead__excerpt {
     width: 100%;
-    max-width: 100%;
+    max-width: none;
     font-size: calc(0.6875rem * 0.5 + 7px);
     line-height: 1.25;
+    text-wrap: wrap;
   }
 }
 
@@ -4758,14 +4746,6 @@ html[data-hero-copy-ready="1"] .hero__content {
 
 .insight-showcase__excerpt {
   grid-area: excerpt;
-  margin: 0;
-  max-width: 100%;
-  font-family: var(--font-sans);
-  font-size: var(--card-meta-desc-size);
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  line-height: var(--card-meta-desc-lh);
-  color: #0a0a0a;
 }
 
 .insight-showcase__title {
@@ -5076,14 +5056,38 @@ html[data-hero-copy-ready="1"] .hero__content {
 .project-window__meta--stack .project-window__tagline {
   font-family: var(--font-sans);
   grid-area: tagline;
-  justify-self: start;
+  justify-self: stretch;
+  align-self: start;
   text-align: left;
-  max-width: 100%;
+  width: 100%;
+  max-width: none;
   font-size: var(--card-meta-desc-size);
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: var(--card-meta-desc-lh);
   color: #0a0a0a;
+  text-wrap: wrap;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: none;
+}
+
+.insight-showcase__excerpt {
+  grid-area: excerpt;
+  margin: 0;
+  justify-self: stretch;
+  width: 100%;
+  max-width: none;
+  font-family: var(--font-sans);
+  font-size: var(--card-meta-desc-size);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: var(--card-meta-desc-lh);
+  color: #0a0a0a;
+  text-wrap: wrap;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: none;
 }
 
 @media (max-width: 800px) {
@@ -5104,16 +5108,27 @@ html[data-hero-copy-ready="1"] .hero__content {
     justify-content: flex-start;
   }
 
-  /* Showcase cards: head row + description */
-  .project-window__meta--stack {
+  /* Showcase cards: head row + description (desc full card width) */
+  .project-window__meta--stack,
+  .insight-showcase__meta {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      "head"
-      "tagline";
     align-items: start;
     column-gap: 0;
     row-gap: var(--card-meta-row-gap);
     padding-inline: 0;
+    width: 100%;
+  }
+
+  .project-window__meta--stack {
+    grid-template-areas:
+      "head"
+      "tagline";
+  }
+
+  .insight-showcase__meta {
+    grid-template-areas:
+      "head"
+      "excerpt";
   }
 
   .project-window__meta--stack .project-window__title,
@@ -5135,11 +5150,13 @@ html[data-hero-copy-ready="1"] .hero__content {
   .project-window__meta--stack .project-window__tagline {
     font-size: var(--card-meta-desc-size-mobile);
     line-height: var(--card-meta-desc-lh-mobile);
-    max-width: 100%;
+    width: 100%;
+    max-width: none;
   }
 
   .insight-showcase__excerpt {
-    max-width: 100%;
+    width: 100%;
+    max-width: none;
     font-size: var(--card-meta-desc-size-mobile);
     line-height: var(--card-meta-desc-lh-mobile);
   }
@@ -5595,6 +5612,13 @@ html[data-hero-copy-ready="1"] .hero__content {
   color: #fff;
 }
 
+.collection-detail__title {
+  font-size: var(--collection-headline-size);
+  width: 100%;
+  max-width: 100%;
+  color: #0a0a0a;
+}
+
 .projects-collection__cta {
   position: relative;
   z-index: 3;
@@ -5656,8 +5680,6 @@ html[data-hero-copy-ready="1"] .hero__content {
   min-height: 100svh;
   background: var(--site-bg);
   color: #0a0a0a;
-  /* Break headline was 95px — detail title at least −35px */
-  --collection-detail-title-size: 45px;
   --type-label-color: rgba(10, 10, 10, 0.5);
   --type-chip-font: clamp(
     calc(0.5625rem * 0.97),
@@ -5672,9 +5694,12 @@ html[data-hero-copy-ready="1"] .hero__content {
 }
 
 .collection-detail__intro-inner {
-  /* Desktop: title band uses 90% of the content shell */
-  width: var(--collection-detail-intro-width);
-  max-width: var(--collection-detail-intro-width);
+  /* Same width band as .collection-detail__body (full shell, not a narrower inset) */
+  width: min(var(--shell-max), 100%);
+  max-width: min(var(--shell-max), 100%);
+  margin-inline: auto;
+  padding-inline: 0;
+  box-sizing: border-box;
 }
 
 .collection-detail__intro .svc-demo__hero-eyebrow {
@@ -5683,29 +5708,15 @@ html[data-hero-copy-ready="1"] .hero__content {
 }
 
 .collection-detail__title {
-  width: 100%;
-  max-width: 100%;
   margin: 0;
-  font-size: var(--collection-detail-title-size);
   text-align: center;
-  color: #0a0a0a;
 }
 
-@media (max-width: 800px) {
-  .collection-detail__intro-inner {
-    width: 100%;
-    max-width: 100%;
+@media (max-width: 899px) {
+  .collection-detail {
+    --collection-headline-size: 29px;
   }
 
-  .collection-detail__title {
-    width: 100%;
-    max-width: 100%;
-    font-size: clamp(2rem, 8vw, var(--collection-detail-title-size));
-    text-align: center;
-  }
-}
-
-@media (max-width: 700px) {
   .collection-detail__title {
     letter-spacing: 0.03em;
   }
@@ -8524,6 +8535,9 @@ html[data-hero-copy-ready="1"] .hero__content {
   height: 100%;
   overflow: hidden;
   pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .project-case-demo__hero-video {
@@ -8534,6 +8548,10 @@ html[data-hero-copy-ready="1"] .hero__content {
   object-fit: cover;
   opacity: 0;
   animation: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
 }
 
 .hero-segment-video {
@@ -8543,6 +8561,10 @@ html[data-hero-copy-ready="1"] .hero__content {
   height: 100%;
   overflow: hidden;
   background: #0a0a0a;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
 }
 
 .hero-segment-video__media {
@@ -8553,6 +8575,9 @@ html[data-hero-copy-ready="1"] .hero__content {
   object-fit: cover;
   opacity: 0;
   transition: opacity 0.35s ease;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .hero-segment-video.is-ready .hero-segment-video__media {
@@ -9498,10 +9523,12 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
     overflow-wrap: normal;
   }
 
-  /* Related card desc = same mobile size as Projects index */
+  /* Related card desc = same mobile size as Projects index; full row width */
   .project-detail .project-window__meta--stack .project-window__tagline {
     font-size: var(--card-meta-desc-size-mobile);
     line-height: var(--card-meta-desc-lh-mobile);
+    width: 100%;
+    max-width: none;
   }
 
   /* Related stacked cards = Projects index card rhythm */

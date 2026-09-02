@@ -6,7 +6,7 @@ import {
   WOODEN_BOX_COLLABORATORS,
   WOODEN_BOX_SPECIAL_THANKS,
 } from "@/content/projectCredits";
-import { asset } from "@/lib/assets";
+import { asset, cdnAsset } from "@/lib/assets";
 
 export type Material =
   | "wood"
@@ -2187,6 +2187,174 @@ const EIGHTEENTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
   },
 ];
 
+/** 「第十九个项目」— End-to-End; index card (detail media when supplied) */
+const NINETEENTH_PROJECT_NAME = "DOOM Crucible Wallet";
+const NINETEENTH_PROJECT_CDN_FOLDER = "Doom Wallet";
+const NINETEENTH_PROJECT_SLUG = projectSlugFromName(NINETEENTH_PROJECT_NAME);
+const NINETEENTH_PROJECT_TAGLINE =
+  "A DOOM Eternal-inspired wallet that turns iconic game artwork into an everyday collectible.";
+const NINETEENTH_PROJECT_COVER = projectCoverFromName(
+  NINETEENTH_PROJECT_CDN_FOLDER,
+  "h1.jpg",
+);
+const NINETEENTH_PROJECT_HOVER_STILLS = [
+  projectCoverFromName(NINETEENTH_PROJECT_CDN_FOLDER, "h1.jpg"),
+  projectCoverFromName(NINETEENTH_PROJECT_CDN_FOLDER, "h2.jpg"),
+  projectCoverFromName(NINETEENTH_PROJECT_CDN_FOLDER, "h3.jpg"),
+] as [string, string, string];
+const NINETEENTH_PROJECT_HERO_VIDEO = projectCoverFromName(
+  NINETEENTH_PROJECT_CDN_FOLDER,
+  "Doom Wallet.mp4",
+);
+/** Detail gallery row 1 — dedicated still (index card cover stays separate) */
+const NINETEENTH_PROJECT_GALLERY_LEAD = projectCoverFromName(
+  NINETEENTH_PROJECT_CDN_FOLDER,
+  "h1.jpg",
+);
+
+const NINETEENTH_PROJECT_STILL = (fileName: string, alt: string) => ({
+  src: projectCoverFromName(NINETEENTH_PROJECT_CDN_FOLDER, fileName),
+  alt,
+});
+
+/** Detail gallery row 2 — 2L | 2R */
+const NINETEENTH_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    NINETEENTH_PROJECT_STILL("2l.jpg", "DOOM Crucible Wallet 2L"),
+    NINETEENTH_PROJECT_STILL("2r.jpg", "DOOM Crucible Wallet 2R"),
+  ],
+};
+
+/** Detail gallery row 3 — 3L | 3M | 3R */
+const NINETEENTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      NINETEENTH_PROJECT_STILL("3l.jpg", "DOOM Crucible Wallet 3L"),
+      NINETEENTH_PROJECT_STILL("3m.jpg", "DOOM Crucible Wallet 3M"),
+      NINETEENTH_PROJECT_STILL("3r.jpg", "DOOM Crucible Wallet 3R"),
+    ],
+  },
+];
+
+const NINETEENTH_PROJECT_OVERVIEW = [
+  "This is a limited-edition collectible wallet inspired by DOOM Eternal and developed by Bethesda, with only 300 pieces produced. The design brings iconic elements from the game—including the Crucible and Mark of the Slayer—into an everyday accessory. Debossing, appliqué patches, and red contrast stitching were used to preserve the visual identity of the game while giving the wallet a practical, collectible feel.",
+];
+
+const NINETEENTH_PROJECT_CHALLENGES_BODY = [
+  "The biggest challenge was capturing the right vintage, distressed look while staying faithful to the visual style of DOOM Eternal. The material itself was not difficult to define—we knew we wanted a leather-based finish—but finding the right surface texture was.",
+  "I reviewed and compared more than 200 different leather textures to find one with the right distressed and cracked appearance.",
+  "Once the material was selected, another challenge came from the printing process. We needed to use digital UV printing to reproduce the detailed artwork, but the rough, uneven surface of the material made it difficult to achieve consistent and sharp print quality. Every fine line and graphic detail needed to remain clearly visible despite the irregular texture.",
+];
+
+const NINETEENTH_PROJECT_EXECUTION_BODY = [
+  "I spent considerable time sourcing, comparing, and matching more than 200 material textures, eventually narrowing them down to the one that best matched the distressed look we were aiming for.",
+  "To solve the printing issue, I worked with the factory to test a surface-treatment process before printing. We applied a thin conditioning layer to the material and then tested the digital UV printing again. This significantly improved the printing surface, allowing the fine artwork details to remain sharp and clearly visible.",
+  "The treatment also helped reduce the risk of the surface becoming excessively brittle and cracking over time.",
+];
+
+const NINETEENTH_PROJECT_IMPACT_BODY = [
+  "The wallet received strong positive feedback from DOOM Eternal fans and sold out quickly, giving the client confidence in developing more game-inspired wallets using a similar approach.",
+  "Following this project, the client went on to develop additional IP-based wallet concepts, including Cyberpunk 2077 and HITMAN / Agent 47. This project demonstrated that detailed game artwork, distinctive material textures, and everyday functionality could be successfully combined into a collectible product.",
+];
+
+const NINETEENTH_PROJECT_SPECIAL_THANKS: SpecialThanksEntry[] = [
+  {
+    company: "DPI Merchandising Inc.",
+    names: ["Michelle Wu"],
+  },
+  {
+    company: "Best Link (USA) Corp. Ltd.",
+    names: ["Karyn Leung", "Susan Hu"],
+  },
+];
+
+const NINETEENTH_PROJECT_COLLABORATORS: CollaboratorCredits = {
+  names: ["Alice", "Mr. Chen"],
+};
+
+/** 「第二十个项目」— Specialized Services; index card (detail media when supplied) */
+const TWENTIETH_PROJECT_NAME = "Dragon Age Grey Warden Joining Bundle";
+const TWENTIETH_PROJECT_CDN_FOLDER = TWENTIETH_PROJECT_NAME;
+const TWENTIETH_PROJECT_SLUG = projectSlugFromName(TWENTIETH_PROJECT_NAME);
+const TWENTIETH_PROJECT_TAGLINE =
+  "A collectible Dragon Age ritual set that brings the iconic Joining ceremony from the game into the real world.";
+/**
+ * Absolute CDN URLs (skip `/__assets` proxy). Long folder name + spaces can
+ * break the rewrite / Image optimizer in local + LAN preview.
+ */
+const twentiethCdn = (fileName: string) =>
+  `https://assets.iamedx.com/images/projects/${encodeURIComponent(TWENTIETH_PROJECT_CDN_FOLDER)}/${encodeURIComponent(fileName)}`;
+const TWENTIETH_PROJECT_COVER = twentiethCdn("h1.jpg");
+const TWENTIETH_PROJECT_HOVER_STILLS = [
+  twentiethCdn("h1.jpg"),
+  twentiethCdn("h2.jpg"),
+  twentiethCdn("h3.jpg"),
+] as [string, string, string];
+/** Case detail hero — self-hosted clip */
+const TWENTIETH_PROJECT_HERO_VIDEO = twentiethCdn("video.mp4");
+
+const TWENTIETH_PROJECT_STILL = (fileName: string, alt: string) => ({
+  src: twentiethCdn(fileName),
+  alt,
+});
+
+/** Detail gallery row 1 — 1L | 1R */
+const TWENTIETH_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    TWENTIETH_PROJECT_STILL("1l.jpg", "Dragon Age Grey Warden Joining Bundle 1L"),
+    TWENTIETH_PROJECT_STILL("1r.jpg", "Dragon Age Grey Warden Joining Bundle 1R"),
+  ],
+};
+
+/** Detail gallery rows 2–5 */
+const TWENTIETH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      TWENTIETH_PROJECT_STILL("2l.jpg", "Dragon Age Grey Warden Joining Bundle 2L"),
+      TWENTIETH_PROJECT_STILL("2m.jpg", "Dragon Age Grey Warden Joining Bundle 2M"),
+      TWENTIETH_PROJECT_STILL("2r.jpg", "Dragon Age Grey Warden Joining Bundle 2R"),
+    ],
+  },
+  {
+    items: [
+      TWENTIETH_PROJECT_STILL("3l.jpg", "Dragon Age Grey Warden Joining Bundle 3L"),
+      TWENTIETH_PROJECT_STILL("3m.jpg", "Dragon Age Grey Warden Joining Bundle 3M"),
+      TWENTIETH_PROJECT_STILL("3r.jpg", "Dragon Age Grey Warden Joining Bundle 3R"),
+    ],
+  },
+  {
+    items: [
+      TWENTIETH_PROJECT_STILL("4l.jpg", "Dragon Age Grey Warden Joining Bundle 4L"),
+      TWENTIETH_PROJECT_STILL("4r.jpg", "Dragon Age Grey Warden Joining Bundle 4R"),
+    ],
+  },
+  {
+    items: [
+      TWENTIETH_PROJECT_STILL("5l.jpg", "Dragon Age Grey Warden Joining Bundle 5L"),
+      TWENTIETH_PROJECT_STILL("5r.jpg", "Dragon Age Grey Warden Joining Bundle 5R"),
+    ],
+  },
+];
+
+const TWENTIETH_PROJECT_OVERVIEW = [
+  "This project is a collectible ritual set inspired by Dragon Age, recreating the Joining—a sacred ritual in which Grey Wardens bind themselves to the duty of fighting the darkspawn. The set was designed to make the fictional ritual feel tangible, bringing together several in-game elements, including the Joining Chalice, ritual letter, scroll case, and vial necklace. Each piece required careful attention to materials, printing, finishing, and small details to create a cohesive and immersive collectible experience.",
+];
+
+const TWENTIETH_PROJECT_CHALLENGES_BODY = [
+  "The chalice required a 304 stainless steel inner cup to be securely fixed inside the decorative outer body. The challenge was finding a practical way to lock the two parts together so the inner cup would not rotate, loosen, or make noise when the chalice was picked up and used.",
+  "The antique finish was another challenge. The griffon emblem and surrounding patterns contained many raised and recessed details. The amount of black left in the recessed areas had to be carefully controlled—too much would make the surface look dirty, while too little would make the details difficult to see.",
+];
+
+const TWENTIETH_PROJECT_EXECUTION_BODY = [
+  "I worked with the factory to test the assembly and fixing method between the stainless steel inner cup and the outer body, making sure the inner cup stayed firmly in position when the chalice was handled and used.",
+  "For the antique finish, I had the factory test different amounts of black remaining in the recessed areas. We finally kept more black inside the grooves while wiping and polishing the raised griffon and patterns back to a brighter silver. This created clearer separation between the raised and recessed details without making the overall surface too dark.",
+];
+
+const TWENTIETH_PROJECT_IMPACT_BODY = [
+  "The final product was designed to have practical use beyond its value as a collectible. The stainless steel inner cup allowed the chalice to actually be used for drinking, while the necklace, letter, and scroll case could be worn, handled, and used as props.",
+  "This was also reflected in the fan response. In the unboxing video, the collector specifically mentioned using the set for Dragon Age live-action role-playing, showing that the finished products worked not only as display pieces, but as functional objects fans could actually use as part of their Dragon Age experience.",
+];
+
 
 /** Default / home lead — End-to-End featured (Dragon Age Writing Bundle) */
 export const projectsFeaturedLead: ProjectsFeaturedLead = {
@@ -3088,6 +3256,78 @@ export const projects: Project[] = [
     result:
       "Controlled light distribution in resin, with strong fan demand and secondary-market prices well above retail.",
   },
+  {
+    slug: NINETEENTH_PROJECT_SLUG,
+    title: NINETEENTH_PROJECT_NAME,
+    materials: ["leather"],
+    country: "global",
+    ips: ["doom-eternal"],
+    tags: involvementTags("end-to-end"),
+    summary: NINETEENTH_PROJECT_TAGLINE,
+    tagline: NINETEENTH_PROJECT_TAGLINE,
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "end-to-end",
+    coverImage: NINETEENTH_PROJECT_COVER,
+    coverHoverStills: NINETEENTH_PROJECT_HOVER_STILLS,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    galleryLeadImage: NINETEENTH_PROJECT_GALLERY_LEAD,
+    heroVideo: NINETEENTH_PROJECT_HERO_VIDEO,
+    afterCoverStills: NINETEENTH_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: NINETEENTH_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    overview: NINETEENTH_PROJECT_OVERVIEW,
+    challengesBody: NINETEENTH_PROJECT_CHALLENGES_BODY,
+    executionBody: NINETEENTH_PROJECT_EXECUTION_BODY,
+    impactBody: NINETEENTH_PROJECT_IMPACT_BODY,
+    specialThanks: NINETEENTH_PROJECT_SPECIAL_THANKS,
+    collaborators: NINETEENTH_PROJECT_COLLABORATORS,
+    client: "DOOM Eternal",
+    year: 2025,
+    featured: false,
+    challenge:
+      "Match a distressed leather look to DOOM Eternal and keep UV print sharp on an uneven surface.",
+    result:
+      "Sold out quickly and unlocked follow-on IP wallet lines including Cyberpunk 2077 and HITMAN.",
+  },
+  {
+    slug: TWENTIETH_PROJECT_SLUG,
+    title: TWENTIETH_PROJECT_NAME,
+    materials: ["metal"],
+    country: "global",
+    ips: ["dragon-age"],
+    tags: involvementTags("specialized"),
+    summary: TWENTIETH_PROJECT_TAGLINE,
+    tagline: TWENTIETH_PROJECT_TAGLINE,
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "specialized",
+    coverImage: TWENTIETH_PROJECT_COVER,
+    cardCoverImage: TWENTIETH_PROJECT_COVER,
+    coverHoverStills: TWENTIETH_PROJECT_HOVER_STILLS,
+    coverWidth: 1920,
+    coverHeight: 1080,
+    heroVideo: TWENTIETH_PROJECT_HERO_VIDEO,
+    afterCoverStills: TWENTIETH_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: TWENTIETH_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    overview: TWENTIETH_PROJECT_OVERVIEW,
+    challengesBody: TWENTIETH_PROJECT_CHALLENGES_BODY,
+    executionBody: TWENTIETH_PROJECT_EXECUTION_BODY,
+    impactBody: TWENTIETH_PROJECT_IMPACT_BODY,
+    client: "Dragon Age",
+    year: 2024,
+    featured: false,
+    challenge:
+      "Lock a 304 stainless steel inner cup inside the decorative chalice body, and balance antique black in the griffon recesses.",
+    result:
+      "A functional Joining set fans used for LARPing—not only display pieces, but props they could drink from, wear, and handle.",
+  },
 ];
 
 export function getProjectBySlug(slug: string) {
@@ -3107,8 +3347,8 @@ const PROJECTS_FEATURED_LEAD_BY_INVOLVEMENT: Record<
   "end-to-end": SECOND_PROJECT_SLUG,
   /* Project Contribution — Horizon Zero Dawn Thunderjaw */
   contribution: THIRD_PROJECT_SLUG,
-  /* Specialized — 10-Year Coin Shadowbox until user picks another */
-  specialized: FOURTH_PROJECT_SLUG,
+  /* Specialized — Dragon Age Grey Warden Joining Bundle */
+  specialized: TWENTIETH_PROJECT_SLUG,
 };
 
 function projectToFeaturedLead(project: Project): ProjectsFeaturedLead {

@@ -20,3 +20,9 @@ export function asset(path: string): string {
   }
   return `${ASSETS_BASE}${normalized}`;
 }
+
+/** Public CDN URL only — never the dev `__assets` proxy. */
+export function cdnAsset(path: string): string {
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return `${ASSETS_BASE}${normalized}`;
+}

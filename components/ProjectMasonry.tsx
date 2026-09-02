@@ -69,6 +69,7 @@ function ProjectShowcaseCard({
                 width={project.coverWidth}
                 height={project.coverHeight}
                 sizes={sizes}
+                unoptimized
               />
             </div>
             {hasHoverStills ? (
@@ -109,6 +110,7 @@ function ProjectShowcaseCard({
             width={project.coverWidth}
             height={project.coverHeight}
             sizes={sizes}
+            unoptimized={coverSrc.startsWith("https://")}
           />
         )}
       </div>

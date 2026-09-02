@@ -135,6 +135,17 @@ export function HomeDifferentCards() {
       id={whatSetsMeApart.id}
       aria-labelledby={`${whatSetsMeApart.id}-title`}
     >
+      {whatSetsMeApart.backgroundImage ? (
+        <div
+          className="home-different__bg"
+          aria-hidden="true"
+          style={{
+            backgroundImage: `url("${whatSetsMeApart.backgroundImage}")`,
+          }}
+        />
+      ) : null}
+      <div className="home-different__frost" aria-hidden="true" />
+
       <div className="home-different__inner">
         <HomeSectionIntro
           titleId={`${whatSetsMeApart.id}-title`}

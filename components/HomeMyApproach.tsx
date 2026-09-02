@@ -4,8 +4,7 @@ import { myApproach } from "@/content/homeCopy";
 const POINTS = myApproach.points;
 
 /**
- * My Approach — intro left, points grid right (3 per row).
- * Each point: keyword → rule → body.
+ * My Approach — intro on top, points grid below (3 per row).
  */
 export function HomeMyApproach() {
   return (
@@ -14,23 +13,12 @@ export function HomeMyApproach() {
       id={myApproach.id}
       aria-labelledby={`${myApproach.id}-title`}
     >
-      <div
-        className="home-someone__bg"
-        aria-hidden="true"
-        style={{
-          backgroundImage: `url("${myApproach.backgroundImage}")`,
-        }}
-      />
-      <div className="home-someone__frost" aria-hidden="true" />
-
       <div className="home-someone__inner">
-        <div className="home-someone__lead">
-          <HomeSectionIntro
-            titleId={`${myApproach.id}-title`}
-            label={myApproach.eyebrow}
-            title={myApproach.title}
-          />
-        </div>
+        <HomeSectionIntro
+          titleId={`${myApproach.id}-title`}
+          label={myApproach.eyebrow}
+          title={myApproach.title}
+        />
 
         <ul className="home-someone__grid">
           {POINTS.map((item) => (
