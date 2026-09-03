@@ -562,15 +562,15 @@ const SECOND_PROJECT_COVER_VIDEO = projectCoverFromName(
 const SECOND_PROJECT_HOVER_STILLS = [
   projectCoverFromName(
     SECOND_PROJECT_NAME,
-    "Dragon Age Writing Bundle hover1.jpg",
-  ),
-  projectCoverFromName(
-    SECOND_PROJECT_NAME,
     "Dragon Age Writing Bundle hover2.jpg",
   ),
   projectCoverFromName(
     SECOND_PROJECT_NAME,
     "Dragon Age Writing Bundle hover3.jpg",
+  ),
+  projectCoverFromName(
+    SECOND_PROJECT_NAME,
+    "Dragon Age Writing Bundle hover1.jpg",
   ),
 ] as [string, string, string];
 const SECOND_PROJECT_HERO_VIDEO = projectCoverFromName(
@@ -2489,6 +2489,9 @@ const TWENTY_FIRST_PROJECT_END_VIDEO_PAIR = {
   nativeAspect: true,
 } as const;
 
+const TWENTY_FIRST_PROJECT_TAGLINE =
+  "A collectible series inspired by the romance stories of Dragon Age, bringing each character’s story to life through a custom wooden box, scroll, and matching necklace.";
+
 const TWENTY_FIRST_PROJECT_OVERVIEW = [
   "This project was developed for BioWare’s Dragon Age, based on Alistair, one of the main companions and romanceable characters from Dragon Age: Origins.",
   "The concept was to turn Alistair’s romance storyline into a physical collectible. The set was built around a carved wooden box featuring Alistair, with a love letter written from him to the female Grey Warden, and a replica-inspired version of Alistair’s Mother’s Amulet to connect the product back to his story in the game.",
@@ -3496,8 +3499,8 @@ export const projects: Project[] = [
     country: "global",
     ips: ["dragon-age"],
     tags: involvementTags("end-to-end"),
-    summary: "",
-    tagline: "",
+    summary: TWENTY_FIRST_PROJECT_TAGLINE,
+    tagline: TWENTY_FIRST_PROJECT_TAGLINE,
     role: [
       "product-development",
       "sample-development",
