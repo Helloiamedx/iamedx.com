@@ -31,7 +31,7 @@ Playback requirements on the working source: **muted**, **autoplay**, **loop**, 
 
 ## 2. Cover before play
 
-- **Loading only** — site mark liquid wave (`VideoLoadingCover`, no copy): crests travel **left → right** while fill level **breathes** up/down. After buffer / playable, keep breathing, slowly fill to full, hold briefly, then fade — video opacity follows `onDone` (not buffer-ready).
+- **Loading only** — site mark (`VideoLoadingCover`, no copy): **opacity breath** dim↔bright while buffering (no blur, desktop + mobile); when ready, ease to full brightness, hold briefly, then fade — video opacity follows `onDone`. Cover is always `pointer-events: none`.
 - **Do not** extract a frame, generate a poster image, or invent a still from the video.
 - Applies to case hero (`HeroSegmentVideo`), gallery clips (`ProjectFallbackVideo`), YouTube hero veil, home hero, and footer underlay.
 

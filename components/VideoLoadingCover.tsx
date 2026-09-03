@@ -2,7 +2,7 @@
 
 import {
   useEffect,
-  useId,
+  useLayoutEffect,
   useRef,
   useState,
   type RefObject,
@@ -24,44 +24,14 @@ function clampProgress(value: number) {
   return Math.min(100, Math.max(0, value));
 }
 
-const VIEW = 500;
-/** Soft breath band — visible load feel, not half-full */
-const BREATH_MIN = 18;
-const BREATH_MAX = 32;
-const BREATH_HZ = 0.48;
-/** Horizontal wave travel (crests move L→R) — subtle ripples */
-const TRAVEL_HZ = 0.58;
-const WAVE_AMP = 6;
-const WAVE_COUNT = 1.25;
 /** Keep breathing after buffer ready — never snap-finish */
 const MIN_BREATH_MS = 780;
 const EXTRA_BREATH_AFTER_READY_MS = 320;
-/** Slow rise to full once we leave the breath phase */
+/** CSS finish transition length — keep in sync with globals.css */
 const FINISH_MS = 720;
-/** Hold full mark before fading the cover (video appears after this) */
 const HOLD_BEFORE_FADE_MS = 120;
 
-type Phase = "wave" | "finish" | "hold" | "done";
-
-/** Liquid clip: flat bottom, wavy top traveling with `phase`. */
-function waveClipPath(
-  fillPct: number,
-  phase: number,
-  amplitude: number,
-): string {
-  const level = VIEW * (1 - clampProgress(fillPct) / 100);
-  const steps = 56;
-  let d = `M0 ${VIEW} L0 ${level}`;
-  for (let i = 0; i <= steps; i++) {
-    const x = (i / steps) * VIEW;
-    const y =
-      level +
-      Math.sin((i / steps) * WAVE_COUNT * Math.PI * 2 + phase) * amplitude;
-    d += ` L${x.toFixed(2)} ${y.toFixed(2)}`;
-  }
-  d += ` L${VIEW} ${VIEW} Z`;
-  return d;
-}
+type Phase = "breath" | "finish" | "hold" | "done";
 
 const MARK_PATHS = (
   <>
@@ -77,9 +47,8 @@ const MARK_PATHS = (
 );
 
 /**
- * Shared video load UI — site mark with a liquid wave that travels
- * left → right while the fill level breathes up/down. After `ready`,
- * keeps breathing, then slowly fills to full, holds, and fades.
+ * Shared video load UI — mark breathes dim ↔ bright (opacity only, no blur);
+ * when ready, eases to full brightness, holds, then fades. Never steals taps.
  */
 export function VideoLoadingCover({
   progress,
@@ -87,26 +56,13 @@ export function VideoLoadingCover({
   framed = false,
   onDone,
 }: VideoLoadingCoverProps) {
-  const clipId = useId().replace(/:/g, "");
-  const [phase, setPhase] = useState<Phase>("wave");
-  const [cycle, setCycle] = useState(0);
-  const [clipD, setClipD] = useState(() =>
-    waveClipPath((BREATH_MIN + BREATH_MAX) / 2, 0, WAVE_AMP),
-  );
-  const [ariaFill, setAriaFill] = useState(BREATH_MIN);
-
-  const phaseRef = useRef<Phase>("wave");
-  const fillRef = useRef((BREATH_MIN + BREATH_MAX) / 2);
-  const phaseAngleRef = useRef(0);
-  const ampRef = useRef(WAVE_AMP);
-  const finishFromRef = useRef(BREATH_MIN);
-  const finishStartRef = useRef(0);
+  const [phase, setPhase] = useState<Phase>("breath");
+  const phaseRef = useRef<Phase>("breath");
   const cycleStartRef = useRef(
     typeof performance !== "undefined" ? performance.now() : 0,
   );
   const readyAtRef = useRef<number | null>(null);
-  const rafRef = useRef(0);
-  const holdTimerRef = useRef(0);
+  const timersRef = useRef<number[]>([]);
   const onDoneRef = useRef(onDone);
   const doneFiredRef = useRef(false);
 
@@ -118,121 +74,71 @@ export function VideoLoadingCover({
     phaseRef.current = phase;
   }, [phase]);
 
+  const clearTimers = () => {
+    for (const id of timersRef.current) window.clearTimeout(id);
+    timersRef.current = [];
+  };
+
   /* Reset when parent drops ready */
   useEffect(() => {
     if (ready) return;
-    setPhase("wave");
-    phaseRef.current = "wave";
-    fillRef.current = (BREATH_MIN + BREATH_MAX) / 2;
-    phaseAngleRef.current = 0;
-    ampRef.current = WAVE_AMP;
+    clearTimers();
+    setPhase("breath");
+    phaseRef.current = "breath";
     readyAtRef.current = null;
     doneFiredRef.current = false;
     cycleStartRef.current = performance.now();
-    if (holdTimerRef.current) {
-      window.clearTimeout(holdTimerRef.current);
-      holdTimerRef.current = 0;
-    }
-    setCycle((n) => n + 1);
   }, [ready]);
 
+  /* After ready: keep CSS breath, then finish → hold → done (timers only) */
   useEffect(() => {
-    if (!ready || readyAtRef.current != null) return;
-    readyAtRef.current = performance.now();
-  }, [ready]);
+    if (!ready) return;
+    if (readyAtRef.current == null) readyAtRef.current = performance.now();
 
-  /* Single rAF loop: travel L→R + breath, then slow finish */
-  useEffect(() => {
-    const mid = (BREATH_MIN + BREATH_MAX) / 2;
-    const breathAmp = (BREATH_MAX - BREATH_MIN) / 2;
+    clearTimers();
+    const sinceStart = performance.now() - cycleStartRef.current;
+    const sinceReady = performance.now() - (readyAtRef.current ?? performance.now());
+    const wait = Math.max(
+      0,
+      Math.max(MIN_BREATH_MS - sinceStart, EXTRA_BREATH_AFTER_READY_MS - sinceReady),
+    );
 
-    const tick = (now: number) => {
-      const p = phaseRef.current;
-      const t = (now - cycleStartRef.current) / 1000;
+    const tFinish = window.setTimeout(() => {
+      setPhase("finish");
+      phaseRef.current = "finish";
 
-      /* Crests drift left → right */
-      phaseAngleRef.current = t * Math.PI * 2 * TRAVEL_HZ;
+      const tHold = window.setTimeout(() => {
+        setPhase("hold");
+        phaseRef.current = "hold";
 
-      if (p === "wave") {
-        fillRef.current =
-          mid + Math.sin(t * Math.PI * 2 * BREATH_HZ) * breathAmp;
-        ampRef.current = WAVE_AMP;
-
-        if (readyAtRef.current != null) {
-          const sinceStart = now - cycleStartRef.current;
-          const sinceReady = now - readyAtRef.current;
-          if (
-            sinceStart >= MIN_BREATH_MS &&
-            sinceReady >= EXTRA_BREATH_AFTER_READY_MS
-          ) {
-            finishFromRef.current = fillRef.current;
-            finishStartRef.current = now;
-            phaseRef.current = "finish";
-            setPhase("finish");
+        const tDone = window.setTimeout(() => {
+          setPhase("done");
+          phaseRef.current = "done";
+          if (!doneFiredRef.current) {
+            doneFiredRef.current = true;
+            onDoneRef.current?.();
           }
-        }
-      } else if (p === "finish") {
-        const u = Math.min(1, (now - finishStartRef.current) / FINISH_MS);
-        const eased = 1 - (1 - u) ** 3;
-        fillRef.current =
-          finishFromRef.current + (100 - finishFromRef.current) * eased;
-        ampRef.current = WAVE_AMP * (1 - eased);
+        }, HOLD_BEFORE_FADE_MS);
+        timersRef.current.push(tDone);
+      }, FINISH_MS);
+      timersRef.current.push(tHold);
+    }, wait);
+    timersRef.current.push(tFinish);
 
-        if (u >= 1) {
-          fillRef.current = 100;
-          ampRef.current = 0;
-          phaseRef.current = "hold";
-          setPhase("hold");
-        }
-      }
-
-      setClipD(
-        waveClipPath(
-          fillRef.current,
-          phaseAngleRef.current,
-          ampRef.current,
-        ),
-      );
-      setAriaFill(fillRef.current);
-
-      if (phaseRef.current !== "done") {
-        rafRef.current = requestAnimationFrame(tick);
-      }
-    };
-
-    rafRef.current = requestAnimationFrame(tick);
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-  }, [cycle]);
-
-  /* Brief hold at full, then fade cover + notify parent */
-  useEffect(() => {
-    if (phase !== "hold") return;
-    holdTimerRef.current = window.setTimeout(() => {
-      setPhase("done");
-      phaseRef.current = "done";
-      if (!doneFiredRef.current) {
-        doneFiredRef.current = true;
-        onDoneRef.current?.();
-      }
-    }, HOLD_BEFORE_FADE_MS);
-    return () => {
-      if (holdTimerRef.current) window.clearTimeout(holdTimerRef.current);
-    };
-  }, [phase]);
+    return clearTimers;
+  }, [ready]);
 
   const exiting = phase === "done";
-  const loading = phase === "wave";
-  const ariaNow = Math.round(
-    exiting || phase === "finish" || phase === "hold"
-      ? ariaFill
-      : Math.max(ariaFill, clampProgress(progress)),
-  );
+  const ariaNow =
+    phase === "hold" || exiting
+      ? 100
+      : phase === "finish"
+        ? 85
+        : Math.round(Math.max(12, clampProgress(progress) * 0.4));
 
   return (
     <div
-      className={`video-loading-cover${exiting ? " is-ready" : ""}${framed ? " is-framed" : ""}${loading ? " is-loading" : ""}`}
+      className={`video-loading-cover${exiting ? " is-ready" : ""}${framed ? " is-framed" : ""}${phase === "breath" ? " is-loading" : ""}${phase === "finish" ? " is-finishing" : ""}${phase === "hold" ? " is-holding" : ""}`}
       aria-hidden={exiting}
       aria-busy={!exiting}
       role="progressbar"
@@ -244,21 +150,13 @@ export function VideoLoadingCover({
       <div className="video-loading-cover__mark">
         <svg
           className="video-loading-cover__svg"
-          viewBox={`0 0 ${VIEW} ${VIEW}`}
+          viewBox="0 0 500 500"
           width={160}
           height={160}
           aria-hidden="true"
           focusable="false"
         >
-          <defs>
-            <clipPath id={clipId} clipPathUnits="userSpaceOnUse">
-              <path d={clipD} />
-            </clipPath>
-          </defs>
-          <g className="video-loading-cover__base" opacity={0.22}>
-            {MARK_PATHS}
-          </g>
-          <g clipPath={`url(#${clipId})`}>{MARK_PATHS}</g>
+          {MARK_PATHS}
         </svg>
       </div>
     </div>
@@ -305,7 +203,7 @@ export function useVideoLoadProgress(
   const [progress, setProgress] = useState(0);
   const [ready, setReady] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setProgress(0);
     setReady(false);
     const el = videoRef.current;
@@ -327,7 +225,6 @@ export function useVideoLoadProgress(
       setProgress((prev) => Math.max(prev, next));
       if (
         next >= 99.5 ||
-        el.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA ||
         el.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA
       ) {
         finish();
@@ -335,6 +232,7 @@ export function useVideoLoadProgress(
     };
 
     const onCanPlay = () => finish();
+    const onPlaying = () => finish();
     const onProgress = () => sync();
     const onLoadedData = () => sync();
     const onLoadedMetadata = () => sync();
@@ -345,28 +243,37 @@ export function useVideoLoadProgress(
     el.addEventListener("loadedmetadata", onLoadedMetadata);
     el.addEventListener("canplay", onCanPlay);
     el.addEventListener("canplaythrough", onCanPlay);
+    el.addEventListener("playing", onPlaying);
     el.addEventListener("error", onError);
 
-    try {
-      el.load();
-    } catch {
-      /* ignore */
+    /* Only restart if nothing is buffered yet — el.load() can stall on iOS */
+    if (el.readyState < HTMLMediaElement.HAVE_METADATA) {
+      try {
+        el.load();
+      } catch {
+        /* ignore */
+      }
     }
 
     sync();
     if (el.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) finish();
 
-    const safety = window.setTimeout(() => {
+    const safetyMeta = window.setTimeout(() => {
       if (!done && el.readyState >= HTMLMediaElement.HAVE_METADATA) finish();
-    }, 4000);
+    }, 2500);
+    const safetyHard = window.setTimeout(() => {
+      if (!done) finish();
+    }, 8000);
 
     return () => {
-      window.clearTimeout(safety);
+      window.clearTimeout(safetyMeta);
+      window.clearTimeout(safetyHard);
       el.removeEventListener("progress", onProgress);
       el.removeEventListener("loadeddata", onLoadedData);
       el.removeEventListener("loadedmetadata", onLoadedMetadata);
       el.removeEventListener("canplay", onCanPlay);
       el.removeEventListener("canplaythrough", onCanPlay);
+      el.removeEventListener("playing", onPlaying);
       el.removeEventListener("error", onError);
     };
   }, [videoRef, resetKey]);

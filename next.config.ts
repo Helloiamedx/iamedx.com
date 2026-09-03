@@ -6,6 +6,7 @@ import type { NextConfig } from "next";
  * Also proxies CDN through same origin in `rewrites` so media works on LAN.
  */
 const LAN_DEV_HOSTS = [
+  "192.168.0.103",
   "192.168.2.44",
   "192.168.2.40",
   "localhost",
