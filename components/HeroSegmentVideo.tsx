@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
 import {
   VideoLoadingCover,
@@ -19,7 +19,7 @@ type HeroSegmentVideoProps = {
 /**
  * Full-bleed muted hero clip. Optional `[start, end]` loop via currentTime
  * (native `loop` only when no end is set).
- * Progress bar until buffer hits 100%, then play.
+ * Wave cover until buffer ready + settle, then reveal.
  */
 export function HeroSegmentVideo({
   src,
@@ -29,7 +29,12 @@ export function HeroSegmentVideo({
 }: HeroSegmentVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { progress, ready } = useVideoLoadProgress(videoRef, src);
+  const [revealed, setRevealed] = useState(false);
   const segmentLoop = endSeconds != null && endSeconds > startSeconds;
+
+  useEffect(() => {
+    setRevealed(false);
+  }, [src]);
 
   useEffect(() => {
     const el = videoRef.current;
@@ -69,7 +74,7 @@ export function HeroSegmentVideo({
 
   return (
     <div
-      className={`hero-segment-video${ready ? " is-ready" : ""}${className ? ` ${className}` : ""}`}
+      className={`hero-segment-video${revealed ? " is-ready" : ""}${className ? ` ${className}` : ""}`}
       aria-hidden="true"
     >
       <ProtectedVideo
@@ -80,7 +85,11 @@ export function HeroSegmentVideo({
         autoPlay={false}
         loop={!segmentLoop}
       />
-      <VideoLoadingCover progress={progress} ready={ready} />
+      <VideoLoadingCover
+        progress={progress}
+        ready={ready}
+        onDone={() => setRevealed(true)}
+      />
     </div>
   );
 }

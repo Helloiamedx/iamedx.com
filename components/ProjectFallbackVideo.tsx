@@ -31,7 +31,7 @@ export type ProjectFallbackVideoProps = {
 /**
  * Tries `primarySrc` first; on load/play failure (or timeout) switches to
  * `fallbackSrc` when provided. Muted autoplay loop, no download.
- * Progress bar until buffer hits 100%, then play — never a frame poster.
+ * Site-mark wave until buffer ready + cover settles, then reveal.
  */
 export function ProjectFallbackVideo({
   primarySrc,
@@ -46,12 +46,14 @@ export function ProjectFallbackVideo({
   const [src, setSrc] = useState(primarySrc);
   const [usedFallback, setUsedFallback] = useState(false);
   const [intrinsicRatio, setIntrinsicRatio] = useState<string | undefined>();
+  const [revealed, setRevealed] = useState(false);
   const { progress, ready } = useVideoLoadProgress(videoRef, src);
 
   useEffect(() => {
     setSrc(primarySrc);
     setUsedFallback(false);
     setIntrinsicRatio(undefined);
+    setRevealed(false);
   }, [primarySrc, fallbackSrc]);
 
   useEffect(() => {
@@ -59,6 +61,7 @@ export function ProjectFallbackVideo({
     const id = window.setTimeout(() => {
       setUsedFallback(true);
       setSrc(fallbackSrc);
+      setRevealed(false);
     }, primaryTimeoutMs);
     return () => window.clearTimeout(id);
   }, [src, fallbackSrc, usedFallback, ready, primaryTimeoutMs]);
@@ -75,6 +78,7 @@ export function ProjectFallbackVideo({
     if (!fallbackSrc || usedFallback || src === fallbackSrc) return;
     setUsedFallback(true);
     setSrc(fallbackSrc);
+    setRevealed(false);
   };
 
   const syncIntrinsic = () => {
@@ -85,7 +89,7 @@ export function ProjectFallbackVideo({
 
   return (
     <div
-      className={`project-fallback-video${nativeAspect ? " project-fallback-video--native" : ""}${ready ? " is-ready" : ""}${className ? ` ${className}` : ""}`}
+      className={`project-fallback-video${nativeAspect ? " project-fallback-video--native" : ""}${revealed ? " is-ready" : ""}${className ? ` ${className}` : ""}`}
       style={
         nativeAspect
           ? intrinsicRatio
@@ -106,7 +110,11 @@ export function ProjectFallbackVideo({
         onLoadedMetadata={nativeAspect ? syncIntrinsic : undefined}
       />
 
-      <VideoLoadingCover progress={progress} ready={ready} />
+      <VideoLoadingCover
+        progress={progress}
+        ready={ready}
+        onDone={() => setRevealed(true)}
+      />
     </div>
   );
 }

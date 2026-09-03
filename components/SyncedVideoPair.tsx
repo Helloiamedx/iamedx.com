@@ -47,6 +47,11 @@ export function SyncedVideoPair({
 
   const bothReady = leftReady && rightReady;
   const pairProgress = Math.min(leftProgress, rightProgress);
+  const [revealed, setRevealed] = useState(false);
+
+  useEffect(() => {
+    setRevealed(false);
+  }, [left.primary, right.primary]);
 
   useEffect(() => {
     if (!bothReady) return;
@@ -104,6 +109,8 @@ export function SyncedVideoPair({
         nativeAspect={nativeAspect}
         progress={pairProgress}
         ready={bothReady}
+        revealed={revealed}
+        onCoverDone={() => setRevealed(true)}
       />
       <Side
         videoRef={rightRef}
@@ -113,6 +120,8 @@ export function SyncedVideoPair({
         nativeAspect={nativeAspect}
         progress={pairProgress}
         ready={bothReady}
+        revealed={revealed}
+        onCoverDone={() => setRevealed(true)}
       />
     </div>
   );
@@ -126,6 +135,8 @@ function Side({
   nativeAspect,
   progress,
   ready,
+  revealed,
+  onCoverDone,
 }: {
   videoRef: RefObject<HTMLVideoElement | null>;
   src: string;
@@ -134,6 +145,8 @@ function Side({
   nativeAspect: boolean;
   progress: number;
   ready: boolean;
+  revealed: boolean;
+  onCoverDone: () => void;
 }) {
   const [intrinsicRatio, setIntrinsicRatio] = useState<string | undefined>();
 
@@ -145,7 +158,7 @@ function Side({
 
   return (
     <div
-      className={`project-fallback-video${nativeAspect ? " project-fallback-video--native" : ""}${ready ? " is-ready" : ""}`}
+      className={`project-fallback-video${nativeAspect ? " project-fallback-video--native" : ""}${revealed ? " is-ready" : ""}`}
       style={
         nativeAspect
           ? intrinsicRatio
@@ -164,7 +177,11 @@ function Side({
         aria-label={alt}
         onLoadedMetadata={nativeAspect ? syncIntrinsic : undefined}
       />
-      <VideoLoadingCover progress={progress} ready={ready} />
+      <VideoLoadingCover
+        progress={progress}
+        ready={ready}
+        onDone={onCoverDone}
+      />
     </div>
   );
 }

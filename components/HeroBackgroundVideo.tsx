@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
-import { HeroVideoLoadingMark } from "@/components/HeroVideoLoadingMark";
-import { useVideoLoadProgress } from "@/components/VideoLoadingCover";
+import {
+  VideoLoadingCover,
+  useVideoLoadProgress,
+} from "@/components/VideoLoadingCover";
 import { HERO_VIDEO_SRC } from "@/lib/heroMedia";
 import {
   HERO_CHROME_ATTR,
@@ -18,11 +20,12 @@ const COPY_AFTER_READY_MS = 420;
 
 /**
  * Home hero video.
- * Sequence: icon fill (bottom→top) → video playable + chrome → video in → copy.
+ * Sequence: wave mark → buffer + chrome → settle cover → video in → copy.
  */
 export function HeroBackgroundVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [src, setSrc] = useState<string | null>(null);
+  const [coverReady, setCoverReady] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const { progress, ready: playable } = useVideoLoadProgress(
     videoRef,
@@ -52,29 +55,25 @@ export function HeroBackgroundVideo() {
     };
   }, []);
 
-  /* Reveal / play once playable + chrome is up */
+  /* Tell the cover it may finish once playable + chrome is up */
   useEffect(() => {
-    if (!playable || !src || revealed) return;
+    if (!playable || !src || coverReady) return;
     const ac = new AbortController();
     let cancelled = false;
 
     void (async () => {
       await whenHeroFlag(HERO_CHROME_ATTR, { signal: ac.signal });
       if (cancelled || ac.signal.aborted) return;
-
+      setCoverReady(true);
       const el = videoRef.current;
-      if (!el) return;
-
-      setRevealed(true);
-      setHeroFlag(HERO_VIDEO_ATTR);
-      void el.play().catch(() => {});
+      if (el) void el.play().catch(() => {});
     })();
 
     return () => {
       cancelled = true;
       ac.abort();
     };
-  }, [playable, src, revealed]);
+  }, [playable, src, coverReady]);
 
   /*
    * Copy gate is a separate effect — must NOT share cleanup with the reveal
@@ -91,10 +90,15 @@ export function HeroBackgroundVideo() {
     return () => window.clearTimeout(copyTimer);
   }, [revealed]);
 
+  const handleCoverDone = () => {
+    setRevealed(true);
+    setHeroFlag(HERO_VIDEO_ATTR);
+  };
+
   if (!src) {
     return (
       <div className="hero__video-wrap">
-        <HeroVideoLoadingMark progress={0} ready={false} />
+        <VideoLoadingCover progress={0} ready={false} />
       </div>
     );
   }
@@ -110,7 +114,11 @@ export function HeroBackgroundVideo() {
         // @ts-expect-error — fetchPriority on HTMLVideoElement (Chromium+)
         fetchPriority="high"
       />
-      <HeroVideoLoadingMark progress={progress} ready={revealed} />
+      <VideoLoadingCover
+        progress={progress}
+        ready={coverReady}
+        onDone={handleCoverDone}
+      />
     </div>
   );
 }

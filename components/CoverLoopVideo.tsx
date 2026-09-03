@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
 import {
   VideoLoadingCover,
@@ -16,7 +16,7 @@ type CoverLoopVideoProps = {
 };
 
 /**
- * Index / Related card cover loop — pill progress until playable, then mute autoplay.
+ * Index / Related card cover loop — site-mark wave until settle, then mute autoplay.
  */
 export function CoverLoopVideo({
   src,
@@ -25,6 +25,11 @@ export function CoverLoopVideo({
 }: CoverLoopVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { progress, ready } = useVideoLoadProgress(videoRef, src);
+  const [revealed, setRevealed] = useState(false);
+
+  useEffect(() => {
+    setRevealed(false);
+  }, [src]);
 
   useEffect(() => {
     const el = videoRef.current;
@@ -34,7 +39,7 @@ export function CoverLoopVideo({
 
   return (
     <div
-      className={cn("cover-loop-video", ready && "is-ready")}
+      className={cn("cover-loop-video", revealed && "is-ready")}
       aria-hidden={ariaLabel ? undefined : true}
     >
       <ProtectedVideo
@@ -45,7 +50,11 @@ export function CoverLoopVideo({
         autoPlay={false}
         aria-label={ariaLabel}
       />
-      <VideoLoadingCover progress={progress} ready={ready} />
+      <VideoLoadingCover
+        progress={progress}
+        ready={ready}
+        onDone={() => setRevealed(true)}
+      />
     </div>
   );
 }

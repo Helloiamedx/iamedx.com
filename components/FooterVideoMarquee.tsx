@@ -12,13 +12,14 @@ import { asset } from "@/lib/assets";
 /**
  * Footer underlay video — always fit the exact HELLOIAMEDX box
  * (--footer-wordmark-x/w/h), object-fit cover, object-position top.
- * Progress bar until buffer hits 100%, then play.
+ * Wave cover until settle, then play / reveal.
  */
 export function FooterVideoMarquee() {
   const clip = footerMarqueeVideos[0];
   const videoRef = useRef<HTMLVideoElement>(null);
   const src = asset(clip.src);
   const { progress, ready } = useVideoLoadProgress(videoRef, src);
+  const [revealed, setRevealed] = useState(false);
 
   useEffect(() => {
     const el = videoRef.current;
@@ -28,7 +29,7 @@ export function FooterVideoMarquee() {
 
   return (
     <div
-      className={`footer-video-fill${ready ? " is-ready" : ""}`}
+      className={`footer-video-fill${revealed ? " is-ready" : ""}`}
       aria-hidden="true"
     >
       <ProtectedVideo
@@ -40,7 +41,11 @@ export function FooterVideoMarquee() {
         aria-label={clip.label}
         style={{ objectFit: "cover", objectPosition: "top center" }}
       />
-      <VideoLoadingCover progress={progress} ready={ready} />
+      <VideoLoadingCover
+        progress={progress}
+        ready={ready}
+        onDone={() => setRevealed(true)}
+      />
     </div>
   );
 }

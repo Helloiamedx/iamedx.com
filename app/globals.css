@@ -79,7 +79,7 @@
 @font-face {
   font-family: "Grtsk Tera";
   src:
-    url("/fonts/GrtskTera-light.woff2") format("woff2"),
+    url("/fonts/GrtskTera-Light.woff2") format("woff2"),
     url("https://assets.iamedx.com/fonts/Grtsk%20Tera%20light.woff2")
       format("woff2");
   font-weight: 300;
@@ -90,7 +90,7 @@
 @font-face {
   font-family: "Grtsk Tera";
   src:
-    url("/fonts/GrtskTera-semiBold.woff2") format("woff2"),
+    url("/fonts/GrtskTera-SemiBold.woff2") format("woff2"),
     url("https://assets.iamedx.com/fonts/Grtsk%20Tera%20semiBold.woff2")
       format("woff2");
   font-weight: 600;
@@ -101,7 +101,7 @@
 @font-face {
   font-family: "Grtsk Tera";
   src:
-    url("/fonts/GrtskTera-thin.woff2") format("woff2"),
+    url("/fonts/GrtskTera-Thin.woff2") format("woff2"),
     url("https://assets.iamedx.com/fonts/Grtsk%20Tera%20thin.woff2")
       format("woff2");
   font-weight: 100;
@@ -2216,13 +2216,12 @@ html[data-chrome-ready="1"] .hero__video.is-loaded {
 }
 
 /* Progress / icon load above idle content stacking */
-.hero__video-wrap .video-loading-cover,
-.hero__video-wrap .hero-video-load {
+.hero__video-wrap .video-loading-cover {
   z-index: 2;
 }
 
-/* Home hero — site icon fills bottom → top */
-.hero-video-load {
+/* Shared video load — site mark liquid wave (L→R travel + breath) */
+.video-loading-cover {
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -2233,22 +2232,27 @@ html[data-chrome-ready="1"] .hero__video.is-loaded {
   opacity: 1;
   visibility: visible;
   transition:
-    opacity 0.35s ease,
+    opacity 0.4s ease,
     visibility 0s linear 0s;
   pointer-events: none;
+  color: #fff;
 }
 
-.hero-video-load.is-ready {
+.video-loading-cover.is-ready {
   opacity: 0;
   visibility: hidden;
   transition:
-    opacity 0.35s ease,
-    visibility 0s linear 0.35s;
+    opacity 0.4s ease,
+    visibility 0s linear 0.4s;
 }
 
-.hero-video-load__mark {
+/* First frame already showing — drop the black plate, keep the mark */
+.video-loading-cover.is-framed:not(.is-ready) {
+  background: transparent;
+}
+
+.video-loading-cover__mark {
   position: relative;
-  /* Phone / desktop load-mark sizes (iterated from base) */
   width: clamp(7.182rem, 32.832vw, 9.576rem);
   height: clamp(7.182rem, 32.832vw, 9.576rem);
   line-height: 0;
@@ -2256,45 +2260,39 @@ html[data-chrome-ready="1"] .hero__video.is-loaded {
 }
 
 @media (min-width: 900px) {
-  .hero-video-load__mark {
+  .video-loading-cover__mark {
     width: clamp(5.620625rem, 10.58vw, 7.27375rem);
     height: clamp(5.620625rem, 10.58vw, 7.27375rem);
   }
 }
 
-.hero-video-load__base,
-.hero-video-load__reveal svg {
+.video-loading-cover__svg {
   display: block;
   width: 100%;
   height: 100%;
   user-select: none;
   pointer-events: none;
-}
-
-.hero-video-load__base {
-  opacity: 0.22;
-}
-
-.hero-video-load__reveal {
-  position: absolute;
-  inset: 0;
-  /* Bottom→top fill: reveal lower portion as --load-p rises 0–100 */
-  clip-path: inset(calc(100% - (var(--load-p, 0) * 1%)) 0 0 0);
-  transition: clip-path 0.18s ease-out;
-  will-change: clip-path;
+  overflow: hidden;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-video-load__reveal {
+  .video-loading-cover {
     transition: none;
   }
 
-  .hero-video-load {
+  .video-loading-cover.is-ready {
     transition: none;
   }
 
-  .hero-video-load.is-ready {
+  .project-fallback-video__media,
+  .hero-segment-video__media {
     transition: none;
+  }
+
+  .project-case-demo__media-col,
+  .project-case-demo__panel,
+  .project-case-demo__panel-copy {
+    transition: none !important;
   }
 }
 
@@ -6037,6 +6035,7 @@ html[data-hero-copy-ready="1"] .hero__content {
 
 .cover-loop-video.is-ready .cover-loop-video__media {
   opacity: 1;
+  transition: opacity 0.4s ease;
 }
 
 .project-featured__media .cover-loop-video {
@@ -6967,6 +6966,8 @@ html[data-hero-copy-ready="1"] .hero__content {
   font-family: var(--font-fine);
   font-weight: 100;
   font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   font-size: clamp(1.75rem, 5.5vw, 3.25rem);
   letter-spacing: 0.04em;
   line-height: 1.05;
@@ -8582,6 +8583,7 @@ html[data-hero-copy-ready="1"] .hero__content {
 
 .hero-segment-video.is-ready .hero-segment-video__media {
   opacity: 1;
+  transition: opacity 0.4s ease;
 }
 
 /* Desktop embeds — fill the 16:9 band (no viewport cover math) */
@@ -9158,6 +9160,7 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
 
 .project-fallback-video.is-ready .project-fallback-video__media {
   opacity: 1;
+  transition: opacity 0.4s ease;
 }
 
 /* Intrinsic file size — no forced padding box / cover crop */
@@ -9181,71 +9184,6 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
 
 .project-case-demo__full--video .project-fallback-video--native .project-fallback-video__media {
   object-fit: unset;
-}
-
-/* Shared — hero, gallery, YouTube veil */
-.video-loading-cover {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #141414;
-  opacity: 1;
-  visibility: visible;
-  transition:
-    opacity 0.35s ease,
-    visibility 0s linear 0s;
-  pointer-events: none;
-}
-
-.video-loading-cover.is-ready {
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity 0.35s ease,
-    visibility 0s linear 0.35s;
-}
-
-/* First frame already showing — drop the black plate, keep the pill */
-.video-loading-cover.is-framed:not(.is-ready) {
-  background: transparent;
-}
-
-/* Pill track — rounded outer ends; fill clipped for a sharp mid cut */
-.video-loading-cover__track {
-  width: min(11.5rem, 42vw);
-  height: 3px;
-  border-radius: 999px;
-  background: #3a3a3a;
-  overflow: hidden;
-}
-
-.video-loading-cover__fill {
-  height: 100%;
-  width: 0%;
-  background: #fff;
-  transition: width 0.18s ease-out;
-  will-change: width;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .video-loading-cover__fill {
-    transition: none;
-  }
-
-  .project-fallback-video__media,
-  .hero-segment-video__media,
-  .video-loading-cover {
-    transition: none;
-  }
-
-  .project-case-demo__media-col,
-  .project-case-demo__panel,
-  .project-case-demo__panel-copy {
-    transition: none !important;
-  }
 }
 
 .project-case-demo__panel {

@@ -107,14 +107,16 @@ export function YouTubeBackground({
   const playerRef = useRef<YtPlayer | null>(null);
   const [ready, setReady] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [revealed, setRevealed] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    let revealed = false;
+    let revealedBuffer = false;
     let watchId = 0;
     let playingSince: number | null = null;
     setReady(false);
     setProgress(0);
+    setRevealed(false);
 
     const restart = (target: YtPlayer) => {
       playingSince = null;
@@ -127,7 +129,7 @@ export function YouTubeBackground({
 
     /* Soft crawl toward ~90% while waiting for stable PLAYING */
     const crawlId = window.setInterval(() => {
-      if (cancelled || revealed) return;
+      if (cancelled || revealedBuffer) return;
       setProgress((p) => (p >= 90 ? p : Math.min(90, p + 3 + Math.random() * 4)));
     }, 180);
 
@@ -152,7 +154,7 @@ export function YouTubeBackground({
       }
 
       const tryReveal = (target: YtPlayer) => {
-        if (cancelled || revealed) return;
+        if (cancelled || revealedBuffer) return;
         try {
           const state = target.getPlayerState();
           const t = target.getCurrentTime();
@@ -160,7 +162,7 @@ export function YouTubeBackground({
             const now = performance.now();
             if (playingSince == null) playingSince = now;
             if (now - playingSince >= REVEAL_HOLD_MS) {
-              revealed = true;
+              revealedBuffer = true;
               setProgress(100);
               setReady(true);
             }
@@ -213,7 +215,7 @@ export function YouTubeBackground({
             ) {
               playingSince = null;
               /* Keep pushing play so the big play button never sticks */
-              if (!revealed) {
+              if (!revealedBuffer) {
                 event.target.mute();
                 event.target.playVideo();
               }
@@ -242,12 +244,16 @@ export function YouTubeBackground({
 
   return (
     <div
-      className={`youtube-background${ready ? " is-ready" : ""}${className ? ` ${className}` : ""}`}
+      className={`youtube-background${revealed ? " is-ready" : ""}${className ? ` ${className}` : ""}`}
       aria-hidden={title ? undefined : true}
     >
       <div id={hostId} className="youtube-background__host" title={title} />
-      {/* Opaque until stable playback — blocks YouTube title + big play */}
-      <VideoLoadingCover progress={progress} ready={ready} />
+      {/* Opaque until cover settles — blocks YouTube title + big play */}
+      <VideoLoadingCover
+        progress={progress}
+        ready={ready}
+        onDone={() => setRevealed(true)}
+      />
     </div>
   );
 }
