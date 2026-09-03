@@ -675,7 +675,21 @@ const SECOND_PROJECT_AFTER_VIDEO_ROW = {
   ratio: "100%",
   afterIndex: 0,
 };
+/** Second-to-last gallery row — 2L | 2R (native 1800×1800) */
 const SECOND_PROJECT_BEFORE_END_ROW = {
+  items: [
+    {
+      src: projectCoverFromName(SECOND_PROJECT_NAME, "2l.jpg"),
+      alt: "Dragon Age Writing Bundle 2L",
+    },
+    {
+      src: projectCoverFromName(SECOND_PROJECT_NAME, "2.jpg"),
+      alt: "Dragon Age Writing Bundle 2R",
+    },
+  ],
+};
+/** Last gallery stills row — h8 | h9 | h10 */
+const SECOND_PROJECT_AFTER_END_ROW = {
   items: [
     {
       src: projectCoverFromName(
@@ -2635,6 +2649,7 @@ export const projects: Project[] = [
     afterCoverVideo: SECOND_PROJECT_AFTER_COVER_VIDEO,
     afterVideoRow: SECOND_PROJECT_AFTER_VIDEO_ROW,
     beforeEndRow: SECOND_PROJECT_BEFORE_END_ROW,
+    afterEndRow: SECOND_PROJECT_AFTER_END_ROW,
     specialThanks: SECOND_PROJECT_SPECIAL_THANKS,
     collaborators: SECOND_PROJECT_COLLABORATORS,
     overview: [
