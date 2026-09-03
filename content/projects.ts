@@ -675,7 +675,7 @@ const SECOND_PROJECT_AFTER_VIDEO_ROW = {
   ratio: "100%",
   afterIndex: 0,
 };
-/** Second-to-last gallery row — 2L | 2R (native 1800×1800) */
+/** Second-to-last gallery row — 2L | 2 (native) */
 const SECOND_PROJECT_BEFORE_END_ROW = {
   items: [
     {
