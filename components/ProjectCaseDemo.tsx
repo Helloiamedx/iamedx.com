@@ -44,7 +44,8 @@ type MediaItem =
       primary: string;
       fallback?: string;
       alt: string;
-      ratio: string;
+      ratio?: string;
+      nativeAspect?: boolean;
     }
   | {
       kind: "still-video-pair";
@@ -55,12 +56,15 @@ type MediaItem =
         alt: string;
         ratio: string;
       };
+      /** Default: still left / video right. Set true for video | still. */
+      videoOnLeft?: boolean;
     }
   | {
       kind: "video-pair";
       left: { primary: string; fallback?: string; alt: string };
       right: { primary: string; fallback?: string; alt: string };
       ratio?: string;
+      nativeAspect?: boolean;
     };
 
 function readCssPx(name: string, fallback: number) {
@@ -165,7 +169,8 @@ function buildCaseMedia(project: Project): MediaItem[] {
           primary: clip.primary,
           fallback: clip.fallback,
           alt: clip.alt,
-          ratio: clip.ratio ?? "56.25%",
+          ratio: clip.nativeAspect ? undefined : (clip.ratio ?? "56.25%"),
+          nativeAspect: clip.nativeAspect,
         });
       }
     } else if (project.afterCoverVideo) {
@@ -174,7 +179,10 @@ function buildCaseMedia(project: Project): MediaItem[] {
         primary: project.afterCoverVideo.primary,
         fallback: project.afterCoverVideo.fallback,
         alt: project.afterCoverVideo.alt,
-        ratio: project.afterCoverVideo.ratio ?? "56.25%",
+        ratio: project.afterCoverVideo.nativeAspect
+          ? undefined
+          : (project.afterCoverVideo.ratio ?? "56.25%"),
+        nativeAspect: project.afterCoverVideo.nativeAspect,
       });
     }
   };
@@ -218,7 +226,10 @@ function buildCaseMedia(project: Project): MediaItem[] {
       kind: "video-pair",
       left: project.afterCoverVideoPair.left,
       right: project.afterCoverVideoPair.right,
-      ratio: project.afterCoverVideoPair.ratio ?? "100%",
+      ratio: project.afterCoverVideoPair.nativeAspect
+        ? undefined
+        : (project.afterCoverVideoPair.ratio ?? "100%"),
+      nativeAspect: project.afterCoverVideoPair.nativeAspect,
     });
   }
 
@@ -269,6 +280,7 @@ function buildCaseMedia(project: Project): MediaItem[] {
         alt: pair.video.alt,
         ratio,
       },
+      videoOnLeft: pair.videoOnLeft,
     });
   };
 
@@ -350,7 +362,10 @@ function buildCaseMedia(project: Project): MediaItem[] {
       kind: "video-pair",
       left: project.endVideoPair.left,
       right: project.endVideoPair.right,
-      ratio: project.endVideoPair.ratio ?? "177.78%",
+      ratio: project.endVideoPair.nativeAspect
+        ? undefined
+        : (project.endVideoPair.ratio ?? "177.78%"),
+      nativeAspect: project.endVideoPair.nativeAspect,
     });
   }
 
@@ -609,22 +624,36 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
                       left={item.left}
                       right={item.right}
                       ratio={item.ratio}
+                      nativeAspect={item.nativeAspect}
                     />
                   );
                 }
                 if (item.kind === "still-video-pair") {
+                  const video = (
+                    <ProjectFallbackVideo
+                      primarySrc={item.video.primary}
+                      fallbackSrc={item.video.fallback}
+                      alt={item.video.alt}
+                      ratio={item.video.ratio}
+                    />
+                  );
+                  const still = <Frame {...item.still} />;
                   return (
                     <div
                       key={`still-video-${index}`}
                       className="project-case-demo__pair project-case-demo__pair--video"
                     >
-                      <Frame {...item.still} />
-                      <ProjectFallbackVideo
-                        primarySrc={item.video.primary}
-                        fallbackSrc={item.video.fallback}
-                        alt={item.video.alt}
-                        ratio={item.video.ratio}
-                      />
+                      {item.videoOnLeft ? (
+                        <>
+                          {video}
+                          {still}
+                        </>
+                      ) : (
+                        <>
+                          {still}
+                          {video}
+                        </>
+                      )}
                     </div>
                   );
                 }
@@ -639,6 +668,7 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
                         fallbackSrc={item.fallback}
                         alt={item.alt}
                         ratio={item.ratio}
+                        nativeAspect={item.nativeAspect}
                       />
                     </div>
                   );
@@ -715,9 +745,28 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
                     <h3 className="project-case-demo__panel-title">
                       {section.label}
                     </h3>
-                    {section.body.map((paragraph, index) => (
-                      <p key={`${section.id}-${index}`}>{paragraph}</p>
-                    ))}
+                    {section.body.map((paragraph, index) => {
+                      const trimmed = paragraph.trim();
+                      const isSubhead =
+                        (section.id === "challenge" ||
+                          section.id === "what-i-did") &&
+                        trimmed.length > 0 &&
+                        trimmed.length < 90 &&
+                        !/[.!?]$/.test(trimmed);
+                      if (isSubhead) {
+                        return (
+                          <h4
+                            key={`${section.id}-${index}`}
+                            className="project-case-demo__panel-subhead"
+                          >
+                            {paragraph}
+                          </h4>
+                        );
+                      }
+                      return (
+                        <p key={`${section.id}-${index}`}>{paragraph}</p>
+                      );
+                    })}
                   </section>
                 ))}
               </div>

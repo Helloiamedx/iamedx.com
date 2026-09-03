@@ -44,6 +44,12 @@ export type ProjectCollection = {
   entries: CollectionEntry[];
 };
 
+/**
+ * Collection detail (`/collections/[slug]` + Read more CTA).
+ * Keep false until the detail layout is ready — blocks nav and returns 404.
+ */
+export const COLLECTIONS_DETAIL_LIVE = false;
+
 function panelFromProjectImages(
   primary: string,
   swap: string,

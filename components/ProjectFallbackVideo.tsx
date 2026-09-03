@@ -18,6 +18,11 @@ export type ProjectFallbackVideoProps = {
   alt: string;
   /** CSS padding-bottom ratio, e.g. `177.78%` for 9:16 */
   ratio?: string;
+  /**
+   * Size the frame to the file’s intrinsic width/height (no forced box /
+   * cover crop). Wins over `ratio` when set.
+   */
+  nativeAspect?: boolean;
   className?: string;
   /** Give up on primary and switch to fallback after this many ms. */
   primaryTimeoutMs?: number;
@@ -33,17 +38,20 @@ export function ProjectFallbackVideo({
   fallbackSrc,
   alt,
   ratio = "177.78%",
+  nativeAspect = false,
   className = "",
   primaryTimeoutMs = 2500,
 }: ProjectFallbackVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [src, setSrc] = useState(primarySrc);
   const [usedFallback, setUsedFallback] = useState(false);
+  const [intrinsicRatio, setIntrinsicRatio] = useState<string | undefined>();
   const { progress, ready } = useVideoLoadProgress(videoRef, src);
 
   useEffect(() => {
     setSrc(primarySrc);
     setUsedFallback(false);
+    setIntrinsicRatio(undefined);
   }, [primarySrc, fallbackSrc]);
 
   useEffect(() => {
@@ -69,10 +77,22 @@ export function ProjectFallbackVideo({
     setSrc(fallbackSrc);
   };
 
+  const syncIntrinsic = () => {
+    const el = videoRef.current;
+    if (!el || !el.videoWidth || !el.videoHeight) return;
+    setIntrinsicRatio(`${el.videoWidth} / ${el.videoHeight}`);
+  };
+
   return (
     <div
-      className={`project-fallback-video${ready ? " is-ready" : ""}${className ? ` ${className}` : ""}`}
-      style={{ paddingBottom: ratio }}
+      className={`project-fallback-video${nativeAspect ? " project-fallback-video--native" : ""}${ready ? " is-ready" : ""}${className ? ` ${className}` : ""}`}
+      style={
+        nativeAspect
+          ? intrinsicRatio
+            ? { aspectRatio: intrinsicRatio }
+            : undefined
+          : { paddingBottom: ratio }
+      }
     >
       <ProtectedVideo
         key={src}
@@ -83,6 +103,7 @@ export function ProjectFallbackVideo({
         autoPlay={false}
         aria-label={alt}
         onError={switchToFallback}
+        onLoadedMetadata={nativeAspect ? syncIntrinsic : undefined}
       />
 
       <VideoLoadingCover progress={progress} ready={ready} />

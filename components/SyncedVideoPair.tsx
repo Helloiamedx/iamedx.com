@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type RefObject } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
 import {
   VideoLoadingCover,
@@ -16,8 +16,10 @@ type PairSide = {
 type SyncedVideoPairProps = {
   left: PairSide;
   right: PairSide;
-  /** CSS padding-bottom ratio per cell */
+  /** CSS padding-bottom ratio per cell — omit when `nativeAspect` */
   ratio?: string;
+  /** Size each side to the file’s intrinsic aspect (no forced box) */
+  nativeAspect?: boolean;
 };
 
 const DRIFT_SEC = 0.08;
@@ -30,6 +32,7 @@ export function SyncedVideoPair({
   left,
   right,
   ratio = "100%",
+  nativeAspect = false,
 }: SyncedVideoPairProps) {
   const leftRef = useRef<HTMLVideoElement>(null);
   const rightRef = useRef<HTMLVideoElement>(null);
@@ -98,6 +101,7 @@ export function SyncedVideoPair({
         src={left.primary}
         alt={left.alt}
         ratio={ratio}
+        nativeAspect={nativeAspect}
         progress={pairProgress}
         ready={bothReady}
       />
@@ -106,6 +110,7 @@ export function SyncedVideoPair({
         src={right.primary}
         alt={right.alt}
         ratio={ratio}
+        nativeAspect={nativeAspect}
         progress={pairProgress}
         ready={bothReady}
       />
@@ -118,6 +123,7 @@ function Side({
   src,
   alt,
   ratio,
+  nativeAspect,
   progress,
   ready,
 }: {
@@ -125,13 +131,28 @@ function Side({
   src: string;
   alt: string;
   ratio: string;
+  nativeAspect: boolean;
   progress: number;
   ready: boolean;
 }) {
+  const [intrinsicRatio, setIntrinsicRatio] = useState<string | undefined>();
+
+  const syncIntrinsic = () => {
+    const el = videoRef.current;
+    if (!el || !el.videoWidth || !el.videoHeight) return;
+    setIntrinsicRatio(`${el.videoWidth} / ${el.videoHeight}`);
+  };
+
   return (
     <div
-      className={`project-fallback-video${ready ? " is-ready" : ""}`}
-      style={{ paddingBottom: ratio }}
+      className={`project-fallback-video${nativeAspect ? " project-fallback-video--native" : ""}${ready ? " is-ready" : ""}`}
+      style={
+        nativeAspect
+          ? intrinsicRatio
+            ? { aspectRatio: intrinsicRatio }
+            : undefined
+          : { paddingBottom: ratio }
+      }
     >
       <ProtectedVideo
         ref={videoRef}
@@ -141,6 +162,7 @@ function Side({
         autoPlay={false}
         loop={false}
         aria-label={alt}
+        onLoadedMetadata={nativeAspect ? syncIntrinsic : undefined}
       />
       <VideoLoadingCover progress={progress} ready={ready} />
     </div>

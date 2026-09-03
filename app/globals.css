@@ -9160,9 +9160,27 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   opacity: 1;
 }
 
+/* Intrinsic file size — no forced padding box / cover crop */
+.project-fallback-video--native {
+  height: auto;
+  overflow: visible;
+  background: transparent;
+}
+
+.project-fallback-video--native .project-fallback-video__media {
+  position: static;
+  width: 100%;
+  height: auto;
+  object-fit: unset;
+}
+
 /* Full-width gallery clips — native aspect, no cover crop / zoom */
 .project-case-demo__full--video .project-fallback-video__media {
   object-fit: contain;
+}
+
+.project-case-demo__full--video .project-fallback-video--native .project-fallback-video__media {
+  object-fit: unset;
 }
 
 /* Shared — hero, gallery, YouTube veil */
@@ -9340,6 +9358,21 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   line-height: 1.25;
   text-transform: uppercase;
   color: #0a0a0a;
+}
+
+.project-case-demo__panel-subhead {
+  margin: 1.35rem 0 0.55rem;
+  /* Same face as body copy — black, +2px */
+  font-family: var(--font-sans);
+  font-size: calc(1rem + 2px);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  color: #0a0a0a;
+}
+
+.project-case-demo__panel-block > .project-case-demo__panel-subhead:first-of-type {
+  margin-top: 0;
 }
 
 /*
@@ -9572,6 +9605,12 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   }
 
   .project-case-demo__panel-title {
+    color: #0a0a0a;
+  }
+
+  .project-case-demo__panel-subhead {
+    /* Mobile body is 1rem − 1px; subhead stays +2px over body */
+    font-size: calc(1rem + 1px);
     color: #0a0a0a;
   }
 

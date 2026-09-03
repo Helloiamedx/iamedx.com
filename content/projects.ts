@@ -223,6 +223,8 @@ export type Project = {
     alt: string;
     /** CSS padding-bottom ratio; default 16:9 */
     ratio?: string;
+    /** Use file intrinsic aspect — no forced padding box / cover crop */
+    nativeAspect?: boolean;
   };
   /**
    * When true, render `afterCoverVideo` / `afterCoverVideos` as the first
@@ -238,9 +240,11 @@ export type Project = {
     fallback?: string;
     alt: string;
     ratio?: string;
+    nativeAspect?: boolean;
   }[];
   /**
-   * Two-up row after stills / before `afterCoverVideos`: still left, video right.
+   * Two-up row after stills / before `afterCoverVideos`: still left, video right
+   * (or video left / still right when `videoOnLeft`).
    */
   afterCoverStillVideoPair?: {
     still: { src: string; alt: string };
@@ -251,6 +255,8 @@ export type Project = {
     };
     /** CSS padding-bottom ratio per cell; default 100% */
     ratio?: string;
+    /** Video | still (default still | video) */
+    videoOnLeft?: boolean;
   };
   /**
    * When both `afterCoverStillVideoPair` and `afterCoverExtraRows` are set,
@@ -265,6 +271,7 @@ export type Project = {
     left: { primary: string; fallback?: string; alt: string };
     right: { primary: string; fallback?: string; alt: string };
     ratio?: string;
+    nativeAspect?: boolean;
   };
   /** Full-width stills after the process video (each item = one row). */
   afterVideoStills?: { src: string; alt: string; ratio?: string }[];
@@ -296,6 +303,7 @@ export type Project = {
     left: { primary: string; fallback?: string; alt: string };
     right: { primary: string; fallback?: string; alt: string };
     ratio?: string;
+    nativeAspect?: boolean;
   };
   /** Still row after `endVideoPair` (e.g. closing photo pair under process clips). */
   afterEndVideoPairRow?: {
@@ -2355,6 +2363,159 @@ const TWENTIETH_PROJECT_IMPACT_BODY = [
   "This was also reflected in the fan response. In the unboxing video, the collector specifically mentioned using the set for Dragon Age live-action role-playing, showing that the finished products worked not only as display pieces, but as functional objects fans could actually use as part of their Dragon Age experience.",
 ];
 
+/** 「第二十一个项目」— End-to-End; index card (detail media / copy when supplied) */
+const TWENTY_FIRST_PROJECT_NAME = "Dragon Age Bundle & Wooden Box Series";
+/** CDN folder casing — keep exact (typo “Sereis” + no space before &) */
+const TWENTY_FIRST_PROJECT_CDN_FOLDER =
+  "Dragon Age Bundle& Wooden box Sereis";
+const TWENTY_FIRST_PROJECT_SLUG = projectSlugFromName(
+  TWENTY_FIRST_PROJECT_NAME,
+);
+/**
+ * Absolute CDN URLs (skip `/__assets` proxy). `&` in the folder name can
+ * break the rewrite / Image optimizer in local + LAN preview.
+ */
+const twentyFirstCdn = (fileName: string) =>
+  `https://assets.iamedx.com/images/projects/${encodeURIComponent(TWENTY_FIRST_PROJECT_CDN_FOLDER)}/${encodeURIComponent(fileName)}`;
+const TWENTY_FIRST_PROJECT_COVER = twentyFirstCdn("w1.jpg");
+const TWENTY_FIRST_PROJECT_HOVER_STILLS = [
+  twentyFirstCdn("w1.jpg"),
+  twentyFirstCdn("w2.jpg"),
+  twentyFirstCdn("w3.jpg"),
+] as [string, string, string];
+/** Case detail first-screen hero */
+const TWENTY_FIRST_PROJECT_HERO_VIDEO = twentyFirstCdn("video.mp4");
+
+const TWENTY_FIRST_PROJECT_STILL = (fileName: string, alt: string) => ({
+  src: twentyFirstCdn(fileName),
+  alt,
+});
+
+/** Gallery row 1 — full-width still (native 1920×800) */
+const TWENTY_FIRST_PROJECT_GALLERY_LEAD = twentyFirstCdn("1f.jpg");
+
+/**
+ * Gallery row 2 — video left | still right.
+ * Cell box matches 2r.jpg (1500×2000); video covers that box (铺满).
+ */
+const TWENTY_FIRST_PROJECT_ROW2_RATIO = `${(2000 / 1500) * 100}%`;
+const TWENTY_FIRST_PROJECT_AFTER_COVER_STILL_VIDEO_PAIR = {
+  videoOnLeft: true,
+  still: TWENTY_FIRST_PROJECT_STILL(
+    "2r.jpg",
+    "Dragon Age Bundle & Wooden Box Series 2R",
+  ),
+  video: {
+    primary: twentyFirstCdn("2l.mp4"),
+    alt: "Dragon Age Bundle & Wooden Box Series 2L",
+  },
+  ratio: TWENTY_FIRST_PROJECT_ROW2_RATIO,
+} as const;
+
+/** Gallery rows 3–5 — still pairs at native size */
+const TWENTY_FIRST_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      TWENTY_FIRST_PROJECT_STILL(
+        "3l.jpg",
+        "Dragon Age Bundle & Wooden Box Series 3L",
+      ),
+      TWENTY_FIRST_PROJECT_STILL(
+        "3r.jpg",
+        "Dragon Age Bundle & Wooden Box Series 3R",
+      ),
+    ],
+  },
+  {
+    items: [
+      TWENTY_FIRST_PROJECT_STILL(
+        "4l.jpg",
+        "Dragon Age Bundle & Wooden Box Series 4L",
+      ),
+      TWENTY_FIRST_PROJECT_STILL(
+        "4r.jpg",
+        "Dragon Age Bundle & Wooden Box Series 4R",
+      ),
+    ],
+  },
+  {
+    items: [
+      TWENTY_FIRST_PROJECT_STILL(
+        "5l.jpg",
+        "Dragon Age Bundle & Wooden Box Series 5L",
+      ),
+      TWENTY_FIRST_PROJECT_STILL(
+        "5r.jpg",
+        "Dragon Age Bundle & Wooden Box Series 5R",
+      ),
+    ],
+  },
+];
+
+/** Gallery rows 6–9 — full-width clips at native aspect */
+const TWENTY_FIRST_PROJECT_AFTER_COVER_VIDEOS = [
+  {
+    primary: twentyFirstCdn("6f.mp4"),
+    alt: "Dragon Age Bundle & Wooden Box Series 6",
+    nativeAspect: true,
+  },
+  {
+    primary: twentyFirstCdn("7f.mp4"),
+    alt: "Dragon Age Bundle & Wooden Box Series 7",
+    nativeAspect: true,
+  },
+  {
+    primary: twentyFirstCdn("8f.mov"),
+    alt: "Dragon Age Bundle & Wooden Box Series 8",
+    nativeAspect: true,
+  },
+  {
+    primary: twentyFirstCdn("9f.mov"),
+    alt: "Dragon Age Bundle & Wooden Box Series 9",
+    nativeAspect: true,
+  },
+] as const;
+
+/** Gallery row 10 — closing video pair at native aspect */
+const TWENTY_FIRST_PROJECT_END_VIDEO_PAIR = {
+  left: {
+    primary: twentyFirstCdn("10l.mp4"),
+    alt: "Dragon Age Bundle & Wooden Box Series 10L",
+  },
+  right: {
+    primary: twentyFirstCdn("10r.mp4"),
+    alt: "Dragon Age Bundle & Wooden Box Series 10R",
+  },
+  nativeAspect: true,
+} as const;
+
+const TWENTY_FIRST_PROJECT_OVERVIEW = [
+  "This project was developed for BioWare’s Dragon Age, based on Alistair, one of the main companions and romanceable characters from Dragon Age: Origins.",
+  "The concept was to turn Alistair’s romance storyline into a physical collectible. The set was built around a carved wooden box featuring Alistair, with a love letter written from him to the female Grey Warden, and a replica-inspired version of Alistair’s Mother’s Amulet to connect the product back to his story in the game.",
+];
+
+const TWENTY_FIRST_PROJECT_CHALLENGES_BODY = [
+  "Hidden Magnetic Closure & Holding Strength",
+  "The original box used an interlocking lid-and-base structure, but later versions needed to transition to a hidden magnetic closure without changing the proven box dimensions. The magnets had to remain completely hidden while providing enough holding force to keep the lid securely closed, especially since the products inside were designed to sit tightly against the lid. This required testing the magnet size, strength, depth, and placement.",
+  "Color Consistency Across Production Batches",
+  "Different character versions were produced at different times, but collectors could purchase and display them together. This made cross-batch color consistency critical. Variations in wood moisture affected the darkness of laser engraving, while differences in the wood itself also influenced paint absorption and the final finish. The challenge was keeping the wood tone, engraving depth, and painted color consistent across Alistair, Dorian, Morrigan, Isabela, and Iron Bull.",
+  "Fitting Different Products Within a Fixed Internal Height",
+  "The box dimensions, internal height, and liner structure were already fixed, while the products for each character could vary in thickness. Each new set therefore had to fit within the same available height without creating too much upward pressure on the lid. The challenge was to accommodate different product thicknesses while keeping the contents secure and the magnetic lid fully closed.",
+];
+
+const TWENTY_FIRST_PROJECT_EXECUTION_BODY = [
+  "Optimized & Concealed the Magnetic Closure",
+  "I worked with the factory to test three different magnet layouts and finalized a four-magnet configuration—two in the lid and two in the base. Testing confirmed that 3 mm diameter strong magnets provided enough holding force. To completely hide them, I also changed the assembly process: the front texture paper on the base was applied after the magnets were installed, allowing the final paper layer to cover the magnet positions without leaving them visible.",
+  "Controlled Color Consistency Across Batches",
+  "I anticipated that additional character versions and repeat orders would follow, so I arranged for the factory to purchase and reserve material from the same production batch in advance. This kept the wood condition, moisture level, texture paper, and bonding process as consistent as possible across future runs. Instead of sourcing new materials for every character, we could use the reserved material and simply laser-engrave the corresponding character artwork for each new version, significantly reducing cross-batch variation in engraving darkness and final color.",
+  "Adjusted the Liner for Different Product Thicknesses",
+  "For thicker components, I had the factory hollow out specific areas of the liner to create additional clearance without changing the box dimensions. I also adjusted the thickness of the EVA mounting/backing board according to each set of components, allowing products of different thicknesses to fit within the same internal height while keeping the lid properly closed.",
+];
+
+const TWENTY_FIRST_PROJECT_IMPACT_BODY = [
+  "The product sold strongly during the initial pre-sale, leading the client to place a repeat order soon after. The additional production also sold quickly.",
+  "The magnetic closure structure I developed—replacing the original clasp-style closure—was well received by customers and became the standard structure for the series. Following the success of the first release, the client expanded the concept to other Dragon Age characters, including Dorian, Morrigan, Isabela, and Iron Bull, while continuing to use the same magnetic box structure for their matching character-themed collectibles.",
+];
 
 /** Default / home lead — End-to-End featured (Dragon Age Writing Bundle) */
 export const projectsFeaturedLead: ProjectsFeaturedLead = {
@@ -3327,6 +3488,45 @@ export const projects: Project[] = [
       "Lock a 304 stainless steel inner cup inside the decorative chalice body, and balance antique black in the griffon recesses.",
     result:
       "A functional Joining set fans used for LARPing—not only display pieces, but props they could drink from, wear, and handle.",
+  },
+  {
+    slug: TWENTY_FIRST_PROJECT_SLUG,
+    title: TWENTY_FIRST_PROJECT_NAME,
+    materials: ["wood"],
+    country: "global",
+    ips: ["dragon-age"],
+    tags: involvementTags("end-to-end"),
+    summary: "",
+    tagline: "",
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "end-to-end",
+    coverImage: TWENTY_FIRST_PROJECT_COVER,
+    cardCoverImage: TWENTY_FIRST_PROJECT_COVER,
+    coverHoverStills: TWENTY_FIRST_PROJECT_HOVER_STILLS,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    heroVideo: TWENTY_FIRST_PROJECT_HERO_VIDEO,
+    galleryLeadImage: TWENTY_FIRST_PROJECT_GALLERY_LEAD,
+    afterCoverStillVideoPair: TWENTY_FIRST_PROJECT_AFTER_COVER_STILL_VIDEO_PAIR,
+    afterCoverStillVideoBeforeExtraRows: true,
+    afterCoverExtraRows: TWENTY_FIRST_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    afterCoverVideos: [...TWENTY_FIRST_PROJECT_AFTER_COVER_VIDEOS],
+    endVideoPair: TWENTY_FIRST_PROJECT_END_VIDEO_PAIR,
+    specialThanks: WOODEN_BOX_SPECIAL_THANKS,
+    collaborators: WOODEN_BOX_COLLABORATORS,
+    overview: TWENTY_FIRST_PROJECT_OVERVIEW,
+    challengesBody: TWENTY_FIRST_PROJECT_CHALLENGES_BODY,
+    executionBody: TWENTY_FIRST_PROJECT_EXECUTION_BODY,
+    impactBody: TWENTY_FIRST_PROJECT_IMPACT_BODY,
+    client: "Dragon Age",
+    year: 2024,
+    featured: false,
+    challenge: "",
+    result: "",
   },
 ];
 

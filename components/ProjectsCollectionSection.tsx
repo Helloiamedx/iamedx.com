@@ -3,9 +3,10 @@
 import { useReducedMotion } from "motion/react";
 import { useEffect, useRef } from "react";
 import { OriginButton } from "@/components/ui/origin-button";
-import type {
-  CollectionPanel,
-  ProjectCollection,
+import {
+  COLLECTIONS_DETAIL_LIVE,
+  type CollectionPanel,
+  type ProjectCollection,
 } from "@/content/collections";
 
 const PANEL_W = 240;
@@ -102,7 +103,7 @@ function CollectionPanelMedia({
 
 /**
  * Full-bleed collection break on `/projects` — multi-variant product family.
- * Separate from standard project detail; links to `/collections/[slug]`.
+ * Detail page / Read more gated by `COLLECTIONS_DETAIL_LIVE`.
  */
 export function ProjectsCollectionSection({
   collection,
@@ -240,11 +241,13 @@ export function ProjectsCollectionSection({
         </div>
       </div>
 
-      <div className="projects-collection__cta">
-        <OriginButton href={`/collections/${collection.slug}`}>
-          Read more
-        </OriginButton>
-      </div>
+      {COLLECTIONS_DETAIL_LIVE ? (
+        <div className="projects-collection__cta">
+          <OriginButton href={`/collections/${collection.slug}`}>
+            Read more
+          </OriginButton>
+        </div>
+      ) : null}
     </section>
   );
 }

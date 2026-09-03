@@ -30,7 +30,7 @@ export const WOODEN_BOX_SPECIAL_THANKS: SpecialThanksEntry[] = [
   },
   {
     company: "Best Link (USA) Corp. Ltd.",
-    names: ["Karyn Leung", "Susan Hu"],
+    names: ["Karyn Leung", "Susan Hu", "Candy"],
   },
   {
     company: SGS_CREDIT_COMPANY,

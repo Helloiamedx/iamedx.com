@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CollectionDetailBody } from "@/components/CollectionDetailBody";
 import {
+  COLLECTIONS_DETAIL_LIVE,
   getCollectionBySlug,
   projectCollections,
 } from "@/content/collections";
@@ -11,12 +12,14 @@ type CollectionPageProps = {
 };
 
 export function generateStaticParams() {
+  if (!COLLECTIONS_DETAIL_LIVE) return [];
   return projectCollections.map((collection) => ({ slug: collection.slug }));
 }
 
 export async function generateMetadata({
   params,
 }: CollectionPageProps): Promise<Metadata> {
+  if (!COLLECTIONS_DETAIL_LIVE) return { title: "Collection" };
   const { slug } = await params;
   const collection = getCollectionBySlug(slug);
   if (!collection) return { title: "Collection" };
@@ -27,6 +30,8 @@ export async function generateMetadata({
 }
 
 export default async function CollectionPage({ params }: CollectionPageProps) {
+  if (!COLLECTIONS_DETAIL_LIVE) notFound();
+
   const { slug } = await params;
   const collection = getCollectionBySlug(slug);
   if (!collection) notFound();
