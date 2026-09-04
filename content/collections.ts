@@ -46,9 +46,9 @@ export type ProjectCollection = {
 
 /**
  * Collection detail (`/collections/[slug]` + Read more CTA).
- * Keep false until the detail layout is ready — blocks nav and returns 404.
+ * When false: blocks nav and returns 404.
  */
-export const COLLECTIONS_DETAIL_LIVE = false;
+export const COLLECTIONS_DETAIL_LIVE = true;
 
 function panelFromProjectImages(
   primary: string,
@@ -69,6 +69,9 @@ const COLLECTION_TESTIMONIAL_PLACEHOLDER: CollectionTestimonial = {
 };
 
 const CYBERPUNK_BANNER_SLUG = projectSlugFromName("Cyberpunk 2077 Systems Banner");
+const DRAGON_AGE_GREY_WARDENS_BANNER_SLUG = projectSlugFromName(
+  "Dragon Age Grey Wardens Banner",
+);
 const MASS_EFFECT_TALI_SLUG = projectSlugFromName("Mass Effect Tali Companion Bundle");
 const SKYRIM_MESSENGER_BAG_SLUG = projectSlugFromName(
   "Skyrim Dragon Hunter Messenger Bag",
@@ -76,6 +79,18 @@ const SKYRIM_MESSENGER_BAG_SLUG = projectSlugFromName(
 const DRAGON_AGE_KEEPSAKE_BOX_SLUG = projectSlugFromName(
   "Dragon Age Dreadwolf Keepsake Box",
 );
+const DRAGON_AGE_MAGE_TEMPLAR_COIN_SLUG = projectSlugFromName(
+  "Dragon Age Mage-Templar War Coin Set",
+);
+const FALLOUT_NCR_RANGER_COIN_SLUG = projectSlugFromName(
+  "Fallout NCR Ranger Challenge Coin",
+);
+const FALLOUT_TOPS_CASINO_CHIP_SLUG = projectSlugFromName(
+  "Fallout The Tops Casino Chip Collectible Coin",
+);
+
+const FALLOUT_GAME_INFO =
+  "A post-apocalyptic role-playing series set in a retro-futuristic United States — where factions, vaults, and scavenged culture define life after the bombs.";
 
 const PLACEHOLDER_QUOTE_NAMES = [
   "Shanna Holthaus",
@@ -138,6 +153,13 @@ export const projectCollections: ProjectCollection[] = [
           "An open-world action RPG set in Night City, built around a distinct futuristic aesthetic that extends naturally into physical merchandise and display pieces.",
         testimonial: COLLECTION_TESTIMONIAL_PLACEHOLDER,
       },
+      {
+        slug: DRAGON_AGE_GREY_WARDENS_BANNER_SLUG,
+        gameTitle: "Dragon Age",
+        gameInfo:
+          "A dark fantasy action RPG series set in Thedas — a world of magic, political intrigue, and characters whose choices leave lasting marks on the story.",
+        testimonial: COLLECTION_TESTIMONIAL_PLACEHOLDER,
+      },
     ],
   },
   {
@@ -185,6 +207,37 @@ export const projectCollections: ProjectCollection[] = [
           quote:
             "Really pretty! I loved the attention to detail on the hinges and metal on the corners, none of it is left plain. Feels quite sturdy as well!",
         },
+      },
+      {
+        slug: DRAGON_AGE_MAGE_TEMPLAR_COIN_SLUG,
+        gameTitle: "Dragon Age",
+        gameInfo:
+          "A dark fantasy action RPG series set in Thedas — a world of magic, political intrigue, and characters whose choices leave lasting marks on the story.",
+        testimonial: COLLECTION_TESTIMONIAL_PLACEHOLDER,
+      },
+    ],
+  },
+  {
+    slug: "packaging",
+    title: "Packaging",
+    headline: "Redefining packaging through the details",
+    panels: [
+      panelFromProjectImages("101.jpg", "102.jpg"),
+      panelFromProjectImages("201.jpg", "202.jpg"),
+      panelFromProjectImages("301.jpg", "302.jpg"),
+    ],
+    entries: [
+      {
+        slug: FALLOUT_TOPS_CASINO_CHIP_SLUG,
+        gameTitle: "Fallout",
+        gameInfo: FALLOUT_GAME_INFO,
+        testimonial: COLLECTION_TESTIMONIAL_PLACEHOLDER,
+      },
+      {
+        slug: FALLOUT_NCR_RANGER_COIN_SLUG,
+        gameTitle: "Fallout",
+        gameInfo: FALLOUT_GAME_INFO,
+        testimonial: COLLECTION_TESTIMONIAL_PLACEHOLDER,
       },
     ],
   },

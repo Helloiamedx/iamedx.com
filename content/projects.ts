@@ -903,7 +903,7 @@ const FIFTH_PROJECT_HOVER_STILLS = [
   ),
   projectCoverFromName(
     FIFTH_PROJECT_NAME,
-    "The Elder Scrolls Online NECROM Look Book Bundle hover3.jpg",
+    "a.jpg",
   ),
 ] as [string, string, string];
 /** Case detail first-screen hero */
@@ -2534,6 +2534,359 @@ const TWENTY_FIRST_PROJECT_IMPACT_BODY = [
   "The magnetic closure structure I developed—replacing the original clasp-style closure—was well received by customers and became the standard structure for the series. Following the success of the first release, the client expanded the concept to other Dragon Age characters, including Dorian, Morrigan, Isabela, and Iron Bull, while continuing to use the same magnetic box structure for their matching character-themed collectibles.",
 ];
 
+/** 「第二十二个项目」— End-to-End; index hover h1–h3; gallery by name, video last */
+const TWENTY_SECOND_PROJECT_NAME = "Dragon Age Mage-Templar War Coin Set";
+const TWENTY_SECOND_PROJECT_CDN_FOLDER = TWENTY_SECOND_PROJECT_NAME;
+const TWENTY_SECOND_PROJECT_SLUG = projectSlugFromName(
+  TWENTY_SECOND_PROJECT_NAME,
+);
+const TWENTY_SECOND_PROJECT_TAGLINE =
+  "Two sides. Two beliefs. One choice.\n\nA collectible coin set that brings the Mage-Templar conflict from Dragon Age into the real world, presented in a handcrafted wooden display box.";
+/**
+ * Absolute CDN URLs (skip `/__assets` proxy). Long folder name + spaces can
+ * break the rewrite / Image optimizer in local + LAN preview.
+ */
+const twentySecondCdn = (fileName: string) =>
+  `https://assets.iamedx.com/images/projects/${encodeURIComponent(TWENTY_SECOND_PROJECT_CDN_FOLDER)}/${encodeURIComponent(fileName)}`;
+const TWENTY_SECOND_PROJECT_COVER = twentySecondCdn("h1.jpg");
+const TWENTY_SECOND_PROJECT_HOVER_STILLS = [
+  twentySecondCdn("h1.jpg"),
+  twentySecondCdn("h2.jpg"),
+  twentySecondCdn("h3.jpg"),
+] as [string, string, string];
+/** Case detail first-screen still */
+const TWENTY_SECOND_PROJECT_HERO = twentySecondCdn("hero.jpg");
+const TWENTY_SECOND_PROJECT_STILL = (fileName: string, alt: string) => ({
+  src: twentySecondCdn(fileName),
+  alt,
+});
+/** Detail gallery: 11f → 2l|2r → 3f → Reference → video last */
+const TWENTY_SECOND_PROJECT_GALLERY_LEAD = twentySecondCdn("11f.jpg");
+const TWENTY_SECOND_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    TWENTY_SECOND_PROJECT_STILL(
+      "2l.jpg",
+      "Dragon Age Mage-Templar War Coin Set 2L",
+    ),
+    TWENTY_SECOND_PROJECT_STILL(
+      "2r.jpg",
+      "Dragon Age Mage-Templar War Coin Set 2R",
+    ),
+  ],
+};
+const TWENTY_SECOND_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      TWENTY_SECOND_PROJECT_STILL(
+        "3f.jpg",
+        "Dragon Age Mage-Templar War Coin Set 3",
+      ),
+    ],
+  },
+  {
+    items: [
+      TWENTY_SECOND_PROJECT_STILL(
+        "Reference.jpg",
+        "Dragon Age Mage-Templar War Coin Set reference",
+      ),
+    ],
+  },
+];
+const TWENTY_SECOND_PROJECT_END_VIDEO = {
+  primary: twentySecondCdn("video.mp4"),
+  alt: "Dragon Age Mage-Templar War Coin Set",
+  ratio: "56.25%",
+} as const;
+
+const TWENTY_SECOND_PROJECT_OVERVIEW = [
+  "The Dragon Age Mage-Templar War Coin Set is a collectible inspired by the long-standing conflict between mages and templars in the Dragon Age universe. The set features two zinc-alloy coins representing the opposing sides, finished in antique silver with red enamel details and embossed faction symbols.",
+  "Both coins are presented in a handmade black wooden display box with red velvet lining, battle artwork, and an etched lid design, turning the choice between Mages and Templars into a physical collectible.",
+];
+
+const TWENTY_SECOND_PROJECT_CHALLENGES_BODY = [
+  "This was the client’s first attempt at developing a wood-based collectible, so the initial budget was kept very tight because there was no certainty yet about how the market would respond. At the same time, the client still wanted the product to have the look and feel of solid wood, without making it feel cheap because of the limited budget.",
+  "Another challenge was the shape of the box. The client did not want it to look like a standard square wooden box commonly found on the market. The goal was to introduce a memorable design detail without significantly increasing structural complexity or production cost. The challenge was therefore to create a distinctive identity through a relatively small structural change.",
+];
+
+const TWENTY_SECOND_PROJECT_EXECUTION_BODY = [
+  "I did not simply treat “solid wood + low budget” as two surface-level requirements and start looking for materials. I first tried to understand why the client wanted both.",
+  "The client wanted solid wood because they wanted their first wood-based collectible to have authentic wood grain, texture, and a premium feel. The limited budget, however, came from the fact that this was an untested material direction, and the client did not want to invest too heavily in development and production before knowing how the market would respond.",
+  "Once I understood the purpose behind both requirements, I did not simply choose the cheapest solid wood available. Instead, I separated the structural cost from the material experience the customer would actually see and feel.",
+  "Before finalizing the material solution, I also conducted extensive research into different wood-processing methods, material combinations, surface treatments, and construction approaches. Since this was my first wood-based project for the client, I wanted to understand what could realistically be achieved at different cost levels before taking a specific proposal to the factory. This research gave me a much clearer basis for evaluating the factory’s suggestions and developing a solution that matched the client’s actual priorities.",
+  "I took this approach to the factory and discussed different material and manufacturing options. I eventually settled on MDF for the main structure, with real wood veneer applied to the visible and touchable surfaces. The MDF kept the structural and material costs under control, while the real wood surface preserved the natural texture and feel the client actually wanted.",
+  "My role here was not simply to select a material, but to break down two seemingly conflicting requirements and develop a solution around what the client actually cared about.",
+  "For the client’s requirement that the box should not look ordinary, I also avoided adding complicated structures simply for the sake of being different, as that would have worked directly against the budget target.",
+  "Instead, I introduced a long recessed opening through the center of the lid, using a relatively small and cost-controlled structural change to break up the conventional rectangular shape of the box.",
+  "The opening becomes part of the lid design when the box is open and remains visible from the back when the box is closed, giving the product a recognizable detail in either state. My goal was to create a memorable design feature with the smallest possible structural change, without compromising the original budget target.",
+];
+
+const TWENTY_SECOND_PROJECT_IMPACT_BODY = [
+  "This was the first wooden box I developed for the client, and it was also the client’s first time using wood as a material for a collectible product. Throughout the project, I learned and refined how to work with wood construction, surface finishes, and overall presentation. The final product was successfully launched and performed very well in the market.",
+  "More importantly, the success of this project helped me validate wood as a new material direction for the client’s collectible products. For a brand that places strong emphasis on uniqueness and design, this gave the product team another practical material option for bringing different concepts to life.",
+  "After this product, I went on to develop several more wood-based products for the client. It was not just a successful product launch—it became the starting point for the client’s continued expansion into wood-based collectibles.",
+];
+
+/** 「第二十三个项目」— media only until copy is ready; hover h1–h3; video last */
+const TWENTY_THIRD_PROJECT_NAME = "Dragon Age Varric Pin Set";
+const TWENTY_THIRD_PROJECT_CDN_FOLDER = TWENTY_THIRD_PROJECT_NAME;
+const TWENTY_THIRD_PROJECT_SLUG = projectSlugFromName(TWENTY_THIRD_PROJECT_NAME);
+const TWENTY_THIRD_PROJECT_TAGLINE =
+  "A three-piece Dragon Age collectible pin set celebrating Varric Tethras, featuring Varric, Bianca, and his necklace, presented in a custom Kirkwall-themed display box.";
+/**
+ * Absolute CDN URLs (skip `/__assets` proxy). Long folder name + spaces can
+ * break the rewrite / Image optimizer in local + LAN preview.
+ */
+const twentyThirdCdn = (fileName: string) =>
+  `https://assets.iamedx.com/images/projects/${encodeURIComponent(TWENTY_THIRD_PROJECT_CDN_FOLDER)}/${encodeURIComponent(fileName)}`;
+const TWENTY_THIRD_PROJECT_COVER = twentyThirdCdn("h1.jpg");
+const TWENTY_THIRD_PROJECT_HOVER_STILLS = [
+  twentyThirdCdn("h1.jpg"),
+  twentyThirdCdn("h2.jpg"),
+  twentyThirdCdn("h3.jpg"),
+] as [string, string, string];
+/** Case detail first-screen still */
+const TWENTY_THIRD_PROJECT_HERO = twentyThirdCdn("hero.jpg");
+const TWENTY_THIRD_PROJECT_STILL = (fileName: string, alt: string) => ({
+  src: twentyThirdCdn(fileName),
+  alt,
+});
+/** Detail gallery: 1l|1r → 2l|2r → 3l|3r → video last */
+const TWENTY_THIRD_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    TWENTY_THIRD_PROJECT_STILL("1l.jpg", "Dragon Age Varric Pin Set 1L"),
+    TWENTY_THIRD_PROJECT_STILL("1r.jpg", "Dragon Age Varric Pin Set 1R"),
+  ],
+};
+const TWENTY_THIRD_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      TWENTY_THIRD_PROJECT_STILL("2l.jpg", "Dragon Age Varric Pin Set 2L"),
+      TWENTY_THIRD_PROJECT_STILL("2r.jpg", "Dragon Age Varric Pin Set 2R"),
+    ],
+  },
+  {
+    items: [
+      TWENTY_THIRD_PROJECT_STILL("3l.jpg", "Dragon Age Varric Pin Set 3L"),
+      TWENTY_THIRD_PROJECT_STILL("3r.jpg", "Dragon Age Varric Pin Set 3R"),
+    ],
+  },
+];
+const TWENTY_THIRD_PROJECT_END_VIDEO = {
+  primary: twentyThirdCdn("video.mov"),
+  alt: "Dragon Age Varric Pin Set",
+  ratio: "56.25%",
+} as const;
+
+const TWENTY_THIRD_PROJECT_OVERVIEW = [
+  "Varric Tethras is one of the most recognizable companions in the Dragon Age series, known for his charisma, storytelling, and inseparable crossbow, Bianca. This collectible pin set brings together three elements closely associated with Varric—his portrait, Bianca, and his necklace—in a custom display box inspired by his identity and connection to Kirkwall.",
+];
+
+const TWENTY_THIRD_PROJECT_CHALLENGES_BODY = [
+  "The biggest challenge of this project was turning the client’s initial packaging concept into a production-ready structure that could also be reused across future products. The client wanted all three pins mounted on a single backer card, with the pins and character artwork clearly visible through a window when the box was opened. At the same time, they specifically required the window to be completely plastic-free. This ruled out the conventional PET/PVC window solution and required the box structure, window die-line, backer card position, and product mounting method to be reconsidered together so that both the “open-window display” and “plastic-free” requirements could work within one structure. More importantly, the same packaging concept would later be used for other characters and designs, so the solution needed to be repeatable rather than developed for just one product.",
+  "The second challenge came from the thickness of the pins and how the backer card would be supported inside the box. Each pin has a pin post and locking pin back, which creates noticeable thickness behind the card once installed. If a single flat card were placed directly inside the box, the pin backs would push it forward, leaving gaps around the edges and allowing the entire card to shift from side to side. The challenge, therefore, was not simply how to attach the pins to the card, but how to leave enough clearance for the pin backs while keeping the entire display card flat, stable, and securely positioned inside the box, with enough depth to create a more dimensional presentation.",
+];
+
+const TWENTY_THIRD_PROJECT_EXECUTION_BODY = [
+  "The client initially provided a design direction rather than a complete structural solution. To determine how to make it work, I contacted several pin manufacturers I had worked with and shared the client’s requirements for a plastic-free window, single-card display, and gift-box format. I asked them to provide examples of packaging they had previously produced with similar design purposes.",
+  "I collected around 7–8 different structural references, compared their window designs, card-mounting methods, box structures, and production feasibility, and then combined and adapted the most suitable elements into the final packaging structure. Rather than directly copying an existing box style, I used these references to develop a structure specifically around the display experience the client wanted.",
+  "Once the box structure was confirmed, I focused on solving the thickness created by the pin posts and locking pin backs.",
+  "I tested several folding methods and eventually designed the unfolded backer card to be three times the width of the final display area. The center one-third holds and displays the pins, while the remaining one-third on each side folds backward.",
+  "Once folded, the two side sections create depth behind the display surface, effectively turning a single sheet of paperboard into a self-supporting three-dimensional insert. This provides clearance for the locking pin backs while keeping the front display surface flat. It also fills the otherwise empty space between the card and the box, preventing the insert from shifting from side to side without requiring an additional plastic tray.",
+  "I also optimized the spacing at the connection between the lid and the box body. Although this is a small dimensional detail, it directly affects how the box sits when opened and closed. If the spacing is too large, the connecting section pushes upward; if it is too short, the lid cannot settle naturally into position and tends to lift instead of sitting flush with the box.",
+  "To determine the correct spacing, I went directly to a digital prototyping shop and cut multiple die-line variations, tested different paper materials, and adjusted the connection distances through physical prototypes rather than relying only on dimensions on a drawing.",
+  "After multiple rounds of testing, I determined the final dimensions and spacing that allowed the lid to sit naturally and flush with the box without the connecting section pushing upward. When fully opened, the structure could also remain flat. These dimensions later became a structural reference for developing other boxes in the same series.",
+];
+
+const TWENTY_THIRD_PROJECT_IMPACT_BODY = [
+  "The most valuable outcome of this project was turning what I learned through repeated prototyping and testing into two reusable structural solutions for future packaging in the same series.",
+  "One of the key results was a plastic-free window display structure. By refining the window die-line, opening dimensions, and the fit between the window and internal card structure, I was able to keep the products clearly visible while using the paper structure itself for positioning and concealment, eliminating the need for PET/PVC window film.",
+  "This structure could then be reused for similar packaging, reducing the additional testing, assembly requirements, and costs associated with conventional plastic window solutions.",
+];
+
+const TWENTY_THIRD_PROJECT_SPECIAL_THANKS: SpecialThanksEntry[] = [
+  {
+    company: "DPI Merchandising Inc.",
+    names: ["Michelle Wu"],
+  },
+  {
+    company: "Best Link (USA) Corp. Ltd.",
+    names: ["Karyn Leung"],
+  },
+  {
+    company: SGS_CREDIT_COMPANY,
+    names: ["Liu Xinyu"],
+  },
+];
+
+const TWENTY_THIRD_PROJECT_COLLABORATORS: CollaboratorCredits = {
+  names: ["Mr. Zhang"],
+};
+
+/** The Tops Casino Chip only — extra collaborator names */
+const TWENTY_FIFTH_PROJECT_COLLABORATORS: CollaboratorCredits = {
+  names: ["Mr. Zhang", "Fangqiang Xu", "Feng Wang", "Alice"],
+};
+
+/** 「第二十四个项目」— index hover h1–h3; hero.mp4; gallery 1l|1r → 2l|2r → 21|22 → 3l|3m|3r */
+const TWENTY_FOURTH_PROJECT_NAME = "Fallout NCR Ranger Challenge Coin";
+const TWENTY_FOURTH_PROJECT_CDN_FOLDER = TWENTY_FOURTH_PROJECT_NAME;
+const TWENTY_FOURTH_PROJECT_SLUG = projectSlugFromName(
+  TWENTY_FOURTH_PROJECT_NAME,
+);
+const TWENTY_FOURTH_PROJECT_TAGLINE =
+  "A collectible challenge coin inspired by the elite NCR Rangers of Fallout, featuring a high-relief Ranger and the iconic NCR Grizzly in an antique gold finish.";
+/**
+ * Absolute CDN URLs (skip `/__assets` proxy). Long folder name + spaces can
+ * break the rewrite / Image optimizer in local + LAN preview.
+ */
+const twentyFourthCdn = (fileName: string) =>
+  `https://assets.iamedx.com/images/projects/${encodeURIComponent(TWENTY_FOURTH_PROJECT_CDN_FOLDER)}/${encodeURIComponent(fileName)}`;
+const TWENTY_FOURTH_PROJECT_COVER = twentyFourthCdn("h1.jpg");
+const TWENTY_FOURTH_PROJECT_HOVER_STILLS = [
+  twentyFourthCdn("h1.jpg"),
+  twentyFourthCdn("h2.jpg"),
+  twentyFourthCdn("h3.jpg"),
+] as [string, string, string];
+const TWENTY_FOURTH_PROJECT_HERO_VIDEO = twentyFourthCdn("hero.mp4");
+const TWENTY_FOURTH_PROJECT_STILL = (fileName: string, alt: string) => ({
+  src: twentyFourthCdn(fileName),
+  alt,
+});
+/** Detail gallery: 1l|1r → 2l|2r → 21|22 → 3l|3m|3r */
+const TWENTY_FOURTH_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    TWENTY_FOURTH_PROJECT_STILL("1l.jpg", "Fallout NCR Ranger Challenge Coin 1L"),
+    TWENTY_FOURTH_PROJECT_STILL("1r.jpg", "Fallout NCR Ranger Challenge Coin 1R"),
+  ],
+};
+const TWENTY_FOURTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      TWENTY_FOURTH_PROJECT_STILL("2l.jpg", "Fallout NCR Ranger Challenge Coin 2L"),
+      TWENTY_FOURTH_PROJECT_STILL("2r.jpg", "Fallout NCR Ranger Challenge Coin 2R"),
+    ],
+  },
+  {
+    items: [
+      TWENTY_FOURTH_PROJECT_STILL("21.jpg", "Fallout NCR Ranger Challenge Coin 21"),
+      TWENTY_FOURTH_PROJECT_STILL("22.jpg", "Fallout NCR Ranger Challenge Coin 22"),
+    ],
+  },
+  {
+    items: [
+      TWENTY_FOURTH_PROJECT_STILL("3l.jpg", "Fallout NCR Ranger Challenge Coin 3L"),
+      TWENTY_FOURTH_PROJECT_STILL("3m.jpg", "Fallout NCR Ranger Challenge Coin 3M"),
+      TWENTY_FOURTH_PROJECT_STILL("3r.jpg", "Fallout NCR Ranger Challenge Coin 3R"),
+    ],
+  },
+];
+
+const TWENTY_FOURTH_PROJECT_OVERVIEW = [
+  "The Fallout NCR Ranger Challenge Coin was created as a collectible tribute to the elite NCR Rangers of the Fallout universe. Designed around the idea of a token of service to the New California Republic, the coin features a high-relief NCR Ranger on one side and the NCR Grizzly emblem on the other.",
+  "Made from zinc alloy with an antique gold finish, the 50.8 mm coin combines embossed detailing with a substantial 4 mm thickness. It is presented in a velvet-lined display box, giving the finished product the feel of an official military keepsake from within the Fallout world.",
+];
+
+const TWENTY_FOURTH_PROJECT_CHALLENGES_BODY = [
+  "The real challenge of this project was not simply how to make the box, but how to turn the client’s requirement—one standardized box that could be mass-produced while still displaying different content for different products—into a practical manufacturing solution.",
+  "The box dimensions and main structure needed to remain unchanged so the client could estimate the annual demand for coins and produce the boxes in one larger batch to reduce unit costs. However, each coin had its own logo, artwork, and display content, which meant those elements could not all be fixed during the initial production run. I needed to determine which parts of the packaging could be standardized and which parts should remain separate for later customization.",
+  "This required a strong understanding of different packaging and printing processes. For example, the logo and artwork inside the lid and the logo on the exterior required different production approaches, depending on the material, order quantity, graphic requirements, and how frequently the artwork would change. Without understanding these processes, it would have been difficult to explain to the client which elements could be produced in advance and which needed to remain customizable—or to turn the original idea into a cost-efficient, repeatable production system that could support different logos and artwork over time.",
+];
+
+const TWENTY_FOURTH_PROJECT_EXECUTION_BODY = [
+  "I started with color and overall versatility, standardizing the box in solid black. Rather than matching the packaging color individually to each coin, black could work across different IPs, visual styles, and product colors. It also provided a neutral base for adding logos and graphics in different colors later. This allowed the client to produce the same black box in bulk without having to manufacture a new box every time the product theme changed.",
+  "For the logo application, I separated the variable elements and selected different processes based on where they would appear. For logos on the exterior and other areas where the position and dimensions remained consistent, I recommended pad printing as a standardized printing process. Once the printing position, dimensions, and production parameters were established, future versions could follow the same setup and simply change the printing plate for each design instead of redeveloping the entire package.",
+  "For the inside lid, where the artwork could change significantly, use multiple colors, and be required in very small quantities, I avoided conventional mass-production printing. Instead, I designed it as a replaceable display surface. Each product’s artwork, logo, and text could be digitally printed on specialty paper and then applied inside the lid. This kept the cost low even for very small runs, avoided traditional printing MOQ limitations, and allowed much more flexibility for full-color artwork.",
+  "In practice, I divided the packaging into two production systems: mass-produce what stays the same, and customize only what changes. This preserved the customized presentation expected from a collectible product while eliminating the need to develop an entirely new box for every new coin.",
+];
+
+const TWENTY_FOURTH_PROJECT_IMPACT_BODY = [
+  "The project ultimately established a standardized packaging system designed for long-term use across small-batch collectible products. By standardizing the box dimensions, structure, and materials and producing the boxes in larger batches, I was able to push the unit packaging cost as low as possible and eliminate the need to source materials and restart the entire packaging production process for every new coin.",
+  "More importantly, the solution resolved the conflict between packaging standardization and highly customized presentation. The client could estimate the total annual demand for coins and manufacture one batch of standardized boxes in advance, then customize the printed display content according to the specific product being packed.",
+  "As a result, the packaging changed from a one-off cost for each individual project into a repeatable, scalable system that could be purchased in bulk while still supporting customized presentation. It also created a packaging foundation that the client could continue using for future small-batch coin releases.",
+];
+
+/** 「第二十五个项目」— Specialized; hover h1–h3; hero video.mp4; gallery h1 → 2l|2r → 3l|3m|3r */
+const TWENTY_FIFTH_PROJECT_NAME = "Fallout The Tops Casino Chip Collectible Coin";
+const TWENTY_FIFTH_PROJECT_CDN_FOLDER = TWENTY_FIFTH_PROJECT_NAME;
+const TWENTY_FIFTH_PROJECT_SLUG = projectSlugFromName(TWENTY_FIFTH_PROJECT_NAME);
+const TWENTY_FIFTH_PROJECT_TAGLINE =
+  "A premium metal recreation of The Tops casino chip, featuring embossed details, enamel accents, and an antique brass finish, presented in a velvet-lined display box.";
+/**
+ * Absolute CDN URLs (skip `/__assets` proxy). Long folder name + spaces can
+ * break the rewrite / Image optimizer in local + LAN preview.
+ */
+const twentyFifthCdn = (fileName: string) =>
+  `https://assets.iamedx.com/images/projects/${encodeURIComponent(TWENTY_FIFTH_PROJECT_CDN_FOLDER)}/${encodeURIComponent(fileName)}`;
+const TWENTY_FIFTH_PROJECT_COVER = twentyFifthCdn("h1.jpg");
+const TWENTY_FIFTH_PROJECT_HOVER_STILLS = [
+  twentyFifthCdn("h1.jpg"),
+  twentyFifthCdn("h2.jpg"),
+  twentyFifthCdn("h3.jpg"),
+] as [string, string, string];
+const TWENTY_FIFTH_PROJECT_HERO_VIDEO = twentyFifthCdn("video.mp4");
+/** Detail gallery row 1 — user-supplied still (same file as hover h1) */
+const TWENTY_FIFTH_PROJECT_GALLERY_LEAD = twentyFifthCdn("h1.jpg");
+const TWENTY_FIFTH_PROJECT_STILL = (fileName: string, alt: string) => ({
+  src: twentyFifthCdn(fileName),
+  alt,
+});
+/** Detail gallery: h1 → 2l|2r → 3l|3m|3r */
+const TWENTY_FIFTH_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    TWENTY_FIFTH_PROJECT_STILL(
+      "2l.jpg",
+      "Fallout The Tops Casino Chip Collectible Coin 2L",
+    ),
+    TWENTY_FIFTH_PROJECT_STILL(
+      "2r.jpg",
+      "Fallout The Tops Casino Chip Collectible Coin 2R",
+    ),
+  ],
+};
+const TWENTY_FIFTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      TWENTY_FIFTH_PROJECT_STILL(
+        "3l.jpg",
+        "Fallout The Tops Casino Chip Collectible Coin 3L",
+      ),
+      TWENTY_FIFTH_PROJECT_STILL(
+        "3m.jpg",
+        "Fallout The Tops Casino Chip Collectible Coin 3M",
+      ),
+      TWENTY_FIFTH_PROJECT_STILL(
+        "3r.jpg",
+        "Fallout The Tops Casino Chip Collectible Coin 3R",
+      ),
+    ],
+  },
+];
+
+const TWENTY_FIFTH_PROJECT_OVERVIEW = [
+  "The Tops Casino Chip is an officially licensed collectible inspired by the iconic casino from the Fallout universe. Released in 2022 as a limited-production item, the piece recreates The Tops’ red betting chip as a premium metal collectible, combining embossed details, red and black enamel, and an antique brass finish. It comes in a velvet-lined presentation box designed for display and collection.",
+];
+
+const TWENTY_FIFTH_PROJECT_CHALLENGES_BODY = [
+  "The client had one very specific requirement for the presentation box: every visible surface had to be black. The exterior, interior, corners, recessed areas, and folded edges all needed to appear as one continuous color so that the red casino chip would immediately stand out when the box was opened.",
+  "This sounds simple, but it is difficult to achieve with a traditional rigid lid-and-base box. Standard wrapping papers can crack or expose their lighter substrate when folded tightly around internal edges and recessed areas. One common solution is to cover these areas with additional pieces of material, but that creates visible joints and overlapping edges. The box may technically become black, but it no longer looks like it was made from one continuous surface.",
+  "The challenge was therefore not simply choosing black paper. I needed to find a material and wrapping method that could survive the folds while allowing the box to remain visually continuous from the outside all the way into the recessed interior.",
+];
+
+const TWENTY_FIFTH_PROJECT_EXECUTION_BODY = [
+  "I wanted to avoid using multiple pieces of wrapping material to hide exposed areas, because every additional piece would introduce another seam. I therefore kept the construction based around one continuous wrapping material and focused the development work on finding a material flexible enough to handle the difficult folds.",
+  "After testing different materials, I selected a high-flexibility synthetic paper with much greater toughness and elasticity than conventional paper. Its polymer-like properties allowed it to stretch and conform around corners and folded areas without cracking as easily.",
+  "I then worked with the factory to print the material in a consistent deep black and wrap it across the critical edges and recessed areas. This allowed the exterior, interior and folded surfaces to visually connect without the obvious white or grey-board exposure that can appear with conventional wrapping materials.",
+  "The result was the continuous all-black appearance visible in the final box. Instead of using contrasting materials or additional patches to conceal difficult areas, the box reads visually as one complete black structure.",
+  "I also repeatedly adjusted the dimensional tolerance between the lid and base. A standard rigid box can easily become too loose and drop open with almost no resistance, or too tight and become difficult to separate.",
+  "Through multiple sample adjustments, I refined the fit until the lid moved with controlled resistance during opening and closing. The goal was similar to the slow, deliberate feel associated with premium consumer-electronics packaging: enough friction to communicate precision and quality, without making the box difficult to open.",
+];
+
+const TWENTY_FIFTH_PROJECT_IMPACT_BODY = [
+  "The final box achieved something that is difficult to execute consistently with a conventional rigid lid-and-base construction: a visually continuous all-black finish across the exterior, interior, folded edges and recessed areas without relying on obvious multi-piece patching.",
+  "Combined with the carefully tuned lid resistance, what could have been a standard presentation box became part of the product experience itself. The uninterrupted black surface created a strong contrast against the red and antique-brass casino chip, while the controlled opening feel made the presentation feel substantially more premium.",
+  "The finished collectible received strong feedback from the fan community. Most customers would never notice the material and wrapping decisions behind the box—and that was exactly the point: the manufacturing problem disappeared, leaving only a clean, unified presentation of the product.",
+];
+
 /** Default / home lead — End-to-End featured (Dragon Age Writing Bundle) */
 export const projectsFeaturedLead: ProjectsFeaturedLead = {
   slug: SECOND_PROJECT_SLUG,
@@ -3542,6 +3895,150 @@ export const projects: Project[] = [
     impactBody: TWENTY_FIRST_PROJECT_IMPACT_BODY,
     client: "Dragon Age",
     year: 2024,
+    featured: false,
+    challenge: "",
+    result: "",
+  },
+  {
+    slug: TWENTY_SECOND_PROJECT_SLUG,
+    title: TWENTY_SECOND_PROJECT_NAME,
+    materials: ["wood"],
+    country: "global",
+    ips: ["dragon-age"],
+    tags: involvementTags("end-to-end"),
+    summary: TWENTY_SECOND_PROJECT_TAGLINE,
+    tagline: TWENTY_SECOND_PROJECT_TAGLINE,
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "end-to-end",
+    coverImage: TWENTY_SECOND_PROJECT_COVER,
+    cardCoverImage: TWENTY_SECOND_PROJECT_COVER,
+    coverHoverStills: TWENTY_SECOND_PROJECT_HOVER_STILLS,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    heroImage: TWENTY_SECOND_PROJECT_HERO,
+    galleryLeadImage: TWENTY_SECOND_PROJECT_GALLERY_LEAD,
+    afterCoverStills: TWENTY_SECOND_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: TWENTY_SECOND_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    endVideo: TWENTY_SECOND_PROJECT_END_VIDEO,
+    specialThanks: WOODEN_BOX_SPECIAL_THANKS,
+    collaborators: WOODEN_BOX_COLLABORATORS,
+    overview: TWENTY_SECOND_PROJECT_OVERVIEW,
+    challengesBody: TWENTY_SECOND_PROJECT_CHALLENGES_BODY,
+    executionBody: TWENTY_SECOND_PROJECT_EXECUTION_BODY,
+    impactBody: TWENTY_SECOND_PROJECT_IMPACT_BODY,
+    client: "Dragon Age",
+    year: 2024,
+    featured: false,
+    challenge: "",
+    result: "",
+  },
+  {
+    slug: TWENTY_THIRD_PROJECT_SLUG,
+    title: TWENTY_THIRD_PROJECT_NAME,
+    materials: ["paper"],
+    country: "global",
+    ips: ["dragon-age"],
+    tags: involvementTags("end-to-end"),
+    summary: TWENTY_THIRD_PROJECT_TAGLINE,
+    tagline: TWENTY_THIRD_PROJECT_TAGLINE,
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "end-to-end",
+    coverImage: TWENTY_THIRD_PROJECT_COVER,
+    cardCoverImage: TWENTY_THIRD_PROJECT_COVER,
+    coverHoverStills: TWENTY_THIRD_PROJECT_HOVER_STILLS,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    heroImage: TWENTY_THIRD_PROJECT_HERO,
+    afterCoverStills: TWENTY_THIRD_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: TWENTY_THIRD_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    endVideo: TWENTY_THIRD_PROJECT_END_VIDEO,
+    specialThanks: TWENTY_THIRD_PROJECT_SPECIAL_THANKS,
+    collaborators: TWENTY_THIRD_PROJECT_COLLABORATORS,
+    overview: TWENTY_THIRD_PROJECT_OVERVIEW,
+    challengesBody: TWENTY_THIRD_PROJECT_CHALLENGES_BODY,
+    executionBody: TWENTY_THIRD_PROJECT_EXECUTION_BODY,
+    impactBody: TWENTY_THIRD_PROJECT_IMPACT_BODY,
+    client: "Dragon Age",
+    year: 2024,
+    featured: false,
+    challenge: "",
+    result: "",
+  },
+  {
+    slug: TWENTY_FOURTH_PROJECT_SLUG,
+    title: TWENTY_FOURTH_PROJECT_NAME,
+    materials: ["paper"],
+    country: "global",
+    ips: ["fallout"],
+    tags: involvementTags("specialized"),
+    summary: TWENTY_FOURTH_PROJECT_TAGLINE,
+    tagline: TWENTY_FOURTH_PROJECT_TAGLINE,
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "specialized",
+    coverImage: TWENTY_FOURTH_PROJECT_COVER,
+    cardCoverImage: TWENTY_FOURTH_PROJECT_COVER,
+    coverHoverStills: TWENTY_FOURTH_PROJECT_HOVER_STILLS,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    heroVideo: TWENTY_FOURTH_PROJECT_HERO_VIDEO,
+    afterCoverStills: TWENTY_FOURTH_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: TWENTY_FOURTH_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    specialThanks: TWENTY_THIRD_PROJECT_SPECIAL_THANKS,
+    collaborators: TWENTY_THIRD_PROJECT_COLLABORATORS,
+    overview: TWENTY_FOURTH_PROJECT_OVERVIEW,
+    challengesBody: TWENTY_FOURTH_PROJECT_CHALLENGES_BODY,
+    executionBody: TWENTY_FOURTH_PROJECT_EXECUTION_BODY,
+    impactBody: TWENTY_FOURTH_PROJECT_IMPACT_BODY,
+    client: "Fallout",
+    year: 2024,
+    featured: false,
+    challenge: "",
+    result: "",
+  },
+  {
+    slug: TWENTY_FIFTH_PROJECT_SLUG,
+    title: TWENTY_FIFTH_PROJECT_NAME,
+    materials: ["paper"],
+    country: "global",
+    ips: ["fallout"],
+    tags: involvementTags("specialized"),
+    summary: TWENTY_FIFTH_PROJECT_TAGLINE,
+    tagline: TWENTY_FIFTH_PROJECT_TAGLINE,
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "specialized",
+    coverImage: TWENTY_FIFTH_PROJECT_COVER,
+    cardCoverImage: TWENTY_FIFTH_PROJECT_COVER,
+    coverHoverStills: TWENTY_FIFTH_PROJECT_HOVER_STILLS,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    heroVideo: TWENTY_FIFTH_PROJECT_HERO_VIDEO,
+    galleryLeadImage: TWENTY_FIFTH_PROJECT_GALLERY_LEAD,
+    afterCoverStills: TWENTY_FIFTH_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: TWENTY_FIFTH_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    specialThanks: TWENTY_THIRD_PROJECT_SPECIAL_THANKS,
+    collaborators: TWENTY_FIFTH_PROJECT_COLLABORATORS,
+    overview: TWENTY_FIFTH_PROJECT_OVERVIEW,
+    challengesBody: TWENTY_FIFTH_PROJECT_CHALLENGES_BODY,
+    executionBody: TWENTY_FIFTH_PROJECT_EXECUTION_BODY,
+    impactBody: TWENTY_FIFTH_PROJECT_IMPACT_BODY,
+    client: "Fallout",
+    year: 2022,
     featured: false,
     challenge: "",
     result: "",
