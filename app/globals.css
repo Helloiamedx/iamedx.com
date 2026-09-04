@@ -5885,7 +5885,8 @@ html[data-hero-copy-ready="1"] .hero__content {
 }
 /* Background / Outcome labels — same face as body, +2px */
 .collection-detail__entry-section-title {
-  margin: 0 0 0.85rem;
+  /* One blank body line under the chapter label */
+  margin: 0 0 1.3rem;
   font-family: var(--font-sans);
   font-size: calc(1rem + 2px);
   font-weight: 400;
@@ -9376,7 +9377,8 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
 }
 
 .project-case-demo__panel-title {
-  margin: 0 0 0.85rem;
+  /* One blank body line under the chapter label */
+  margin: 0 0 1.3rem;
   font-family: var(--font-desc);
   font-size: calc(1.375rem - 3px);
   font-weight: 600;
@@ -9388,10 +9390,10 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
 }
 
 .project-case-demo__panel-subhead {
-  margin: 1.35rem 0 0.55rem;
-  /* Same face as body copy — black, +2px */
+  margin: 1.35rem 0 1rem;
+  /* Same face + size as body — black only */
   font-family: var(--font-sans);
-  font-size: calc(1rem + 2px);
+  font-size: 1rem;
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.3;
@@ -9636,8 +9638,8 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   }
 
   .project-case-demo__panel-subhead {
-    /* Mobile body is 1rem − 1px; subhead stays +2px over body */
-    font-size: calc(1rem + 1px);
+    /* Match mobile body size */
+    font-size: calc(1rem - 1px);
     color: #0a0a0a;
   }
 

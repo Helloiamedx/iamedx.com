@@ -72,6 +72,7 @@ const CYBERPUNK_BANNER_SLUG = projectSlugFromName("Cyberpunk 2077 Systems Banner
 const DRAGON_AGE_GREY_WARDENS_BANNER_SLUG = projectSlugFromName(
   "Dragon Age Grey Wardens Banner",
 );
+const WITCHER_BANNER_SLUG = projectSlugFromName("The Witcher Banner");
 const MASS_EFFECT_TALI_SLUG = projectSlugFromName("Mass Effect Tali Companion Bundle");
 const SKYRIM_MESSENGER_BAG_SLUG = projectSlugFromName(
   "Skyrim Dragon Hunter Messenger Bag",
@@ -146,6 +147,13 @@ export const projectCollections: ProjectCollection[] = [
       panelFromProjectImages("31.jpg", "32.jpg"),
     ],
     entries: [
+      {
+        slug: WITCHER_BANNER_SLUG,
+        gameTitle: "The Witcher",
+        gameInfo:
+          "A dark fantasy action RPG series following Geralt of Rivia — monster hunting, political intrigue, and choices that shape the Continent.",
+        testimonial: COLLECTION_TESTIMONIAL_PLACEHOLDER,
+      },
       {
         slug: CYBERPUNK_BANNER_SLUG,
         gameTitle: "Cyberpunk 2077",

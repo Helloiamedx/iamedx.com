@@ -2805,6 +2805,117 @@ const TWENTY_FOURTH_PROJECT_IMPACT_BODY = [
   "As a result, the packaging changed from a one-off cost for each individual project into a repeatable, scalable system that could be purchased in bulk while still supporting customized presentation. It also created a packaging foundation that the client could continue using for future small-batch coin releases.",
 ];
 
+/** 「第二十六个项目」— End-to-End; The Witcher Banner (CDN folder keeps Pin Banner) */
+const TWENTY_SIXTH_PROJECT_NAME = "The Witcher Banner";
+/** CDN folder — keep exact (assets uploaded under Pin Banner name) */
+const TWENTY_SIXTH_PROJECT_CDN_FOLDER = "The Witcher Pin Banner";
+const TWENTY_SIXTH_PROJECT_SLUG = projectSlugFromName(TWENTY_SIXTH_PROJECT_NAME);
+const TWENTY_SIXTH_PROJECT_TAGLINE =
+  "A Wolf School-inspired patch display banner featuring a Loop Velcro panel, embroidered White Wolf emblem, and sculpted wolf-head end caps.";
+/**
+ * Absolute CDN URLs (skip `/__assets` proxy). Long folder name + spaces can
+ * break the rewrite / Image optimizer in local + LAN preview.
+ */
+const twentySixthCdn = (fileName: string) =>
+  `https://assets.iamedx.com/images/projects/${encodeURIComponent(TWENTY_SIXTH_PROJECT_CDN_FOLDER)}/${encodeURIComponent(fileName)}`;
+const TWENTY_SIXTH_PROJECT_COVER = twentySixthCdn("h1.jpg");
+const TWENTY_SIXTH_PROJECT_COVER_VIDEO = twentySixthCdn("video.mp4");
+const TWENTY_SIXTH_PROJECT_HOVER_STILLS = [
+  twentySixthCdn("h1.jpg"),
+  twentySixthCdn("h2.jpg"),
+  twentySixthCdn("h3.jpg"),
+] as [string, string, string];
+/** Case detail first-screen hero */
+const TWENTY_SIXTH_PROJECT_HERO_VIDEO = twentySixthCdn("hero.mp4");
+const TWENTY_SIXTH_PROJECT_STILL = (fileName: string, alt: string) => ({
+  src: twentySixthCdn(fileName),
+  alt,
+});
+/** Detail gallery row 1 — 1L | 1R */
+const TWENTY_SIXTH_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    TWENTY_SIXTH_PROJECT_STILL("1l.jpg", "The Witcher Banner 1L"),
+    TWENTY_SIXTH_PROJECT_STILL("1r.jpg", "The Witcher Banner 1R"),
+  ],
+};
+/** Detail gallery: 2L|2M|2R → 4L|4R → 3L|3M|3R */
+const TWENTY_SIXTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      TWENTY_SIXTH_PROJECT_STILL("2l.jpg", "The Witcher Banner 2L"),
+      TWENTY_SIXTH_PROJECT_STILL("2m.jpg", "The Witcher Banner 2M"),
+      TWENTY_SIXTH_PROJECT_STILL("2r.jpg", "The Witcher Banner 2R"),
+    ],
+  },
+  {
+    items: [
+      TWENTY_SIXTH_PROJECT_STILL("4l.jpg", "The Witcher Banner 4L"),
+      TWENTY_SIXTH_PROJECT_STILL("4r.jpg", "The Witcher Banner 4R"),
+    ],
+    /* Native 1600×900 | 800×900 — same height; column share must match widths */
+    columnWidths: [1600, 800],
+  },
+  {
+    items: [
+      TWENTY_SIXTH_PROJECT_STILL("11.jpg", "The Witcher Banner 11"),
+      TWENTY_SIXTH_PROJECT_STILL("12.jpg", "The Witcher Banner 12"),
+    ],
+  },
+  {
+    items: [
+      TWENTY_SIXTH_PROJECT_STILL("3l.jpg", "The Witcher Banner 3L"),
+      TWENTY_SIXTH_PROJECT_STILL("3m.jpg", "The Witcher Banner 3M"),
+      TWENTY_SIXTH_PROJECT_STILL("3r.jpg", "The Witcher Banner 3R"),
+    ],
+  },
+];
+/** Detail gallery — full-width clips under the stills */
+const TWENTY_SIXTH_PROJECT_AFTER_COVER_VIDEOS = [
+  {
+    primary: twentySixthCdn("video1.mp4"),
+    alt: "The Witcher Banner process 1",
+    ratio: "56.25%",
+  },
+  {
+    primary: twentySixthCdn("video2.mp4"),
+    alt: "The Witcher Banner process 2",
+    ratio: "56.25%",
+  },
+] as const;
+
+const TWENTY_SIXTH_PROJECT_OVERVIEW = [
+  "Inspired by The Witcher’s Wolf School, this banner was designed as both a decorative display piece and a functional patch organizer for fans. It combines a Loop Velcro panel for customizable patch display with the iconic White Wolf emblem, while two molded wolf-head end caps reinforce the visual identity of the Wolf School.",
+  "Made from felt, PU, and zinc alloy, the design brings together textile, embroidery, and molded metal components in one collectible display piece.",
+];
+
+const TWENTY_SIXTH_PROJECT_CHALLENGES_BODY = [
+  "The biggest challenge was the assembly between the wolf-head end caps and the hanging rod.",
+  "The wolf heads on both ends were designed to be removable, which meant the fit between the two parts had to be controlled very precisely. The wolf heads needed to slide onto the rod easily, while still maintaining enough grip and stability to prevent them from becoming loose, rotating, or tilting after assembly. Especially after packaging and transportation, I did not want the customer to open the product for the first time and find a wolf head already sitting crooked. This seemingly small connection point therefore required very careful control of dimensions, tolerances, and assembly stability.",
+  "Another challenge was that I needed to understand the dimensions and spatial relationships of virtually every part of the product. The wolf heads, hanging rod, mounting loops over the rod, and the Banner itself all came together within a very limited space at the top. The width, spacing, position, and processing parameters of each component could affect the others.",
+  "This meant I could not simply send the original artwork to the factories. I needed to research and test where each processing point should be located, what its exact dimensions should be, and how much space should be left between components, then provide accurate specifications to the different factories involved. Only when all these dimensional relationships were properly controlled could the final assembly avoid looking crowded or messy and instead create clear visual depth and hierarchy.",
+  "The premium feel did not come from one particularly expensive material. It came from getting all these small dimensions, spacing, and assembly details right.",
+];
+
+const TWENTY_SIXTH_PROJECT_EXECUTION_BODY = [
+  "Wolf-Head and Rod Connection",
+  "I first worked closely with the metal hardware factory to define the structural specifications of the wolf heads. Their overall size was limited by the proportions of the Banner, so I could not simply make them larger to make assembly easier. I had to balance the rod diameter, the width of the Banner, and the visual proportions of the wolf heads while confirming what the factory could realistically manufacture.",
+  "From there, I defined the inner diameter, outer diameter, wall thickness, insertion depth, and corresponding rod dimensions at the connection point. These specifications could not be determined independently. I had to consider both the factory's manufacturing limitations and the final assembly requirements, then adjust the wolf-head structure accordingly.",
+  "To solve the tolerance issue, I chose not to rely on a direct rigid fit between the metal wolf heads and the rod. Instead, I added an elastic rubber sleeve to each end of the rod. Its flexibility helped absorb the unavoidable dimensional variations between the two components. This prevented the fit from becoming too tight for easy installation while still providing enough grip to keep the wolf heads stable and prevent them from rotating or tilting.",
+  "Turning One Design Drawing into Production Specifications",
+  "The client initially provided only one complete design drawing and the overall product dimensions. There were no detailed production dimensions for the wolf heads, rod, mounting loops, hanging cords, or other individual components.",
+  "I therefore had to build those specifications myself. I first estimated the dimensions of each element based on the overall proportions, then refined them through prototyping and physical testing. This allowed me to determine the appropriate wolf-head size, rod length, mounting-loop positions, spacing between the hanging cords, and the clearance required when multiple components came together.",
+  "Once these dimensions were confirmed, I also modified the artwork according to the actual materials and manufacturing processes available at each factory, gradually turning a visual design into accurate production data that each supplier could work from.",
+  "Because the product combined felt, PU, sewing, embroidery, metal hardware, and final assembly, its components were produced by multiple factories rather than a single supplier. I had to transfer dimensions and manufacturing limitations from one factory to another, then continue adjusting the specifications based on physical samples until every component could be assembled correctly.",
+  "In the end, I was not simply defining a few dimensions. I was building a complete set of production specifications that allowed multiple factories to manufacture different components to the same final product standard.",
+];
+
+const TWENTY_SIXTH_PROJECT_IMPACT_BODY = [
+  "The biggest outcome of this project for me was that it redefined how I understood what a Banner could be.",
+  "Before this project, I mainly thought of banners as traditional fabric flags. This was the first time I realized that felt, PU, embroidery, metal hardware, and sewn structures could be combined to create a completely different type of Banner. Instead of simply being a printed piece of fabric, it could become a more dimensional collectible display through the integration of different materials, structures, and manufacturing processes.",
+  "This project was also one of the first times I brought material selection, sewing processes, artwork modification, metal hardware selection and processing, assembly, and final packaging together within a single product development process. It gave me much more confidence when approaching unfamiliar Banner designs, flags, and even product structures I had never worked with before. I knew I could break them down, understand the materials and processes involved, and find a practical way to manufacture them.",
+  "More importantly, that confidence later carried over into the development of Dragon Age IP Banners. During the prototyping stage of a later Dragon Age Banner project, I photographed the finished sample and sent it to the client. They were impressed by how well the design had translated into a physical product. The sample gave the client greater confidence in this product format and encouraged them to continue developing Banner products for the Dragon Age IP.",
+];
+
 /** 「第二十五个项目」— Specialized; hover h1–h3; hero video.mp4; gallery h1 → 2l|2r → 3l|3m|3r */
 const TWENTY_FIFTH_PROJECT_NAME = "Fallout The Tops Casino Chip Collectible Coin";
 const TWENTY_FIFTH_PROJECT_CDN_FOLDER = TWENTY_FIFTH_PROJECT_NAME;
@@ -4039,6 +4150,43 @@ export const projects: Project[] = [
     impactBody: TWENTY_FIFTH_PROJECT_IMPACT_BODY,
     client: "Fallout",
     year: 2022,
+    featured: false,
+    challenge: "",
+    result: "",
+  },
+  {
+    slug: TWENTY_SIXTH_PROJECT_SLUG,
+    title: TWENTY_SIXTH_PROJECT_NAME,
+    materials: ["fabric"],
+    country: "global",
+    ips: ["the-witcher"],
+    tags: involvementTags("end-to-end"),
+    summary: TWENTY_SIXTH_PROJECT_TAGLINE,
+    tagline: TWENTY_SIXTH_PROJECT_TAGLINE,
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "end-to-end",
+    coverImage: TWENTY_SIXTH_PROJECT_COVER,
+    coverVideo: TWENTY_SIXTH_PROJECT_COVER_VIDEO,
+    coverHoverStills: TWENTY_SIXTH_PROJECT_HOVER_STILLS,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    heroVideo: TWENTY_SIXTH_PROJECT_HERO_VIDEO,
+    afterCoverStills: TWENTY_SIXTH_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: TWENTY_SIXTH_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    afterCoverVideos: [...TWENTY_SIXTH_PROJECT_AFTER_COVER_VIDEOS],
+    /* Same credits as Cyberpunk / Grey Wardens banners */
+    specialThanks: TWELFTH_PROJECT_SPECIAL_THANKS,
+    collaborators: TWELFTH_PROJECT_COLLABORATORS,
+    overview: TWENTY_SIXTH_PROJECT_OVERVIEW,
+    challengesBody: TWENTY_SIXTH_PROJECT_CHALLENGES_BODY,
+    executionBody: TWENTY_SIXTH_PROJECT_EXECUTION_BODY,
+    impactBody: TWENTY_SIXTH_PROJECT_IMPACT_BODY,
+    client: "The Witcher",
+    year: 2023,
     featured: false,
     challenge: "",
     result: "",
