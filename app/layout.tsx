@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { SmoothScroll } from "@/components/SmoothScroll";
+import { VideoLoadGateReset } from "@/components/VideoLoadGateReset";
 import { asset } from "@/lib/assets";
 import "./globals.css";
 
@@ -11,7 +12,7 @@ const favicon = asset("/brand/favicon.svg");
 
 /**
  * Home + first visit only. Skip if already seen (localStorage) or not `/`.
- * Site stays painted under the veil — no visibility:hidden flash.
+ * Paints `edx-loading` so CSS can cover the page before the branded loader mounts.
  */
 const EDX_LOADING_BOOT = `(function(){var p=location.pathname;try{if(localStorage.getItem("edx-intro-seen-v2")==="1")return;}catch(e){}if(p!=="/"&&p!=="")return;document.documentElement.classList.add("edx-loading");})();`;
 
@@ -95,6 +96,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {EDX_LOADING_BOOT}
         </Script>
         <SmoothScroll>
+          <VideoLoadGateReset />
           <Header />
           <div className="site-main">{children}</div>
           <div className="site-end">

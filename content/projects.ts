@@ -318,8 +318,10 @@ export type Project = {
     primary: string;
     fallback?: string;
     alt: string;
-    /** CSS padding-bottom ratio; default 16:9 */
+    /** CSS padding-bottom ratio; default 16:9 — ignored when `nativeAspect` */
     ratio?: string;
+    /** Size frame to the file’s intrinsic width/height */
+    nativeAspect?: boolean;
   };
   year: number;
   client?: string;
@@ -1343,10 +1345,11 @@ const TENTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
     ratio: TENTH_PROJECT_LANDSCAPE_RATIO,
   },
 ];
-/** Detail gallery — always last row */
+/** Detail gallery — always last row (intrinsic video size, no forced frame) */
 const TENTH_PROJECT_END_VIDEO = {
   primary: projectCoverFromName(TENTH_PROJECT_NAME, "video3.mp4"),
   alt: "JD Fenix bike statue clip",
+  nativeAspect: true,
 };
 const TENTH_PROJECT_TAGLINE =
   "A Gears of War 4 Collector’s Edition statue featuring JD Fenix with his armored bike, combining character, vehicle, and battlefield weathering into one detailed combat scene.";

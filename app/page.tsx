@@ -33,11 +33,9 @@ export default function HomePage() {
     getAllInsights().filter((insight) => insight.slug !== featuredInsight?.slug),
   ).slice(0, 2);
 
-  /* Home intro waits for these — hero + linked card/cover/footer videos */
+  /* Intro waits for in-page players only (hero + insight covers + footer) */
   const introVideoSrcs = [
     HERO_VIDEO_SRC,
-    projectsFeaturedLead.coverVideo,
-    ...selectedProjects.map((project) => project.coverVideo),
     featuredInsight && isInsightVideoCover(featuredInsight.coverImage)
       ? featuredInsight.coverImage
       : undefined,

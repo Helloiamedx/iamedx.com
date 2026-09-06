@@ -15,6 +15,12 @@ import {
   setHeroFlag,
   whenHeroFlag,
 } from "@/lib/heroSequence";
+import { markHomeMediaReady } from "@/lib/homeMediaGate";
+import {
+  VIDEO_LOAD_PRIORITY,
+  unlockVideosAfterHero,
+  useVideoLoadSlot,
+} from "@/lib/videoLoadQueue";
 
 /** Beat after video pops in — then headline may appear */
 const COPY_AFTER_READY_MS = 420;
@@ -25,22 +31,29 @@ function isSiteIntroActive() {
 
 /**
  * Home hero video.
- * First visit: site intro covers the wait — video buffers under the veil,
- * then reveals with the intro (no second mark loader).
- * Return visit: stroke mark cover as elsewhere.
+ * First visit: site intro covers the wait — video buffers under the veil.
+ * Return visit: stroke cover; takes load-queue priority so it isn’t blocked.
  */
 export function HeroBackgroundVideo() {
+  const rootRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [src, setSrc] = useState<string | null>(null);
   const [coverReady, setCoverReady] = useState(false);
   const [revealed, setRevealed] = useState(false);
-  /** First paint under site intro — skip VideoLoadingCover entirely */
   const [underIntro] = useState(() =>
     typeof document !== "undefined" ? isSiteIntroActive() : false,
   );
+  /* Under intro: bypass queue (intro gate needs hero bytes). Else: top of page. */
+  const { allowed, releaseSlot } = useVideoLoadSlot(
+    HERO_VIDEO_SRC,
+    Boolean(src) && !underIntro,
+    VIDEO_LOAD_PRIORITY.hero,
+    rootRef,
+  );
+  const canLoad = Boolean(src) && (underIntro || allowed);
   const { progress, ready: playable } = useVideoLoadProgress(
     videoRef,
-    src ?? "",
+    canLoad && src ? src : "",
   );
 
   useEffect(() => {
@@ -66,16 +79,13 @@ export function HeroBackgroundVideo() {
     };
   }, []);
 
-  /* Gate site intro on buffer */
   useEffect(() => {
     if (!playable || !src) return;
     setHeroFlag(HERO_VIDEO_PLAYABLE_ATTR);
+    markHomeMediaReady(HERO_VIDEO_SRC);
+    unlockVideosAfterHero();
   }, [playable, src]);
 
-  /*
-   * Under intro: start playback as soon as buffered (still under black veil).
-   * Copy waits until the veil is gone.
-   */
   useEffect(() => {
     if (!underIntro || !playable || !src || revealed) return;
     const el = videoRef.current;
@@ -106,7 +116,6 @@ export function HeroBackgroundVideo() {
     return () => obs.disconnect();
   }, [underIntro, revealed]);
 
-  /* Return visit (no intro): stroke cover after playable + chrome */
   useEffect(() => {
     if (underIntro || !playable || !src || coverReady) return;
     const ac = new AbortController();
@@ -138,43 +147,41 @@ export function HeroBackgroundVideo() {
   }, [underIntro, revealed]);
 
   const handleCoverDone = () => {
+    releaseSlot();
     setRevealed(true);
     setHeroFlag(HERO_VIDEO_ATTR);
   };
 
+  useEffect(() => {
+    if (canLoad && coverReady) releaseSlot();
+  }, [canLoad, coverReady, releaseSlot]);
+
   if (!src) {
-    return (
-      <div className="hero__video-wrap">
-      {underIntro ? null : (
-          <VideoLoadingCover
-            progress={0}
-            ready={false}
-            cacheKey={HERO_VIDEO_SRC}
-          />
-        )}
-      </div>
-    );
+    return <div ref={rootRef} className="hero__video-wrap" />;
   }
 
   return (
-    <div className="hero__video-wrap">
-      <ProtectedVideo
-        ref={videoRef}
-        className={`hero__video${revealed ? " is-loaded" : ""}`}
-        src={src}
-        preload="auto"
-        autoPlay={false}
-        // @ts-expect-error — fetchPriority on HTMLVideoElement (Chromium+)
-        fetchPriority="high"
-      />
-      {underIntro ? null : (
+    <div ref={rootRef} className="hero__video-wrap">
+      {canLoad ? (
+        <ProtectedVideo
+          ref={videoRef}
+          className={`hero__video${revealed ? " is-loaded" : ""}`}
+          src={src}
+          preload="auto"
+          autoPlay={false}
+          // @ts-expect-error — fetchPriority on HTMLVideoElement (Chromium+)
+          fetchPriority="high"
+        />
+      ) : null}
+      {underIntro || revealed ? null : canLoad ? (
         <VideoLoadingCover
+          active
           progress={progress}
           ready={coverReady}
           cacheKey={src}
           onDone={handleCoverDone}
         />
-      )}
+      ) : null}
     </div>
   );
 }

@@ -6,7 +6,12 @@ import {
   VideoLoadingCover,
   useVideoLoadProgress,
 } from "@/components/VideoLoadingCover";
+import { markHomeMediaReady } from "@/lib/homeMediaGate";
 import { useVideoRevealGate } from "@/lib/videoLoadMemory";
+import {
+  VIDEO_LOAD_PRIORITY,
+  useVideoLoadSlot,
+} from "@/lib/videoLoadQueue";
 import { cn } from "@/lib/utils";
 
 type CoverLoopVideoProps = {
@@ -16,9 +21,15 @@ type CoverLoopVideoProps = {
   ariaLabel?: string;
 };
 
+function isHomeIntroLoading() {
+  return document.documentElement.classList.contains("edx-loading");
+}
+
 /**
- * Index / Related card cover loop — stroke→fill mark until settle, then mute autoplay.
- * Starts the network load when near the viewport (keeps mobile tappable).
+ * Index / Related card cover loop.
+ * Loads as soon as the post-hero gate opens (not wait-for-scroll).
+ * When playable: play immediately. Mark loader only if still on-screen and
+ * not yet revealed; off-screen clips unveil + play without waiting for scroll.
  */
 export function CoverLoopVideo({
   src,
@@ -27,29 +38,37 @@ export function CoverLoopVideo({
 }: CoverLoopVideoProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [active, setActive] = useState(false);
-  const loadKey = active ? src : "";
+  const [underIntro] = useState(() =>
+    typeof document !== "undefined" ? isHomeIntroLoading() : false,
+  );
+  const [nearView, setNearView] = useState(underIntro);
+  const { allowed, releaseSlot } = useVideoLoadSlot(
+    src,
+    true,
+    VIDEO_LOAD_PRIORITY.coverCard,
+    rootRef,
+  );
+  const loadKey = allowed ? src : "";
   const { progress, ready } = useVideoLoadProgress(videoRef, loadKey);
-  const { revealed, instant, onCoverDone } = useVideoRevealGate(src);
+  const { revealed, onCoverDone } = useVideoRevealGate(src);
+  const showMark = Boolean(allowed && nearView && !revealed && !underIntro);
 
   useEffect(() => {
+    if (underIntro) {
+      setNearView(true);
+      return;
+    }
+
     const root = rootRef.current;
     if (!root) return;
 
-    const activate = () => setActive(true);
-
-    /* Home intro veil — load every cover now, not after scroll */
-    if (document.documentElement.classList.contains("edx-loading")) {
-      activate();
-      return;
-    }
+    const activate = () => setNearView(true);
 
     if (typeof IntersectionObserver === "undefined") {
       activate();
       return;
     }
 
-    /* Already on screen (common for featured lead) — don't wait for IO */
     const rect = root.getBoundingClientRect();
     if (rect.bottom > 0 && rect.top < window.innerHeight + 240) {
       activate();
@@ -67,25 +86,53 @@ export function CoverLoopVideo({
     );
     io.observe(root);
     return () => io.disconnect();
-  }, []);
+  }, [underIntro]);
 
+  useEffect(() => {
+    if (allowed && ready) releaseSlot();
+  }, [allowed, ready, releaseSlot]);
+
+  /* Always play when ready — do not wait for scroll */
   useLayoutEffect(() => {
     const el = videoRef.current;
     if (!el || !ready) return;
     void el.play().catch(() => {});
   }, [ready, loadKey]);
 
+  /*
+   * Unveil as soon as playable unless an on-screen mark is finishing the fill.
+   * Off-screen / intro: no scroll gate.
+   */
+  useEffect(() => {
+    if (!allowed || !ready || revealed) return;
+    if (nearView && !underIntro) return;
+    onCoverDone();
+    markHomeMediaReady(src);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allowed, ready, revealed, nearView, underIntro, src]);
+
+  /* Under fullscreen intro — no second mark loader; report ready to the gate */
+  useEffect(() => {
+    if (!underIntro || !ready) return;
+    releaseSlot();
+    onCoverDone();
+    markHomeMediaReady(src);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only when playable under intro
+  }, [underIntro, ready, src]);
+
+  const handleDone = () => {
+    releaseSlot();
+    onCoverDone();
+    markHomeMediaReady(src);
+  };
+
   return (
     <div
       ref={rootRef}
-      className={cn(
-        "cover-loop-video",
-        revealed && "is-ready",
-        instant && "is-instant",
-      )}
+      className={cn("cover-loop-video", revealed && "is-ready")}
       aria-hidden={ariaLabel ? undefined : true}
     >
-      {active ? (
+      {allowed ? (
         <ProtectedVideo
           ref={videoRef}
           className={cn("cover-loop-video__media", className)}
@@ -95,12 +142,15 @@ export function CoverLoopVideo({
           aria-label={ariaLabel}
         />
       ) : null}
-      <VideoLoadingCover
-        progress={active ? progress : 0}
-        ready={Boolean(active && ready)}
-        cacheKey={src}
-        onDone={onCoverDone}
-      />
+      {showMark ? (
+        <VideoLoadingCover
+          active
+          progress={progress}
+          ready={ready}
+          cacheKey={src}
+          onDone={handleDone}
+        />
+      ) : null}
     </div>
   );
 }

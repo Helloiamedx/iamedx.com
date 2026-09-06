@@ -1,15 +1,20 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   SITE_MARK_BOTTOM_D,
   SITE_MARK_TOP_D,
 } from "@/lib/siteMark";
 import {
+  setHomeMediaExpected,
+  whenHomeMediaReady,
+} from "@/lib/homeMediaGate";
+import {
   HERO_VIDEO_PLAYABLE_ATTR,
   whenHeroFlag,
 } from "@/lib/heroSequence";
-import { preloadHomeVideos } from "@/lib/preloadHomeVideos";
+import { unlockVideosAfterHero } from "@/lib/videoLoadQueue";
 
 type IntroLanguage = {
   lang: string;
@@ -17,16 +22,19 @@ type IntroLanguage = {
 };
 
 const CONFIG = {
-  minimumDuration: 2400,
-  traceFinishDuration: 700,
-  beforeFillPause: 50,
+  minimumDuration: 3200,
+  /** One full outline draw before reset / next loop */
+  strokeCycleDuration: 3000,
+  /** Brief hold at full outline after a cycle ends once resources are ready */
+  beforeFillPause: 80,
   fillDuration: 850,
   completedHold: 400,
   revealDuration: 900,
-  englishDuration: 1800,
-  otherLanguageDuration: 1400,
+  /** Hold each greeting longer — language switches read as deliberate */
+  englishDuration: 3200,
+  otherLanguageDuration: 2600,
   /** Soft crossfade only — no slide */
-  textFadeMs: 180,
+  textFadeMs: 360,
   /** Greeting starts this many ms after the mark begins */
   textStartDelayMs: 480,
 } as const;
@@ -67,12 +75,9 @@ function ease(value: number) {
   return progress * progress * (3 - 2 * progress);
 }
 
-/**
- * Waiting curve while resources load — not a real download %.
- * Completion still waits for window load + fonts (and a minimum duration).
- */
-function waitingProgress(elapsed: number) {
-  return 0.9 * (1 - Math.exp(-Math.max(0, elapsed) / 2600));
+/** Outline draw 0 → 1 within a cycle. Loop resets instantly and redraws. */
+function strokeDrawProgress(localMs: number, cycleMs: number) {
+  return ease(clamp(localMs / cycleMs));
 }
 
 function languageAt(elapsed: number) {
@@ -108,20 +113,29 @@ declare global {
 }
 
 /**
- * Home-only first-visit intro.
- * Site stays painted under the opaque veil — veil fades out (no solid flash).
- * Once seen (localStorage), back / return visits skip it.
- * Waits for page load + fonts + hero + home/linked cover videos before finish.
+ * Home-only first-visit intro (also used by `/dev/intro-test` with `preview`).
+ * Portaled to `document.body` so header / footer / blend modes can’t peek through.
+ * Opaque veil until fill + reveal — only the mark + greeting are visible.
+ * Outline loops until resources are ready, then fill and unveil.
  */
 export function SiteIntroLoader({
   preloadVideos = [],
+  preview = false,
+  previewReadyAfterMs = 7500,
+  onPreviewDone,
 }: {
-  /** Hero + below-the-fold / linked card videos on the home page */
+  /** Hero + cover / footer video srcs that mount on the home page */
   preloadVideos?: string[];
+  /** Dev preview: always play, never read/write localStorage */
+  preview?: boolean;
+  /** Preview only — when to treat resources as ready (then finish current stroke → fill) */
+  previewReadyAfterMs?: number;
+  onPreviewDone?: () => void;
 }) {
   /* Always true on SSR + first client paint — reading localStorage here
    * caused hydration mismatch when the visit was already marked seen. */
   const [active, setActive] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const loaderRef = useRef<HTMLDivElement>(null);
   const brandRef = useRef<HTMLDivElement>(null);
   const fillRef = useRef<SVGGElement>(null);
@@ -129,10 +143,21 @@ export function SiteIntroLoader({
   const outlineGroupRef = useRef<SVGGElement>(null);
   const preloadVideosRef = useRef(preloadVideos);
   preloadVideosRef.current = preloadVideos;
+  const previewRef = useRef(preview);
+  previewRef.current = preview;
+  const onPreviewDoneRef = useRef(onPreviewDone);
+  onPreviewDoneRef.current = onPreviewDone;
 
   useLayoutEffect(() => {
-    /* Back / bfcache / soft return — never replay once seen */
+    setMounted(true);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!mounted) return;
+
+    /* Back / bfcache / soft return — never replay once seen (skip in preview) */
     const skipIfSeen = () => {
+      if (previewRef.current) return false;
       if (!hasSeenIntro()) return false;
       document.documentElement.classList.remove("edx-loading");
       setActive(false);
@@ -144,6 +169,7 @@ export function SiteIntroLoader({
     document.documentElement.classList.add("edx-loading");
 
     const onPageShow = (event: PageTransitionEvent) => {
+      if (previewRef.current) return;
       if (event.persisted || hasSeenIntro()) {
         document.documentElement.classList.remove("edx-loading");
         setActive(false);
@@ -165,7 +191,7 @@ export function SiteIntroLoader({
      * skip the real play. Mark on finish + pagehide (leave mid-intro).
      */
     const onPageHide = () => {
-      markIntroSeen();
+      if (!previewRef.current) markIntroSeen();
     };
     window.addEventListener("pagehide", onPageHide);
 
@@ -193,6 +219,7 @@ export function SiteIntroLoader({
     let readyAt = Infinity;
     let frameId = 0;
     let safetyId = 0;
+    let previewReadyId = 0;
     let aborted = false;
     let finished = false;
     let currentLanguage = -1;
@@ -202,9 +229,12 @@ export function SiteIntroLoader({
       finished = true;
       cancelAnimationFrame(frameId);
       window.clearTimeout(safetyId);
-      markIntroSeen();
+      window.clearTimeout(previewReadyId);
+      if (!previewRef.current) markIntroSeen();
       document.documentElement.classList.remove("edx-loading");
+      unlockVideosAfterHero();
       setActive(false);
+      if (previewRef.current) onPreviewDoneRef.current?.();
     }
 
     function updateGreeting(elapsed: number, revealStart: number) {
@@ -250,27 +280,37 @@ export function SiteIntroLoader({
 
       const elapsed = now - startedAt;
       const reduce = reducedMotion.matches;
-      const completionStart = Math.max(CONFIG.minimumDuration, readyAt);
-      const fillStart =
-        completionStart +
-        CONFIG.traceFinishDuration +
-        CONFIG.beforeFillPause;
+      const cycleMs = CONFIG.strokeCycleDuration;
+
+      /*
+       * Ready → wait out minimum duration → finish the *current* stroke cycle
+       * (never cut mid-draw; never start another loop after that).
+       */
+      const gateAt = Number.isFinite(readyAt)
+        ? Math.max(CONFIG.minimumDuration, readyAt)
+        : Infinity;
+      const strokeDoneAt = Number.isFinite(gateAt)
+        ? Math.ceil(gateAt / cycleMs) * cycleMs
+        : Infinity;
+      const fillStart = strokeDoneAt + CONFIG.beforeFillPause;
       const fillEnd = fillStart + CONFIG.fillDuration;
       const revealStart = fillEnd + CONFIG.completedHold;
       const revealDuration = reduce ? 180 : CONFIG.revealDuration;
       const reveal = ease((elapsed - revealStart) / revealDuration);
-
-      const baseProgress = waitingProgress(
-        Math.min(elapsed, completionStart),
-      );
-      const finishProgress = ease(
-        (elapsed - completionStart) / CONFIG.traceFinishDuration,
-      );
-      const traceProgress =
-        baseProgress + (1 - baseProgress) * finishProgress;
       const fillProgress = ease(
         (elapsed - fillStart) / CONFIG.fillDuration,
       );
+
+      let traceProgress: number;
+      if (reduce) {
+        traceProgress = 1;
+      } else if (elapsed >= strokeDoneAt) {
+        /* Hold full outline for the beat before fill */
+        traceProgress = 1;
+      } else {
+        const local = elapsed % cycleMs;
+        traceProgress = strokeDrawProgress(local, cycleMs);
+      }
 
       outlines.forEach((path, index) => {
         const stagger = index === 0 ? 0.12 : 0;
@@ -316,9 +356,14 @@ export function SiteIntroLoader({
 
     safetyId = window.setTimeout(() => {
       api.complete();
-    }, 12000);
+    }, 22000);
 
-    if (!window.EDX_LOADER_MANUAL) {
+    if (previewRef.current) {
+      /* Preview: no home media gates — loop for a bit, then fill + unveil */
+      previewReadyId = window.setTimeout(() => {
+        api.complete();
+      }, previewReadyAfterMs);
+    } else if (!window.EDX_LOADER_MANUAL) {
       const pageReady =
         document.readyState === "complete"
           ? Promise.resolve()
@@ -329,13 +374,14 @@ export function SiteIntroLoader({
         ? document.fonts.ready
         : Promise.resolve();
 
+      /* In-page players (hero, insight covers, footer) report here while edx-loading */
+      setHomeMediaExpected(preloadVideosRef.current);
+
       const gates: Promise<unknown>[] = [pageReady, fontsReady];
-      /* Wait for hero buffer under the veil */
       gates.push(
-        whenHeroFlag(HERO_VIDEO_PLAYABLE_ATTR, { timeoutMs: 12000 }),
+        whenHeroFlag(HERO_VIDEO_PLAYABLE_ATTR, { timeoutMs: 20000 }),
       );
-      /* Home + linked section videos (covers / footer) — home-only gate */
-      gates.push(preloadHomeVideos(preloadVideosRef.current, 14000));
+      gates.push(whenHomeMediaReady(20000));
 
       Promise.allSettled(gates).then(() => {
         if (aborted || finished) return;
@@ -347,23 +393,25 @@ export function SiteIntroLoader({
       aborted = true;
       cancelAnimationFrame(frameId);
       window.clearTimeout(safetyId);
+      window.clearTimeout(previewReadyId);
       window.removeEventListener("pageshow", onPageShow);
       window.removeEventListener("pagehide", onPageHide);
       if (window.edxLoader === api) {
         delete window.edxLoader;
       }
     };
-  }, []);
+  }, [mounted, previewReadyAfterMs]);
 
-  if (!active) return null;
+  if (!active || !mounted) return null;
 
-  return (
+  return createPortal(
     <div
       ref={loaderRef}
       className="edx-loader"
       id="edx-loader"
       role="status"
       aria-label="Loading"
+      aria-live="polite"
     >
       <div ref={brandRef} className="edx-loader__brand">
         <svg
@@ -383,6 +431,7 @@ export function SiteIntroLoader({
           </span>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

@@ -250,6 +250,7 @@ export function YouTubeBackground({
       <div id={hostId} className="youtube-background__host" title={title} />
       {/* Opaque until cover settles — blocks YouTube title + big play */}
       <VideoLoadingCover
+        active
         progress={progress}
         ready={ready}
         cacheKey={`youtube:${videoId}`}

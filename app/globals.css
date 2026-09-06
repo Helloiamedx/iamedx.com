@@ -484,16 +484,42 @@ button.origin-button {
 /* —— Home first-visit intro —— */
 html.edx-loading {
   overflow: hidden;
+  background: #080808;
 }
 
 /*
- * Opaque veil covers the live site (site stays painted underneath).
- * Fade the veil out → no solid-color flash between intro and content.
+ * Solid plate before the branded loader mounts (boot script → portal).
+ * Dropped once `.edx-loader` is in the document.
+ */
+html.edx-loading body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646;
+  background: #080808;
+  pointer-events: auto;
+}
+
+html.edx-loading body:has(.edx-loader)::before {
+  display: none;
+}
+
+/* Header blend / edge blur must not peek over the veil */
+html.edx-loading .site-header-chrome,
+html.edx-loading .site-header,
+html.edx-loading .viewport-edge-blur {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/*
+ * Opaque veil on body (portaled) — only mark + greeting until reveal fade.
+ * Site stays painted underneath for a warm unveil.
  */
 .edx-loader {
   position: fixed;
   inset: 0;
-  z-index: 99999;
+  z-index: 2147483647;
   display: block;
   background: #080808;
   color: #fff;
@@ -2331,7 +2357,7 @@ html[data-chrome-ready="1"] .hero__video.is-loaded {
   z-index: 2;
 }
 
-/* Shared video load — always stroke → fill; stalled buffer breathes the stroke line only */
+/* Shared video load — loop full stroke → fill → unveil (same as home intro) */
 .video-loading-cover {
   position: absolute;
   inset: 0;
