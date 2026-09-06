@@ -7,10 +7,6 @@ import {
   SITE_MARK_TOP_D,
 } from "@/lib/siteMark";
 import {
-  setHomeMediaExpected,
-  whenHomeMediaReady,
-} from "@/lib/homeMediaGate";
-import {
   HERO_VIDEO_PLAYABLE_ATTR,
   whenHeroFlag,
 } from "@/lib/heroSequence";
@@ -116,16 +112,14 @@ declare global {
  * Home-only first-visit intro (also used by `/dev/intro-test` with `preview`).
  * Portaled to `document.body` so header / footer / blend modes can’t peek through.
  * Opaque veil until fill + reveal — only the mark + greeting are visible.
- * Outline loops until resources are ready, then fill and unveil.
+ * Outline loops until the home hero is playable (+ fonts), then fill and unveil.
+ * Below-fold clips are intentionally not gates — they load after hero unlocks.
  */
 export function SiteIntroLoader({
-  preloadVideos = [],
   preview = false,
   previewReadyAfterMs = 7500,
   onPreviewDone,
 }: {
-  /** Hero + cover / footer video srcs that mount on the home page */
-  preloadVideos?: string[];
   /** Dev preview: always play, never read/write localStorage */
   preview?: boolean;
   /** Preview only — when to treat resources as ready (then finish current stroke → fill) */
@@ -141,8 +135,6 @@ export function SiteIntroLoader({
   const fillRef = useRef<SVGGElement>(null);
   const greetingRef = useRef<HTMLSpanElement>(null);
   const outlineGroupRef = useRef<SVGGElement>(null);
-  const preloadVideosRef = useRef(preloadVideos);
-  preloadVideosRef.current = preloadVideos;
   const previewRef = useRef(preview);
   previewRef.current = preview;
   const onPreviewDoneRef = useRef(onPreviewDone);
@@ -364,26 +356,18 @@ export function SiteIntroLoader({
         api.complete();
       }, previewReadyAfterMs);
     } else if (!window.EDX_LOADER_MANUAL) {
-      const pageReady =
-        document.readyState === "complete"
-          ? Promise.resolve()
-          : new Promise<void>((resolve) => {
-              window.addEventListener("load", () => resolve(), { once: true });
-            });
       const fontsReady = document.fonts
         ? document.fonts.ready
         : Promise.resolve();
 
-      /* In-page players (hero, insight covers, footer) report here while edx-loading */
-      setHomeMediaExpected(preloadVideosRef.current);
-
-      const gates: Promise<unknown>[] = [pageReady, fontsReady];
-      gates.push(
+      /*
+       * Hero-first only. Do NOT wait for window.load or below-fold videos —
+       * that made the intro (and the hero) crawl while insight/footer competed.
+       */
+      Promise.allSettled([
+        fontsReady,
         whenHeroFlag(HERO_VIDEO_PLAYABLE_ATTR, { timeoutMs: 20000 }),
-      );
-      gates.push(whenHomeMediaReady(20000));
-
-      Promise.allSettled(gates).then(() => {
+      ]).then(() => {
         if (aborted || finished) return;
         api.complete();
       });

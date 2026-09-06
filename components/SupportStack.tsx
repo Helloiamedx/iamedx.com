@@ -9,6 +9,10 @@ import {
   supportKnowCards,
   type SupportKnowCard,
 } from "@/content/supportBento";
+import {
+  VIDEO_LOAD_PRIORITY,
+  useVideoLoadSlot,
+} from "@/lib/videoLoadQueue";
 import { cn } from "@/lib/utils";
 
 const CARDS = supportKnowCards;
@@ -30,31 +34,64 @@ function SupportPanelVideo({
   src: string;
   playbackRate?: number;
 }) {
+  const rootRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const { allowed, releaseSlot } = useVideoLoadSlot(
+    src,
+    true,
+    VIDEO_LOAD_PRIORITY.homeSupport,
+    rootRef,
+  );
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !allowed) return;
     video.playbackRate = playbackRate;
-  }, [playbackRate, src]);
+  }, [playbackRate, src, allowed]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !allowed) return;
+
+    const markReady = () => {
+      releaseSlot();
+      void video.play().catch(() => {});
+    };
+
+    if (video.readyState >= 3) {
+      markReady();
+      return;
+    }
+
+    const onCanPlay = () => markReady();
+    video.addEventListener("canplay", onCanPlay);
+    video.addEventListener("loadeddata", onCanPlay);
+    return () => {
+      video.removeEventListener("canplay", onCanPlay);
+      video.removeEventListener("loadeddata", onCanPlay);
+    };
+  }, [allowed, releaseSlot, src]);
 
   return (
     <div
+      ref={rootRef}
       className="support-know__panel support-know__panel--video"
       aria-hidden="true"
     >
-      <ProtectedVideo
-        ref={videoRef}
-        className="support-know__panel-video"
-        src={src}
-        preload="metadata"
-        onLoadedMetadata={(event) => {
-          event.currentTarget.playbackRate = playbackRate;
-        }}
-        onPlay={(event) => {
-          event.currentTarget.playbackRate = playbackRate;
-        }}
-      />
+      {allowed ? (
+        <ProtectedVideo
+          ref={videoRef}
+          className="support-know__panel-video"
+          src={src}
+          preload="auto"
+          onLoadedMetadata={(event) => {
+            event.currentTarget.playbackRate = playbackRate;
+          }}
+          onPlay={(event) => {
+            event.currentTarget.playbackRate = playbackRate;
+          }}
+        />
+      ) : null}
     </div>
   );
 }

@@ -58,7 +58,11 @@ function ProjectShowcaseCard({
     : "project-showcase__media";
 
   return (
-    <Link href={`/projects/${project.slug}`} className="project-showcase__link">
+    <Link
+      href={`/projects/${project.slug}`}
+      className="project-showcase__link"
+      prefetch={false}
+    >
       <div className={mediaClass}>
         {useSwap ? (
           <>

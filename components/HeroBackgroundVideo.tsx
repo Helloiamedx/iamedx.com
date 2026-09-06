@@ -15,7 +15,6 @@ import {
   setHeroFlag,
   whenHeroFlag,
 } from "@/lib/heroSequence";
-import { markHomeMediaReady } from "@/lib/homeMediaGate";
 import {
   VIDEO_LOAD_PRIORITY,
   unlockVideosAfterHero,
@@ -82,7 +81,6 @@ export function HeroBackgroundVideo() {
   useEffect(() => {
     if (!playable || !src) return;
     setHeroFlag(HERO_VIDEO_PLAYABLE_ATTR);
-    markHomeMediaReady(HERO_VIDEO_SRC);
     unlockVideosAfterHero();
   }, [playable, src]);
 

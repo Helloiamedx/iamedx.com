@@ -42,6 +42,7 @@ export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
       <Link
         href={`/projects/${project.slug}`}
         className="project-featured__link"
+        prefetch={false}
       >
         <div className={mediaClass}>
           {useSwap ? (

@@ -13,11 +13,8 @@ import { ProjectFeaturedLead } from "@/components/ProjectFeaturedLead";
 import { ProjectMasonry } from "@/components/ProjectMasonry";
 import { SiteIntroLoader } from "@/components/SiteIntroLoader";
 import { SupportBento } from "@/components/SupportBento";
-import { footerMarqueeVideos } from "@/content/nav";
 import { projects, projectsFeaturedLead } from "@/content/projects";
-import { asset } from "@/lib/assets";
 import { HERO_VIDEO_SRC } from "@/lib/heroMedia";
-import { isInsightVideoCover } from "@/lib/insight-meta";
 import { getAllInsights, getInsightsFeaturedLead } from "@/lib/insights";
 import { shuffleArray } from "@/lib/utils";
 
@@ -33,21 +30,10 @@ export default function HomePage() {
     getAllInsights().filter((insight) => insight.slug !== featuredInsight?.slug),
   ).slice(0, 2);
 
-  /* Intro waits for in-page players only (hero + insight covers + footer) */
-  const introVideoSrcs = [
-    HERO_VIDEO_SRC,
-    featuredInsight && isInsightVideoCover(featuredInsight.coverImage)
-      ? featuredInsight.coverImage
-      : undefined,
-    ...selectedInsights
-      .filter((insight) => isInsightVideoCover(insight.coverImage))
-      .map((insight) => insight.coverImage),
-    asset(footerMarqueeVideos[0]?.src ?? ""),
-  ].filter((src): src is string => Boolean(src));
-
   return (
     <>
-      <SiteIntroLoader preloadVideos={introVideoSrcs} />
+      {/* Intro gates on home hero playable (+ fonts) — not below-fold clips */}
+      <SiteIntroLoader />
       <main className="home-page">
         {/* Kick hero bytes as early as the document head allows */}
         <link

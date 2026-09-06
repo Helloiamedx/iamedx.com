@@ -78,6 +78,7 @@ export function InsightMasonry({
             <Link
               href={`/thoughts/${insight.slug}`}
               className="insight-showcase__link"
+              prefetch={false}
             >
               <div className="insight-showcase__media">
                 {isInsightVideoCover(insight.coverImage) ? (

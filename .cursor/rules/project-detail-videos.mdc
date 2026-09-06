@@ -32,9 +32,9 @@ Playback requirements on the working source: **muted**, **autoplay**, **loop**, 
 ## 2. Cover before play
 
 - **Loading only** — site mark (`VideoLoadingCover`) only while on-screen and not yet revealed. Loop full outlines; on playable → fill → unveil. **No black waiting plate.** Plate when showing is **pure black** (`#000`). Cover is `pointer-events: none`.
-- **Hero first, then parallel** — `lib/videoLoadQueue.ts`: case/home hero attaches immediately. When hero is playable (or intro unveils), **unlock** so gallery / cards / footer attach sources and buffer **in parallel**. Do not serialize every clip one-after-another (that made loads feel slower than before the mark existed).
+- **Hero first, then serial top→bottom** — `lib/videoLoadQueue.ts`: only **one** clip attaches/buffers at a time. Case/home hero always runs first. When it is playable (or intro unveils), unlock the queue and load the rest **one-by-one** in page order (priority bands + mount/registration order). Do **not** open all remaining clips in parallel.
 - **Play when ready** — once a clip is playable, `play()` immediately (and unveil if off-screen). Do **not** wait for scroll-into-view to start playback. Mark loader is only for on-screen first paint.
-- **Home intro exception** — while `edx-loading`, home players may warm under the veil; intro finish also unlocks the post-hero gate.
+- **Home intro** — while `edx-loading`, **only the home hero** may attach/buffer. Hold every other home clip (support panels, insight covers, footer) and do **not** start other-route media. Intro completes on hero playable (+ fonts / min duration). When the veil lifts, open the serial queue for remaining **homepage** materials top→bottom.
 - **Do not** extract a frame, generate a poster image, or invent a still from the video.
 - Applies to case hero (`HeroSegmentVideo`), gallery clips (`ProjectFallbackVideo`), YouTube hero veil, home hero, and footer underlay.
 

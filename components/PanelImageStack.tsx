@@ -49,7 +49,8 @@ function initialStack(total: number): StackFrame {
   };
 }
 
-/** Image stack — hard cut; dual buffer keeps the previous frame until the next is ready. */
+/** Image stack — hard cut; dual buffer keeps the previous frame until the next is ready.
+ *  Waits out the home fullscreen intro so those bytes don’t fight the hero. */
 export function PanelImageStack({
   images,
   align,
@@ -60,8 +61,33 @@ export function PanelImageStack({
 
   const [ready, setReady] = useState(n <= 1);
   const [stack, setStack] = useState<StackFrame>(() => initialStack(n));
+  const [introClear, setIntroClear] = useState(() =>
+    typeof document === "undefined"
+      ? true
+      : !document.documentElement.classList.contains("edx-loading"),
+  );
 
   useEffect(() => {
+    if (introClear) return;
+    if (!document.documentElement.classList.contains("edx-loading")) {
+      setIntroClear(true);
+      return;
+    }
+    const obs = new MutationObserver(() => {
+      if (!document.documentElement.classList.contains("edx-loading")) {
+        setIntroClear(true);
+        obs.disconnect();
+      }
+    });
+    obs.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+    return () => obs.disconnect();
+  }, [introClear]);
+
+  useEffect(() => {
+    if (!introClear) return;
     if (n <= 1) {
       setReady(true);
       setStack(initialStack(n));
@@ -79,7 +105,7 @@ export function PanelImageStack({
     return () => {
       cancelled = true;
     };
-  }, [images, imagesKey, n]);
+  }, [images, imagesKey, n, introClear]);
 
   useEffect(() => {
     if (!ready || n < 2) return;

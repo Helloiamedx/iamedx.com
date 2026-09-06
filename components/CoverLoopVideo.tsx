@@ -6,7 +6,6 @@ import {
   VideoLoadingCover,
   useVideoLoadProgress,
 } from "@/components/VideoLoadingCover";
-import { markHomeMediaReady } from "@/lib/homeMediaGate";
 import { useVideoRevealGate } from "@/lib/videoLoadMemory";
 import {
   VIDEO_LOAD_PRIORITY,
@@ -27,7 +26,7 @@ function isHomeIntroLoading() {
 
 /**
  * Index / Related card cover loop.
- * Loads as soon as the post-hero gate opens (not wait-for-scroll).
+ * Loads one-at-a-time after the hero (serial queue, top→bottom).
  * When playable: play immediately. Mark loader only if still on-screen and
  * not yet revealed; off-screen clips unveil + play without waiting for scroll.
  */
@@ -107,23 +106,20 @@ export function CoverLoopVideo({
     if (!allowed || !ready || revealed) return;
     if (nearView && !underIntro) return;
     onCoverDone();
-    markHomeMediaReady(src);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allowed, ready, revealed, nearView, underIntro, src]);
 
-  /* Under fullscreen intro — no second mark loader; report ready to the gate */
+  /* Under fullscreen intro — no second mark loader; unveil when playable */
   useEffect(() => {
     if (!underIntro || !ready) return;
     releaseSlot();
     onCoverDone();
-    markHomeMediaReady(src);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only when playable under intro
   }, [underIntro, ready, src]);
 
   const handleDone = () => {
     releaseSlot();
     onCoverDone();
-    markHomeMediaReady(src);
   };
 
   return (

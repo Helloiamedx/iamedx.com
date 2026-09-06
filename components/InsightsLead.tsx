@@ -25,7 +25,11 @@ export function InsightsLead({ insight }: InsightsLeadProps) {
 
   return (
     <article className="insights-lead insights-shell">
-      <Link href={`/thoughts/${insight.slug}`} className="insights-lead__link">
+      <Link
+        href={`/thoughts/${insight.slug}`}
+        className="insights-lead__link"
+        prefetch={false}
+      >
         <div className="insights-lead__media">
           {videoCover ? (
             <CoverLoopVideo

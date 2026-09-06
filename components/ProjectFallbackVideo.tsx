@@ -37,9 +37,9 @@ export type ProjectFallbackVideoProps = {
  * Tries `primarySrc` first; on load/play failure (or timeout) switches to
  * `fallbackSrc` when provided.
  *
- * After hero unlock: buffer in the background. When playable, play immediately
- * (no wait-for-scroll). Mark loader only if the cell is on-screen and not yet
- * revealed.
+ * After hero: takes one serial queue turn (top→bottom). When playable, play
+ * immediately (no wait-for-scroll). Mark loader only if the cell is on-screen
+ * and not yet revealed.
  */
 export function ProjectFallbackVideo({
   primarySrc,

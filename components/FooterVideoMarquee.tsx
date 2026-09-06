@@ -7,7 +7,6 @@ import {
   VideoLoadingCover,
   useVideoLoadProgress,
 } from "@/components/VideoLoadingCover";
-import { markHomeMediaReady } from "@/lib/homeMediaGate";
 import { useVideoRevealGate } from "@/lib/videoLoadMemory";
 import {
   VIDEO_LOAD_PRIORITY,
@@ -20,7 +19,7 @@ function isHomeIntroLoading() {
 }
 
 /**
- * Footer underlay — last in the top→bottom queue.
+ * Footer underlay — last in the serial top→bottom queue.
  * No black wait plate; mark only while this clip’s turn is active.
  */
 export function FooterVideoMarquee() {
@@ -55,14 +54,12 @@ export function FooterVideoMarquee() {
     if (!underIntro || !ready) return;
     releaseSlot();
     onCoverDone();
-    markHomeMediaReady(src);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only when playable under intro
   }, [underIntro, ready, src]);
 
   const handleDone = () => {
     releaseSlot();
     onCoverDone();
-    markHomeMediaReady(src);
   };
 
   return (
