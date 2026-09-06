@@ -74,6 +74,7 @@ function ProjectShowcaseCard({
                 height={project.coverHeight}
                 sizes={sizes}
                 unoptimized
+                loading="lazy"
               />
             </div>
             {hasHoverStills ? (
@@ -89,6 +90,7 @@ function ProjectShowcaseCard({
                     width={project.coverWidth}
                     height={project.coverHeight}
                     sizes={sizes}
+                    loading="lazy"
                     className={`project-showcase__swap-frame project-showcase__swap-frame--${index + 1}`}
                   />
                 ))}
@@ -115,6 +117,7 @@ function ProjectShowcaseCard({
             height={project.coverHeight}
             sizes={sizes}
             unoptimized={coverSrc.startsWith("https://")}
+            loading="lazy"
           />
         )}
       </div>

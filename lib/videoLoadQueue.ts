@@ -2,14 +2,14 @@
  * Video load gate — one clip at a time, top → bottom.
  *
  * Home fullscreen intro (`edx-loading`):
- *   ONLY the home / case hero may attach. Nothing else on this page (and no
- *   other-route media) starts until the veil is gone.
+ *   ONLY the home / case hero may attach. Nothing else starts until the veil lifts.
  *
- * After intro / on other pages:
- *   1. Hero first (or watchdog if none)
+ * Every page (home, case, collection, …):
+ *   1. Hero first (or watchdog / still-hero unlock if none)
  *   2. Then waiters serially: lower priority first; same priority keeps
  *      registration order (React mount ≈ DOM top → bottom)
  *   3. `releaseSlot` when playable → next waiter
+ *   4. Non-video media (gallery stills) also wait on `useAfterHeroGate`
  */
 
 "use client";
@@ -27,6 +27,7 @@ let heroDone = false;
 let activeId: string | null = null;
 let seqCounter = 0;
 const waiters: Waiter[] = [];
+const heroListeners = new Set<() => void>();
 let heroWatchdogId = 0;
 let introObserver: MutationObserver | null = null;
 
@@ -55,6 +56,10 @@ function sortWaiters() {
   waiters.sort((a, b) => a.priority - b.priority || a.seq - b.seq);
 }
 
+function emitHeroUnlocked() {
+  heroListeners.forEach((listener) => listener());
+}
+
 /** While the home veil is up, watch for unveil so the serial queue can resume. */
 function ensureIntroObserver() {
   if (typeof document === "undefined" || introObserver) return;
@@ -63,6 +68,7 @@ function ensureIntroObserver() {
       introObserver?.disconnect();
       introObserver = null;
       if (!activeId) pump();
+      if (heroDone) emitHeroUnlocked();
     }
   });
   introObserver.observe(document.documentElement, {
@@ -151,17 +157,17 @@ function release(id: string) {
 }
 
 /**
- * Call when the page hero (home or case) can play.
- * After the home intro unveils, opens the serial queue for the next clip.
+ * Call when the page hero (home or case) can play / is painted.
+ * Opens the serial queue for the next top→bottom clip and stills gate.
  */
 export function unlockVideosAfterHero() {
-  if (heroDone) {
-    if (!activeId) pump();
-    return;
+  const wasDone = heroDone;
+  if (!heroDone) {
+    heroDone = true;
+    clearHeroWatchdog();
   }
-  heroDone = true;
-  clearHeroWatchdog();
   if (!activeId) pump();
+  if (!wasDone || !isHomeIntroLoading()) emitHeroUnlocked();
 }
 
 /** Soft reset on client navigations that remount the tree (best-effort). */
@@ -173,6 +179,30 @@ export function resetVideoLoadGate() {
   clearHeroWatchdog();
   introObserver?.disconnect();
   introObserver = null;
+  emitHeroUnlocked();
+}
+
+/**
+ * True once the page hero has unlocked (and home intro veil is gone).
+ * Use for gallery stills / other non-queued media so they don’t fight the hero.
+ */
+export function useAfterHeroGate() {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const sync = () => {
+      setOpen(heroDone && !isHomeIntroLoading());
+    };
+    sync();
+    heroListeners.add(sync);
+    if (!heroDone) ensureHeroWatchdog();
+    if (isHomeIntroLoading()) ensureIntroObserver();
+    return () => {
+      heroListeners.delete(sync);
+    };
+  }, []);
+
+  return open;
 }
 
 /**

@@ -2,6 +2,10 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { VideoLoadingCover } from "@/components/VideoLoadingCover";
+import {
+  unlockVideosAfterHero,
+  useAfterHeroGate,
+} from "@/lib/videoLoadQueue";
 
 type YouTubeBackgroundProps = {
   videoId: string;
@@ -11,6 +15,11 @@ type YouTubeBackgroundProps = {
   endSeconds?: number;
   className?: string;
   title?: string;
+  /**
+   * When true (default), this is the page hero — loads immediately and unlocks
+   * the serial media queue when playable. When false, waits for the page hero.
+   */
+  isPageHero?: boolean;
 };
 
 type YtPlayer = {
@@ -101,6 +110,7 @@ export function YouTubeBackground({
   endSeconds,
   className = "",
   title = "",
+  isPageHero = true,
 }: YouTubeBackgroundProps) {
   const reactId = useId().replace(/:/g, "");
   const hostId = `yt-bg-${reactId}`;
@@ -108,8 +118,12 @@ export function YouTubeBackground({
   const [ready, setReady] = useState(false);
   const [progress, setProgress] = useState(0);
   const [revealed, setRevealed] = useState(false);
+  const afterHero = useAfterHeroGate();
+  const canLoad = isPageHero || afterHero;
 
   useEffect(() => {
+    if (!canLoad) return;
+
     let cancelled = false;
     let revealedBuffer = false;
     let watchId = 0;
@@ -240,17 +254,26 @@ export function YouTubeBackground({
       }
       playerRef.current = null;
     };
-  }, [hostId, videoId, startSeconds, endSeconds]);
+  }, [hostId, videoId, startSeconds, endSeconds, canLoad]);
+
+  useEffect(() => {
+    if (!ready || !isPageHero) return;
+    unlockVideosAfterHero();
+  }, [ready, isPageHero]);
 
   return (
     <div
       className={`youtube-background${revealed ? " is-ready" : ""}${className ? ` ${className}` : ""}`}
       aria-hidden={title ? undefined : true}
     >
-      <div id={hostId} className="youtube-background__host" title={title} />
+      {canLoad ? (
+        <div id={hostId} className="youtube-background__host" title={title} />
+      ) : (
+        <div className="youtube-background__host" title={title} />
+      )}
       {/* Opaque until cover settles — blocks YouTube title + big play */}
       <VideoLoadingCover
-        active
+        active={canLoad}
         progress={progress}
         ready={ready}
         cacheKey={`youtube:${videoId}`}

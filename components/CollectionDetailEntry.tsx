@@ -1,7 +1,6 @@
 "use client";
 
 import { HeroSegmentVideo } from "@/components/HeroSegmentVideo";
-import { ProtectedVideo } from "@/components/ProtectedVideo";
 import { OriginButton } from "@/components/ui/origin-button";
 import { YouTubeBackground } from "@/components/YouTubeBackground";
 import {
@@ -10,6 +9,11 @@ import {
 } from "@/content/caseCopy";
 import type { Project } from "@/content/projects";
 import { asset } from "@/lib/assets";
+import {
+  VIDEO_LOAD_PRIORITY,
+  unlockVideosAfterHero,
+  useAfterHeroGate,
+} from "@/lib/videoLoadQueue";
 
 type CollectionDetailEntryProps = {
   /** Game / IP display name — between first project card and Read case study */
@@ -43,14 +47,26 @@ function CollectionIpHero({
       <HeroSegmentVideo
         className="collection-detail__entry-video"
         src={ipVideo}
+        priority={VIDEO_LOAD_PRIORITY.caseHero}
       />
     );
   }
 
-  return <CollectionEntryHero project={fallbackProject} />;
+  return (
+    <CollectionEntryHero
+      project={fallbackProject}
+      priority={VIDEO_LOAD_PRIORITY.caseHero}
+    />
+  );
 }
 
-function CollectionEntryHero({ project }: { project: Project }) {
+function CollectionEntryHero({
+  project,
+  priority = VIDEO_LOAD_PRIORITY.gallery,
+}: {
+  project: Project;
+  priority?: number;
+}) {
   if (project.heroVideo) {
     return (
       <HeroSegmentVideo
@@ -58,6 +74,7 @@ function CollectionEntryHero({ project }: { project: Project }) {
         src={project.heroVideo}
         startSeconds={project.heroVideoStart ?? 0}
         endSeconds={project.heroVideoEnd}
+        priority={priority}
       />
     );
   }
@@ -69,27 +86,56 @@ function CollectionEntryHero({ project }: { project: Project }) {
         videoId={project.heroYoutubeId}
         startSeconds={project.heroYoutubeStart ?? 0}
         endSeconds={project.heroYoutubeEnd}
+        isPageHero={priority <= VIDEO_LOAD_PRIORITY.caseHero}
       />
     );
   }
 
   if (project.heroImage) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        className="collection-detail__entry-still"
+      <CollectionStill
         src={project.heroImage}
-        alt=""
-        draggable={false}
+        unlockHero={priority <= VIDEO_LOAD_PRIORITY.caseHero}
       />
     );
   }
 
   return (
-    <ProtectedVideo
+    <HeroSegmentVideo
       className="collection-detail__entry-video"
       src={asset("videos/home-hero-video.mp4")}
-      preload="metadata"
+      priority={priority}
+    />
+  );
+}
+
+function CollectionStill({
+  src,
+  unlockHero,
+}: {
+  src: string;
+  unlockHero: boolean;
+}) {
+  const afterHero = useAfterHeroGate();
+  const canLoad = unlockHero || afterHero;
+
+  if (!canLoad) {
+    return <div className="collection-detail__entry-still" aria-hidden="true" />;
+  }
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      className="collection-detail__entry-still"
+      src={src}
+      alt=""
+      draggable={false}
+      ref={(el) => {
+        if (unlockHero && el?.complete) unlockVideosAfterHero();
+      }}
+      onLoad={() => {
+        if (unlockHero) unlockVideosAfterHero();
+      }}
     />
   );
 }
@@ -107,7 +153,10 @@ function CollectionProjectBlock({
   return (
     <div className="collection-detail__project">
       <div className="collection-detail__project-media-frame">
-        <CollectionEntryHero project={project} />
+        <CollectionEntryHero
+          project={project}
+          priority={VIDEO_LOAD_PRIORITY.gallery}
+        />
       </div>
       <h2 className="collection-detail__entry-ip">{gameTitle}</h2>
       <OriginButton href={`/projects/${project.slug}`}>

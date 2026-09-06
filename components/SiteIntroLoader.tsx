@@ -18,10 +18,9 @@ type IntroLanguage = {
 };
 
 const CONFIG = {
-  minimumDuration: 3200,
-  /** One full outline draw before reset / next loop */
+  /** One full outline draw before reset / next loop (while still waiting) */
   strokeCycleDuration: 3000,
-  /** Brief hold at full outline after a cycle ends once resources are ready */
+  /** Brief hold at full outline after resources are ready */
   beforeFillPause: 80,
   fillDuration: 850,
   completedHold: 400,
@@ -275,15 +274,10 @@ export function SiteIntroLoader({
       const cycleMs = CONFIG.strokeCycleDuration;
 
       /*
-       * Ready → wait out minimum duration → finish the *current* stroke cycle
-       * (never cut mid-draw; never start another loop after that).
+       * Ready as soon as hero (+ fonts) report — no artificial minimum wait.
+       * Snap outline to full and start fill; don’t wait out the current stroke loop.
        */
-      const gateAt = Number.isFinite(readyAt)
-        ? Math.max(CONFIG.minimumDuration, readyAt)
-        : Infinity;
-      const strokeDoneAt = Number.isFinite(gateAt)
-        ? Math.ceil(gateAt / cycleMs) * cycleMs
-        : Infinity;
+      const strokeDoneAt = Number.isFinite(readyAt) ? readyAt : Infinity;
       const fillStart = strokeDoneAt + CONFIG.beforeFillPause;
       const fillEnd = fillStart + CONFIG.fillDuration;
       const revealStart = fillEnd + CONFIG.completedHold;

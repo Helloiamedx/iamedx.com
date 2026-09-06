@@ -20,6 +20,11 @@ type HeroSegmentVideoProps = {
   /** Loop-back point in seconds (e.g. 401 = 6:41). Omit to native-loop the whole file. */
   endSeconds?: number;
   className?: string;
+  /**
+   * Queue band — default case hero (runs first). Use `gallery` for secondary
+   * heroes on collection rails so they don’t all compete as “hero”.
+   */
+  priority?: number;
 };
 
 /**
@@ -31,13 +36,14 @@ export function HeroSegmentVideo({
   startSeconds = 0,
   endSeconds,
   className = "",
+  priority = VIDEO_LOAD_PRIORITY.caseHero,
 }: HeroSegmentVideoProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const { allowed, releaseSlot } = useVideoLoadSlot(
     src,
     true,
-    VIDEO_LOAD_PRIORITY.caseHero,
+    priority,
     rootRef,
   );
   const loadKey = allowed ? src : "";
@@ -45,13 +51,15 @@ export function HeroSegmentVideo({
   const { revealed, onCoverDone } = useVideoRevealGate(src);
   const segmentLoop = endSeconds != null && endSeconds > startSeconds;
 
-  /* Unlock the rest of the page as soon as the hero can play */
+  /* Unlock the rest of the page as soon as a true hero can play */
   useEffect(() => {
     if (allowed && ready) {
-      unlockVideosAfterHero();
+      if (priority <= VIDEO_LOAD_PRIORITY.caseHero) {
+        unlockVideosAfterHero();
+      }
       releaseSlot();
     }
-  }, [allowed, ready, releaseSlot]);
+  }, [allowed, ready, releaseSlot, priority]);
 
   useEffect(() => {
     const el = videoRef.current;

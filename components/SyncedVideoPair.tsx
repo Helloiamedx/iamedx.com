@@ -36,8 +36,9 @@ const DRIFT_SEC = 0.08;
 const PRIMARY_TIMEOUT_MS = 2500;
 
 /**
- * Two gallery clips that share one load-queue turn, then start together
- * and stay loop-synced.
+ * Two gallery clips that share one load-queue turn.
+ * Left attaches first; right waits until left is playable (no parallel pair fetch).
+ * Then both start together and stay loop-synced.
  */
 export function SyncedVideoPair({
   left,
@@ -60,6 +61,7 @@ export function SyncedVideoPair({
   const [rightSrc, setRightSrc] = useState(right.primary);
   const [leftUsedFallback, setLeftUsedFallback] = useState(false);
   const [rightUsedFallback, setRightUsedFallback] = useState(false);
+  const [rightArmed, setRightArmed] = useState(false);
 
   useEffect(() => {
     setLeftSrc(left.primary);
@@ -71,8 +73,15 @@ export function SyncedVideoPair({
     setRightUsedFallback(false);
   }, [right.primary, right.fallback]);
 
+  useEffect(() => {
+    if (!allowed) {
+      setRightArmed(false);
+      return;
+    }
+  }, [allowed]);
+
   const leftKey = allowed ? leftSrc : "";
-  const rightKey = allowed ? rightSrc : "";
+  const rightKey = allowed && rightArmed ? rightSrc : "";
 
   const { progress: leftProgress, ready: leftReady } = useVideoLoadProgress(
     leftRef,
@@ -82,6 +91,12 @@ export function SyncedVideoPair({
     rightRef,
     rightKey,
   );
+
+  /* Serial within the pair — right only after left can play */
+  useEffect(() => {
+    if (!allowed || !leftReady || rightArmed) return;
+    setRightArmed(true);
+  }, [allowed, leftReady, rightArmed]);
 
   useEffect(() => {
     if (!allowed) return;
@@ -266,7 +281,7 @@ export function SyncedVideoPair({
         progress={pairProgress}
         ready={bothReady}
         revealed={revealed}
-        allowed={allowed}
+        allowed={allowed && rightArmed}
         showLoader={false}
         onCoverDone={handleCoverDone}
         onError={switchRightFallback}

@@ -7,7 +7,6 @@ import { HeroSegmentVideo } from "@/components/HeroSegmentVideo";
 import { OriginButton } from "@/components/ui/origin-button";
 import { ProjectFallbackVideo } from "@/components/ProjectFallbackVideo";
 import { SyncedVideoPair } from "@/components/SyncedVideoPair";
-import { ProtectedVideo } from "@/components/ProtectedVideo";
 import { YouTubeBackground } from "@/components/YouTubeBackground";
 import { getCaseCopySections } from "@/content/caseCopy";
 import {
@@ -17,6 +16,10 @@ import {
 import type { Project } from "@/content/projects";
 import { ProjectCardTags } from "@/components/ProjectCardTags";
 import { asset } from "@/lib/assets";
+import {
+  unlockVideosAfterHero,
+  useAfterHeroGate,
+} from "@/lib/videoLoadQueue";
 
 type StillFrame = {
   src: string;
@@ -109,18 +112,21 @@ function Frame({
   ratio?: string;
   fillCell?: boolean;
 }) {
+  const heroReady = useAfterHeroGate();
   const useNative = !fillCell && !ratio;
 
   if (useNative) {
     return (
       <div className="project-case-demo__frame project-case-demo__frame--native">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={src}
-          alt={alt}
-          className="project-case-demo__img project-case-demo__img--native"
-          draggable={false}
-        />
+        {heroReady ? (
+          <img
+            src={src}
+            alt={alt}
+            className="project-case-demo__img project-case-demo__img--native"
+            draggable={false}
+          />
+        ) : null}
       </div>
     );
   }
@@ -135,16 +141,18 @@ function Frame({
       style={fillCell ? undefined : { paddingBottom: ratio }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={src}
-        alt={alt}
-        className={
-          fillCell
-            ? "project-case-demo__img project-case-demo__img--contain"
-            : "project-case-demo__img"
-        }
-        draggable={false}
-      />
+      {heroReady ? (
+        <img
+          src={src}
+          alt={alt}
+          className={
+            fillCell
+              ? "project-case-demo__img project-case-demo__img--contain"
+              : "project-case-demo__img"
+          }
+          draggable={false}
+        />
+      ) : null}
     </div>
   );
 }
@@ -590,12 +598,15 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
               src={project.heroImage}
               alt=""
               draggable={false}
+              ref={(el) => {
+                if (el?.complete) unlockVideosAfterHero();
+              }}
+              onLoad={() => unlockVideosAfterHero()}
             />
           ) : (
-            <ProtectedVideo
+            <HeroSegmentVideo
               className="project-case-demo__hero-video"
               src={asset("videos/home-hero-video.mp4")}
-              preload="metadata"
             />
           )}
         </div>
