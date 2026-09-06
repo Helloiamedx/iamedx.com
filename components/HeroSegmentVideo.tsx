@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
 import {
   VideoLoadingCover,
   useVideoLoadProgress,
 } from "@/components/VideoLoadingCover";
+import { useVideoRevealGate } from "@/lib/videoLoadMemory";
 
 type HeroSegmentVideoProps = {
   src: string;
@@ -29,12 +30,8 @@ export function HeroSegmentVideo({
 }: HeroSegmentVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { progress, ready } = useVideoLoadProgress(videoRef, src);
-  const [revealed, setRevealed] = useState(false);
+  const { revealed, instant, onCoverDone } = useVideoRevealGate(src);
   const segmentLoop = endSeconds != null && endSeconds > startSeconds;
-
-  useEffect(() => {
-    setRevealed(false);
-  }, [src]);
 
   useEffect(() => {
     const el = videoRef.current;
@@ -74,7 +71,7 @@ export function HeroSegmentVideo({
 
   return (
     <div
-      className={`hero-segment-video${revealed ? " is-ready" : ""}${className ? ` ${className}` : ""}`}
+      className={`hero-segment-video${revealed ? " is-ready" : ""}${instant ? " is-instant" : ""}${className ? ` ${className}` : ""}`}
       aria-hidden="true"
     >
       <ProtectedVideo
@@ -88,7 +85,8 @@ export function HeroSegmentVideo({
       <VideoLoadingCover
         progress={progress}
         ready={ready}
-        onDone={() => setRevealed(true)}
+        cacheKey={src}
+        onDone={onCoverDone}
       />
     </div>
   );

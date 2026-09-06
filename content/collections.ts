@@ -19,6 +19,12 @@ export type CollectionEntry = {
   gameTitle: string;
   /** Game or IP context — shown below the title */
   gameInfo: string | string[];
+  /** Official game / IP site — left-column Visit official CTA when set */
+  officialWebsite?: string;
+  /** Studio / publisher — inserted in left CTA: Visit {companyName} official */
+  companyName?: string;
+  /** Left-column IP card video (CDN). Falls back to lead project detail hero. */
+  ipVideo?: string;
   testimonial?: CollectionTestimonial;
 };
 
@@ -152,6 +158,9 @@ export const projectCollections: ProjectCollection[] = [
         gameTitle: "The Witcher",
         gameInfo:
           "A dark fantasy action RPG series following Geralt of Rivia — monster hunting, political intrigue, and choices that shape the Continent.",
+        officialWebsite: "https://www.cdprojektred.com/en",
+        companyName: "CD Projekt Red",
+        ipVideo: asset("images/projects/collection/CDPR_Website.mp4"),
         testimonial: COLLECTION_TESTIMONIAL_PLACEHOLDER,
       },
       {
@@ -185,6 +194,10 @@ export const projectCollections: ProjectCollection[] = [
         gameTitle: "The Elder Scrolls V: Skyrim",
         gameInfo:
           "An open-world fantasy RPG set in the northern province of Skyrim — a world of dragons, ancient ruins, and rugged frontier culture.",
+        officialWebsite: "https://bethesdagamestudios.com",
+        companyName: "Bethesda Game Studios",
+        ipVideo:
+          "https://cdnstatic.bethsoft.com/bethesdagamestudios.com/Starfield_TheEndlessPursuit_ForWeb.mp4",
         testimonial: COLLECTION_TESTIMONIAL_PLACEHOLDER,
       },
     ],
@@ -266,7 +279,22 @@ export type CollectionProjectRow = {
   project: Project;
   gameTitle: string;
   gameInfo: string[];
+  officialWebsite?: string;
+  companyName?: string;
+  ipVideo?: string;
   testimonial: CollectionTestimonial;
+};
+
+/** One IP block on collection detail — left media + right stacked projects. */
+export type CollectionIpGroup = {
+  gameTitle: string;
+  gameInfo: string[];
+  officialWebsite?: string;
+  companyName?: string;
+  /** Dedicated IP card video when set; else lead project detail hero. */
+  ipVideo?: string;
+  /** Lead project supplies fallback left media + right stack. */
+  projects: Project[];
 };
 
 function asGameInfoParagraphs(value: string | string[]): string[] {
@@ -286,6 +314,9 @@ export function getCollectionProjects(
         project,
         gameTitle: entry.gameTitle,
         gameInfo: asGameInfoParagraphs(entry.gameInfo),
+        officialWebsite: entry.officialWebsite?.trim() || undefined,
+        companyName: entry.companyName?.trim() || undefined,
+        ipVideo: entry.ipVideo?.trim() || undefined,
         testimonial: resolveCollectionTestimonial(
           entry.slug,
           entry.testimonial,
@@ -293,4 +324,49 @@ export function getCollectionProjects(
       },
     ];
   });
+}
+
+/**
+ * Group resolved rows by gameTitle (shelf order of first appearance).
+ * Same-IP products stack on the right; left media uses ipVideo or first project.
+ */
+export function getCollectionIpGroups(
+  collection: ProjectCollection,
+): CollectionIpGroup[] {
+  const rows = getCollectionProjects(collection);
+  const groups: CollectionIpGroup[] = [];
+  const indexByTitle = new Map<string, number>();
+
+  for (const row of rows) {
+    const existing = indexByTitle.get(row.gameTitle);
+    if (existing === undefined) {
+      indexByTitle.set(row.gameTitle, groups.length);
+      groups.push({
+        gameTitle: row.gameTitle,
+        gameInfo: row.gameInfo,
+        officialWebsite: row.officialWebsite,
+        companyName: row.companyName,
+        ipVideo: row.ipVideo,
+        projects: [row.project],
+      });
+      continue;
+    }
+
+    const group = groups[existing]!;
+    group.projects.push(row.project);
+    if (!group.officialWebsite && row.officialWebsite) {
+      group.officialWebsite = row.officialWebsite;
+    }
+    if (!group.companyName && row.companyName) {
+      group.companyName = row.companyName;
+    }
+    if (!group.ipVideo && row.ipVideo) {
+      group.ipVideo = row.ipVideo;
+    }
+    if (group.gameInfo.length === 0 && row.gameInfo.length > 0) {
+      group.gameInfo = row.gameInfo;
+    }
+  }
+
+  return groups;
 }

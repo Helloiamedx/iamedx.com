@@ -481,6 +481,113 @@ button.origin-button {
   margin: 0;
 }
 
+/* —— Home first-visit intro —— */
+html.edx-loading {
+  overflow: hidden;
+}
+
+/*
+ * Opaque veil covers the live site (site stays painted underneath).
+ * Fade the veil out → no solid-color flash between intro and content.
+ */
+.edx-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: block;
+  background: #080808;
+  color: #fff;
+  overflow: hidden;
+  isolation: isolate;
+  container-type: size;
+  pointer-events: auto;
+}
+
+/* Hide until boot script marks first visit — avoids return-visit flash */
+html:not(.edx-loading) .edx-loader {
+  display: none;
+}
+
+.edx-loader__brand {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding:
+    max(16px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
+}
+
+.edx-loader__logo {
+  display: block;
+  flex: none;
+  width: clamp(104px, 11vw, 160px);
+  height: clamp(104px, 11vw, 160px);
+  width: clamp(104px, 11cqw, 160px);
+  height: clamp(104px, 11cqw, 160px);
+  overflow: visible;
+}
+
+.edx-loader__outline {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1000 1000;
+  stroke-dashoffset: 1000;
+  opacity: 0;
+}
+
+.edx-loader__fill {
+  fill: currentColor;
+  opacity: 0;
+}
+
+.edx-loader__greeting {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 36px;
+  overflow: hidden;
+  color: #ededed;
+  /* Grtsk Regular — same as site body */
+  font-family: "Grtsk", var(--font-sans), sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: clamp(12px, 1.3vw, 16px);
+  font-size: clamp(12px, 1.3cqw, 16px);
+  letter-spacing: 0.015em;
+  text-align: center;
+}
+
+.edx-loader__greeting span {
+  display: block;
+  max-width: 100%;
+  white-space: nowrap;
+  opacity: 1;
+  font-family: inherit;
+  font-weight: inherit;
+}
+
+@media (max-height: 450px) {
+  .edx-loader__logo {
+    width: 96px;
+    height: 96px;
+  }
+
+  .edx-loader__greeting {
+    height: 30px;
+    font-size: 12px;
+  }
+}
+
 /*
  * Fixed bottom viewport edge blur (all pages).
  * Content stays sharp above; softens as it scrolls into the bottom band.
@@ -2181,7 +2288,8 @@ body.is-mobile-menu-open .project-case-demo__toggle-pin {
   min-height: 100svh;
   margin-top: calc(-1 * var(--header-offset));
   display: grid;
-  align-items: end;
+  align-items: center;
+  justify-items: center;
   color: #f7f7f7;
   overflow: hidden;
   background: #0a0a0a;
@@ -2195,6 +2303,7 @@ body.is-mobile-menu-open .project-case-demo__toggle-pin {
 .hero__video-wrap {
   position: absolute;
   inset: 0;
+  background: #141414;
 }
 
 .hero__video {
@@ -2204,15 +2313,17 @@ body.is-mobile-menu-open .project-case-demo__toggle-pin {
   height: 100%;
   object-fit: cover;
   object-position: center;
-  /* Stay dark until revealed — progress cover sits above */
-  opacity: 0;
+  /* Paint under the cover — unveil by hiding cover only (no dual opacity gap) */
+  opacity: 1;
   animation: none;
   user-select: none;
   -webkit-user-drag: none;
 }
 
 html[data-chrome-ready="1"] .hero__video.is-loaded {
-  animation: hero-video-in 560ms cubic-bezier(0.22, 1, 0.36, 1) 80ms forwards;
+  /* Intro / return reveal already handled by cover; keep fully visible */
+  opacity: 1;
+  animation: none;
 }
 
 /* Progress / icon load above idle content stacking */
@@ -2220,7 +2331,7 @@ html[data-chrome-ready="1"] .hero__video.is-loaded {
   z-index: 2;
 }
 
-/* Shared video load — mark dim↔bright breath → full brightness (no blur) */
+/* Shared video load — stroke → fill only (no breath / flash) */
 .video-loading-cover {
   position: absolute;
   inset: 0;
@@ -2250,6 +2361,22 @@ html[data-chrome-ready="1"] .hero__video.is-loaded {
     visibility 0s linear 0.4s;
 }
 
+/* Cached remount — solid mark while waiting for a real frame (not dead black) */
+.video-loading-cover.is-warm .video-loading-cover__fill {
+  opacity: 1;
+}
+
+.video-loading-cover.is-warm .video-loading-cover__outline {
+  opacity: 0;
+}
+
+/* Tab-cached unveil — no slow fade once a frame exists */
+.video-loading-cover.is-ready.is-instant {
+  transition: none;
+  opacity: 0;
+  visibility: hidden;
+}
+
 /* First frame already showing — drop the black plate, keep the mark */
 .video-loading-cover.is-framed:not(.is-ready) {
   background: transparent;
@@ -2257,47 +2384,40 @@ html[data-chrome-ready="1"] .hero__video.is-loaded {
 
 .video-loading-cover__mark {
   position: relative;
-  /* Fallback when cq* unsupported */
-  width: clamp(2.5rem, 18vw, 7.5rem);
-  height: clamp(2.5rem, 18vw, 7.5rem);
-  /* ~18% of the frame’s shorter side */
-  width: clamp(2.5rem, 18cqmin, 7.5rem);
-  height: clamp(2.5rem, 18cqmin, 7.5rem);
+  /* Match site intro mark scale; size against this video frame */
+  width: clamp(104px, 11vw, 160px);
+  height: clamp(104px, 11vw, 160px);
+  width: clamp(104px, 11cqmin, 160px);
+  height: clamp(104px, 11cqmin, 160px);
   line-height: 0;
   color: #fff;
-  opacity: 0.4;
+  opacity: var(--video-load-mark-opacity, 1);
   pointer-events: none;
 }
 
 /* Insights — slightly smaller relative to the same frame */
 .insights-page .video-loading-cover__mark,
 .insight-detail .video-loading-cover__mark {
-  width: clamp(2.25rem, 14.5vw, 6rem);
-  height: clamp(2.25rem, 14.5vw, 6rem);
-  width: clamp(2.25rem, 14.5cqmin, 6rem);
-  height: clamp(2.25rem, 14.5cqmin, 6rem);
+  width: clamp(88px, 9vw, 136px);
+  height: clamp(88px, 9vw, 136px);
+  width: clamp(88px, 9cqmin, 136px);
+  height: clamp(88px, 9cqmin, 136px);
 }
 
-@keyframes video-load-breath {
-  from {
-    opacity: 0.22;
-  }
-  to {
-    opacity: 0.72;
-  }
+.video-loading-cover__outline {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1000 1000;
+  stroke-dashoffset: 1000;
+  opacity: 0;
 }
 
-/* Loading: opacity breath only (desktop + mobile) */
-.video-loading-cover.is-loading .video-loading-cover__mark {
-  animation: video-load-breath 1.35s ease-in-out infinite alternate;
-}
-
-/* Ready: ease to full brightness */
-.video-loading-cover.is-finishing .video-loading-cover__mark,
-.video-loading-cover.is-holding .video-loading-cover__mark {
-  animation: none;
-  opacity: 1;
-  transition: opacity 0.72s cubic-bezier(0.22, 1, 0.36, 1);
+.video-loading-cover__fill {
+  fill: currentColor;
+  opacity: 0;
 }
 
 .video-loading-cover__svg {
@@ -2334,17 +2454,6 @@ html[data-chrome-ready="1"] .hero__video.is-loaded {
     transition: none;
   }
 
-  .video-loading-cover.is-loading .video-loading-cover__mark {
-    animation: none;
-    opacity: 0.5;
-  }
-
-  .video-loading-cover.is-finishing .video-loading-cover__mark,
-  .video-loading-cover.is-holding .video-loading-cover__mark {
-    transition: none;
-    opacity: 1;
-  }
-
   .project-fallback-video__media,
   .hero-segment-video__media {
     transition: none;
@@ -2367,25 +2476,19 @@ html[data-chrome-ready="1"] .hero__video.is-loaded {
 }
 
 .hero__content {
-  position: absolute;
+  position: relative;
   z-index: 0;
   box-sizing: border-box;
-  /* Bottom-left: same inset as header/menu left edge on both sides; width 50% */
-  --hero-content-inset: max(
-    var(--shell-gutter),
-    calc((100% - min(var(--shell-max), calc(100% - var(--shell-gutter) * 2))) / 2)
-  );
-  left: var(--hero-content-inset);
-  bottom: var(--hero-content-inset);
-  width: 50%;
-  max-width: 50%;
+  /* 75% of viewport, capped near 75% of shell (1440 → 1080) */
+  width: 75vw;
+  max-width: 1080px;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: clamp(1.35rem, 3.2vw, 2rem);
-  text-align: left;
+  text-align: center;
   color: #fff;
   /* Hidden until video pops in — otherwise copy covers the progress bar */
   visibility: hidden;
@@ -2413,7 +2516,7 @@ html[data-hero-copy-ready="1"] .hero__content {
   letter-spacing: -0.03em;
   line-height: 1.1;
   text-transform: uppercase;
-  text-align: left;
+  text-align: center;
   color: #fff;
   opacity: 0;
   transform: translateY(0.55rem);
@@ -2430,7 +2533,7 @@ html[data-hero-copy-ready="1"] .hero__content {
 .hero__actions {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-start;
+  justify-content: center;
   gap: clamp(0.5rem, 0.35rem + 1.1vw, 0.85rem);
   margin: 0;
   padding: 0;
@@ -2467,34 +2570,19 @@ html[data-hero-copy-ready="1"] .hero__content {
 }
 
 @media (max-width: 899px) {
-  .hero {
-    align-items: center;
-    justify-items: center;
-  }
-
   .hero__content {
-    position: relative;
-    left: auto;
-    bottom: auto;
+    /* Same usable width as `.site-header__bar` / shell */
     width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
-    max-width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
-    margin: 0;
-    align-items: center;
-    text-align: center;
+    max-width: none;
   }
 
   .hero__title {
-    /* Prior mobile size + 5px */
+    /* Prior mobile size + 5px, then +3px, +3px, +2px, −1px */
     font-size: clamp(
-      calc((2.2rem - 2px) * 0.5 + 10px),
-      calc((6.2vw - 2px) * 0.5 + 10px),
-      calc((5.25rem - 2px) * 0.5 + 10px)
+      calc((2.2rem - 2px) * 0.5 + 17px),
+      calc((6.2vw - 2px) * 0.5 + 17px),
+      calc((5.25rem - 2px) * 0.5 + 17px)
     );
-    text-align: center;
-  }
-
-  .hero__actions {
-    justify-content: center;
   }
 
   a.origin-button,
@@ -2503,6 +2591,14 @@ html[data-hero-copy-ready="1"] .hero__content {
     padding: calc(var(--origin-button-pad-block) * var(--origin-button-mobile-scale))
       calc(var(--origin-button-pad-inline) * var(--origin-button-mobile-scale));
     font-size: calc(var(--origin-button-font-size) * var(--origin-button-mobile-scale));
+  }
+
+  /* Hero CTAs — match horizontal pad to vertical on phone */
+  .hero__actions a.origin-button,
+  .hero__actions button.origin-button {
+    padding-inline: calc(
+      var(--origin-button-pad-block) * var(--origin-button-mobile-scale)
+    );
   }
 
   .site-footer__whatsapp-btn {
@@ -5826,8 +5922,8 @@ html[data-hero-copy-ready="1"] .hero__content {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: clamp(4rem, 9vw, 8rem);
-  /* Left card+CTA as a unit: vertically center against right copy */
-  align-items: center;
+  /* Start-aligned so left sticky rail pins while right projects stack */
+  align-items: start;
 }
 
 .collection-detail__entry-media {
@@ -5838,23 +5934,56 @@ html[data-hero-copy-ready="1"] .hero__content {
   gap: clamp(1rem, 2vw, 1.35rem);
   max-width: 100%;
   min-width: 0;
+  /* Lock IP card while scrolling stacked projects on the right */
+  position: sticky;
+  top: calc(var(--header-offset) + clamp(1rem, 2.5vw, 1.75rem));
+  align-self: start;
+}
+
+/*
+ * Sticky creates a stacking context that isolates mix-blend-mode:difference,
+ * so the left CTA would render white-on-light. Force the light-surface recipe
+ * so it matches Read case study on the right.
+ */
+.collection-detail__entry-media .origin-button-wrap {
+  mix-blend-mode: normal;
+  color: #0a0a0a;
+}
+
+.collection-detail__entry-media .origin-button {
+  border-color: #0a0a0a;
+  color: #0a0a0a;
+}
+
+.collection-detail__entry-media-frame,
+.collection-detail__project-media-frame {
+  position: relative;
+  overflow: hidden;
+  background: #141414;
+  /* Case hero is 16:9 — not the index card ratio */
+  aspect-ratio: 16 / 9;
 }
 
 .collection-detail__entry-media-frame {
-  position: relative;
   width: 66.666%;
   max-width: 66.666%;
-  /* Case hero is 16:9 — not the index card ratio */
-  aspect-ratio: 16 / 9;
-  overflow: hidden;
-  background: #141414;
+}
+
+.collection-detail__project-media-frame {
+  width: 100%;
+  max-width: 100%;
 }
 
 .collection-detail__entry-media-frame .cover-loop-video,
 .collection-detail__entry-media-frame .hero-segment-video,
 .collection-detail__entry-media-frame .youtube-background,
 .collection-detail__entry-media-frame .collection-detail__entry-video,
-.collection-detail__entry-media-frame .collection-detail__entry-still {
+.collection-detail__entry-media-frame .collection-detail__entry-still,
+.collection-detail__project-media-frame .cover-loop-video,
+.collection-detail__project-media-frame .hero-segment-video,
+.collection-detail__project-media-frame .youtube-background,
+.collection-detail__project-media-frame .collection-detail__entry-video,
+.collection-detail__project-media-frame .collection-detail__entry-still {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -5870,20 +5999,43 @@ html[data-hero-copy-ready="1"] .hero__content {
 
 .collection-detail__entry-copy {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
 .collection-detail__entry-ip {
-  margin: 0 0 clamp(2rem, 3.5vw, 2.75rem);
+  margin: 0;
   font-family: var(--font-desc);
   font-size: calc(1.375rem - 3px);
   font-weight: 600;
   font-synthesis: none;
   letter-spacing: 0.04em;
-  line-height: 1.2;
+  line-height: 1;
   text-transform: uppercase;
   color: #0a0a0a;
 }
-/* Background / Outcome labels — same face as body, +2px */
+
+.collection-detail__projects {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2.5rem, 5vw, 3.75rem);
+}
+
+.collection-detail__project {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(1rem, 2vw, 1.35rem);
+  min-width: 0;
+}
+
+/* Extra air: Read case study → Outcome */
+.collection-detail__project > .collection-detail__entry-body {
+  margin-top: clamp(0.85rem, 1.75vw, 1.35rem);
+}
+
+/* Outcome labels — same face as body, +2px */
 .collection-detail__entry-section-title {
   /* One blank body line under the chapter label */
   margin: 0 0 1.3rem;
@@ -5908,6 +6060,7 @@ html[data-hero-copy-ready="1"] .hero__content {
   opacity: 1;
   transform: none;
   transition: none;
+  width: 100%;
 }
 
 .collection-detail__entry-body.project-case-demo__panel-copy p {
@@ -5934,10 +6087,15 @@ html[data-hero-copy-ready="1"] .hero__content {
     gap: 0;
   }
 
-  /* Phone: IP above card, then CTA, then Background / Outcome */
+  /* Phone: IP title → left IP card + Visit official → project stacks */
   .collection-detail__entry-grid {
     grid-template-columns: 1fr;
     gap: clamp(1.25rem, 4vw, 1.75rem);
+  }
+
+  .collection-detail__entry-media {
+    position: static;
+    top: auto;
   }
 
   .collection-detail__entry-copy {
@@ -5945,10 +6103,17 @@ html[data-hero-copy-ready="1"] .hero__content {
   }
 
   .collection-detail__entry-ip {
-    order: -1;
-    margin-bottom: 0;
     /* Desktop IP −5px was prior; +3px from that mobile size */
     font-size: calc(1.375rem - 5px);
+  }
+
+  .collection-detail__projects {
+    display: contents;
+  }
+
+  .collection-detail__project {
+    /* After IP media column in document order */
+    order: 1;
   }
 
   .collection-detail__entry-media-frame {
@@ -5956,14 +6121,10 @@ html[data-hero-copy-ready="1"] .hero__content {
     max-width: 100%;
   }
 
-  /* Read Case — 10% larger than site mobile OriginButton */
-  .collection-detail__entry-media {
+  /* Visit official / Read Case — 10% larger than site mobile OriginButton */
+  .collection-detail__entry-media,
+  .collection-detail__project {
     --origin-button-mobile-scale: calc(2 / 3 * 1.15 * 1.05 * 1.1);
-  }
-
-  /* Read Case → Background / Outcome: extra air beyond the grid gap */
-  .collection-detail__entry-body.project-case-demo__panel-copy {
-    margin-top: clamp(1.75rem, 5.5vw, 2.75rem);
   }
 }
 
@@ -6113,8 +6274,9 @@ html[data-hero-copy-ready="1"] .hero__content {
   height: 100%;
   object-fit: cover;
   object-position: center;
-  opacity: 0;
-  transition: opacity 0.35s ease;
+  /* Always painted under the cover — never opacity-gate (avoids black flash) */
+  opacity: 1;
+  transition: none;
 }
 
 .insights-lead__media .cover-loop-video,
@@ -6124,7 +6286,10 @@ html[data-hero-copy-ready="1"] .hero__content {
 
 .cover-loop-video.is-ready .cover-loop-video__media {
   opacity: 1;
-  transition: opacity 0.4s ease;
+}
+
+.cover-loop-video.is-instant.is-ready .cover-loop-video__media {
+  transition: none;
 }
 
 .project-featured__media .cover-loop-video {
@@ -8663,8 +8828,8 @@ html[data-hero-copy-ready="1"] .hero__content {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0;
-  transition: opacity 0.35s ease;
+  opacity: 1;
+  transition: none;
   -webkit-user-select: none;
   user-select: none;
   -webkit-user-drag: none;
@@ -8672,7 +8837,10 @@ html[data-hero-copy-ready="1"] .hero__content {
 
 .hero-segment-video.is-ready .hero-segment-video__media {
   opacity: 1;
-  transition: opacity 0.4s ease;
+}
+
+.hero-segment-video.is-instant.is-ready .hero-segment-video__media {
+  transition: none;
 }
 
 /* Desktop embeds — fill the 16:9 band (no viewport cover math) */
@@ -8723,12 +8891,17 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   height: 100%;
   transform: translate(-50%, -50%) scale(1.25);
   transform-origin: center center;
-  opacity: 0;
-  transition: opacity 480ms cubic-bezier(0.22, 1, 0.36, 1);
+  /* Paint under the cover — unveil by hiding cover only */
+  opacity: 1;
+  transition: none;
 }
 
 .youtube-background.is-ready iframe {
   opacity: 1;
+}
+
+.youtube-background.is-instant.is-ready iframe {
+  transition: none;
 }
 
 /* Hide title / big-play flash until playback is stable past start —
@@ -9244,13 +9417,17 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0;
-  transition: opacity 0.35s ease;
+  /* Always painted under the cover — avoid opacity:0 + missing frame = dead black */
+  opacity: 1;
+  transition: none;
 }
 
 .project-fallback-video.is-ready .project-fallback-video__media {
   opacity: 1;
-  transition: opacity 0.4s ease;
+}
+
+.project-fallback-video.is-instant.is-ready .project-fallback-video__media {
+  transition: none;
 }
 
 /* Intrinsic file size — no forced padding box / cover crop */

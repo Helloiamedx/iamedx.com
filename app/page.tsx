@@ -11,9 +11,13 @@ import { InsightMasonry } from "@/components/InsightMasonry";
 import { InsightsLead } from "@/components/InsightsLead";
 import { ProjectFeaturedLead } from "@/components/ProjectFeaturedLead";
 import { ProjectMasonry } from "@/components/ProjectMasonry";
+import { SiteIntroLoader } from "@/components/SiteIntroLoader";
 import { SupportBento } from "@/components/SupportBento";
+import { footerMarqueeVideos } from "@/content/nav";
 import { projects, projectsFeaturedLead } from "@/content/projects";
+import { asset } from "@/lib/assets";
 import { HERO_VIDEO_SRC } from "@/lib/heroMedia";
+import { isInsightVideoCover } from "@/lib/insight-meta";
 import { getAllInsights, getInsightsFeaturedLead } from "@/lib/insights";
 import { shuffleArray } from "@/lib/utils";
 
@@ -29,62 +33,79 @@ export default function HomePage() {
     getAllInsights().filter((insight) => insight.slug !== featuredInsight?.slug),
   ).slice(0, 2);
 
+  /* Home intro waits for these — hero + linked card/cover/footer videos */
+  const introVideoSrcs = [
+    HERO_VIDEO_SRC,
+    projectsFeaturedLead.coverVideo,
+    ...selectedProjects.map((project) => project.coverVideo),
+    featuredInsight && isInsightVideoCover(featuredInsight.coverImage)
+      ? featuredInsight.coverImage
+      : undefined,
+    ...selectedInsights
+      .filter((insight) => isInsightVideoCover(insight.coverImage))
+      .map((insight) => insight.coverImage),
+    asset(footerMarqueeVideos[0]?.src ?? ""),
+  ].filter((src): src is string => Boolean(src));
+
   return (
-    <main className="home-page">
-      {/* Kick hero bytes as early as the document head allows */}
-      <link
-        rel="preload"
-        as="video"
-        href={HERO_VIDEO_SRC}
-        type="video/mp4"
-        fetchPriority="high"
-      />
-      <section className="hero">
-        <div className="hero__media" aria-hidden="true">
-          <HeroBackgroundVideo />
-        </div>
-        <div className="hero__content">
-          <HeroHeadline />
-        </div>
-      </section>
-
-      {/* recognition → support → my approach → character → … */}
-      <HomeRecognitionBand />
-      <SupportBento />
-      <HomeMyApproach />
-      <HomeDifferentCards />
-
-      <section
-        className="section home-page__section"
-        aria-labelledby="home-products-title"
-      >
-        <HomeSectionIntro
-          titleId="home-products-title"
-          label="portfolio"
-          title="Products I Have Helped Bring to Life"
+    <>
+      <SiteIntroLoader preloadVideos={introVideoSrcs} />
+      <main className="home-page">
+        {/* Kick hero bytes as early as the document head allows */}
+        <link
+          rel="preload"
+          as="video"
+          href={HERO_VIDEO_SRC}
+          type="video/mp4"
+          fetchPriority="high"
         />
-        <ProjectFeaturedLead project={projectsFeaturedLead} />
-        <ProjectMasonry
-          projects={selectedProjects}
-          layout="related"
-          enableHoverSwap
-        />
-        <FrostIndexLink href="/projects">All projects</FrostIndexLink>
-      </section>
+        <section className="hero">
+          <div className="hero__media" aria-hidden="true">
+            <HeroBackgroundVideo />
+          </div>
+          <div className="hero__content">
+            <HeroHeadline />
+          </div>
+        </section>
 
-      <section
-        className="section home-page__section"
-        aria-labelledby="home-thoughts-title"
-      >
-        <HomeSectionIntro
-          titleId="home-thoughts-title"
-          label="thoughts"
-          title="How I Think About My Work"
-        />
-        {featuredInsight ? <InsightsLead insight={featuredInsight} /> : null}
-        <InsightMasonry insights={selectedInsights} layout="related" />
-        <FrostIndexLink href="/thoughts">All thoughts</FrostIndexLink>
-      </section>
-    </main>
+        {/* recognition → support → my approach → character → … */}
+        <HomeRecognitionBand />
+        <SupportBento />
+        <HomeMyApproach />
+        <HomeDifferentCards />
+
+        <section
+          className="section home-page__section"
+          aria-labelledby="home-products-title"
+        >
+          <HomeSectionIntro
+            titleId="home-products-title"
+            label="portfolio"
+            title="Products I Have Helped Bring to Life"
+          />
+          <ProjectFeaturedLead project={projectsFeaturedLead} />
+          <ProjectMasonry
+            projects={selectedProjects}
+            layout="related"
+            enableHoverSwap
+          />
+          <FrostIndexLink href="/projects">All projects</FrostIndexLink>
+        </section>
+
+        <section
+          className="section home-page__section"
+          aria-labelledby="home-thoughts-title"
+        >
+          <HomeSectionIntro
+            titleId="home-thoughts-title"
+            label="thoughts"
+            title="How I Think About My Work"
+          />
+          {featuredInsight ? <InsightsLead insight={featuredInsight} /> : null}
+          <InsightMasonry insights={selectedInsights} layout="related" />
+          <FrostIndexLink href="/thoughts">All thoughts</FrostIndexLink>
+        </section>
+      </main>
+    </>
   );
 }

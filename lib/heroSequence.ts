@@ -1,12 +1,14 @@
 /**
  * Home hero playback sequence (documentElement data attrs):
  * 1. data-chrome-ready — header logo/menu painted (Header)
- * 2. data-hero-video-ready — video can play + revealed (HeroBackgroundVideo)
- * 3. data-hero-copy-ready — headline may appear (short delay after video in)
+ * 2. data-hero-video-playable — hero video can play (buffer ready; gates site intro)
+ * 3. data-hero-video-ready — video revealed under / after intro
+ * 4. data-hero-copy-ready — headline may appear (short delay after video in)
  *    → HeroHeadline then reveals CTAs after another short beat
  */
 
 export const HERO_CHROME_ATTR = "chromeReady";
+export const HERO_VIDEO_PLAYABLE_ATTR = "heroVideoPlayable";
 export const HERO_VIDEO_ATTR = "heroVideoReady";
 export const HERO_COPY_ATTR = "heroCopyReady";
 

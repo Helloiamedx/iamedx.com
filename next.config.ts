@@ -1,20 +1,24 @@
 import type { NextConfig } from "next";
+import os from "node:os";
 
 /**
  * LAN phone/tablet preview: Next 16 blocks /_next from unknown hosts.
- * Keep this Mac’s current Wi‑Fi IP here (see `ipconfig getifaddr en0`).
+ * Auto-collect this Mac’s private IPv4s so Wi‑Fi DHCP changes don’t break media.
  * Also proxies CDN through same origin in `rewrites` so media works on LAN.
  */
-const LAN_DEV_HOSTS = [
-  "192.168.0.103",
-  "192.168.2.44",
-  "192.168.2.40",
-  "localhost",
-  "127.0.0.1",
-];
+function lanDevHosts(): string[] {
+  const hosts = new Set<string>(["localhost", "127.0.0.1"]);
+  for (const infos of Object.values(os.networkInterfaces())) {
+    for (const info of infos ?? []) {
+      if (info.family !== "IPv4" || info.internal) continue;
+      hosts.add(info.address);
+    }
+  }
+  return [...hosts];
+}
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: LAN_DEV_HOSTS,
+  allowedDevOrigins: lanDevHosts(),
   async redirects() {
     return [
       {

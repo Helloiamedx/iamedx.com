@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
@@ -7,6 +8,12 @@ import { asset } from "@/lib/assets";
 import "./globals.css";
 
 const favicon = asset("/brand/favicon.svg");
+
+/**
+ * Home + first visit only. Skip if already seen (localStorage) or not `/`.
+ * Site stays painted under the veil — no visibility:hidden flash.
+ */
+const EDX_LOADING_BOOT = `(function(){var p=location.pathname;try{if(localStorage.getItem("edx-intro-seen-v2")==="1")return;}catch(e){}if(p!=="/"&&p!=="")return;document.documentElement.classList.add("edx-loading");})();`;
 
 export const metadata: Metadata = {
   title: {
@@ -84,6 +91,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body className="min-h-full flex flex-col">
+        <Script id="edx-loading-boot" strategy="beforeInteractive">
+          {EDX_LOADING_BOOT}
+        </Script>
         <SmoothScroll>
           <Header />
           <div className="site-main">{children}</div>

@@ -252,6 +252,7 @@ export function YouTubeBackground({
       <VideoLoadingCover
         progress={progress}
         ready={ready}
+        cacheKey={`youtube:${videoId}`}
         onDone={() => setRevealed(true)}
       />
     </div>

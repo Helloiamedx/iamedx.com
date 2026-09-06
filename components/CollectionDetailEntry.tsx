@@ -12,16 +12,42 @@ import type { Project } from "@/content/projects";
 import { asset } from "@/lib/assets";
 
 type CollectionDetailEntryProps = {
-  project: Project;
-  /** Game / IP display name — desktop: top of right column; mobile: above the card */
+  /** Game / IP display name — between first project card and Read case study */
   gameTitle: string;
+  /** Official site — left Visit official CTA when set */
+  officialWebsite?: string;
+  /** Studio / publisher name in left CTA */
+  companyName?: string;
+  /** Dedicated left-column IP video when set */
+  ipVideo?: string;
+  /** Lead project = left IP media fallback; all projects stack on the right */
+  projects: Project[];
 };
 
-/** Collection detail right rail — Background then Outcome only. */
-function getCollectionCopySections(project: Project): CaseCopySection[] {
+/** Collection detail right rail — Outcome only. */
+function getCollectionOutcomeSections(project: Project): CaseCopySection[] {
   return getCaseCopySections(project).filter(
-    (section) => section.id === "background" || section.id === "outcome",
+    (section) => section.id === "outcome",
   );
+}
+
+function CollectionIpHero({
+  ipVideo,
+  fallbackProject,
+}: {
+  ipVideo?: string;
+  fallbackProject: Project;
+}) {
+  if (ipVideo) {
+    return (
+      <HeroSegmentVideo
+        className="collection-detail__entry-video"
+        src={ipVideo}
+      />
+    );
+  }
+
+  return <CollectionEntryHero project={fallbackProject} />;
 }
 
 function CollectionEntryHero({ project }: { project: Project }) {
@@ -68,11 +94,61 @@ function CollectionEntryHero({ project }: { project: Project }) {
   );
 }
 
-export function CollectionDetailEntry({
+function CollectionProjectBlock({
   project,
   gameTitle,
+}: {
+  project: Project;
+  /** Between the project card and Read case study */
+  gameTitle: string;
+}) {
+  const outcomeSections = getCollectionOutcomeSections(project);
+
+  return (
+    <div className="collection-detail__project">
+      <div className="collection-detail__project-media-frame">
+        <CollectionEntryHero project={project} />
+      </div>
+      <h2 className="collection-detail__entry-ip">{gameTitle}</h2>
+      <OriginButton href={`/projects/${project.slug}`}>
+        Read case study
+      </OriginButton>
+      {outcomeSections.length > 0 ? (
+        <div className="collection-detail__entry-body project-case-demo__panel-copy">
+          {outcomeSections.map((section) => (
+            <section
+              key={section.id}
+              className="project-case-demo__panel-block collection-detail__entry-section"
+            >
+              <h3 className="collection-detail__entry-section-title">
+                {section.id === "outcome" ? "OUTCOME" : section.label}
+              </h3>
+              {section.body.map((paragraph) => {
+                const trimmed = paragraph.trim();
+                if (!trimmed) return null;
+                return (
+                  <p key={`${section.id}-${trimmed.slice(0, 48)}`}>
+                    {trimmed}
+                  </p>
+                );
+              })}
+            </section>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+export function CollectionDetailEntry({
+  gameTitle,
+  officialWebsite,
+  companyName,
+  ipVideo,
+  projects,
 }: CollectionDetailEntryProps) {
-  const copySections = getCollectionCopySections(project);
+  const leadProject = projects[0];
+  if (!leadProject) return null;
 
   return (
     <article className="collection-detail__entry">
@@ -81,38 +157,39 @@ export function CollectionDetailEntry({
         <div className="collection-detail__entry-grid">
           <div className="collection-detail__entry-media">
             <div className="collection-detail__entry-media-frame">
-              <CollectionEntryHero project={project} />
+              <CollectionIpHero
+                ipVideo={ipVideo}
+                fallbackProject={leadProject}
+              />
             </div>
-            <OriginButton href={`/projects/${project.slug}`}>
-              Read case study
+            {companyName ? (
+              <p className="collection-detail__entry-ip">{companyName}</p>
+            ) : null}
+            <OriginButton
+              href={officialWebsite || "#"}
+              external={Boolean(officialWebsite)}
+              onClick={
+                officialWebsite
+                  ? undefined
+                  : (event) => {
+                      event.preventDefault();
+                    }
+              }
+            >
+              Visit official
             </OriginButton>
           </div>
 
           <div className="collection-detail__entry-copy">
-            <h2 className="collection-detail__entry-ip">{gameTitle}</h2>
-            {copySections.length > 0 ? (
-              <div className="collection-detail__entry-body project-case-demo__panel-copy">
-                {copySections.map((section) => (
-                  <section
-                    key={section.id}
-                    className="project-case-demo__panel-block collection-detail__entry-section"
-                  >
-                    <h3 className="collection-detail__entry-section-title">
-                      {section.label}
-                    </h3>
-                    {section.body.map((paragraph) => {
-                      const trimmed = paragraph.trim();
-                      if (!trimmed) return null;
-                      return (
-                        <p key={`${section.id}-${trimmed.slice(0, 48)}`}>
-                          {trimmed}
-                        </p>
-                      );
-                    })}
-                  </section>
-                ))}
-              </div>
-            ) : null}
+            <div className="collection-detail__projects">
+              {projects.map((project) => (
+                <CollectionProjectBlock
+                  key={project.slug}
+                  project={project}
+                  gameTitle={gameTitle}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>

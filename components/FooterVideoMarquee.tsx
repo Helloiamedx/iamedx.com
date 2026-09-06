@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { footerMarqueeVideos } from "@/content/nav";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
 import {
   VideoLoadingCover,
   useVideoLoadProgress,
 } from "@/components/VideoLoadingCover";
+import { useVideoRevealGate } from "@/lib/videoLoadMemory";
 import { asset } from "@/lib/assets";
 
 /**
@@ -19,7 +20,7 @@ export function FooterVideoMarquee() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const src = asset(clip.src);
   const { progress, ready } = useVideoLoadProgress(videoRef, src);
-  const [revealed, setRevealed] = useState(false);
+  const { revealed, instant, onCoverDone } = useVideoRevealGate(src);
 
   useEffect(() => {
     const el = videoRef.current;
@@ -29,7 +30,7 @@ export function FooterVideoMarquee() {
 
   return (
     <div
-      className={`footer-video-fill${revealed ? " is-ready" : ""}`}
+      className={`footer-video-fill${revealed ? " is-ready" : ""}${instant ? " is-instant" : ""}`}
       aria-hidden="true"
     >
       <ProtectedVideo
@@ -44,7 +45,8 @@ export function FooterVideoMarquee() {
       <VideoLoadingCover
         progress={progress}
         ready={ready}
-        onDone={() => setRevealed(true)}
+        cacheKey={src}
+        onDone={onCoverDone}
       />
     </div>
   );

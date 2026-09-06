@@ -6,6 +6,7 @@ import {
   VideoLoadingCover,
   useVideoLoadProgress,
 } from "@/components/VideoLoadingCover";
+import { useVideoRevealGate } from "@/lib/videoLoadMemory";
 import { cn } from "@/lib/utils";
 
 type CoverLoopVideoProps = {
@@ -16,7 +17,7 @@ type CoverLoopVideoProps = {
 };
 
 /**
- * Index / Related card cover loop — dim↔bright mark until settle, then mute autoplay.
+ * Index / Related card cover loop — stroke→fill mark until settle, then mute autoplay.
  * Starts the network load when near the viewport (keeps mobile tappable).
  */
 export function CoverLoopVideo({
@@ -29,13 +30,19 @@ export function CoverLoopVideo({
   const [active, setActive] = useState(false);
   const loadKey = active ? src : "";
   const { progress, ready } = useVideoLoadProgress(videoRef, loadKey);
-  const [revealed, setRevealed] = useState(false);
+  const { revealed, instant, onCoverDone } = useVideoRevealGate(src);
 
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
 
     const activate = () => setActive(true);
+
+    /* Home intro veil — load every cover now, not after scroll */
+    if (document.documentElement.classList.contains("edx-loading")) {
+      activate();
+      return;
+    }
 
     if (typeof IntersectionObserver === "undefined") {
       activate();
@@ -62,10 +69,6 @@ export function CoverLoopVideo({
     return () => io.disconnect();
   }, []);
 
-  useEffect(() => {
-    setRevealed(false);
-  }, [src]);
-
   useLayoutEffect(() => {
     const el = videoRef.current;
     if (!el || !ready) return;
@@ -75,7 +78,11 @@ export function CoverLoopVideo({
   return (
     <div
       ref={rootRef}
-      className={cn("cover-loop-video", revealed && "is-ready")}
+      className={cn(
+        "cover-loop-video",
+        revealed && "is-ready",
+        instant && "is-instant",
+      )}
       aria-hidden={ariaLabel ? undefined : true}
     >
       {active ? (
@@ -91,7 +98,8 @@ export function CoverLoopVideo({
       <VideoLoadingCover
         progress={active ? progress : 0}
         ready={Boolean(active && ready)}
-        onDone={() => setRevealed(true)}
+        cacheKey={src}
+        onDone={onCoverDone}
       />
     </div>
   );

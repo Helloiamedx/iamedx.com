@@ -1,6 +1,6 @@
 import { CollectionDetailEntry } from "@/components/CollectionDetailEntry";
 import {
-  getCollectionProjects,
+  getCollectionIpGroups,
   type ProjectCollection,
 } from "@/content/collections";
 
@@ -9,20 +9,25 @@ type CollectionDetailBodyProps = {
 };
 
 export function CollectionDetailBody({ collection }: CollectionDetailBodyProps) {
-  const entries = getCollectionProjects(collection);
+  const groups = getCollectionIpGroups(collection);
 
-  if (entries.length === 0) return null;
+  if (groups.length === 0) return null;
 
   return (
     <div className="collection-detail__body">
       <div className="collection-detail__entries">
-        {entries.map(({ project, gameTitle }) => (
+        {groups.map(
+          ({ gameTitle, officialWebsite, companyName, ipVideo, projects }) => (
           <CollectionDetailEntry
-            key={project.slug}
-            project={project}
+            key={gameTitle}
             gameTitle={gameTitle}
+            officialWebsite={officialWebsite}
+            companyName={companyName}
+            ipVideo={ipVideo}
+            projects={projects}
           />
-        ))}
+        ),
+        )}
         <hr className="collection-detail__rule" aria-hidden="true" />
       </div>
     </div>
