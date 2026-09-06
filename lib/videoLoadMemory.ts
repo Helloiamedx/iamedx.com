@@ -1,6 +1,6 @@
 /**
- * Remember video srcs that already finished loading in this tab.
- * Soft navigations + reloads in the same tab skip the stroke loader.
+ * Tab memory for video srcs that finished a load cycle.
+ * Used for soft analytics / optional hints — covers always run stroke→fill.
  */
 
 "use client";
@@ -43,22 +43,19 @@ export function markVideoLoaded(src: string) {
 }
 
 /**
- * Reveal gate for a single video src.
- * Cached clips use an instant cover fade — but only after onCoverDone
- * (real frame ready). Never reveal the media before that, or you get a black flash.
+ * Reveal gate — parent shows media after cover onDone.
+ * No “instant skip” path; every mount gets stroke → fill.
  */
-export function useVideoRevealGate(cacheKey: string) {
+export function useVideoRevealGate(_cacheKey: string) {
   const [revealed, setRevealed] = useState(false);
-  const [instant, setInstant] = useState(false);
 
   useLayoutEffect(() => {
     setRevealed(false);
-    setInstant(Boolean(cacheKey && wasVideoLoaded(cacheKey)));
-  }, [cacheKey]);
+  }, [_cacheKey]);
 
   return {
     revealed,
-    instant,
+    instant: false,
     onCoverDone: () => setRevealed(true),
   };
 }

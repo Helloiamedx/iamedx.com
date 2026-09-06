@@ -31,7 +31,7 @@ Playback requirements on the working source: **muted**, **autoplay**, **loop**, 
 
 ## 2. Cover before play
 
-- **Loading only** — site mark (`VideoLoadingCover`, no copy): **stroke → fill** bound to that clip’s buffer (no breath / flash, no blur); size against the video frame (`cqmin`; Insights slightly smaller). After fill, brief hold, then fade cover — video stays painted underneath; unveil by hiding the cover. Cover is always `pointer-events: none`.
+- **Loading only** — site mark (`VideoLoadingCover`, no copy): **always stroke → fill → unveil** (never skip to a solid “breathing” mark). While buffer progress is stalled (cold first load), soft **opacity breath on the stroke line only**. Plate is **pure black** (`#000`). Video plays muted under the cover before unveil so remounts don’t stutter. Cover is always `pointer-events: none`.
 - **Do not** extract a frame, generate a poster image, or invent a still from the video.
 - Applies to case hero (`HeroSegmentVideo`), gallery clips (`ProjectFallbackVideo`), YouTube hero veil, home hero, and footer underlay.
 

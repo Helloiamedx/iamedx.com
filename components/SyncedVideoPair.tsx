@@ -12,7 +12,6 @@ import {
   VideoLoadingCover,
   useVideoLoadProgress,
 } from "@/components/VideoLoadingCover";
-import { wasVideoLoaded } from "@/lib/videoLoadMemory";
 
 type PairSide = {
   primary: string;
@@ -113,16 +112,9 @@ export function SyncedVideoPair({
   const bothReady = leftReady && rightReady;
   const pairProgress = Math.min(leftProgress, rightProgress);
   const [revealed, setRevealed] = useState(false);
-  const [instant, setInstant] = useState(false);
 
   useLayoutEffect(() => {
-    if (wasVideoLoaded(leftSrc) && wasVideoLoaded(rightSrc)) {
-      setInstant(true);
-      setRevealed(false);
-    } else {
-      setInstant(false);
-      setRevealed(false);
-    }
+    setRevealed(false);
   }, [leftSrc, rightSrc]);
 
   useEffect(() => {
@@ -132,16 +124,34 @@ export function SyncedVideoPair({
     const b = rightRef.current;
     if (!a || !b) return;
 
-    const startTogether = () => {
-      try {
-        a.currentTime = 0;
-        b.currentTime = 0;
-      } catch {
-        /* seek can throw before metadata settles */
-      }
-      void Promise.all([a.play(), b.play()]).catch(() => {
-        /* muted autoplay usually ok */
+    const seekToStart = (v: HTMLVideoElement) =>
+      new Promise<void>((resolve) => {
+        if (v.currentTime <= 0.08) {
+          resolve();
+          return;
+        }
+        const done = () => {
+          v.removeEventListener("seeked", done);
+          window.clearTimeout(safety);
+          resolve();
+        };
+        const safety = window.setTimeout(done, 500);
+        v.addEventListener("seeked", done);
+        try {
+          v.currentTime = 0;
+        } catch {
+          done();
+        }
       });
+
+    let cancelled = false;
+
+    const startTogether = () => {
+      void (async () => {
+        await Promise.all([seekToStart(a), seekToStart(b)]);
+        if (cancelled) return;
+        void Promise.all([a.play(), b.play()]).catch(() => {});
+      })();
     };
 
     startTogether();
@@ -165,6 +175,7 @@ export function SyncedVideoPair({
     a.addEventListener("timeupdate", onTimeUpdate);
 
     return () => {
+      cancelled = true;
       a.removeEventListener("ended", onEnded);
       b.removeEventListener("ended", onEnded);
       a.removeEventListener("timeupdate", onTimeUpdate);
@@ -182,7 +193,6 @@ export function SyncedVideoPair({
         progress={pairProgress}
         ready={bothReady}
         revealed={revealed}
-        instant={instant}
         onCoverDone={() => setRevealed(true)}
         onError={switchLeftFallback}
       />
@@ -195,7 +205,6 @@ export function SyncedVideoPair({
         progress={pairProgress}
         ready={bothReady}
         revealed={revealed}
-        instant={instant}
         onCoverDone={() => setRevealed(true)}
         onError={switchRightFallback}
       />
@@ -212,7 +221,6 @@ function Side({
   progress,
   ready,
   revealed,
-  instant,
   onCoverDone,
   onError,
 }: {
@@ -224,7 +232,6 @@ function Side({
   progress: number;
   ready: boolean;
   revealed: boolean;
-  instant: boolean;
   onCoverDone: () => void;
   onError: () => void;
 }) {
@@ -238,7 +245,7 @@ function Side({
 
   return (
     <div
-      className={`project-fallback-video${nativeAspect ? " project-fallback-video--native" : ""}${revealed ? " is-ready" : ""}${instant ? " is-instant" : ""}`}
+      className={`project-fallback-video${nativeAspect ? " project-fallback-video--native" : ""}${revealed ? " is-ready" : ""}`}
       style={
         nativeAspect
           ? intrinsicRatio

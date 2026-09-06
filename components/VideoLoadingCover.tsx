@@ -11,10 +11,7 @@ import {
   SITE_MARK_BOTTOM_D,
   SITE_MARK_TOP_D,
 } from "@/lib/siteMark";
-import {
-  markVideoLoaded,
-  wasVideoLoaded,
-} from "@/lib/videoLoadMemory";
+import { markVideoLoaded } from "@/lib/videoLoadMemory";
 
 type VideoLoadingCoverProps = {
   /**
@@ -26,10 +23,7 @@ type VideoLoadingCoverProps = {
   ready: boolean;
   /** First frame is painted — keep mark, clear solid black plate */
   framed?: boolean;
-  /**
-   * Video URL (or stable id). Once loaded once in this tab, later mounts
-   * skip the stroke animation.
-   */
+  /** Stable id — remembered after a successful unveil (tab session) */
   cacheKey?: string;
   /** Fires when the cover begins fading — parent should reveal the video then */
   onDone?: () => void;
@@ -51,11 +45,11 @@ function ease(value: number) {
 
 /** After stroke hits the ready gate: fill → brief hold → fade with video */
 const BEFORE_FILL_MS = 30;
-const FILL_MS = 520;
-const HOLD_MS = 80;
+const FILL_MS = 480;
+const HOLD_MS = 40;
 /** Stroke eases toward live progress (smooths chunky buffer jumps) */
 const TRACE_CATCHUP = 0.42;
-/** Tiny tip so the mark reads immediately — not fake progress */
+/** Tiny tip so the stroke reads immediately — not fake progress */
 const STROKE_TIP = 0.03;
 
 /**
@@ -91,19 +85,12 @@ export function readBufferedRatio(el: HTMLVideoElement): number {
   }
 }
 
-/**
- * How much of the file we need before first play feels smooth.
- * First unveil waits for a real lead — early play under the cover was causing
- * underrun stutter that continued after the cover lifted.
- */
 export function readyTargetRatio(el: HTMLVideoElement): number {
   const { duration } = el;
   if (duration && Number.isFinite(duration) && duration > 0) {
     if (duration <= 20) {
-      /* Short loops: ~5s lead or ~40–55% */
       return Math.min(0.55, Math.max(0.4, 5 / duration));
     }
-    /* Longer: ~7s or ~28% */
     return Math.min(0.45, Math.max(7 / duration, 0.28));
   }
   return 0.5;
@@ -116,20 +103,13 @@ export function isVideoBufferReady(el: HTMLVideoElement): boolean {
   if (readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA && ratio >= 0.2) {
     return true;
   }
-
   if (ratio >= 0.8) return true;
-
   if (duration && Number.isFinite(duration) && duration > 0) {
     return ratio >= readyTargetRatio(el);
   }
-
   return readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA;
 }
 
-/**
- * 0–100 for the stroke: 100 means “hit the ready gate”, not “downloaded 100% of the file”.
- * That way the line finishes when we can play — no empty chase after ready.
- */
 export function readVideoBufferProgress(el: HTMLVideoElement): number {
   const ratio = readBufferedRatio(el);
   if (ratio > 0) {
@@ -146,8 +126,8 @@ export function readVideoBufferProgress(el: HTMLVideoElement): number {
 }
 
 /**
- * Video load UI — stroke tracks THIS clip’s buffer toward the ready gate;
- * fill only after that; then unveil. Tab-cached srcs skip motion.
+ * Always: stroke (tracks buffer) → fill → unveil.
+ * When buffer is stalled (no progress), the stroke line breathes — not the whole mark.
  */
 export function VideoLoadingCover({
   progress,
@@ -156,20 +136,18 @@ export function VideoLoadingCover({
   cacheKey,
   onDone,
 }: VideoLoadingCoverProps) {
-  /*
-   * Do not read sessionStorage during render — SSR has no storage, so
-   * wasVideoLoaded() would hydrate with a different className / aria-hidden.
-   */
   const [exiting, setExiting] = useState(false);
-  const [skipMotion, setSkipMotion] = useState(false);
+  const [stalled, setStalled] = useState(true);
   const [cycle, setCycle] = useState(0);
   const coverRef = useRef<HTMLDivElement>(null);
   const fillRef = useRef<SVGGElement>(null);
   const outlineGroupRef = useRef<SVGGElement>(null);
   const readyRef = useRef(ready);
   const progressRef = useRef(progress);
+  const stalledRef = useRef(true);
   const onDoneRef = useRef(onDone);
   const doneFiredRef = useRef(false);
+  const lastProgressRef = useRef(progress);
 
   useEffect(() => {
     onDoneRef.current = onDone;
@@ -183,33 +161,34 @@ export function VideoLoadingCover({
     progressRef.current = progress;
   }, [progress]);
 
-  /* Reset gate whenever the clip identity changes */
+  useEffect(() => {
+    stalledRef.current = stalled;
+  }, [stalled]);
+
+  /* Stall = no buffer progress for a beat (first-load “still waiting”) */
+  useEffect(() => {
+    if (exiting || ready) {
+      setStalled(false);
+      return;
+    }
+
+    const moved = progress > lastProgressRef.current + 0.5;
+    lastProgressRef.current = progress;
+    if (moved) setStalled(false);
+
+    const id = window.setTimeout(() => setStalled(true), 380);
+    return () => window.clearTimeout(id);
+  }, [progress, ready, exiting, cacheKey]);
+
   useLayoutEffect(() => {
     doneFiredRef.current = false;
     setExiting(false);
-    const cached = Boolean(cacheKey && wasVideoLoaded(cacheKey));
-    setSkipMotion(cached);
-    /*
-     * Same layout pass as skipMotion — don’t wait for a re-render, or the
-     * plate paints as dead black (no stroke outlines when stroke RAF bails).
-     */
-    if (cached) {
-      const fill = fillRef.current;
-      const cover = coverRef.current;
-      if (fill) fill.style.opacity = "1";
-      cover?.style.setProperty("--video-load-mark-opacity", "1");
-    }
+    setStalled(true);
+    lastProgressRef.current = 0;
+    setCycle((n) => n + 1);
   }, [cacheKey]);
 
-  /* Tab-cached: skip stroke; unveil only once THIS element reports ready */
-  useLayoutEffect(() => {
-    if (!cacheKey || !wasVideoLoaded(cacheKey)) return;
-    if (!ready || doneFiredRef.current) return;
-    doneFiredRef.current = true;
-    setExiting(true);
-    onDoneRef.current?.();
-  }, [cacheKey, ready]);
-
+  /* ready flipped false again — restart stroke cycle */
   const wasReadyRef = useRef(false);
   useEffect(() => {
     if (ready) {
@@ -218,28 +197,13 @@ export function VideoLoadingCover({
     }
     if (!wasReadyRef.current) return;
     wasReadyRef.current = false;
-    if (cacheKey && wasVideoLoaded(cacheKey)) {
-      setSkipMotion(true);
-      const fill = fillRef.current;
-      if (fill) fill.style.opacity = "1";
-      return;
-    }
-    setSkipMotion(false);
     setExiting(false);
     doneFiredRef.current = false;
+    setStalled(true);
     setCycle((n) => n + 1);
-  }, [ready, cacheKey]);
-
-  /* Keep solid mark visible while cached wait is still up */
-  useLayoutEffect(() => {
-    if (!skipMotion || exiting) return;
-    const fill = fillRef.current;
-    if (fill) fill.style.opacity = "1";
-  }, [skipMotion, exiting, cacheKey]);
+  }, [ready]);
 
   useLayoutEffect(() => {
-    if (cacheKey && wasVideoLoaded(cacheKey)) return;
-
     const cover = coverRef.current;
     const fill = fillRef.current;
     const outlineGroup = outlineGroupRef.current;
@@ -298,14 +262,8 @@ export function VideoLoadingCover({
       if (reduce) {
         displayTrace = 1;
       } else {
-        /*
-         * progress is already normalized to the ready gate (100 = can play).
-         * When ready, snap the last hair — no long chase past real buffer.
-         */
         const gate01 = clampProgress(progressRef.current) / 100;
-        const target = readyRef.current
-          ? 1
-          : Math.max(STROKE_TIP, gate01);
+        const target = readyRef.current ? 1 : Math.max(STROKE_TIP, gate01);
         const catchupRate = readyRef.current
           ? Math.min(0.85, TRACE_CATCHUP * 2.2)
           : TRACE_CATCHUP;
@@ -334,9 +292,22 @@ export function VideoLoadingCover({
         const denom = Math.max(0.001, 1 - stagger);
         const segment = clamp01((displayTrace - stagger) / denom);
         path.style.strokeDashoffset = String(1000 * (1 - segment));
-        path.style.opacity = String(
-          (segment > 0.001 ? 1 : 0) * (1 - fillProgress),
-        );
+        /*
+         * Breath ONLY the drawn stroke while buffer is stalled —
+         * never the whole filled mark.
+         */
+        let strokeAlpha = (segment > 0.001 ? 1 : 0) * (1 - fillProgress);
+        if (
+          strokeAlpha > 0 &&
+          stalledRef.current &&
+          !readyRef.current &&
+          fillProgress < 0.02
+        ) {
+          const breath =
+            0.4 + 0.6 * (0.5 + 0.5 * Math.sin((now / 1350) * Math.PI * 2));
+          strokeAlpha *= breath;
+        }
+        path.style.opacity = String(strokeAlpha);
       });
 
       fillEl.style.opacity = String(fillProgress);
@@ -358,15 +329,14 @@ export function VideoLoadingCover({
     };
   }, [cycle, cacheKey]);
 
-  const ariaNow =
-    exiting || skipMotion ? 100 : Math.round(clampProgress(progress));
+  const ariaNow = exiting ? 100 : Math.round(clampProgress(progress));
 
   return (
     <div
       ref={coverRef}
-      className={`video-loading-cover${exiting ? " is-ready" : ""}${skipMotion ? " is-instant" : ""}${skipMotion && !exiting ? " is-warm" : ""}${framed ? " is-framed" : ""}${ready ? " is-finishing" : " is-loading"}`}
-      aria-hidden={exiting || skipMotion}
-      aria-busy={!exiting && !skipMotion}
+      className={`video-loading-cover${exiting ? " is-ready" : ""}${framed ? " is-framed" : ""}${ready ? " is-finishing" : " is-loading"}${stalled && !exiting && !ready ? " is-stalled" : ""}`}
+      aria-hidden={exiting}
+      aria-busy={!exiting}
       role="progressbar"
       aria-valuemin={0}
       aria-valuemax={100}
@@ -404,25 +374,53 @@ export function HeroVideoLoadingMark(props: {
 }
 
 /**
- * Resolve only once THIS element has a paintable frame (or hard timeout).
- * Avoids lifting the cover onto a still-black video plate.
- * Call only after the buffer gate — play starts here, not during early load.
+ * Contiguous buffered seconds ahead of the playhead.
  */
-function whenVideoHasFrame(
+function readForwardLeadSec(el: HTMLVideoElement): number {
+  const t = el.currentTime || 0;
+  const { buffered } = el;
+  if (!buffered || buffered.length === 0) return 0;
+  try {
+    let best = 0;
+    for (let i = 0; i < buffered.length; i++) {
+      const start = buffered.start(i);
+      const end = buffered.end(i);
+      if (start <= t + 0.35 && end > t) {
+        best = Math.max(best, end - t);
+      }
+    }
+    return best;
+  } catch {
+    return 0;
+  }
+}
+
+function hasPlayableLead(el: HTMLVideoElement): boolean {
+  if (el.videoWidth <= 0) return false;
+  if (el.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA) return true;
+  return readForwardLeadSec(el) >= 1.2;
+}
+
+/**
+ * After the buffer gate: keep playing under the cover until we have a frame
+ * + short lead, then flip `ready` so stroke can finish → fill → unveil
+ * onto an already-warm decoder (avoids remount stutter).
+ */
+function whenPlayableUnderCover(
   el: HTMLVideoElement,
-  onFrame: () => void,
-  hardMs = 2800,
+  onReady: () => void,
+  hardMs = 4000,
 ): () => void {
   let settled = false;
-  let softId = 0;
   let hardId = 0;
+  let pollId = 0;
   let rvfcId: number | null = null;
 
   const settle = () => {
     if (settled) return;
     settled = true;
-    window.clearTimeout(softId);
     window.clearTimeout(hardId);
+    window.clearInterval(pollId);
     if (
       rvfcId != null &&
       typeof el.cancelVideoFrameCallback === "function"
@@ -433,48 +431,45 @@ function whenVideoHasFrame(
         /* ignore */
       }
     }
-    el.removeEventListener("playing", settle);
-    el.removeEventListener("loadeddata", onData);
-    el.removeEventListener("canplay", onData);
-    onFrame();
+    el.removeEventListener("playing", trySettle);
+    el.removeEventListener("progress", trySettle);
+    el.removeEventListener("canplay", trySettle);
+    el.removeEventListener("loadeddata", trySettle);
+    onReady();
   };
 
-  const onData = () => {
-    if (el.videoWidth <= 0) return;
-    if (el.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
-    /* Prefer a real presented frame; soft-settle if decode already has pixels */
-    window.clearTimeout(softId);
-    softId = window.setTimeout(() => {
-      if (el.videoWidth > 0) settle();
-    }, 90);
+  const trySettle = () => {
+    if (settled) return;
+    if (el.paused) {
+      void el.play().catch(() => {});
+    }
+    if (!hasPlayableLead(el)) return;
+    if (el.paused) return;
+    settle();
   };
 
-  el.addEventListener("playing", settle);
-  el.addEventListener("loadeddata", onData);
-  el.addEventListener("canplay", onData);
+  el.addEventListener("playing", trySettle);
+  el.addEventListener("progress", trySettle);
+  el.addEventListener("canplay", trySettle);
+  el.addEventListener("loadeddata", trySettle);
 
   if (typeof el.requestVideoFrameCallback === "function") {
     try {
-      rvfcId = el.requestVideoFrameCallback(() => settle());
+      rvfcId = el.requestVideoFrameCallback(() => trySettle());
     } catch {
       rvfcId = null;
     }
   }
 
-  try {
-    if (el.currentTime > 0.05) el.currentTime = 0;
-  } catch {
-    /* seek can throw before metadata */
-  }
   void el.play().catch(() => {});
-  if (el.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) onData();
-
+  trySettle();
+  pollId = window.setInterval(trySettle, 80);
   hardId = window.setTimeout(settle, hardMs);
 
   return () => {
     settled = true;
-    window.clearTimeout(softId);
     window.clearTimeout(hardId);
+    window.clearInterval(pollId);
     if (
       rvfcId != null &&
       typeof el.cancelVideoFrameCallback === "function"
@@ -485,17 +480,17 @@ function whenVideoHasFrame(
         /* ignore */
       }
     }
-    el.removeEventListener("playing", settle);
-    el.removeEventListener("loadeddata", onData);
-    el.removeEventListener("canplay", onData);
+    el.removeEventListener("playing", trySettle);
+    el.removeEventListener("progress", trySettle);
+    el.removeEventListener("canplay", trySettle);
+    el.removeEventListener("loadeddata", trySettle);
   };
 }
 
 /**
- * Tracks THIS video’s buffer until the ready gate.
- * Progress is gate-normalized (100 = can play). `ready` waits for a painted
- * frame so the cover never unveils onto dead black.
- * Do NOT play during early buffering — that underruns and stutters after unveil.
+ * Tracks THIS video’s buffer. Plays muted under the cover as soon as
+ * pixels exist so remounts don’t stutter after unveil.
+ * `ready` means: buffer gate hit AND playing with a short lead.
  */
 export function useVideoLoadProgress(
   videoRef: RefObject<HTMLVideoElement | null>,
@@ -510,64 +505,47 @@ export function useVideoLoadProgress(
     const el = videoRef.current;
     if (!el || !resetKey) return;
 
-    /* Keep the element paused while preload=auto fills the lead */
-    try {
-      el.pause();
-    } catch {
-      /* ignore */
-    }
-
-    if (wasVideoLoaded(resetKey)) {
-      setProgress(100);
-      try {
-        if (el.networkState === HTMLMediaElement.NETWORK_EMPTY) {
-          el.load();
-        }
-      } catch {
-        /* ignore */
-      }
-      return whenVideoHasFrame(el, () => setReady(true), 2200);
-    }
-
     let done = false;
     let frameId = 0;
     let lastPosted = -1;
     let frameCount = 0;
-    let stopFrameWait: (() => void) | null = null;
+    let stopPlayWait: (() => void) | null = null;
 
     const finish = () => {
       if (done) return;
       done = true;
       cancelAnimationFrame(frameId);
       setProgress(100);
-      stopFrameWait?.();
-      stopFrameWait = whenVideoHasFrame(el, () => setReady(true), 2200);
+      stopPlayWait?.();
+      stopPlayWait = whenPlayableUnderCover(el, () => setReady(true), 4000);
+    };
+
+    const nudgePlayback = () => {
+      if (el.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
+      void el.play().catch(() => {});
     };
 
     const sample = () => {
       if (done) return;
       const next = readVideoBufferProgress(el);
-      /* ~2% steps — enough for the stroke, fewer React updates */
       if (Math.abs(next - lastPosted) >= 2 || next >= 99) {
         lastPosted = next;
         setProgress((prev) => Math.max(prev, next));
       }
+      nudgePlayback();
       if (isVideoBufferReady(el)) finish();
     };
 
-    const onLoadedData = () => {
-      sample();
-    };
     const onError = () => finish();
 
     el.addEventListener("progress", sample);
-    el.addEventListener("loadeddata", onLoadedData);
+    el.addEventListener("loadeddata", sample);
     el.addEventListener("loadedmetadata", sample);
     el.addEventListener("canplay", sample);
     el.addEventListener("canplaythrough", sample);
+    el.addEventListener("playing", sample);
     el.addEventListener("error", onError);
 
-    /* Kick the network without starting playback (avoids early underrun) */
     try {
       if (el.networkState === HTMLMediaElement.NETWORK_EMPTY) {
         el.load();
@@ -575,11 +553,11 @@ export function useVideoLoadProgress(
     } catch {
       /* ignore */
     }
+    nudgePlayback();
     sample();
 
     const poll = () => {
       frameCount += 1;
-      /* Every other frame is plenty — buffered ranges don’t change faster */
       if (frameCount % 2 === 0) sample();
       if (!done) frameId = requestAnimationFrame(poll);
     };
@@ -593,12 +571,13 @@ export function useVideoLoadProgress(
       done = true;
       cancelAnimationFrame(frameId);
       window.clearTimeout(safetyHard);
-      stopFrameWait?.();
+      stopPlayWait?.();
       el.removeEventListener("progress", sample);
-      el.removeEventListener("loadeddata", onLoadedData);
+      el.removeEventListener("loadeddata", sample);
       el.removeEventListener("loadedmetadata", sample);
       el.removeEventListener("canplay", sample);
       el.removeEventListener("canplaythrough", sample);
+      el.removeEventListener("playing", sample);
       el.removeEventListener("error", onError);
     };
   }, [videoRef, resetKey]);
