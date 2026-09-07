@@ -10559,7 +10559,12 @@ body:has(.about-page) .site-end {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: top;
+}
+
+.about-boua__quote-photo--zoom img {
+  transform: scale(1.15);
+  transform-origin: top center;
 }
 
 .about-boua__quote-name {

@@ -40,8 +40,10 @@ const testimonials = [
     company: "Best Link (USA) Corp. Ltd.",
     role: "CEO",
     photo: asset(
-      `/images/about/${encodeURIComponent("Charlotte Tem.avif")}`,
+      `/images/about/${encodeURIComponent("Charlotte Tem.jpg")}`,
     ),
+    /** Crop zoom — headshot sits a bit low in the circle */
+    photoZoom: true,
   },
   {
     quote:
@@ -195,7 +197,13 @@ export default function AboutPage() {
               <li key={item.name} className="about-boua__quote">
                 <p className="about-boua__quote-text">“{item.quote}”</p>
                 <div className="about-boua__quote-attr">
-                  <div className="about-boua__quote-photo">
+                  <div
+                    className={
+                      item.photoZoom
+                        ? "about-boua__quote-photo about-boua__quote-photo--zoom"
+                        : "about-boua__quote-photo"
+                    }
+                  >
                     <Image
                       src={item.photo}
                       alt=""

@@ -3550,6 +3550,131 @@ const THIRTY_FIRST_PROJECT_AFTER_COVER_EXTRA_ROWS = [
   },
 ];
 
+/** 「第三十二个项目」— index hover h1–h3; same attrs/credits as messenger bags; copy + detail media TBD */
+const THIRTY_SECOND_PROJECT_NAME = "Tomb Raider Ancient Adventures Bag";
+const THIRTY_SECOND_PROJECT_CDN_FOLDER = THIRTY_SECOND_PROJECT_NAME;
+const THIRTY_SECOND_PROJECT_SLUG = projectSlugFromName(
+  THIRTY_SECOND_PROJECT_NAME,
+);
+const THIRTY_SECOND_PROJECT_TAGLINE =
+  "A Tomb Raider-inspired leather adventure bag combining Lara Croft’s iconic explorer aesthetic with practical everyday storage, featuring details inspired by the legendary Atlantean Scion.";
+const thirtySecondCdn = (fileName: string) =>
+  `https://assets.iamedx.com/images/projects/${encodeURIComponent(THIRTY_SECOND_PROJECT_CDN_FOLDER)}/${encodeURIComponent(fileName)}`;
+const THIRTY_SECOND_PROJECT_COVER = thirtySecondCdn("h1.jpg");
+const THIRTY_SECOND_PROJECT_HOVER_STILLS = [
+  thirtySecondCdn("h1.jpg"),
+  thirtySecondCdn("h2.jpg"),
+  thirtySecondCdn("h3.jpg"),
+] as [string, string, string];
+const THIRTY_SECOND_PROJECT_HERO_VIDEO = thirtySecondCdn("hero.mp4");
+const THIRTY_SECOND_PROJECT_STILL = (fileName: string, alt: string) => ({
+  src: thirtySecondCdn(fileName),
+  alt,
+});
+/** Detail gallery: 1f → 2l|2r → 3l|3r → 4l|4r → 5l|5m|5r → 6l|6m|6r → 7l|7r */
+const THIRTY_SECOND_PROJECT_GALLERY_LEAD = thirtySecondCdn("1f.jpg");
+const THIRTY_SECOND_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    THIRTY_SECOND_PROJECT_STILL(
+      "2l.jpg",
+      "Tomb Raider Ancient Adventures Bag 2L",
+    ),
+    THIRTY_SECOND_PROJECT_STILL(
+      "2r.jpg",
+      "Tomb Raider Ancient Adventures Bag 2R",
+    ),
+  ],
+};
+const THIRTY_SECOND_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      THIRTY_SECOND_PROJECT_STILL(
+        "3l.jpg",
+        "Tomb Raider Ancient Adventures Bag 3L",
+      ),
+      THIRTY_SECOND_PROJECT_STILL(
+        "3r.jpg",
+        "Tomb Raider Ancient Adventures Bag 3R",
+      ),
+    ],
+  },
+  {
+    items: [
+      THIRTY_SECOND_PROJECT_STILL(
+        "4l.jpg",
+        "Tomb Raider Ancient Adventures Bag 4L",
+      ),
+      THIRTY_SECOND_PROJECT_STILL(
+        "4r.jpg",
+        "Tomb Raider Ancient Adventures Bag 4R",
+      ),
+    ],
+  },
+  {
+    items: [
+      THIRTY_SECOND_PROJECT_STILL(
+        "5l.jpg",
+        "Tomb Raider Ancient Adventures Bag 5L",
+      ),
+      THIRTY_SECOND_PROJECT_STILL(
+        "5m.jpg",
+        "Tomb Raider Ancient Adventures Bag 5M",
+      ),
+      THIRTY_SECOND_PROJECT_STILL(
+        "5r.jpg",
+        "Tomb Raider Ancient Adventures Bag 5R",
+      ),
+    ],
+  },
+  {
+    items: [
+      THIRTY_SECOND_PROJECT_STILL(
+        "6l.jpg",
+        "Tomb Raider Ancient Adventures Bag 6L",
+      ),
+      THIRTY_SECOND_PROJECT_STILL(
+        "6m.jpg",
+        "Tomb Raider Ancient Adventures Bag 6M",
+      ),
+      THIRTY_SECOND_PROJECT_STILL(
+        "6r.jpg",
+        "Tomb Raider Ancient Adventures Bag 6R",
+      ),
+    ],
+  },
+  {
+    items: [
+      THIRTY_SECOND_PROJECT_STILL(
+        "7l.jpg",
+        "Tomb Raider Ancient Adventures Bag 7L",
+      ),
+      THIRTY_SECOND_PROJECT_STILL(
+        "7r.jpg",
+        "Tomb Raider Ancient Adventures Bag 7R",
+      ),
+    ],
+  },
+];
+const THIRTY_SECOND_PROJECT_OVERVIEW = [
+  "Inspired by Lara Croft’s life as an archaeologist and adventurer, the Tomb Raider Ancient Adventures Bag brings the exploration-driven identity of Tomb Raider into a practical everyday accessory.",
+  "The design draws inspiration from the bags Lara carries throughout her adventures, with the Atlantean Scion—the ancient artifact at the center of the original Tomb Raider—used as a key visual element. The goal was to create a leather bag that felt connected to Lara’s world while remaining practical enough for everyday use.",
+];
+/** Messenger-bag credits + Angle Li on Best Link */
+const THIRTY_SECOND_PROJECT_SPECIAL_THANKS: SpecialThanksEntry[] = [
+  {
+    company: "DPI Merchandising Inc.",
+    names: ["Michelle Wu"],
+  },
+  {
+    company: "Best Link (USA) Corp. Ltd.",
+    names: ["Karyn Leung", "Angle Li"],
+  },
+  {
+    company: SGS_CREDIT_COMPANY,
+    names: ["Liu Xinyu"],
+  },
+];
+
 /** Default / home lead — End-to-End featured (Dragon Age Writing Bundle) */
 export const projectsFeaturedLead: ProjectsFeaturedLead = {
   slug: SECOND_PROJECT_SLUG,
@@ -4924,6 +5049,40 @@ export const projects: Project[] = [
     /* Same Special thanks as Claymore */
     specialThanks: THIRTIETH_PROJECT_SPECIAL_THANKS,
     client: "Mass Effect",
+    year: 2024,
+    featured: false,
+    challenge: "",
+    result: "",
+  },
+  {
+    slug: THIRTY_SECOND_PROJECT_SLUG,
+    title: THIRTY_SECOND_PROJECT_NAME,
+    materials: ["leather"],
+    country: "global",
+    ips: ["tomb-raider"],
+    tags: involvementTags("end-to-end"),
+    summary: THIRTY_SECOND_PROJECT_TAGLINE,
+    tagline: THIRTY_SECOND_PROJECT_TAGLINE,
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "end-to-end",
+    coverImage: THIRTY_SECOND_PROJECT_COVER,
+    cardCoverImage: THIRTY_SECOND_PROJECT_COVER,
+    coverHoverStills: THIRTY_SECOND_PROJECT_HOVER_STILLS,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    heroVideo: THIRTY_SECOND_PROJECT_HERO_VIDEO,
+    galleryLeadImage: THIRTY_SECOND_PROJECT_GALLERY_LEAD,
+    afterCoverStills: THIRTY_SECOND_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: THIRTY_SECOND_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    /* Messenger-bag credits + Angle Li on Best Link */
+    specialThanks: THIRTY_SECOND_PROJECT_SPECIAL_THANKS,
+    collaborators: FOURTEENTH_PROJECT_COLLABORATORS,
+    overview: THIRTY_SECOND_PROJECT_OVERVIEW,
+    client: "Tomb Raider",
     year: 2024,
     featured: false,
     challenge: "",
