@@ -569,18 +569,9 @@ const SECOND_PROJECT_COVER_VIDEO = projectCoverFromName(
   "Dragon Age Writing Bundle.mp4",
 );
 const SECOND_PROJECT_HOVER_STILLS = [
-  projectCoverFromName(
-    SECOND_PROJECT_NAME,
-    "Dragon Age Writing Bundle hover2.jpg",
-  ),
-  projectCoverFromName(
-    SECOND_PROJECT_NAME,
-    "Dragon Age Writing Bundle hover3.jpg",
-  ),
-  projectCoverFromName(
-    SECOND_PROJECT_NAME,
-    "Dragon Age Writing Bundle hover1.jpg",
-  ),
+  projectCoverFromName(SECOND_PROJECT_NAME, "h1.jpg"),
+  projectCoverFromName(SECOND_PROJECT_NAME, "h2.jpg"),
+  projectCoverFromName(SECOND_PROJECT_NAME, "h3.jpg"),
 ] as [string, string, string];
 const SECOND_PROJECT_HERO_VIDEO = projectCoverFromName(
   SECOND_PROJECT_NAME,
@@ -771,7 +762,10 @@ const THIRD_PROJECT_STILL = (n: 1 | 2 | 3 | 4 | 5 | 6, alt: string) => ({
 });
 
 /** Detail gallery: 1 full → 2|3 → 4|5|6 → 8|Machines → unboxing */
-const THIRD_PROJECT_GALLERY_LEAD = THIRD_PROJECT_STILL(1, "Thunderjaw 1").src;
+const THIRD_PROJECT_GALLERY_LEAD = projectCoverFromName(
+  THIRD_PROJECT_CDN_FOLDER,
+  "1f.jpg",
+);
 const THIRD_PROJECT_AFTER_COVER_STILLS = {
   items: [
     THIRD_PROJECT_STILL(2, "Thunderjaw 2"),
@@ -858,10 +852,10 @@ const FOURTH_PROJECT_STILL = (file: string, alt: string) => ({
   alt,
 });
 
-/** Detail gallery: cover → 3 → 1|2 → 4|6|5 → drawing */
+/** Detail gallery: cover → 1f → 1|2 → 4|6|5 → drawing */
 const FOURTH_PROJECT_GALLERY_LEAD = FOURTH_PROJECT_COVER;
 const FOURTH_PROJECT_AFTER_COVER_STILLS = {
-  items: [FOURTH_PROJECT_STILL("Coin Shadowbox3.jpg", "Coin Shadowbox 3")],
+  items: [FOURTH_PROJECT_STILL("1f.jpg", "Coin Shadowbox")],
   ratio: "56.25%",
 };
 const FOURTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
@@ -923,7 +917,7 @@ const FIFTH_PROJECT_HERO_VIDEO = projectCoverFromName(
 /** Detail gallery — first full-width still under the hero */
 const FIFTH_PROJECT_GALLERY_LEAD = projectCoverFromName(
   FIFTH_PROJECT_NAME,
-  "The Elder Scrolls Online NECROM Look Book Bundlecover.jpg",
+  "1f.jpg",
 );
 const FIFTH_PROJECT_STILL = (file: string, alt: string) => ({
   src: projectCoverFromName(FIFTH_PROJECT_NAME, file),
@@ -1080,7 +1074,7 @@ const SEVENTH_PROJECT_HERO_VIDEO = projectCoverFromName(
 );
 const SEVENTH_PROJECT_GALLERY_LEAD = projectCoverFromName(
   SEVENTH_PROJECT_CDN_FOLDER,
-  "Dc comics injustice 2 the brainiac statue hover1.jpg",
+  "1f.jpg",
 );
 const SEVENTH_PROJECT_HOVER_STILLS = [
   projectCoverFromName(
@@ -1144,6 +1138,10 @@ const SEVENTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
 const EIGHTH_PROJECT_NAME = "Recore Collector's Edition Statue";
 const EIGHTH_PROJECT_CDN_FOLDER = "Recore collector's edition statue";
 const EIGHTH_PROJECT_SLUG = projectSlugFromName(EIGHTH_PROJECT_NAME);
+const EIGHTH_PROJECT_COVER = projectCoverFromName(
+  EIGHTH_PROJECT_CDN_FOLDER,
+  "1f.jpg",
+);
 const EIGHTH_PROJECT_COVER_VIDEO = projectCoverFromName(
   EIGHTH_PROJECT_CDN_FOLDER,
   "Recore collector's edition statue.mp4",
@@ -1179,7 +1177,7 @@ const EIGHTH_PROJECT_STILL = (n: 1 | 2 | 3 | 4 | 5, alt: string) => ({
 /** Detail gallery: 1 full → -1|-2 → 1mp4|2mp4 → 3|4|5 */
 const EIGHTH_PROJECT_GALLERY_LEAD = projectCoverFromName(
   EIGHTH_PROJECT_CDN_FOLDER,
-  "Recore Collector's Edition Statue1.jpg",
+  "1f.jpg",
 );
 const EIGHTH_PROJECT_AFTER_COVER_STILLS = {
   items: [
@@ -1237,7 +1235,7 @@ const NINTH_PROJECT_HERO_VIDEO = projectCoverFromName(
 /** Detail gallery lead still */
 const NINTH_PROJECT_GALLERY_LEAD = projectCoverFromName(
   NINTH_PROJECT_NAME,
-  "1.jpg",
+  "1f.jpg",
 );
 /** Detail gallery: lead → 21|22 → 31|32|33 → l1|r2 → endVideo last */
 const NINTH_PROJECT_AFTER_COVER_STILLS = {
@@ -1314,7 +1312,7 @@ const TENTH_PROJECT_HERO_VIDEO = projectCoverFromName(
 /** Detail gallery lead still */
 const TENTH_PROJECT_GALLERY_LEAD = projectCoverFromName(
   TENTH_PROJECT_NAME,
-  "111.jpg",
+  "h1.jpg",
 );
 /** Detail gallery row 2 — 3l | 3r (native 1500×2000 per cell) */
 const TENTH_PROJECT_AFTER_COVER_STILLS = {
@@ -1366,6 +1364,10 @@ const ELEVENTH_PROJECT_NAME = "Fallout Tunnel Snakes Rule Patch";
 /** CDN folder casing — keep exact */
 const ELEVENTH_PROJECT_CDN_FOLDER = "Fallout tunnel snakes rule patch";
 const ELEVENTH_PROJECT_SLUG = projectSlugFromName(ELEVENTH_PROJECT_NAME);
+const ELEVENTH_PROJECT_COVER = projectCoverFromName(
+  ELEVENTH_PROJECT_CDN_FOLDER,
+  "Fallout tunnel snakes rule patch-h1.jpg",
+);
 const ELEVENTH_PROJECT_COVER_VIDEO = projectCoverFromName(
   ELEVENTH_PROJECT_CDN_FOLDER,
   "Fallout tunnel snakes rule patch.mp4",
@@ -1398,10 +1400,10 @@ const ELEVENTH_PROJECT_STILL = (n: 1 | 2 | 3, alt: string) => ({
 });
 
 /** Detail gallery: 1 full → 2|3 → 11 full */
-const ELEVENTH_PROJECT_GALLERY_LEAD = ELEVENTH_PROJECT_STILL(
-  1,
-  "Tunnel Snakes patch 1",
-).src;
+const ELEVENTH_PROJECT_GALLERY_LEAD = projectCoverFromName(
+  ELEVENTH_PROJECT_CDN_FOLDER,
+  "Fallout tunnel snakes rule patch-h1.jpg",
+);
 const ELEVENTH_PROJECT_AFTER_COVER_STILLS = {
   items: [
     ELEVENTH_PROJECT_STILL(2, "Tunnel Snakes patch 2"),
@@ -1538,7 +1540,7 @@ const THIRTEENTH_PROJECT_TAGLINE =
   "A limited-edition The Elder Scrolls Online statue bringing Ithelia, the forgotten Daedric Prince, back to life through intricate sculpting, hand-painted details, and her iconic Threads of Fate.";
 const THIRTEENTH_PROJECT_COVER = projectCoverFromName(
   THIRTEENTH_PROJECT_CDN_FOLDER,
-  "1.jpg",
+  "h1.jpg",
 );
 const THIRTEENTH_PROJECT_COVER_VIDEO = projectCoverFromName(
   THIRTEENTH_PROJECT_CDN_FOLDER,
@@ -1549,14 +1551,14 @@ const THIRTEENTH_PROJECT_HERO_VIDEO = projectCoverFromName(
   "video1.mp4",
 );
 const THIRTEENTH_PROJECT_HOVER_STILLS = [
-  projectCoverFromName(THIRTEENTH_PROJECT_CDN_FOLDER, "1.jpg"),
+  projectCoverFromName(THIRTEENTH_PROJECT_CDN_FOLDER, "h1.jpg"),
   projectCoverFromName(THIRTEENTH_PROJECT_CDN_FOLDER, "2.jpg"),
   projectCoverFromName(THIRTEENTH_PROJECT_CDN_FOLDER, "3.jpg"),
 ] as [string, string, string];
-/** Detail gallery lead still — 1920×1080 */
+/** Detail gallery lead still */
 const THIRTEENTH_PROJECT_GALLERY_LEAD = projectCoverFromName(
   THIRTEENTH_PROJECT_CDN_FOLDER,
-  "1.jpg",
+  "h1.jpg",
 );
 const THIRTEENTH_PROJECT_LANDSCAPE_RATIO = `${(1080 / 1920) * 100}%`;
 /** 1500×2000 portrait pair cells */
@@ -1692,7 +1694,7 @@ const FOURTEENTH_PROJECT_TAGLINE =
   "A rugged Dragon Hunter messenger bag combining cowhide leather and canvas, featuring embossed dragon artwork, antiqued metal hardware, and a practical multi-pocket interior designed for everyday carry.";
 const FOURTEENTH_PROJECT_COVER = projectCoverFromName(
   FOURTEENTH_PROJECT_CDN_FOLDER,
-  "1.jpg",
+  "h1.jpg",
 );
 const FOURTEENTH_PROJECT_COVER_VIDEO = projectCoverFromName(
   FOURTEENTH_PROJECT_CDN_FOLDER,
@@ -1703,14 +1705,14 @@ const FOURTEENTH_PROJECT_HERO_VIDEO = projectCoverFromName(
   "video1.mp4",
 );
 const FOURTEENTH_PROJECT_HOVER_STILLS = [
-  projectCoverFromName(FOURTEENTH_PROJECT_CDN_FOLDER, "1.jpg"),
+  projectCoverFromName(FOURTEENTH_PROJECT_CDN_FOLDER, "h1.jpg"),
   projectCoverFromName(FOURTEENTH_PROJECT_CDN_FOLDER, "2.jpg"),
   projectCoverFromName(FOURTEENTH_PROJECT_CDN_FOLDER, "3.jpg"),
 ] as [string, string, string];
 /** Detail gallery — first row still (index card cover stays separate) */
 const FOURTEENTH_PROJECT_GALLERY_LEAD = projectCoverFromName(
   FOURTEENTH_PROJECT_CDN_FOLDER,
-  "1.jpg",
+  "h1.jpg",
 );
 
 const FOURTEENTH_PROJECT_STILL = (fileName: string, alt: string) => ({
@@ -1806,7 +1808,7 @@ const FIFTEENTH_PROJECT_TAGLINE =
   "A Solas-inspired keepsake box designed to preserve precious memories from Dragon Age.";
 const FIFTEENTH_PROJECT_COVER = projectCoverFromName(
   FIFTEENTH_PROJECT_CDN_FOLDER,
-  "1.jpg",
+  "h1.jpg",
 );
 const FIFTEENTH_PROJECT_COVER_VIDEO = projectCoverFromName(
   FIFTEENTH_PROJECT_CDN_FOLDER,
@@ -1817,14 +1819,14 @@ const FIFTEENTH_PROJECT_HERO_VIDEO = projectCoverFromName(
   "video.mp4",
 );
 const FIFTEENTH_PROJECT_HOVER_STILLS = [
-  projectCoverFromName(FIFTEENTH_PROJECT_CDN_FOLDER, "1.jpg"),
+  projectCoverFromName(FIFTEENTH_PROJECT_CDN_FOLDER, "h1.jpg"),
   projectCoverFromName(FIFTEENTH_PROJECT_CDN_FOLDER, "2.jpg"),
   projectCoverFromName(FIFTEENTH_PROJECT_CDN_FOLDER, "3.jpg"),
 ] as [string, string, string];
 
 const FIFTEENTH_PROJECT_GALLERY_LEAD = projectCoverFromName(
   FIFTEENTH_PROJECT_CDN_FOLDER,
-  "1.jpg",
+  "h1.jpg",
 );
 
 const FIFTEENTH_PROJECT_STILL = (fileName: string, alt: string) => ({
@@ -2227,10 +2229,10 @@ const NINETEENTH_PROJECT_TAGLINE =
   "A DOOM Eternal-inspired wallet that turns iconic game artwork into an everyday collectible.";
 const NINETEENTH_PROJECT_COVER = projectCoverFromName(
   NINETEENTH_PROJECT_CDN_FOLDER,
-  "h1.jpg",
+  "h11.jpg",
 );
 const NINETEENTH_PROJECT_HOVER_STILLS = [
-  projectCoverFromName(NINETEENTH_PROJECT_CDN_FOLDER, "h1.jpg"),
+  projectCoverFromName(NINETEENTH_PROJECT_CDN_FOLDER, "h11.jpg"),
   projectCoverFromName(NINETEENTH_PROJECT_CDN_FOLDER, "h2.jpg"),
   projectCoverFromName(NINETEENTH_PROJECT_CDN_FOLDER, "h3.jpg"),
 ] as [string, string, string];
@@ -2238,10 +2240,10 @@ const NINETEENTH_PROJECT_HERO_VIDEO = projectCoverFromName(
   NINETEENTH_PROJECT_CDN_FOLDER,
   "Doom Wallet.mp4",
 );
-/** Detail gallery row 1 — dedicated still (index card cover stays separate) */
+/** Detail gallery row 1 — same still as hover first */
 const NINETEENTH_PROJECT_GALLERY_LEAD = projectCoverFromName(
   NINETEENTH_PROJECT_CDN_FOLDER,
-  "h1.jpg",
+  "h11.jpg",
 );
 
 const NINETEENTH_PROJECT_STILL = (fileName: string, alt: string) => ({
@@ -2938,15 +2940,15 @@ const TWENTY_FIFTH_PROJECT_TAGLINE =
  */
 const twentyFifthCdn = (fileName: string) =>
   `https://assets.iamedx.com/images/projects/${encodeURIComponent(TWENTY_FIFTH_PROJECT_CDN_FOLDER)}/${encodeURIComponent(fileName)}`;
-const TWENTY_FIFTH_PROJECT_COVER = twentyFifthCdn("h1.jpg");
+const TWENTY_FIFTH_PROJECT_COVER = twentyFifthCdn("h11.jpg");
 const TWENTY_FIFTH_PROJECT_HOVER_STILLS = [
-  twentyFifthCdn("h1.jpg"),
+  twentyFifthCdn("h11.jpg"),
   twentyFifthCdn("h2.jpg"),
   twentyFifthCdn("h3.jpg"),
 ] as [string, string, string];
 const TWENTY_FIFTH_PROJECT_HERO_VIDEO = twentyFifthCdn("video.mp4");
-/** Detail gallery row 1 — user-supplied still (same file as hover h1) */
-const TWENTY_FIFTH_PROJECT_GALLERY_LEAD = twentyFifthCdn("h1.jpg");
+/** Detail gallery row 1 — same still as card / hover first */
+const TWENTY_FIFTH_PROJECT_GALLERY_LEAD = twentyFifthCdn("h11.jpg");
 const TWENTY_FIFTH_PROJECT_STILL = (fileName: string, alt: string) => ({
   src: twentyFifthCdn(fileName),
   alt,
@@ -3150,9 +3152,9 @@ const TWENTY_EIGHTH_PROJECT_TAGLINE =
  */
 const twentyEighthCdn = (fileName: string) =>
   `https://assets.iamedx.com/images/projects/${encodeURIComponent(TWENTY_EIGHTH_PROJECT_CDN_FOLDER)}/${encodeURIComponent(fileName)}`;
-const TWENTY_EIGHTH_PROJECT_COVER = twentyEighthCdn("h1.jpg");
+const TWENTY_EIGHTH_PROJECT_COVER = twentyEighthCdn("11f.jpg");
 const TWENTY_EIGHTH_PROJECT_HOVER_STILLS = [
-  twentyEighthCdn("h1.jpg"),
+  twentyEighthCdn("11f.jpg"),
   twentyEighthCdn("h2.jpg"),
   twentyEighthCdn("h3.jpg"),
 ] as [string, string, string];
@@ -3163,7 +3165,7 @@ const TWENTY_EIGHTH_PROJECT_STILL = (fileName: string, alt: string) => ({
   alt,
 });
 /** Detail gallery lead — not the index card cover */
-const TWENTY_EIGHTH_PROJECT_GALLERY_LEAD = twentyEighthCdn("1f.jpg");
+const TWENTY_EIGHTH_PROJECT_GALLERY_LEAD = twentyEighthCdn("11f.jpg");
 /** Detail gallery row 2 — 2L | 2R */
 const TWENTY_EIGHTH_PROJECT_AFTER_COVER_STILLS = {
   items: [
@@ -3190,7 +3192,7 @@ const TWENTY_EIGHTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
         "Guild Wars 2 Heart of the Obscure Enamel Pin 3M",
       ),
       TWENTY_EIGHTH_PROJECT_STILL(
-        "3r.jpg",
+        "3rr.jpg",
         "Guild Wars 2 Heart of the Obscure Enamel Pin 3R",
       ),
     ],
@@ -3572,7 +3574,7 @@ const THIRTY_SECOND_PROJECT_STILL = (fileName: string, alt: string) => ({
   alt,
 });
 /** Detail gallery: 1f → 2l|2r → 3l|3r → 4l|4r → 5l|5m|5r → 6l|6m|6r → 7l|7r */
-const THIRTY_SECOND_PROJECT_GALLERY_LEAD = thirtySecondCdn("1f.jpg");
+const THIRTY_SECOND_PROJECT_GALLERY_LEAD = `${thirtySecondCdn("1f.jpg")}?v=2`;
 const THIRTY_SECOND_PROJECT_AFTER_COVER_STILLS = {
   items: [
     THIRTY_SECOND_PROJECT_STILL(
@@ -3658,6 +3660,18 @@ const THIRTY_SECOND_PROJECT_AFTER_COVER_EXTRA_ROWS = [
 const THIRTY_SECOND_PROJECT_OVERVIEW = [
   "Inspired by Lara Croft’s life as an archaeologist and adventurer, the Tomb Raider Ancient Adventures Bag brings the exploration-driven identity of Tomb Raider into a practical everyday accessory.",
   "The design draws inspiration from the bags Lara carries throughout her adventures, with the Atlantean Scion—the ancient artifact at the center of the original Tomb Raider—used as a key visual element. The goal was to create a leather bag that felt connected to Lara’s world while remaining practical enough for everyday use.",
+];
+const THIRTY_SECOND_PROJECT_CHALLENGES_BODY = [
+  "One challenge was maintaining a consistent gold finish across all of the metal hardware. The bag uses multiple metal components—including buckles, rivets, rings, hooks, and the decorative Scion emblem—and these parts were not necessarily produced through the same process or by the same supplier. Even small differences in plating could make one component appear more yellow, darker, or brighter than the others. Because all of the hardware is visible together on the finished bag, the gold tones needed to look consistent as one complete system.",
+  "Another challenge came from a very simple request from the client: Lara Croft’s signature needed to appear on the front of the bag. There were no further instructions about how it should be made, where exactly it should sit, or what process should be used. The challenge was therefore not just reproducing the signature, but deciding how to translate it onto the leather surface in a way that felt natural to the bag—considering its size, placement, contrast, and production method so that it remained recognizable without looking like an element simply added on top of the design.",
+];
+const THIRTY_SECOND_PROJECT_EXECUTION_BODY = [
+  "To solve the hardware color inconsistency, I first identified the component with the least flexibility for color adjustment and used it as the reference point for the entire hardware set. Once this base color was confirmed, I coordinated the buckles, rivets, rings, hooks, and other metal components to match it. This gave the factory a clear starting point instead of repeatedly adjusting different parts against each other, helping keep all the gold hardware visually consistent.",
+  "For Lara Croft’s signature, I explored multiple styles, placements, and presentation options rather than moving directly into production. I used Photoshop to create visual mockups of the different options on the actual bag design, allowing the client to compare how each one would look before sampling. After reviewing the alternatives, the client selected the final signature treatment that appears on the finished bag.",
+];
+const THIRTY_SECOND_PROJECT_IMPACT_BODY = [
+  "The Ancient Adventures Bag received exceptionally strong feedback after launch. According to the client, even Tomb Raider developers and internal team members purchased the bag, and it sold out within a short period of time.",
+  "The client later described it as one of the most successful bags they had developed and one that best captured Lara Croft’s character and adventurous spirit. Its success also gave them the confidence to quickly move forward with the development of several additional bags, turning a single product into a broader product direction.",
 ];
 /** Messenger-bag credits + Angle Li on Best Link */
 const THIRTY_SECOND_PROJECT_SPECIAL_THANKS: SpecialThanksEntry[] = [
@@ -4115,7 +4129,7 @@ export const projects: Project[] = [
       "Bringing the world of ReCore into reality, this collectible statue captures the journey of Joule Adams and her robotic companion Mack, transforming an iconic in-game moment into a premium physical experience for fans.",
     role: [],
     involvement: "contribution",
-    coverImage: EIGHTH_PROJECT_COVER_VIDEO,
+    coverImage: EIGHTH_PROJECT_COVER,
     coverVideo: EIGHTH_PROJECT_COVER_VIDEO,
     coverHoverStills: EIGHTH_PROJECT_HOVER_STILLS,
     coverWidth: SHOWCASE_COVER_W,
@@ -4262,8 +4276,8 @@ export const projects: Project[] = [
       "A custom embroidered patch inspired by Fallout’s iconic Tunnel Snakes gang, bringing an in-game faction symbol into a collectible physical product.",
     role: [],
     involvement: "specialized",
-    coverImage: ELEVENTH_PROJECT_HOVER_STILLS[2],
-    cardCoverImage: ELEVENTH_PROJECT_HOVER_STILLS[2],
+    coverImage: ELEVENTH_PROJECT_COVER,
+    cardCoverImage: ELEVENTH_PROJECT_COVER,
     coverVideo: ELEVENTH_PROJECT_COVER_VIDEO,
     coverHoverStills: ELEVENTH_PROJECT_HOVER_STILLS,
     coverWidth: SHOWCASE_COVER_W,
@@ -5082,6 +5096,9 @@ export const projects: Project[] = [
     specialThanks: THIRTY_SECOND_PROJECT_SPECIAL_THANKS,
     collaborators: FOURTEENTH_PROJECT_COLLABORATORS,
     overview: THIRTY_SECOND_PROJECT_OVERVIEW,
+    challengesBody: THIRTY_SECOND_PROJECT_CHALLENGES_BODY,
+    executionBody: THIRTY_SECOND_PROJECT_EXECUTION_BODY,
+    impactBody: THIRTY_SECOND_PROJECT_IMPACT_BODY,
     client: "Tomb Raider",
     year: 2024,
     featured: false,

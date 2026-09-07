@@ -271,7 +271,7 @@ export const headerCtaLinks = [] as const;
 
 /** Footer — lead line above contact CTAs */
 export const footerLeadLine =
-  "LET'S MAKE SOMETHING ICONIC.";
+  "Let's Make Something Iconic.";
 
 /** Footer — Pentagram-style inquiry row (legacy title) */
 export const footerHelpTitle = "Let Me Help You";
