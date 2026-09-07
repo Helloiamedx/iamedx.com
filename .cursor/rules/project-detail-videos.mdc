@@ -31,11 +31,13 @@ Playback requirements on the working source: **muted**, **autoplay**, **loop**, 
 
 ## 2. Cover before play
 
-- **Loading only** — site mark (`VideoLoadingCover`) only while on-screen and not yet revealed. Loop full outlines; on playable → fill → unveil. **No black waiting plate.** Plate when showing is **pure black** (`#000`). Cover is `pointer-events: none`.
-- **Hero first, then serial top→bottom** — `lib/videoLoadQueue.ts`: only **one** clip attaches/buffers at a time on **every** page (home, case, collection). Case/home hero always runs first. When it is playable (or intro unveils / still hero paints), unlock the queue and load the rest **one-by-one** in page order. Synced pairs load left then right inside their turn. Do **not** open all remaining clips in parallel.
-- **Play when ready** — once a clip is playable, `play()` immediately (and unveil if off-screen). Do **not** wait for scroll-into-view to start playback. Mark loader is only for on-screen first paint.
-- **Home intro** — while `edx-loading`, **only the home hero** may attach/buffer. Hold every other home clip (support panels, insight covers, footer) and do **not** start other-route media. Intro completes on hero playable (+ fonts / min duration). When the veil lifts, open the serial queue for remaining **homepage** materials top→bottom.
-- **Case gallery stills** — wait on `useAfterHeroGate` so image bytes don’t race the hero video.
+- **Loading only** — site mark (`VideoLoadingCover`) only while on-screen and not yet revealed. Loop full outlines; on playable → finish stroke → **slower fill** → unveil. **No black waiting plate.** Plate when showing is **pure black** (`#000`). Cover is `pointer-events: none`.
+- **Hero first, then visibility + concurrency** — `lib/videoLoadQueue.ts`: page hero is absolute first (nothing else attaches during first load / home `edx-loading`). Unlock after hero **playing** (still onLoad / YouTube ready / hard fail). Routes **without** a page hero (Services, Thoughts, …) unlock the gate almost immediately — do not leave covers on a black plate for the long home failsafe. Then up to **2** near-viewport clips concurrently; prefer in-view over near; far clips stay without `src`. Scroll reorders **pending** work only — never revoke an active playing clip’s src. Gallery stills use `useNearViewportMedia` after hero.
+- **Cover cards (Services / Insights / index)** use `CoverLoopVideo` with the **same** `VideoLoadingCover` mark as project clips. Show the mark as soon as the cell is on-screen — even while waiting for a queue slot — so users never stare at empty black.
+- **Play when ready (background OK)** — once a gallery clip is allowed + buffered enough, `play()` immediately — **do not** wait for scroll-into-view. Mark loader is only for on-screen first paint; off-screen clips unveil quietly when settled. Synced pairs: left then right attach, then start together as soon as both are ready.
+- **Layout stability** — gallery / pair cells always reserve height via `padding-bottom` ratio (including `nativeAspect`, which only switches to `object-fit: contain`). Do not use `height: auto` that collapses the box before metadata — that caused scroll jump/flash (fixed).
+- **Home intro** — only home hero under the veil; intro completes on hero playable (+ fonts), no other-page waits. Failures unlock the page gate so the queue cannot deadlock.
+- Soften `preload` after settle so “playing” doesn’t keep the network wide open forever.
 - **Do not** extract a frame, generate a poster image, or invent a still from the video.
 - Applies to case hero (`HeroSegmentVideo`), gallery clips (`ProjectFallbackVideo`), YouTube hero veil, home hero, and footer underlay.
 

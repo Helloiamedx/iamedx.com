@@ -11,10 +11,10 @@ import "./globals.css";
 const favicon = asset("/brand/favicon.svg");
 
 /**
- * Home + first visit only. Skip if already seen (localStorage) or not `/`.
- * Paints `edx-loading` so CSS can cover the page before the branded loader mounts.
+ * Home `/` only. Paints `edx-loading` before React so the veil covers first paint.
+ * Runs on every homepage load (local or remote) — speed follows how fast hero is ready.
  */
-const EDX_LOADING_BOOT = `(function(){var p=location.pathname;try{if(localStorage.getItem("edx-intro-seen-v2")==="1")return;}catch(e){}if(p!=="/"&&p!=="")return;document.documentElement.classList.add("edx-loading");})();`;
+const EDX_LOADING_BOOT = `(function(){var p=location.pathname;if(p!=="/"&&p!=="")return;document.documentElement.classList.add("edx-loading");})();`;
 
 export const metadata: Metadata = {
   title: {

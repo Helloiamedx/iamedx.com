@@ -323,6 +323,13 @@ export type Project = {
     /** Size frame to the file’s intrinsic width/height */
     nativeAspect?: boolean;
   };
+  /**
+   * Optional closing YouTube embed — always last gallery row
+   * (after `endVideo` / pairs). Interactive review clips, not muted autoplay.
+   */
+  endYoutubeId?: string;
+  /** Accessible title for the YouTube iframe */
+  endYoutubeTitle?: string;
   year: number;
   client?: string;
   featured: boolean;
@@ -652,7 +659,7 @@ const SECOND_PROJECT_AFTER_COVER_EXTRA_ROWS = [
 const SECOND_PROJECT_AFTER_COVER_VIDEO = {
   primary: projectCoverFromName(
     SECOND_PROJECT_NAME,
-    "dragon-age-writing-bundle processing.mov",
+    "dragon-age-writing-bundle processing.mp4",
   ),
   alt: "Processing",
   ratio: "56.25%",
@@ -3001,6 +3008,548 @@ const TWENTY_FIFTH_PROJECT_IMPACT_BODY = [
   "The finished collectible received strong feedback from the fan community. Most customers would never notice the material and wrapping decisions behind the box—and that was exactly the point: the manufacturing problem disappeared, leaving only a clean, unified presentation of the product.",
 ];
 
+/** 「第二十七个项目」— End-to-End; hover h1–h3; hero video.mp4; gallery 1f → 2l|2r → 3l|3r → 4l|4r → 5l|5m|5r → 6f → 7l|7r */
+const TWENTY_SEVENTH_PROJECT_NAME = "The Witcher White Wolf Messenger Bag";
+const TWENTY_SEVENTH_PROJECT_CDN_FOLDER = TWENTY_SEVENTH_PROJECT_NAME;
+const TWENTY_SEVENTH_PROJECT_SLUG = projectSlugFromName(
+  TWENTY_SEVENTH_PROJECT_NAME,
+);
+const TWENTY_SEVENTH_PROJECT_TAGLINE =
+  "A Wolf School-inspired messenger bag combining cowhide leather, distressed canvas, custom metal hardware, and debossed Witcher details with practical everyday storage.";
+/**
+ * Absolute CDN URLs (skip `/__assets` proxy). Long folder name + spaces can
+ * break the rewrite / Image optimizer in local + LAN preview.
+ */
+const twentySeventhCdn = (fileName: string) =>
+  `https://assets.iamedx.com/images/projects/${encodeURIComponent(TWENTY_SEVENTH_PROJECT_CDN_FOLDER)}/${encodeURIComponent(fileName)}`;
+const TWENTY_SEVENTH_PROJECT_COVER = twentySeventhCdn("h1.jpg");
+const TWENTY_SEVENTH_PROJECT_HOVER_STILLS = [
+  twentySeventhCdn("h1.jpg"),
+  twentySeventhCdn("h2.jpg"),
+  twentySeventhCdn("h3.jpg"),
+] as [string, string, string];
+const TWENTY_SEVENTH_PROJECT_HERO_VIDEO = twentySeventhCdn("video.mp4");
+const TWENTY_SEVENTH_PROJECT_STILL = (fileName: string, alt: string) => ({
+  src: twentySeventhCdn(fileName),
+  alt,
+});
+/** Detail gallery lead — not the index card cover */
+const TWENTY_SEVENTH_PROJECT_GALLERY_LEAD = twentySeventhCdn("1f.jpg");
+/** Detail gallery row 2 — 2L | 2R */
+const TWENTY_SEVENTH_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    TWENTY_SEVENTH_PROJECT_STILL(
+      "2l.jpg",
+      "The Witcher White Wolf Messenger Bag 2L",
+    ),
+    TWENTY_SEVENTH_PROJECT_STILL(
+      "2r.jpg",
+      "The Witcher White Wolf Messenger Bag 2R",
+    ),
+  ],
+};
+/** Detail gallery: 3L|3R → 4L|4R → 5L|5M|5R → 6F → 7L|7R */
+const TWENTY_SEVENTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      TWENTY_SEVENTH_PROJECT_STILL(
+        "3l.jpg",
+        "The Witcher White Wolf Messenger Bag 3L",
+      ),
+      TWENTY_SEVENTH_PROJECT_STILL(
+        "3r.jpg",
+        "The Witcher White Wolf Messenger Bag 3R",
+      ),
+    ],
+  },
+  {
+    items: [
+      TWENTY_SEVENTH_PROJECT_STILL(
+        "4l.jpg",
+        "The Witcher White Wolf Messenger Bag 4L",
+      ),
+      TWENTY_SEVENTH_PROJECT_STILL(
+        "4r.jpg",
+        "The Witcher White Wolf Messenger Bag 4R",
+      ),
+    ],
+  },
+  {
+    items: [
+      TWENTY_SEVENTH_PROJECT_STILL(
+        "5l.jpg",
+        "The Witcher White Wolf Messenger Bag 5L",
+      ),
+      TWENTY_SEVENTH_PROJECT_STILL(
+        "5m.jpg",
+        "The Witcher White Wolf Messenger Bag 5M",
+      ),
+      TWENTY_SEVENTH_PROJECT_STILL(
+        "5r.jpg",
+        "The Witcher White Wolf Messenger Bag 5R",
+      ),
+    ],
+  },
+  {
+    items: [
+      TWENTY_SEVENTH_PROJECT_STILL(
+        "6f.jpg",
+        "The Witcher White Wolf Messenger Bag 6",
+      ),
+    ],
+  },
+  {
+    items: [
+      TWENTY_SEVENTH_PROJECT_STILL(
+        "7l.jpg",
+        "The Witcher White Wolf Messenger Bag 7L",
+      ),
+      TWENTY_SEVENTH_PROJECT_STILL(
+        "7r.jpg",
+        "The Witcher White Wolf Messenger Bag 7R",
+      ),
+    ],
+  },
+];
+
+const TWENTY_SEVENTH_PROJECT_OVERVIEW = [
+  "The Witcher White Wolf Messenger Bag was developed as a practical everyday accessory inspired by the world of The Witcher. Designed around the identity of the Wolf School, the bag combines 100% cowhide leather, distressed canvas, antique silver hardware, and debossed Witcher symbols to bring the game’s dark fantasy aesthetic into a functional product for daily use.",
+  "With a 12L capacity, multiple storage compartments, and space for a 15-inch laptop, the project aimed to balance authentic Witcher details, durable construction, and real everyday functionality.",
+];
+
+const TWENTY_SEVENTH_PROJECT_CHALLENGES_BODY = [
+  "Since this messenger bag had already been produced in several previous versions, most of the materials, construction, hardware, and manufacturing process were already well established. The main change in this edition was concentrated on the inside of the front flap.",
+  "Instead of continuing to use the original leather finish on the inner side, the client wanted to add a separate fabric panel with printed artwork while keeping the existing leather construction underneath. This introduced an additional layer that had to be stitched together with the leather flap.",
+  "The challenge was that the panel was manually positioned and sewn, so its edge could not always align perfectly with the leather underneath. Even a small amount of excess fabric along the edge would be visible after stitching and make the finished flap look uneven.",
+];
+
+const TWENTY_SEVENTH_PROJECT_EXECUTION_BODY = [
+  "Rather than changing the existing flap construction, I kept the proven leather structure and treated the printed fabric as an additional finishing layer.",
+  "To solve the uneven edge caused by manual sewing, I worked with the factory to add an edge-finishing process after stitching. Once the fabric panel was sewn onto the flap, any slight excess along the edge was trimmed and then finished together with the leather using leather edge paint.",
+  "This allowed the additional printed fabric to be incorporated without requiring a major structural change, while giving the finished flap a cleaner and more consistent edge.",
+];
+
+const TWENTY_SEVENTH_PROJECT_IMPACT_BODY = [
+  "By reusing the proven materials, construction, hardware, and production process from previous versions, this new edition required only a small change to the debossing mold rather than redeveloping the entire bag.",
+  "With the manufacturing process already mature, the unit cost was reduced by approximately $3–5 compared with earlier versions, while the product still maintained a retail price of around $150.",
+  "This showed the value of building on an established product platform: minimal redevelopment, lower production cost, and preserved retail value.",
+];
+
+/** 「第二十八个项目」— index hover h1–h3; hero.jpg; gallery 1f → 2l|2r → 3l|3m|3r */
+const TWENTY_EIGHTH_PROJECT_NAME =
+  "Guild Wars 2 Heart of the Obscure Enamel Pin";
+const TWENTY_EIGHTH_PROJECT_CDN_FOLDER = TWENTY_EIGHTH_PROJECT_NAME;
+const TWENTY_EIGHTH_PROJECT_SLUG = projectSlugFromName(
+  TWENTY_EIGHTH_PROJECT_NAME,
+);
+const TWENTY_EIGHTH_PROJECT_TAGLINE =
+  "An official Guild Wars 2 collectible enamel pin inspired by the Heart of the Obscure, featuring a polished gold-tone metal frame, white and purple enamel details, and a glitter-effect purple center.";
+/**
+ * Absolute CDN URLs (skip `/__assets` proxy). Long folder name + spaces can
+ * break the rewrite / Image optimizer in local + LAN preview.
+ */
+const twentyEighthCdn = (fileName: string) =>
+  `https://assets.iamedx.com/images/projects/${encodeURIComponent(TWENTY_EIGHTH_PROJECT_CDN_FOLDER)}/${encodeURIComponent(fileName)}`;
+const TWENTY_EIGHTH_PROJECT_COVER = twentyEighthCdn("h1.jpg");
+const TWENTY_EIGHTH_PROJECT_HOVER_STILLS = [
+  twentyEighthCdn("h1.jpg"),
+  twentyEighthCdn("h2.jpg"),
+  twentyEighthCdn("h3.jpg"),
+] as [string, string, string];
+/** Case detail first-screen still */
+const TWENTY_EIGHTH_PROJECT_HERO = twentyEighthCdn("hero.jpg");
+const TWENTY_EIGHTH_PROJECT_STILL = (fileName: string, alt: string) => ({
+  src: twentyEighthCdn(fileName),
+  alt,
+});
+/** Detail gallery lead — not the index card cover */
+const TWENTY_EIGHTH_PROJECT_GALLERY_LEAD = twentyEighthCdn("1f.jpg");
+/** Detail gallery row 2 — 2L | 2R */
+const TWENTY_EIGHTH_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    TWENTY_EIGHTH_PROJECT_STILL(
+      "2l.jpg",
+      "Guild Wars 2 Heart of the Obscure Enamel Pin 2L",
+    ),
+    TWENTY_EIGHTH_PROJECT_STILL(
+      "2r.jpg",
+      "Guild Wars 2 Heart of the Obscure Enamel Pin 2R",
+    ),
+  ],
+};
+/** Detail gallery row 3 — 3L | 3M | 3R */
+const TWENTY_EIGHTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      TWENTY_EIGHTH_PROJECT_STILL(
+        "3l.jpg",
+        "Guild Wars 2 Heart of the Obscure Enamel Pin 3L",
+      ),
+      TWENTY_EIGHTH_PROJECT_STILL(
+        "3m.jpg",
+        "Guild Wars 2 Heart of the Obscure Enamel Pin 3M",
+      ),
+      TWENTY_EIGHTH_PROJECT_STILL(
+        "3r.jpg",
+        "Guild Wars 2 Heart of the Obscure Enamel Pin 3R",
+      ),
+    ],
+  },
+];
+
+const TWENTY_EIGHTH_PROJECT_OVERVIEW = [
+  "The Heart of the Obscure is a mysterious magical artifact featured in Guild Wars 2: Secrets of the Obscure, used by the player throughout the story to interact with and seal rifts.",
+  "This project translated the recognizable in-game artifact into an official collectible enamel pin, preserving its distinctive shape, magical purple center, and intricate decorative details in a small-scale metal product.",
+];
+
+const TWENTY_EIGHTH_PROJECT_CHALLENGES_BODY = [
+  "The main challenge was achieving the sparkling, star-like effect in the purple center while keeping the surface clean and visually consistent.",
+  "A standard enamel fill could reproduce the purple color, but it could not create the depth and shimmer of the original artwork. The glitter also needed to be distributed evenly across the small area. Too little would make the effect almost invisible, while too much could overwhelm the purple background and interfere with the fine white graphic printed on top.",
+];
+
+const TWENTY_EIGHTH_PROJECT_EXECUTION_BODY = [
+  "I worked with the factory to test the glitter concentration and its distribution within the purple area, comparing different samples to find the right balance between the base color and the sparkling effect.",
+  "I also checked how the glitter interacted with the fine white starburst graphic, making sure the decorative effect enhanced the background without reducing the clarity of the artwork.",
+  "Through sampling and adjustment, I established a workable process that could reproduce the intended deep-purple, starry appearance consistently.",
+];
+
+const TWENTY_EIGHTH_PROJECT_IMPACT_BODY = [
+  "This project gave me practical experience with glitter enamel and decorative particle effects on small metal products.",
+  "More importantly, I learned how to control the relationship between glitter density, base color, and printed details, giving me another proven finishing technique that I can apply to future pins, badges, and other collectible products.",
+];
+
+const TWENTY_EIGHTH_PROJECT_SPECIAL_THANKS: SpecialThanksEntry[] = [
+  {
+    company: "DPI Merchandising Inc.",
+    names: ["Michelle Wu"],
+  },
+  {
+    company: "Best Link (USA) Corp. Ltd.",
+    names: ["Charlotte Tam", "Karyn Leung"],
+  },
+];
+
+const TWENTY_EIGHTH_PROJECT_COLLABORATORS: CollaboratorCredits = {
+  leadPartners: [
+    {
+      company: "Dongguan Tongde Craft Products Co., Ltd.",
+      name: "Joyce",
+    },
+  ],
+  names: ["Mr. Huang", "Hugo"],
+};
+
+/** 「第二十九个项目」— Banner; hover h1–h3; hero video.mp4; gallery → video1 last; Background + Outcome (no Challenge / What I did yet) */
+const TWENTY_NINTH_PROJECT_NAME = "Guild Wars 2 Banner";
+const TWENTY_NINTH_PROJECT_CDN_FOLDER = TWENTY_NINTH_PROJECT_NAME;
+const TWENTY_NINTH_PROJECT_SLUG = projectSlugFromName(TWENTY_NINTH_PROJECT_NAME);
+const TWENTY_NINTH_PROJECT_TAGLINE =
+  "A Guild Wars 2 collectible fabric banner featuring iconic character artwork and the dragon emblem, combining layered felt, screen printing, detailed stitching, and a wooden hanging structure.";
+/**
+ * Absolute CDN URLs (skip `/__assets` proxy). Long folder name + spaces can
+ * break the rewrite / Image optimizer in local + LAN preview.
+ */
+const twentyNinthCdn = (fileName: string) =>
+  `https://assets.iamedx.com/images/projects/${encodeURIComponent(TWENTY_NINTH_PROJECT_CDN_FOLDER)}/${encodeURIComponent(fileName)}`;
+const TWENTY_NINTH_PROJECT_COVER = twentyNinthCdn("h1.jpg");
+const TWENTY_NINTH_PROJECT_HOVER_STILLS = [
+  twentyNinthCdn("h1.jpg"),
+  twentyNinthCdn("h2.jpg"),
+  twentyNinthCdn("h3.jpg"),
+] as [string, string, string];
+/** Case detail first-screen hero */
+const TWENTY_NINTH_PROJECT_HERO_VIDEO = twentyNinthCdn("video.mp4");
+const TWENTY_NINTH_PROJECT_STILL = (fileName: string, alt: string) => ({
+  src: twentyNinthCdn(fileName),
+  alt,
+});
+/** Detail gallery lead — not the index card cover */
+const TWENTY_NINTH_PROJECT_GALLERY_LEAD = twentyNinthCdn("1f.jpg");
+/** Detail gallery row 2 — 2L | 2R */
+const TWENTY_NINTH_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    TWENTY_NINTH_PROJECT_STILL("2l.jpg", "Guild Wars 2 Banner 2L"),
+    TWENTY_NINTH_PROJECT_STILL("2r.jpg", "Guild Wars 2 Banner 2R"),
+  ],
+};
+/** Detail gallery: 3F → 3L|3M|3R → 4L|4R */
+const TWENTY_NINTH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [TWENTY_NINTH_PROJECT_STILL("3f.jpg", "Guild Wars 2 Banner 3")],
+  },
+  {
+    items: [
+      TWENTY_NINTH_PROJECT_STILL("3l.jpg", "Guild Wars 2 Banner 3L"),
+      TWENTY_NINTH_PROJECT_STILL("3m.jpg", "Guild Wars 2 Banner 3M"),
+      TWENTY_NINTH_PROJECT_STILL("3r.jpg", "Guild Wars 2 Banner 3R"),
+    ],
+  },
+  {
+    items: [
+      TWENTY_NINTH_PROJECT_STILL("4l.jpg", "Guild Wars 2 Banner 4L"),
+      TWENTY_NINTH_PROJECT_STILL("4r.jpg", "Guild Wars 2 Banner 4R"),
+    ],
+  },
+];
+/** Closing full-width video — last gallery row */
+const TWENTY_NINTH_PROJECT_END_VIDEO = {
+  primary: twentyNinthCdn("video1.mp4"),
+  alt: "Guild Wars 2 Banner",
+  ratio: "56.25%",
+} as const;
+/** Same banner collaborators as Grey Wardens — Mr. Chen + Miss Wang */
+const TWENTY_NINTH_PROJECT_COLLABORATORS: CollaboratorCredits = {
+  names: ["Mr. Chen Hua Xing", "Miss Wang"],
+};
+
+const TWENTY_NINTH_PROJECT_OVERVIEW = [
+  "Guild Wars 2 is a long-running fantasy MMORPG set in the world of Tyria, known for its large-scale world, distinctive races and characters, and a strong community built around the game and its evolving story.",
+  "This project was developed as a physical banner for the Guild Wars 2 community, translating the game’s recognizable characters, artwork, and visual identity into a display piece that players could hang and collect. Unlike a conventional printed poster, the design uses layered fabric panels, stitched construction, a wooden hanging rod, and character artwork to give the piece a more dimensional and collectible presentation.",
+  "The banner was tied directly to the game and distributed to players before it ever reached regular retail, making it a community-focused collectible rather than a conventional store product.",
+];
+
+const TWENTY_NINTH_PROJECT_CHALLENGES_BODY = [
+  "One of the main challenges was keeping every red element consistent across different materials and processes. The red stitching, the felt used for the diamond-shaped graphic, and the felt backing all needed to appear as the same red. Since these components came from different material and production processes, even a small color difference would become noticeable when they were assembled next to each other.",
+  "Another challenge was reproducing the dragon logo clearly on felt. The logo contains many fine lines and small gaps, while screen printing on felt has practical limits on minimum line thickness and spacing. If the original artwork were printed directly without adjustment, some of the narrow gaps could fill with ink and merge together, causing details of the dragon to disappear.",
+];
+
+const TWENTY_NINTH_PROJECT_EXECUTION_BODY = [
+  "I matched the red felt, backing material, and sewing thread together, comparing them as a complete set rather than approving each component separately. This allowed me to control the overall color consistency before the different parts were assembled.",
+  "For the dragon logo, I optimized the artwork specifically for screen printing on felt. I adjusted the spacing between individual strokes and refined some of the smallest details on the computer, while keeping the original appearance of the logo as intact as possible. The goal was not to redesign the artwork, but to give the screen-printing process enough tolerance so that the fine lines and gaps would remain visible on the finished banner.",
+];
+
+const TWENTY_NINTH_PROJECT_IMPACT_BODY = [
+  "This product was originally created as a limited-edition item tied to the game, with some players receiving it directly through the upgraded / special edition. Once it was announced within the game’s core community, it quickly attracted strong interest and reservations from players.",
+  "Ultimately, the entire quantity was claimed before the product ever reached the official store, so it never even entered regular retail sale. The game’s core community alone was enough to take the full quantity, demonstrating the product’s strong appeal among dedicated players.",
+];
+
+/** 「第三十个项目」— hero.mp4; Background + tagline; hover / gallery TBD */
+const THIRTIETH_PROJECT_NAME =
+  "Mass Effect Desktop M-300 Claymore Miniature Replica";
+const THIRTIETH_PROJECT_CDN_FOLDER = THIRTIETH_PROJECT_NAME;
+const THIRTIETH_PROJECT_SLUG = projectSlugFromName(THIRTIETH_PROJECT_NAME);
+const thirtiethCdn = (fileName: string) =>
+  `https://assets.iamedx.com/images/projects/${encodeURIComponent(THIRTIETH_PROJECT_CDN_FOLDER)}/${encodeURIComponent(fileName)}`;
+/** Case detail first-screen hero */
+const THIRTIETH_PROJECT_HERO_VIDEO = thirtiethCdn("hero.mp4");
+/** Index cover — h2 first; hover cycle h2 → h1 → h3 */
+const THIRTIETH_PROJECT_COVER = thirtiethCdn("h2.jpg");
+const THIRTIETH_PROJECT_HOVER_STILLS = [
+  thirtiethCdn("h2.jpg"),
+  thirtiethCdn("h1.jpg"),
+  thirtiethCdn("h3.jpg"),
+] as [string, string, string];
+const THIRTIETH_PROJECT_TAGLINE =
+  "A 47% scale resin replica of the Mass Effect M-300 Claymore, developed as a limited-edition desktop collectible with hand-painted finishes, detailed decals, and an individually numbered metal plate.";
+const THIRTIETH_PROJECT_OVERVIEW = [
+  "The M-300 Claymore is one of the most iconic heavy weapons in the Mass Effect universe, known for its immense power and distinctive design.",
+  "This project transformed the in-game weapon into a 47% scale desktop collectible, preserving its recognizable form and surface details within a display-friendly size. Limited to 1,000 pieces worldwide, each replica was individually hand-painted and paired with a numbered metal plate and Certificate of Authenticity.",
+];
+
+const THIRTIETH_PROJECT_CHALLENGES_BODY = [
+  "One of the main challenges was preserving the details of the M-300 Claymore at only 47% of its original scale. Once reduced in size, many structural lines, color separations, and small graphics became much harder to reproduce consistently on a hand-painted resin body. Some details were simply too small for reliable painting, so it was necessary to determine which elements should be reproduced with decals, while controlling their size, placement, and transition into the surrounding painted areas.",
+  "Another challenge was determining the correct support position based on the replica’s center of gravity. The replica is approximately 30.5 cm long and weighs nearly 895 g, with an irregular weight distribution across the weapon. Placing the support too far forward or backward could cause the replica to tilt or become unstable. At the same time, the support could not block important visual details, so its position had to balance stability, load distribution, and overall presentation.",
+  "The collectible also included a metal plate engraved with the Mass Effect logo and an individual edition number. Its size, engraving clarity, layout, and placement all needed to be considered carefully so that each numbered plate remained clear and consistent across the limited production run.",
+];
+
+const THIRTIETH_PROJECT_EXECUTION_BODY = [
+  "I focused on the detail execution, display structure, and production-ready appearance of the scaled replica.",
+  "For smaller graphics that could not be reproduced consistently through hand painting, I worked with the factory to determine which details should use decals, then adjusted their size and placement according to the actual resin body. This helped preserve smaller visual elements while keeping them integrated with the surrounding painted finish.",
+  "For the display structure, I evaluated the actual center of gravity using physical samples and tested different support positions. I balanced stability, load distribution, and visual obstruction to determine where the stand should contact the replica, allowing the nearly 900 g resin piece to remain securely displayed without unnecessarily covering its details.",
+  "I also reviewed the metal plate specifications, including its dimensions, Mass Effect logo, edition-number layout, and engraving result, ensuring that the individually numbered plate worked as an integrated part of the finished collectible.",
+];
+
+const THIRTIETH_PROJECT_IMPACT_BODY = [
+  "The M-300 Claymore was successfully translated from an in-game weapon into a 47% scale, 30.5 cm desktop collectible. By combining hand-painted finishes with carefully applied decals, the final replica retained the recognizable form and smaller visual details of the original weapon while remaining stable for desktop display.",
+  "The product was released as a limited edition of 1,000 pieces worldwide, with each piece including a Certificate of Authenticity and an individually numbered metal plate. Its official product presentation specifically highlighted its “great attention to detail and faithfulness to the in-game weapon,” reflecting the level of detail that was maintained throughout development.",
+];
+
+const THIRTIETH_PROJECT_STILL = (fileName: string, alt: string) => ({
+  src: thirtiethCdn(fileName),
+  alt,
+});
+/** Detail gallery — video first, then 1L|1R → 2L|2R → 3L|3R → 4L|4M|4R */
+const THIRTIETH_PROJECT_AFTER_COVER_VIDEO = {
+  primary: thirtiethCdn("video.mp4"),
+  alt: "Mass Effect Desktop M-300 Claymore Miniature Replica",
+  nativeAspect: true,
+} as const;
+const THIRTIETH_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    THIRTIETH_PROJECT_STILL(
+      "1l.jpg",
+      "Mass Effect Desktop M-300 Claymore Miniature Replica 1L",
+    ),
+    THIRTIETH_PROJECT_STILL(
+      "1r.jpg",
+      "Mass Effect Desktop M-300 Claymore Miniature Replica 1R",
+    ),
+  ],
+};
+const THIRTIETH_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      THIRTIETH_PROJECT_STILL(
+        "2l.jpg",
+        "Mass Effect Desktop M-300 Claymore Miniature Replica 2L",
+      ),
+      THIRTIETH_PROJECT_STILL(
+        "2r.jpg",
+        "Mass Effect Desktop M-300 Claymore Miniature Replica 2R",
+      ),
+    ],
+  },
+  {
+    items: [
+      THIRTIETH_PROJECT_STILL(
+        "3l.jpg",
+        "Mass Effect Desktop M-300 Claymore Miniature Replica 3L",
+      ),
+      THIRTIETH_PROJECT_STILL(
+        "3r.jpg",
+        "Mass Effect Desktop M-300 Claymore Miniature Replica 3R",
+      ),
+    ],
+  },
+  {
+    items: [
+      THIRTIETH_PROJECT_STILL(
+        "4l.jpg",
+        "Mass Effect Desktop M-300 Claymore Miniature Replica 4L",
+      ),
+      THIRTIETH_PROJECT_STILL(
+        "4m.jpg",
+        "Mass Effect Desktop M-300 Claymore Miniature Replica 4M",
+      ),
+      THIRTIETH_PROJECT_STILL(
+        "4r.jpg",
+        "Mass Effect Desktop M-300 Claymore Miniature Replica 4R",
+      ),
+    ],
+  },
+];
+
+const THIRTIETH_PROJECT_SPECIAL_THANKS: SpecialThanksEntry[] = [
+  {
+    company: "DPI Merchandising Inc.",
+    names: [
+      "Angela McReynolds",
+      "Michelle Wu",
+      "Nikki Petraitis",
+      "Daisy Grice",
+      "Hayley Cumming",
+    ],
+  },
+  {
+    company: "Best Link (USA) Corp. Ltd.",
+    names: [
+      "Charlotte Tam",
+      "Cola Li",
+      "Karyn Leung",
+      "Andy Sun",
+      "Hugo",
+      "Candy",
+    ],
+  },
+];
+
+const THIRTIETH_PROJECT_COLLABORATORS: CollaboratorCredits = {
+  leadPartners: [
+    {
+      company: "Zhongshan Maotai Customized Craftsmanship Co., Ltd.",
+      name: "Mr. Mao",
+    },
+  ],
+  names: [
+    "Jie Chen",
+    "Lei Zhao",
+    "Fan Yang",
+    "Kai Huang",
+    "Chen Wu",
+    "Tao Zhou",
+    "Jing Lin",
+    "Yuxin Chen",
+  ],
+};
+
+/** 「第三十一个项目」— hero.jpg; hover / gallery TBD */
+const THIRTY_FIRST_PROJECT_NAME = "Mass Effect Shepard and KEI-9 Statue";
+const THIRTY_FIRST_PROJECT_CDN_FOLDER = THIRTY_FIRST_PROJECT_NAME;
+const THIRTY_FIRST_PROJECT_SLUG = projectSlugFromName(THIRTY_FIRST_PROJECT_NAME);
+const thirtyFirstCdn = (fileName: string) =>
+  `https://assets.iamedx.com/images/projects/${encodeURIComponent(THIRTY_FIRST_PROJECT_CDN_FOLDER)}/${encodeURIComponent(fileName)}`;
+/** Case detail first-screen still */
+const THIRTY_FIRST_PROJECT_HERO = thirtyFirstCdn("hero.jpg");
+const THIRTY_FIRST_PROJECT_COVER = thirtyFirstCdn("h1.jpg");
+const THIRTY_FIRST_PROJECT_HOVER_STILLS = [
+  thirtyFirstCdn("h1.jpg"),
+  thirtyFirstCdn("h2.jpg"),
+  thirtyFirstCdn("h3.jpg"),
+] as [string, string, string];
+const THIRTY_FIRST_PROJECT_TAGLINE =
+  "A limited-edition Mass Effect Shepard and KEI-9 resin statue, featuring Commander Shepard interacting with the Normandy’s robotic dog.";
+const THIRTY_FIRST_PROJECT_OVERVIEW = [
+  "Set in the Mass Effect universe, KEI-9—nicknamed “Sophie”—is the robotic dog aboard the Normandy and one of the franchise’s more playful companion characters.",
+  "This project turned KEI-9 and Commander Shepard into a physical collectible, capturing an iconic interaction between the two characters in a hand-painted resin statue. Limited to 2,000 pieces worldwide, the product was designed as a display collectible for Mass Effect fans, with particular attention to character recognition, sculpted details, and the interaction between Shepard and KEI-9.",
+];
+
+const THIRTY_FIRST_PROJECT_CHALLENGES_BODY = [
+  "The biggest challenge was making the interaction between Shepard and KEI-9 feel natural. Shepard needed to maintain a kneeling, forward-leaning pose while KEI-9 raised its body toward him. The height of Shepard’s pose, his body angle, the position of his hands, and the angle of KEI-9’s head and body all had to work together. If the two characters were too far apart, the interaction would feel disconnected; if they were too close, the pose could look stiff. Finding the right distance, posture, and contact points was critical to making the scene feel like one complete interaction rather than two separate models placed together.",
+  "Another challenge was securing both Shepard and KEI-9 to the base. Their poses created relatively limited and unusual support points, especially KEI-9 with its narrow mechanical legs. The fixing structure therefore needed to provide enough stability to prevent the figures from loosening during handling or movement, while remaining hidden after assembly so it would not affect the overall appearance of the statue.",
+];
+
+const THIRTY_FIRST_PROJECT_EXECUTION_BODY = [
+  "For the pose, I worked with the factory to refine the contact between Shepard’s hands and KEI-9’s head, including the hand positions, arm angles, Shepard’s forward lean, and the angle at which KEI-9 raised its head and body. The final arrangement allowed Shepard’s hands to rest naturally on KEI-9, creating physical contact between the two characters while keeping the interaction visually natural.",
+  "For the fixing structure, I reviewed KEI-9’s small support area and the overall stability of the figure with the factory. We added a slim cylindrical metal locating pin that inserts into a corresponding hole in the base, providing additional mechanical support beyond KEI-9’s small feet. Magnets were also integrated into the connection, helping with positioning and stability during assembly. The fixing point was kept hidden once the statue was fully assembled, so the added support did not interfere with the overall appearance.",
+];
+
+const THIRTY_FIRST_PROJECT_IMPACT_BODY = [
+  "The final statue received a strong positive response from collectors after unboxing. One reviewer initially had reservations about the product and even considered putting it back in the box if the final result was disappointing. However, after assembling the statue, he specifically praised the level of detail on KEI-9, the textures and small details on Shepard, and how naturally the two figures came together as one scene.",
+  "Most importantly, the finished interaction between Shepard and KEI-9 became one of the strongest parts of the product. The reviewer described the assembled statue as both “adorable” and “awesome,” and ultimately decided to make space on his shelf to display it alongside his other Mass Effect companion collectibles.",
+];
+
+/** Closing YouTube review — last gallery row */
+const THIRTY_FIRST_PROJECT_END_YOUTUBE_ID = "zSwXHsxF9Uc";
+
+/** Detail gallery — video first (unchanged), then 1L|1R → 2L|2R → 3L|3M|3R → 4L|4M|4R */
+const THIRTY_FIRST_PROJECT_AFTER_COVER_VIDEO = {
+  primary: thirtyFirstCdn("video.mp4"),
+  alt: "Mass Effect Shepard and KEI-9 Statue",
+  nativeAspect: true,
+} as const;
+const THIRTY_FIRST_PROJECT_STILL = (fileName: string, alt: string) => ({
+  src: thirtyFirstCdn(fileName),
+  alt,
+});
+const THIRTY_FIRST_PROJECT_AFTER_COVER_STILLS = {
+  items: [
+    THIRTY_FIRST_PROJECT_STILL("1l.jpg", "Mass Effect Shepard and KEI-9 Statue 1L"),
+    THIRTY_FIRST_PROJECT_STILL("1r.jpg", "Mass Effect Shepard and KEI-9 Statue 1R"),
+  ],
+};
+const THIRTY_FIRST_PROJECT_AFTER_COVER_EXTRA_ROWS = [
+  {
+    items: [
+      THIRTY_FIRST_PROJECT_STILL("2l.jpg", "Mass Effect Shepard and KEI-9 Statue 2L"),
+      THIRTY_FIRST_PROJECT_STILL("2r.jpg", "Mass Effect Shepard and KEI-9 Statue 2R"),
+    ],
+  },
+  {
+    items: [
+      THIRTY_FIRST_PROJECT_STILL("3l.jpg", "Mass Effect Shepard and KEI-9 Statue 3L"),
+      THIRTY_FIRST_PROJECT_STILL("3m.jpg", "Mass Effect Shepard and KEI-9 Statue 3M"),
+      THIRTY_FIRST_PROJECT_STILL("3r.jpg", "Mass Effect Shepard and KEI-9 Statue 3R"),
+    ],
+  },
+  {
+    items: [
+      THIRTY_FIRST_PROJECT_STILL("4l.jpg", "Mass Effect Shepard and KEI-9 Statue 4L"),
+      THIRTY_FIRST_PROJECT_STILL("4m.jpg", "Mass Effect Shepard and KEI-9 Statue 4M"),
+      THIRTY_FIRST_PROJECT_STILL("4r.jpg", "Mass Effect Shepard and KEI-9 Statue 4R"),
+    ],
+  },
+];
+
 /** Default / home lead — End-to-End featured (Dragon Age Writing Bundle) */
 export const projectsFeaturedLead: ProjectsFeaturedLead = {
   slug: SECOND_PROJECT_SLUG,
@@ -4190,6 +4739,192 @@ export const projects: Project[] = [
     impactBody: TWENTY_SIXTH_PROJECT_IMPACT_BODY,
     client: "The Witcher",
     year: 2023,
+    featured: false,
+    challenge: "",
+    result: "",
+  },
+  {
+    slug: TWENTY_SEVENTH_PROJECT_SLUG,
+    title: TWENTY_SEVENTH_PROJECT_NAME,
+    materials: ["leather"],
+    country: "global",
+    ips: ["the-witcher"],
+    tags: involvementTags("end-to-end"),
+    summary: TWENTY_SEVENTH_PROJECT_TAGLINE,
+    tagline: TWENTY_SEVENTH_PROJECT_TAGLINE,
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "end-to-end",
+    coverImage: TWENTY_SEVENTH_PROJECT_COVER,
+    coverHoverStills: TWENTY_SEVENTH_PROJECT_HOVER_STILLS,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    heroVideo: TWENTY_SEVENTH_PROJECT_HERO_VIDEO,
+    galleryLeadImage: TWENTY_SEVENTH_PROJECT_GALLERY_LEAD,
+    afterCoverStills: TWENTY_SEVENTH_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: TWENTY_SEVENTH_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    specialThanks: FOURTEENTH_PROJECT_SPECIAL_THANKS,
+    collaborators: FOURTEENTH_PROJECT_COLLABORATORS,
+    overview: TWENTY_SEVENTH_PROJECT_OVERVIEW,
+    challengesBody: TWENTY_SEVENTH_PROJECT_CHALLENGES_BODY,
+    executionBody: TWENTY_SEVENTH_PROJECT_EXECUTION_BODY,
+    impactBody: TWENTY_SEVENTH_PROJECT_IMPACT_BODY,
+    client: "The Witcher",
+    year: 2024,
+    featured: false,
+    challenge: "",
+    result: "",
+  },
+  {
+    slug: TWENTY_EIGHTH_PROJECT_SLUG,
+    title: TWENTY_EIGHTH_PROJECT_NAME,
+    materials: ["metal"],
+    country: "global",
+    ips: ["guild-wars"],
+    tags: involvementTags("end-to-end"),
+    summary: TWENTY_EIGHTH_PROJECT_TAGLINE,
+    tagline: TWENTY_EIGHTH_PROJECT_TAGLINE,
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "end-to-end",
+    coverImage: TWENTY_EIGHTH_PROJECT_COVER,
+    cardCoverImage: TWENTY_EIGHTH_PROJECT_COVER,
+    coverHoverStills: TWENTY_EIGHTH_PROJECT_HOVER_STILLS,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    heroImage: TWENTY_EIGHTH_PROJECT_HERO,
+    galleryLeadImage: TWENTY_EIGHTH_PROJECT_GALLERY_LEAD,
+    afterCoverStills: TWENTY_EIGHTH_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: TWENTY_EIGHTH_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    specialThanks: TWENTY_EIGHTH_PROJECT_SPECIAL_THANKS,
+    collaborators: TWENTY_EIGHTH_PROJECT_COLLABORATORS,
+    overview: TWENTY_EIGHTH_PROJECT_OVERVIEW,
+    challengesBody: TWENTY_EIGHTH_PROJECT_CHALLENGES_BODY,
+    executionBody: TWENTY_EIGHTH_PROJECT_EXECUTION_BODY,
+    impactBody: TWENTY_EIGHTH_PROJECT_IMPACT_BODY,
+    client: "Guild Wars 2",
+    year: 2023,
+    featured: false,
+    challenge: "",
+    result: "",
+  },
+  {
+    slug: TWENTY_NINTH_PROJECT_SLUG,
+    title: TWENTY_NINTH_PROJECT_NAME,
+    materials: ["fabric"],
+    country: "global",
+    ips: ["guild-wars"],
+    tags: involvementTags("end-to-end"),
+    summary: TWENTY_NINTH_PROJECT_TAGLINE,
+    tagline: TWENTY_NINTH_PROJECT_TAGLINE,
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "end-to-end",
+    coverImage: TWENTY_NINTH_PROJECT_COVER,
+    cardCoverImage: TWENTY_NINTH_PROJECT_COVER,
+    coverHoverStills: TWENTY_NINTH_PROJECT_HOVER_STILLS,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    heroVideo: TWENTY_NINTH_PROJECT_HERO_VIDEO,
+    galleryLeadImage: TWENTY_NINTH_PROJECT_GALLERY_LEAD,
+    afterCoverStills: TWENTY_NINTH_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: TWENTY_NINTH_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    endVideo: TWENTY_NINTH_PROJECT_END_VIDEO,
+    /* Same Special thanks as other banners; Collaborators + Miss Wang */
+    specialThanks: TWELFTH_PROJECT_SPECIAL_THANKS,
+    collaborators: TWENTY_NINTH_PROJECT_COLLABORATORS,
+    overview: TWENTY_NINTH_PROJECT_OVERVIEW,
+    challengesBody: TWENTY_NINTH_PROJECT_CHALLENGES_BODY,
+    executionBody: TWENTY_NINTH_PROJECT_EXECUTION_BODY,
+    impactBody: TWENTY_NINTH_PROJECT_IMPACT_BODY,
+    client: "Guild Wars 2",
+    year: 2023,
+    featured: false,
+    challenge: "",
+    result: "",
+  },
+  {
+    slug: THIRTIETH_PROJECT_SLUG,
+    title: THIRTIETH_PROJECT_NAME,
+    materials: ["resin"],
+    country: "global",
+    ips: ["mass-effect"],
+    tags: involvementTags("contribution"),
+    summary: THIRTIETH_PROJECT_TAGLINE,
+    tagline: THIRTIETH_PROJECT_TAGLINE,
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "contribution",
+    coverImage: THIRTIETH_PROJECT_COVER,
+    cardCoverImage: THIRTIETH_PROJECT_COVER,
+    coverHoverStills: THIRTIETH_PROJECT_HOVER_STILLS,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    heroVideo: THIRTIETH_PROJECT_HERO_VIDEO,
+    afterCoverVideoFirst: true,
+    afterCoverVideo: THIRTIETH_PROJECT_AFTER_COVER_VIDEO,
+    afterCoverStills: THIRTIETH_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: THIRTIETH_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    overview: THIRTIETH_PROJECT_OVERVIEW,
+    challengesBody: THIRTIETH_PROJECT_CHALLENGES_BODY,
+    executionBody: THIRTIETH_PROJECT_EXECUTION_BODY,
+    impactBody: THIRTIETH_PROJECT_IMPACT_BODY,
+    /* DPI + Best Link full teams; no TriForce */
+    specialThanks: THIRTIETH_PROJECT_SPECIAL_THANKS,
+    collaborators: THIRTIETH_PROJECT_COLLABORATORS,
+    client: "Mass Effect",
+    year: 2024,
+    featured: false,
+    challenge: "",
+    result: "",
+  },
+  {
+    slug: THIRTY_FIRST_PROJECT_SLUG,
+    title: THIRTY_FIRST_PROJECT_NAME,
+    materials: ["resin"],
+    country: "global",
+    ips: ["mass-effect"],
+    tags: involvementTags("contribution"),
+    summary: THIRTY_FIRST_PROJECT_TAGLINE,
+    tagline: THIRTY_FIRST_PROJECT_TAGLINE,
+    role: [
+      "product-development",
+      "sample-development",
+      "production-management",
+    ],
+    involvement: "contribution",
+    coverImage: THIRTY_FIRST_PROJECT_COVER,
+    cardCoverImage: THIRTY_FIRST_PROJECT_COVER,
+    coverHoverStills: THIRTY_FIRST_PROJECT_HOVER_STILLS,
+    coverWidth: SHOWCASE_COVER_W,
+    coverHeight: SHOWCASE_COVER_H,
+    heroImage: THIRTY_FIRST_PROJECT_HERO,
+    afterCoverVideoFirst: true,
+    afterCoverVideo: THIRTY_FIRST_PROJECT_AFTER_COVER_VIDEO,
+    afterCoverStills: THIRTY_FIRST_PROJECT_AFTER_COVER_STILLS,
+    afterCoverExtraRows: THIRTY_FIRST_PROJECT_AFTER_COVER_EXTRA_ROWS,
+    overview: THIRTY_FIRST_PROJECT_OVERVIEW,
+    challengesBody: THIRTY_FIRST_PROJECT_CHALLENGES_BODY,
+    executionBody: THIRTY_FIRST_PROJECT_EXECUTION_BODY,
+    impactBody: THIRTY_FIRST_PROJECT_IMPACT_BODY,
+    endYoutubeId: THIRTY_FIRST_PROJECT_END_YOUTUBE_ID,
+    endYoutubeTitle: "Mass Effect Shepard and KEI-9 Statue unboxing",
+    /* Same Special thanks as Claymore */
+    specialThanks: THIRTIETH_PROJECT_SPECIAL_THANKS,
+    client: "Mass Effect",
+    year: 2024,
     featured: false,
     challenge: "",
     result: "",

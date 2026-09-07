@@ -14,6 +14,7 @@ import {
 } from "@/components/VideoLoadingCover";
 import {
   VIDEO_LOAD_PRIORITY,
+  softenVideoDownload,
   useVideoLoadSlot,
 } from "@/lib/videoLoadQueue";
 
@@ -26,9 +27,9 @@ type PairSide = {
 type SyncedVideoPairProps = {
   left: PairSide;
   right: PairSide;
-  /** CSS padding-bottom ratio per cell — omit when `nativeAspect` */
+  /** CSS padding-bottom ratio per cell — always reserves height */
   ratio?: string;
-  /** Size each side to the file’s intrinsic aspect (no forced box) */
+  /** Contain inside the reserved box instead of cover-crop */
   nativeAspect?: boolean;
 };
 
@@ -37,8 +38,8 @@ const PRIMARY_TIMEOUT_MS = 2500;
 
 /**
  * Two gallery clips that share one load-queue turn.
- * Left attaches first; right waits until left is playable (no parallel pair fetch).
- * Then both start together and stay loop-synced.
+ * Left attaches first; right waits until left is playable.
+ * Once both can play, start together in the background (no scroll wait).
  */
 export function SyncedVideoPair({
   left,
@@ -83,20 +84,27 @@ export function SyncedVideoPair({
   const leftKey = allowed ? leftSrc : "";
   const rightKey = allowed && rightArmed ? rightSrc : "";
 
-  const { progress: leftProgress, ready: leftReady } = useVideoLoadProgress(
-    leftRef,
-    leftKey,
-  );
-  const { progress: rightProgress, ready: rightReady } = useVideoLoadProgress(
-    rightRef,
-    rightKey,
-  );
+  const {
+    progress: leftProgress,
+    ready: leftReady,
+    failed: leftFailed,
+  } = useVideoLoadProgress(leftRef, leftKey);
+  const {
+    progress: rightProgress,
+    ready: rightReady,
+    failed: rightFailed,
+  } = useVideoLoadProgress(rightRef, rightKey);
 
-  /* Serial within the pair — right only after left can play */
+  /* Serial within the pair — right after left can play; don't deadlock if left stalls */
   useEffect(() => {
-    if (!allowed || !leftReady || rightArmed) return;
-    setRightArmed(true);
-  }, [allowed, leftReady, rightArmed]);
+    if (!allowed || rightArmed) return;
+    if (leftReady || leftFailed) {
+      setRightArmed(true);
+      return;
+    }
+    const id = window.setTimeout(() => setRightArmed(true), 10000);
+    return () => window.clearTimeout(id);
+  }, [allowed, leftReady, leftFailed, rightArmed]);
 
   useEffect(() => {
     if (!allowed) return;
@@ -116,7 +124,7 @@ export function SyncedVideoPair({
   }, [allowed, left.fallback, leftUsedFallback, leftReady, leftSrc]);
 
   useEffect(() => {
-    if (!allowed) return;
+    if (!allowed || !rightArmed) return;
     if (
       !right.fallback ||
       rightUsedFallback ||
@@ -130,7 +138,14 @@ export function SyncedVideoPair({
       setRightSrc(right.fallback!);
     }, PRIMARY_TIMEOUT_MS);
     return () => window.clearTimeout(id);
-  }, [allowed, right.fallback, rightUsedFallback, rightReady, rightSrc]);
+  }, [
+    allowed,
+    rightArmed,
+    right.fallback,
+    rightUsedFallback,
+    rightReady,
+    rightSrc,
+  ]);
 
   const switchLeftFallback = () => {
     if (!left.fallback || leftUsedFallback || leftSrc === left.fallback) return;
@@ -146,23 +161,36 @@ export function SyncedVideoPair({
     setRightSrc(right.fallback);
   };
 
-  const bothReady = Boolean(allowed && leftReady && rightReady);
+  const bothReady = Boolean(
+    allowed && (leftReady || leftFailed) && (rightReady || rightFailed),
+  );
+  const [pairSettled, setPairSettled] = useState(false);
   const pairProgress = allowed ? Math.min(leftProgress, rightProgress) : 0;
   const [revealed, setRevealed] = useState(false);
-  const [nearView, setNearView] = useState(false);
+  const [onScreen, setOnScreen] = useState(false);
+
+  useEffect(() => {
+    if (!allowed || pairSettled) return;
+    const id = window.setTimeout(() => {
+      setPairSettled(true);
+      setRevealed(true);
+      releaseSlot();
+    }, 15000);
+    return () => window.clearTimeout(id);
+  }, [allowed, pairSettled, releaseSlot]);
 
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
     if (typeof IntersectionObserver === "undefined") {
-      setNearView(true);
+      setOnScreen(true);
       return;
     }
     const io = new IntersectionObserver(
       ([entry]) => {
-        if (entry?.isIntersecting) setNearView(true);
+        setOnScreen(Boolean(entry?.isIntersecting));
       },
-      { rootMargin: "160px 0px", threshold: 0 },
+      { rootMargin: "120px 0px", threshold: 0 },
     );
     io.observe(root);
     return () => io.disconnect();
@@ -170,25 +198,44 @@ export function SyncedVideoPair({
 
   useLayoutEffect(() => {
     setRevealed(false);
+    setPairSettled(false);
   }, [leftSrc, rightSrc]);
 
-  /* Free queue when pair is playable — rest of page can keep buffering */
+  /* Off-screen: unveil when settled so the mark isn’t required to free state */
   useEffect(() => {
-    if (bothReady) releaseSlot();
-  }, [bothReady, releaseSlot]);
-
-  /* Off-screen: unveil as soon as playable (playback already started below) */
-  useEffect(() => {
-    if (!bothReady || revealed || nearView) return;
+    if (!pairSettled || revealed || onScreen) return;
     setRevealed(true);
-  }, [bothReady, revealed, nearView]);
+  }, [pairSettled, revealed, onScreen]);
 
+  /* Play as soon as both sides can — no scroll / cover-animation gate */
   useEffect(() => {
     if (!bothReady) return;
 
     const a = leftRef.current;
     const b = rightRef.current;
     if (!a || !b) return;
+
+    let cancelled = false;
+    let released = false;
+    let attempts = 0;
+    let retryId = 0;
+    const free = () => {
+      if (cancelled || released) return;
+      released = true;
+      softenVideoDownload(a);
+      softenVideoDownload(b);
+      setPairSettled(true);
+      releaseSlot();
+    };
+
+    const maybeFree = () => {
+      if (!a.paused && !b.paused) free();
+    };
+
+    a.addEventListener("playing", maybeFree);
+    b.addEventListener("playing", maybeFree);
+    a.addEventListener("error", free);
+    b.addEventListener("error", free);
 
     const seekToStart = (v: HTMLVideoElement) =>
       new Promise<void>((resolve) => {
@@ -210,17 +257,31 @@ export function SyncedVideoPair({
         }
       });
 
-    let cancelled = false;
-
     const startTogether = () => {
       void (async () => {
         await Promise.all([seekToStart(a), seekToStart(b)]);
         if (cancelled) return;
-        void Promise.all([a.play(), b.play()]).catch(() => {});
+        attempts += 1;
+        void Promise.all([a.play(), b.play()]).then(maybeFree, () => {
+          if (cancelled || released) return;
+          if (attempts < 6) {
+            retryId = window.setTimeout(startTogether, 120 * attempts);
+          } else {
+            free();
+          }
+        });
       })();
     };
 
-    startTogether();
+    const resumeBackgroundPair = () => {
+      if (cancelled || document.hidden || a.ended || b.ended) return;
+      window.clearTimeout(retryId);
+      retryId = window.setTimeout(startTogether, 80);
+    };
+
+    const startupTimeout = window.setTimeout(free, 12000);
+    if (a.error || b.error) free();
+    else startTogether();
 
     const onEnded = () => {
       startTogether();
@@ -238,18 +299,27 @@ export function SyncedVideoPair({
 
     a.addEventListener("ended", onEnded);
     b.addEventListener("ended", onEnded);
+    a.addEventListener("pause", resumeBackgroundPair);
+    b.addEventListener("pause", resumeBackgroundPair);
     a.addEventListener("timeupdate", onTimeUpdate);
 
     return () => {
       cancelled = true;
+      window.clearTimeout(startupTimeout);
+      window.clearTimeout(retryId);
+      a.removeEventListener("playing", maybeFree);
+      b.removeEventListener("playing", maybeFree);
+      a.removeEventListener("error", free);
+      b.removeEventListener("error", free);
       a.removeEventListener("ended", onEnded);
       b.removeEventListener("ended", onEnded);
+      a.removeEventListener("pause", resumeBackgroundPair);
+      b.removeEventListener("pause", resumeBackgroundPair);
       a.removeEventListener("timeupdate", onTimeUpdate);
     };
-  }, [bothReady, leftSrc, rightSrc]);
+  }, [bothReady, leftSrc, rightSrc, releaseSlot]);
 
   const handleCoverDone = () => {
-    releaseSlot();
     setRevealed(true);
   };
 
@@ -265,10 +335,10 @@ export function SyncedVideoPair({
         ratio={ratio}
         nativeAspect={nativeAspect}
         progress={pairProgress}
-        ready={bothReady}
+        ready={bothReady || pairSettled}
         revealed={revealed}
         allowed={allowed}
-        showLoader={Boolean(allowed && nearView && !revealed)}
+        showLoader={Boolean(allowed && onScreen && !revealed)}
         onCoverDone={handleCoverDone}
         onError={switchLeftFallback}
       />
@@ -279,10 +349,10 @@ export function SyncedVideoPair({
         ratio={ratio}
         nativeAspect={nativeAspect}
         progress={pairProgress}
-        ready={bothReady}
+        ready={bothReady || pairSettled}
         revealed={revealed}
         allowed={allowed && rightArmed}
-        showLoader={false}
+        showLoader={Boolean(allowed && onScreen && !revealed)}
         onCoverDone={handleCoverDone}
         onError={switchRightFallback}
       />
@@ -313,29 +383,15 @@ function Side({
   ready: boolean;
   revealed: boolean;
   allowed: boolean;
-  /** Mark loader only on the lead cell while on-screen */
+  /** Mark loader while the pair is on-screen and not yet unveiled */
   showLoader: boolean;
   onCoverDone: () => void;
   onError: () => void;
 }) {
-  const [intrinsicRatio, setIntrinsicRatio] = useState<string | undefined>();
-
-  const syncIntrinsic = () => {
-    const el = videoRef.current;
-    if (!el || !el.videoWidth || !el.videoHeight) return;
-    setIntrinsicRatio(`${el.videoWidth} / ${el.videoHeight}`);
-  };
-
   return (
     <div
       className={`project-fallback-video${nativeAspect ? " project-fallback-video--native" : ""}${revealed ? " is-ready" : ""}`}
-      style={
-        nativeAspect
-          ? intrinsicRatio
-            ? { aspectRatio: intrinsicRatio }
-            : undefined
-          : { paddingBottom: ratio }
-      }
+      style={{ paddingBottom: ratio }}
     >
       {allowed ? (
         <ProtectedVideo
@@ -348,7 +404,6 @@ function Side({
           loop={false}
           aria-label={alt}
           onError={onError}
-          onLoadedMetadata={nativeAspect ? syncIntrinsic : undefined}
         />
       ) : null}
       {showLoader ? (

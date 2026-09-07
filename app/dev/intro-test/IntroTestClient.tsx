@@ -114,9 +114,9 @@ export function IntroTestClient() {
           color: "#333",
         }}
       >
-        Opens the fullscreen intro without touching{" "}
-        <code>localStorage</code>. Stroke loops until “ready”, then fills and
-        unveils. Use Replay — no hard refresh.
+        Opens the fullscreen intro. Stroke loops until “ready”, then fills and
+        unveils. Production now replays on every homepage visit — use Replay
+        here without a hard refresh.
       </p>
 
       <div

@@ -13,6 +13,7 @@ import {
   VIDEO_LOAD_PRIORITY,
   useVideoLoadSlot,
 } from "@/lib/videoLoadQueue";
+import { useDriveVideoPlayback } from "@/lib/videoPlayback";
 import { cn } from "@/lib/utils";
 
 const CARDS = supportKnowCards;
@@ -36,6 +37,7 @@ function SupportPanelVideo({
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const releasedRef = useRef(false);
   const { allowed, releaseSlot } = useVideoLoadSlot(
     src,
     true,
@@ -49,28 +51,22 @@ function SupportPanelVideo({
     video.playbackRate = playbackRate;
   }, [playbackRate, src, allowed]);
 
+  const onSettled = () => {
+    if (releasedRef.current) return;
+    releasedRef.current = true;
+    releaseSlot();
+  };
+
+  useDriveVideoPlayback(
+    videoRef,
+    allowed,
+    onSettled,
+    src,
+  );
+
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video || !allowed) return;
-
-    const markReady = () => {
-      releaseSlot();
-      void video.play().catch(() => {});
-    };
-
-    if (video.readyState >= 3) {
-      markReady();
-      return;
-    }
-
-    const onCanPlay = () => markReady();
-    video.addEventListener("canplay", onCanPlay);
-    video.addEventListener("loadeddata", onCanPlay);
-    return () => {
-      video.removeEventListener("canplay", onCanPlay);
-      video.removeEventListener("loadeddata", onCanPlay);
-    };
-  }, [allowed, releaseSlot, src]);
+    releasedRef.current = false;
+  }, [src]);
 
   return (
     <div
@@ -84,6 +80,7 @@ function SupportPanelVideo({
           className="support-know__panel-video"
           src={src}
           preload="auto"
+          autoPlay={false}
           onLoadedMetadata={(event) => {
             event.currentTarget.playbackRate = playbackRate;
           }}

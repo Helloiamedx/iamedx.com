@@ -15,11 +15,11 @@ import { markVideoLoaded } from "@/lib/videoLoadMemory";
 
 type VideoLoadingCoverProps = {
   /**
-   * Buffer progress 0–100 — kept for aria; stroke no longer tracks it.
+   * Readiness estimate 0–100 — not a byte-download percentage.
    * Animation loops full outlines until `ready`, then fill → unveil.
    */
   progress: number;
-  /** True when enough is buffered for smooth first play */
+  /** True once playback starts, or the player reports a failure. */
   ready: boolean;
   /**
    * Only the queue’s current on-screen clip should animate.
@@ -48,12 +48,13 @@ function ease(value: number) {
   return progress * progress * (3 - 2 * progress);
 }
 
-/** Loop while waiting — one full outline draw per cycle (no wipe-back) */
-const STROKE_CYCLE_MS = 2400;
-/** Once the clip is playable: snap outline full → fill → unveil (no extra stroke rounds) */
-const BEFORE_FILL_MS = 20;
-const FILL_MS = 320;
-const HOLD_MS = 40;
+/** Loop while waiting — faster than the fullscreen intro. */
+const STROKE_CYCLE_MS = 1200;
+/** Once ready: finish the current outline, fill it, then unveil. */
+const FINISH_STROKE_MS = 280;
+const BEFORE_FILL_MS = 40;
+const FILL_MS = 520;
+const HOLD_MS = 90;
 
 function strokeDrawProgress(localMs: number, cycleMs: number) {
   return ease(clamp01(localMs / cycleMs));
@@ -92,43 +93,15 @@ export function readBufferedRatio(el: HTMLVideoElement): number {
   }
 }
 
-export function readyTargetRatio(el: HTMLVideoElement): number {
-  const { duration } = el;
-  if (duration && Number.isFinite(duration) && duration > 0) {
-    if (duration <= 20) {
-      return Math.min(0.55, Math.max(0.4, 5 / duration));
-    }
-    return Math.min(0.45, Math.max(7 / duration, 0.28));
-  }
-  return 0.5;
-}
-
+/** Readiness is local to the current playback position, never a file percentage. */
 export function isVideoBufferReady(el: HTMLVideoElement): boolean {
-  const ratio = readBufferedRatio(el);
-  const { duration, readyState } = el;
-
-  if (readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA && ratio >= 0.2) {
-    return true;
-  }
-  if (ratio >= 0.8) return true;
-  if (duration && Number.isFinite(duration) && duration > 0) {
-    return ratio >= readyTargetRatio(el);
-  }
-  return readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA;
+  return !el.seeking && el.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA;
 }
 
 export function readVideoBufferProgress(el: HTMLVideoElement): number {
-  const ratio = readBufferedRatio(el);
-  if (ratio > 0) {
-    const need = Math.max(0.08, readyTargetRatio(el));
-    return clampProgress((ratio / need) * 100);
-  }
-
-  const { readyState } = el;
-  if (readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA) return 100;
-  if (readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) return 55;
-  if (readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) return 28;
-  if (readyState >= HTMLMediaElement.HAVE_METADATA) return 10;
+  if (isVideoBufferReady(el)) return 100;
+  if (el.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) return 70;
+  if (el.readyState >= HTMLMediaElement.HAVE_METADATA) return 30;
   return 0;
 }
 
@@ -213,6 +186,7 @@ export function VideoLoadingCover({
 
     const startedAt = performance.now();
     let readyAt = Infinity;
+    let readyTrace = 0;
     let frameId = 0;
     let aborted = false;
     let finished = false;
@@ -221,7 +195,7 @@ export function VideoLoadingCover({
       if (aborted || finished) return;
       finished = true;
       cancelAnimationFrame(frameId);
-      if (cacheKey) markVideoLoaded(cacheKey);
+      if (cacheKey && readyRef.current) markVideoLoaded(cacheKey);
       setExiting(true);
       if (!doneFiredRef.current) {
         doneFiredRef.current = true;
@@ -237,12 +211,13 @@ export function VideoLoadingCover({
       const cycleMs = STROKE_CYCLE_MS;
 
       /* Video playable → leave the loop immediately (no ceil-to-next-cycle wait) */
-      if (!Number.isFinite(readyAt) && (readyRef.current || reduce)) {
+      if (!Number.isFinite(readyAt) && readyRef.current) {
         readyAt = elapsed;
+        readyTrace = strokeDrawProgress(elapsed % cycleMs, cycleMs);
       }
 
       const fillStart = Number.isFinite(readyAt)
-        ? readyAt + BEFORE_FILL_MS
+        ? readyAt + FINISH_STROKE_MS + BEFORE_FILL_MS
         : Infinity;
       const revealStart = fillStart + FILL_MS + HOLD_MS;
       const fillProgress = Number.isFinite(readyAt)
@@ -250,9 +225,11 @@ export function VideoLoadingCover({
         : 0;
 
       let traceProgress: number;
-      if (reduce || Number.isFinite(readyAt)) {
-        /* Ready: outline complete so fill can read clearly */
+      if (reduce) {
         traceProgress = 1;
+      } else if (Number.isFinite(readyAt)) {
+        const finishProgress = ease((elapsed - readyAt) / FINISH_STROKE_MS);
+        traceProgress = readyTrace + (1 - readyTrace) * finishProgress;
       } else {
         traceProgress = strokeDrawProgress(elapsed % cycleMs, cycleMs);
       }
@@ -333,99 +310,37 @@ export function HeroVideoLoadingMark(props: {
   return <VideoLoadingCover {...props} />;
 }
 
-/**
- * Tracks THIS video’s buffer. Plays muted under the cover as soon as
- * pixels exist so remounts don’t stutter after unveil.
- * `ready` flips at the buffer gate — do not wait on a second “lead” delay
- * (that made the mark loader feel like it slowed downloads).
- */
+/** Observe readiness only. Playback belongs to the player's controller. */
 export function useVideoLoadProgress(
   videoRef: RefObject<HTMLVideoElement | null>,
   resetKey: string,
 ) {
   const [progress, setProgress] = useState(0);
   const [ready, setReady] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   useLayoutEffect(() => {
     setProgress(0);
     setReady(false);
+    setFailed(false);
     const el = videoRef.current;
     if (!el || !resetKey) return;
 
-    let done = false;
-    let frameId = 0;
-    let lastPosted = -1;
-    let frameCount = 0;
-
-    const finish = () => {
-      if (done) return;
-      done = true;
-      cancelAnimationFrame(frameId);
-      setProgress(100);
-      setReady(true);
-      void el.play().catch(() => {});
-    };
-
-    const nudgePlayback = () => {
-      if (el.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
-      void el.play().catch(() => {});
-    };
-
     const sample = () => {
-      if (done) return;
-      const next = readVideoBufferProgress(el);
-      if (Math.abs(next - lastPosted) >= 2 || next >= 99) {
-        lastPosted = next;
-        setProgress((prev) => Math.max(prev, next));
-      }
-      nudgePlayback();
-      if (isVideoBufferReady(el)) finish();
+      setProgress(readVideoBufferProgress(el));
+      setReady(isVideoBufferReady(el));
     };
-
-    const onError = () => finish();
-
-    el.addEventListener("progress", sample);
-    el.addEventListener("loadeddata", sample);
-    el.addEventListener("loadedmetadata", sample);
-    el.addEventListener("canplay", sample);
-    el.addEventListener("canplaythrough", sample);
-    el.addEventListener("playing", sample);
+    const onError = () => setFailed(true);
+    const events = ["progress", "loadeddata", "loadedmetadata", "canplay", "playing", "seeked"];
+    events.forEach((event) => el.addEventListener(event, sample));
     el.addEventListener("error", onError);
-
-    try {
-      if (el.networkState === HTMLMediaElement.NETWORK_EMPTY) {
-        el.load();
-      }
-    } catch {
-      /* ignore */
-    }
-    nudgePlayback();
     sample();
-
-    const poll = () => {
-      frameCount += 1;
-      if (frameCount % 2 === 0) sample();
-      if (!done) frameId = requestAnimationFrame(poll);
-    };
-    frameId = requestAnimationFrame(poll);
-
-    const safetyHard = window.setTimeout(() => {
-      if (!done) finish();
-    }, 12000);
-
+    if (el.error) onError();
     return () => {
-      done = true;
-      cancelAnimationFrame(frameId);
-      window.clearTimeout(safetyHard);
-      el.removeEventListener("progress", sample);
-      el.removeEventListener("loadeddata", sample);
-      el.removeEventListener("loadedmetadata", sample);
-      el.removeEventListener("canplay", sample);
-      el.removeEventListener("canplaythrough", sample);
-      el.removeEventListener("playing", sample);
+      events.forEach((event) => el.removeEventListener(event, sample));
       el.removeEventListener("error", onError);
     };
   }, [videoRef, resetKey]);
 
-  return { progress, ready };
+  return { progress, ready, failed };
 }

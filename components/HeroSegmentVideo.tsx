@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
 import {
   VideoLoadingCover,
@@ -12,6 +12,7 @@ import {
   unlockVideosAfterHero,
   useVideoLoadSlot,
 } from "@/lib/videoLoadQueue";
+import { useDriveVideoPlayback } from "@/lib/videoPlayback";
 
 type HeroSegmentVideoProps = {
   src: string;
@@ -29,7 +30,7 @@ type HeroSegmentVideoProps = {
 
 /**
  * Full-bleed muted hero clip. Optional `[start, end]` loop via currentTime.
- * First in the top→bottom queue so the case hero isn’t blocked by gallery.
+ * Unlocks the page media gate when playback actually starts (or hard-fails).
  */
 export function HeroSegmentVideo({
   src,
@@ -40,6 +41,8 @@ export function HeroSegmentVideo({
 }: HeroSegmentVideoProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const releasedRef = useRef(false);
+  const [animationDone, setAnimationDone] = useState(false);
   const { allowed, releaseSlot } = useVideoLoadSlot(
     src,
     true,
@@ -47,23 +50,36 @@ export function HeroSegmentVideo({
     rootRef,
   );
   const loadKey = allowed ? src : "";
-  const { progress, ready } = useVideoLoadProgress(videoRef, loadKey);
+  const { progress, ready, failed } = useVideoLoadProgress(videoRef, loadKey);
   const { revealed, onCoverDone } = useVideoRevealGate(src);
   const segmentLoop = endSeconds != null && endSeconds > startSeconds;
+  const isPageHero = priority <= VIDEO_LOAD_PRIORITY.caseHero;
 
-  /* Unlock the rest of the page as soon as a true hero can play */
+  const onSettled = () => {
+    if (releasedRef.current) return;
+    releasedRef.current = true;
+    if (isPageHero) unlockVideosAfterHero();
+    releaseSlot();
+    onCoverDone();
+  };
+
+  useDriveVideoPlayback(
+    videoRef,
+    allowed && animationDone,
+    onSettled,
+    src,
+  );
+
+  const coverReady = ready || failed;
+
   useEffect(() => {
-    if (allowed && ready) {
-      if (priority <= VIDEO_LOAD_PRIORITY.caseHero) {
-        unlockVideosAfterHero();
-      }
-      releaseSlot();
-    }
-  }, [allowed, ready, releaseSlot, priority]);
+    releasedRef.current = false;
+    setAnimationDone(false);
+  }, [src]);
 
   useEffect(() => {
     const el = videoRef.current;
-    if (!el || !ready) return;
+    if (!el || !allowed) return;
 
     const seekStart = () => {
       if (Math.abs(el.currentTime - startSeconds) > 0.35) {
@@ -71,8 +87,8 @@ export function HeroSegmentVideo({
       }
     };
 
-    seekStart();
-    void el.play().catch(() => {});
+    if (el.readyState >= HTMLMediaElement.HAVE_METADATA) seekStart();
+    el.addEventListener("loadedmetadata", seekStart);
 
     const onTimeUpdate = () => {
       if (!segmentLoop) return;
@@ -90,14 +106,18 @@ export function HeroSegmentVideo({
     el.addEventListener("timeupdate", onTimeUpdate);
     el.addEventListener("ended", onEnded);
     return () => {
+      el.removeEventListener("loadedmetadata", seekStart);
       el.removeEventListener("timeupdate", onTimeUpdate);
       el.removeEventListener("ended", onEnded);
     };
-  }, [ready, src, startSeconds, endSeconds, segmentLoop]);
+  }, [allowed, src, startSeconds, endSeconds, segmentLoop]);
 
   const handleDone = () => {
-    releaseSlot();
-    onCoverDone();
+    if (failed) {
+      onSettled();
+      return;
+    }
+    setAnimationDone(true);
   };
 
   return (
@@ -120,7 +140,7 @@ export function HeroSegmentVideo({
         <VideoLoadingCover
           active
           progress={progress}
-          ready={ready}
+          ready={coverReady}
           cacheKey={src}
           onDone={handleDone}
         />

@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
 import {
   VideoLoadingCover,
   useVideoLoadProgress,
 } from "@/components/VideoLoadingCover";
+import { useDriveVideoPlayback } from "@/lib/videoPlayback";
 import { HERO_VIDEO_SRC } from "@/lib/heroMedia";
 import {
   HERO_CHROME_ATTR,
@@ -30,18 +31,25 @@ function isSiteIntroActive() {
 
 /**
  * Home hero video.
- * First visit: site intro covers the wait — video buffers under the veil.
- * Return visit: stroke cover; takes load-queue priority so it isn’t blocked.
+ * Under the homepage intro veil: bypass the load queue so hero bytes start immediately.
+ * Every homepage visit plays the intro — cold loads feel slower, warm loads finish faster.
  */
 export function HeroBackgroundVideo() {
   const rootRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [src, setSrc] = useState<string | null>(null);
   const [coverReady, setCoverReady] = useState(false);
+  const [animationDone, setAnimationDone] = useState(false);
   const [revealed, setRevealed] = useState(false);
-  const [underIntro] = useState(() =>
+  const [underIntro, setUnderIntro] = useState(() =>
     typeof document !== "undefined" ? isSiteIntroActive() : false,
   );
+
+  /* Client nav to `/` may add edx-loading after this component’s first render */
+  useLayoutEffect(() => {
+    if (isSiteIntroActive()) setUnderIntro(true);
+  }, []);
+
   /* Under intro: bypass queue (intro gate needs hero bytes). Else: top of page. */
   const { allowed, releaseSlot } = useVideoLoadSlot(
     HERO_VIDEO_SRC,
@@ -50,7 +58,7 @@ export function HeroBackgroundVideo() {
     rootRef,
   );
   const canLoad = Boolean(src) && (underIntro || allowed);
-  const { progress, ready: playable } = useVideoLoadProgress(
+  const { progress, ready, failed } = useVideoLoadProgress(
     videoRef,
     canLoad && src ? src : "",
   );
@@ -78,19 +86,13 @@ export function HeroBackgroundVideo() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!playable || !src) return;
-    setHeroFlag(HERO_VIDEO_PLAYABLE_ATTR);
+  useDriveVideoPlayback(videoRef, canLoad && (underIntro || animationDone), () => {
     unlockVideosAfterHero();
-  }, [playable, src]);
-
-  useEffect(() => {
-    if (!underIntro || !playable || !src || revealed) return;
-    const el = videoRef.current;
-    if (el) void el.play().catch(() => {});
+    releaseSlot();
+    setHeroFlag(HERO_VIDEO_PLAYABLE_ATTR);
     setRevealed(true);
     setHeroFlag(HERO_VIDEO_ATTR);
-  }, [underIntro, playable, src, revealed]);
+  }, src ?? "");
 
   useEffect(() => {
     if (!underIntro || !revealed) return;
@@ -115,23 +117,13 @@ export function HeroBackgroundVideo() {
   }, [underIntro, revealed]);
 
   useEffect(() => {
-    if (underIntro || !playable || !src || coverReady) return;
+    if (underIntro || (!ready && !failed) || coverReady) return;
     const ac = new AbortController();
-    let cancelled = false;
-
-    void (async () => {
-      await whenHeroFlag(HERO_CHROME_ATTR, { signal: ac.signal });
-      if (cancelled || ac.signal.aborted) return;
-      setCoverReady(true);
-      const el = videoRef.current;
-      if (el) void el.play().catch(() => {});
-    })();
-
-    return () => {
-      cancelled = true;
-      ac.abort();
-    };
-  }, [underIntro, playable, src, coverReady]);
+    void whenHeroFlag(HERO_CHROME_ATTR, { signal: ac.signal }).then(() => {
+      if (!ac.signal.aborted) setCoverReady(true);
+    });
+    return () => ac.abort();
+  }, [underIntro, ready, failed, coverReady]);
 
   useEffect(() => {
     if (underIntro || !revealed) return;
@@ -145,14 +137,8 @@ export function HeroBackgroundVideo() {
   }, [underIntro, revealed]);
 
   const handleCoverDone = () => {
-    releaseSlot();
-    setRevealed(true);
-    setHeroFlag(HERO_VIDEO_ATTR);
+    setAnimationDone(true);
   };
-
-  useEffect(() => {
-    if (canLoad && coverReady) releaseSlot();
-  }, [canLoad, coverReady, releaseSlot]);
 
   if (!src) {
     return <div ref={rootRef} className="hero__video-wrap" />;

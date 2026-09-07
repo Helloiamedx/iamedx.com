@@ -9,8 +9,10 @@ import {
 import { useVideoRevealGate } from "@/lib/videoLoadMemory";
 import {
   VIDEO_LOAD_PRIORITY,
+  softenVideoDownload,
   useVideoLoadSlot,
 } from "@/lib/videoLoadQueue";
+import { useDriveVideoPlayback } from "@/lib/videoPlayback";
 
 export type ProjectFallbackVideoProps = {
   /** Preferred source (e.g. TikTok / original URL). */
@@ -21,11 +23,11 @@ export type ProjectFallbackVideoProps = {
    */
   fallbackSrc?: string;
   alt: string;
-  /** CSS padding-bottom ratio, e.g. `177.78%` for 9:16 */
+  /** CSS padding-bottom ratio, e.g. `177.78%` for 9:16 — always reserves height */
   ratio?: string;
   /**
-   * Size the frame to the file’s intrinsic width/height (no forced box /
-   * cover crop). Wins over `ratio` when set.
+   * Size the frame to the file’s real width/height once metadata loads
+   * (no letterbox bars). `ratio` is only the pre-metadata reserve.
    */
   nativeAspect?: boolean;
   className?: string;
@@ -34,12 +36,9 @@ export type ProjectFallbackVideoProps = {
 };
 
 /**
- * Tries `primarySrc` first; on load/play failure (or timeout) switches to
- * `fallbackSrc` when provided.
- *
- * After hero: takes one serial queue turn (top→bottom). When playable, play
- * immediately (no wait-for-scroll). Mark loader only if the cell is on-screen
- * and not yet revealed.
+ * Gallery clip — near-viewport after hero (queue), reserved padding box.
+ * Once allowed: buffer and play in the background (do not wait for scroll).
+ * Mark loader only while the cell is on-screen.
  */
 export function ProjectFallbackVideo({
   primarySrc,
@@ -54,8 +53,9 @@ export function ProjectFallbackVideo({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [src, setSrc] = useState(primarySrc);
   const [usedFallback, setUsedFallback] = useState(false);
-  const [intrinsicRatio, setIntrinsicRatio] = useState<string | undefined>();
-  const [nearView, setNearView] = useState(false);
+  const [onScreen, setOnScreen] = useState(false);
+  const [boxRatio, setBoxRatio] = useState(ratio);
+  const releasedRef = useRef(false);
   const { allowed, releaseSlot } = useVideoLoadSlot(
     primarySrc,
     true,
@@ -63,22 +63,65 @@ export function ProjectFallbackVideo({
     rootRef,
   );
   const loadKey = allowed ? src : "";
-  const { progress, ready } = useVideoLoadProgress(videoRef, loadKey);
+  const { progress, ready, failed } = useVideoLoadProgress(videoRef, loadKey);
   const { revealed, onCoverDone } = useVideoRevealGate(src);
-  const showMark = allowed && nearView && !revealed;
+
+  const onSettled = () => {
+    if (releasedRef.current) return;
+    releasedRef.current = true;
+    softenVideoDownload(videoRef.current);
+    releaseSlot();
+  };
+
+  const { playing, settled } = useDriveVideoPlayback(
+    videoRef,
+    allowed,
+    onSettled,
+    src,
+  );
+
+  const coverReady = playing || settled || ready || failed;
+  const showMark = allowed && onScreen && !revealed;
+
+  useEffect(() => {
+    releasedRef.current = false;
+  }, [primarySrc, src]);
+
+  useEffect(() => {
+    setBoxRatio(ratio);
+  }, [ratio, src]);
+
+  /* nativeAspect — lock the padding box to the file’s intrinsic aspect */
+  useEffect(() => {
+    if (!nativeAspect || !allowed) return;
+    const video = videoRef.current;
+    if (!video) return;
+
+    const applyNativeRatio = () => {
+      const w = video.videoWidth;
+      const h = video.videoHeight;
+      if (w > 0 && h > 0) {
+        setBoxRatio(`${(h / w) * 100}%`);
+      }
+    };
+
+    applyNativeRatio();
+    video.addEventListener("loadedmetadata", applyNativeRatio);
+    return () => video.removeEventListener("loadedmetadata", applyNativeRatio);
+  }, [nativeAspect, allowed, src]);
 
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
     if (typeof IntersectionObserver === "undefined") {
-      setNearView(true);
+      setOnScreen(true);
       return;
     }
     const io = new IntersectionObserver(
       ([entry]) => {
-        if (entry?.isIntersecting) setNearView(true);
+        setOnScreen(Boolean(entry?.isIntersecting));
       },
-      { rootMargin: "160px 0px", threshold: 0 },
+      { rootMargin: "120px 0px", threshold: 0 },
     );
     io.observe(root);
     return () => io.disconnect();
@@ -87,29 +130,13 @@ export function ProjectFallbackVideo({
   useEffect(() => {
     setSrc(primarySrc);
     setUsedFallback(false);
-    setIntrinsicRatio(undefined);
   }, [primarySrc, fallbackSrc]);
 
+  /* Off-screen: unveil once settled so we don’t leave a stuck cover state */
   useEffect(() => {
-    if (allowed && ready) releaseSlot();
-  }, [allowed, ready, releaseSlot]);
-
-  /* Play as soon as playable — do not wait for scroll */
-  useEffect(() => {
-    const el = videoRef.current;
-    if (!el || !ready) return;
-    void el.play().catch(() => {});
-  }, [ready, src]);
-
-  /*
-   * Unveil when ready unless an on-screen mark is handling fill→unveil.
-   * Off-screen warm clips unveil immediately (already playing underneath).
-   */
-  useEffect(() => {
-    if (!allowed || !ready || revealed) return;
-    if (nearView) return;
+    if (!allowed || !coverReady || revealed || onScreen) return;
     onCoverDone();
-  }, [allowed, ready, revealed, nearView, onCoverDone]);
+  }, [allowed, coverReady, revealed, onScreen, onCoverDone]);
 
   useEffect(() => {
     if (!allowed) return;
@@ -122,19 +149,16 @@ export function ProjectFallbackVideo({
   }, [allowed, src, fallbackSrc, usedFallback, ready, primaryTimeoutMs]);
 
   const switchToFallback = () => {
-    if (!fallbackSrc || usedFallback || src === fallbackSrc) return;
+    if (!fallbackSrc || usedFallback || src === fallbackSrc) {
+      onSettled();
+      onCoverDone();
+      return;
+    }
     setUsedFallback(true);
     setSrc(fallbackSrc);
   };
 
-  const syncIntrinsic = () => {
-    const el = videoRef.current;
-    if (!el || !el.videoWidth || !el.videoHeight) return;
-    setIntrinsicRatio(`${el.videoWidth} / ${el.videoHeight}`);
-  };
-
   const handleDone = () => {
-    releaseSlot();
     onCoverDone();
   };
 
@@ -142,13 +166,7 @@ export function ProjectFallbackVideo({
     <div
       ref={rootRef}
       className={`project-fallback-video${nativeAspect ? " project-fallback-video--native" : ""}${revealed ? " is-ready" : ""}${className ? ` ${className}` : ""}`}
-      style={
-        nativeAspect
-          ? intrinsicRatio
-            ? { aspectRatio: intrinsicRatio }
-            : undefined
-          : { paddingBottom: ratio }
-      }
+      style={{ paddingBottom: boxRatio }}
     >
       {allowed ? (
         <ProtectedVideo
@@ -160,7 +178,6 @@ export function ProjectFallbackVideo({
           autoPlay={false}
           aria-label={alt}
           onError={switchToFallback}
-          onLoadedMetadata={nativeAspect ? syncIntrinsic : undefined}
         />
       ) : null}
 
@@ -168,7 +185,7 @@ export function ProjectFallbackVideo({
         <VideoLoadingCover
           active
           progress={progress}
-          ready={ready}
+          ready={coverReady}
           cacheKey={src}
           onDone={handleDone}
         />

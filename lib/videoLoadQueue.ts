@@ -1,32 +1,57 @@
 /**
- * Video load gate — one clip at a time, top → bottom.
+ * Video load gate — hero absolute first, then visibility-ranked concurrency.
  *
- * Home fullscreen intro (`edx-loading`):
- *   ONLY the home / case hero may attach. Nothing else starts until the veil lifts.
+ * Home fullscreen intro (`edx-loading`): only hero may attach.
  *
- * Every page (home, case, collection, …):
- *   1. Hero first (or watchdog / still-hero unlock if none)
- *   2. Then waiters serially: lower priority first; same priority keeps
- *      registration order (React mount ≈ DOM top → bottom)
- *   3. `releaseSlot` when playable → next waiter
- *   4. Non-video media (gallery stills) also wait on `useAfterHeroGate`
+ * After hero unlocks (playing / still painted / YouTube ready / hard fail):
+ *   - Up to MAX_POST_HERO concurrent non-hero clips
+ *   - Prefer in-view, then near-view; far clips stay pending (no src)
+ *   - Scroll updates visibility scores so pending work reorders — active
+ *     slots are never revoked (no src thrash on playing clips)
+ *   - releaseSlot frees a concurrency slot (playing started, error, or unmount)
  */
 
 "use client";
 
-import { useEffect, useState, type RefObject } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+  type RefObject,
+} from "react";
+
+/** In viewport */
+export const VIS_IN = 0;
+/** Within preload margin of viewport */
+export const VIS_NEAR = 1;
+/** Far — registered but not eligible to start */
+export const VIS_FAR = 2;
+
+const MAX_POST_HERO = 2;
+/**
+ * Unlock if no page hero ever claims the gate.
+ * Home intro keeps a long failsafe; other routes (services / thoughts) have no
+ * hero — open almost immediately so covers aren’t stuck on a black plate.
+ */
+const HERO_FAILSAFE_HOME_MS = 16000;
+const HERO_FAILSAFE_PAGE_MS = 48;
+const NEAR_ROOT_MARGIN = "280px 0px";
 
 type Waiter = {
   id: string;
-  priority: number;
+  band: number;
   seq: number;
   resolve: () => void;
+  /** Lower = sooner */
+  visibility: number;
+  /** Hero bands ignore far-gate */
+  isHero: boolean;
 };
 
 let heroDone = false;
-let activeId: string | null = null;
 let seqCounter = 0;
 const waiters: Waiter[] = [];
+const activeIds = new Set<string>();
 const heroListeners = new Set<() => void>();
 let heroWatchdogId = 0;
 let introObserver: MutationObserver | null = null;
@@ -38,36 +63,30 @@ function clearHeroWatchdog() {
   }
 }
 
-function isHomeIntroLoading() {
+export function isHomeIntroLoading() {
   return (
     typeof document !== "undefined" &&
     document.documentElement.classList.contains("edx-loading")
   );
 }
 
-function isHeroPriority(priority: number) {
+function isHeroPriority(band: number) {
   return (
-    priority <= VIDEO_LOAD_PRIORITY.caseHero ||
-    priority === VIDEO_LOAD_PRIORITY.hero
+    band <= VIDEO_LOAD_PRIORITY.caseHero || band === VIDEO_LOAD_PRIORITY.hero
   );
-}
-
-function sortWaiters() {
-  waiters.sort((a, b) => a.priority - b.priority || a.seq - b.seq);
 }
 
 function emitHeroUnlocked() {
   heroListeners.forEach((listener) => listener());
 }
 
-/** While the home veil is up, watch for unveil so the serial queue can resume. */
 function ensureIntroObserver() {
   if (typeof document === "undefined" || introObserver) return;
   introObserver = new MutationObserver(() => {
     if (!isHomeIntroLoading()) {
       introObserver?.disconnect();
       introObserver = null;
-      if (!activeId) pump();
+      pump();
       if (heroDone) emitHeroUnlocked();
     }
   });
@@ -77,72 +96,103 @@ function ensureIntroObserver() {
   });
 }
 
+function sortWaiters() {
+  waiters.sort((a, b) => {
+    if (a.isHero !== b.isHero) return a.isHero ? -1 : 1;
+    if (a.visibility !== b.visibility) return a.visibility - b.visibility;
+    if (a.band !== b.band) return a.band - b.band;
+    return a.seq - b.seq;
+  });
+}
+
+function maxSlots(): number {
+  if (isHomeIntroLoading()) return 1;
+  if (!heroDone) return 1;
+  return MAX_POST_HERO;
+}
+
+function canStart(waiter: Waiter): boolean {
+  if (isHomeIntroLoading()) return waiter.isHero;
+  if (!heroDone) return waiter.isHero;
+  /* After hero: only in-view / near-view */
+  return waiter.visibility <= VIS_NEAR;
+}
+
 function pump() {
-  if (activeId) return;
+  const limit = maxSlots();
+  if (activeIds.size >= limit) return;
+
+  if (isHomeIntroLoading()) ensureIntroObserver();
+
+  if (!heroDone && !waiters.some((w) => w.isHero) && !activeIds.size) {
+    ensureHeroWatchdog();
+  }
 
   sortWaiters();
 
-  /* Fullscreen home intro: hero bytes only — hold every other clip. */
-  if (isHomeIntroLoading()) {
-    ensureIntroObserver();
-    const index = waiters.findIndex((w) => isHeroPriority(w.priority));
-    if (index < 0) {
-      ensureHeroWatchdog();
-      return;
-    }
+  while (activeIds.size < limit) {
+    const index = waiters.findIndex(
+      (w) => !activeIds.has(w.id) && canStart(w),
+    );
+    if (index < 0) break;
     const [next] = waiters.splice(index, 1);
-    activeId = next.id;
+    activeIds.add(next.id);
     next.resolve();
-    return;
   }
-
-  if (!heroDone) {
-    const index = waiters.findIndex((w) => isHeroPriority(w.priority));
-    if (index < 0) {
-      ensureHeroWatchdog();
-      return;
-    }
-    const [next] = waiters.splice(index, 1);
-    activeId = next.id;
-    next.resolve();
-    return;
-  }
-
-  const next = waiters.shift();
-  if (!next) return;
-  activeId = next.id;
-  next.resolve();
 }
 
 function ensureHeroWatchdog() {
   if (heroDone || heroWatchdogId || typeof window === "undefined") return;
-  /* Pages without a hero video shouldn't block the rest forever */
+  const delay = isHomeIntroLoading()
+    ? HERO_FAILSAFE_HOME_MS
+    : HERO_FAILSAFE_PAGE_MS;
   heroWatchdogId = window.setTimeout(() => {
     heroWatchdogId = 0;
     unlockVideosAfterHero();
-  }, 4000);
+  }, delay);
 }
 
-function acquire(id: string, priority: number): Promise<void> {
+function acquire(
+  id: string,
+  band: number,
+  visibility: number,
+): Promise<void> {
   if (!id) return Promise.resolve();
 
   return new Promise((resolve) => {
     const existing = waiters.find((w) => w.id === id);
     if (existing) {
       existing.resolve = resolve;
-      existing.priority = priority;
+      existing.band = band;
+      existing.visibility = visibility;
+      existing.isHero = isHeroPriority(band);
       pump();
+      return;
+    }
+
+    if (activeIds.has(id)) {
+      resolve();
       return;
     }
 
     waiters.push({
       id,
-      priority,
+      band,
       seq: seqCounter++,
       resolve,
+      visibility,
+      isHero: isHeroPriority(band),
     });
     pump();
   });
+}
+
+function updateVisibility(id: string, visibility: number) {
+  const waiter = waiters.find((w) => w.id === id);
+  if (waiter) {
+    waiter.visibility = visibility;
+    pump();
+  }
 }
 
 function release(id: string) {
@@ -151,14 +201,17 @@ function release(id: string) {
   const waiting = waiters.findIndex((w) => w.id === id);
   if (waiting >= 0) waiters.splice(waiting, 1);
 
-  if (activeId !== id) return;
-  activeId = null;
+  if (!activeIds.has(id)) {
+    pump();
+    return;
+  }
+  activeIds.delete(id);
   pump();
 }
 
 /**
- * Call when the page hero (home or case) can play / is painted.
- * Opens the serial queue for the next top→bottom clip and stills gate.
+ * Page hero has started playback (or still/YouTube equivalent / hard fail).
+ * Opens post-hero concurrency for near-viewport media.
  */
 export function unlockVideosAfterHero() {
   const wasDone = heroDone;
@@ -166,16 +219,16 @@ export function unlockVideosAfterHero() {
     heroDone = true;
     clearHeroWatchdog();
   }
-  if (!activeId) pump();
+  pump();
   if (!wasDone || !isHomeIntroLoading()) emitHeroUnlocked();
 }
 
-/** Soft reset on client navigations that remount the tree (best-effort). */
+/** Soft reset on client navigations. */
 export function resetVideoLoadGate() {
   heroDone = false;
-  activeId = null;
   seqCounter = 0;
   waiters.length = 0;
+  activeIds.clear();
   clearHeroWatchdog();
   introObserver?.disconnect();
   introObserver = null;
@@ -183,8 +236,8 @@ export function resetVideoLoadGate() {
 }
 
 /**
- * True once the page hero has unlocked (and home intro veil is gone).
- * Use for gallery stills / other non-queued media so they don’t fight the hero.
+ * True once the page hero has unlocked and home intro veil is gone.
+ * Pair with near-viewport for gallery stills.
  */
 export function useAfterHeroGate() {
   const [open, setOpen] = useState(false);
@@ -206,18 +259,68 @@ export function useAfterHeroGate() {
 }
 
 /**
- * `allowed` = may attach <video src> and buffer.
- * Only one slot is active at a time. Hero priorities run before anything else.
- * During `edx-loading`, non-hero slots stay blocked.
+ * Start loading stills near the viewport, after hero unlock.
+ * Once admitted, retain the media until unmount: removing off-screen images
+ * collapses native-height frames and makes the document jump while scrolling.
+ */
+export function useNearViewportMedia(
+  anchorRef: RefObject<Element | null>,
+  rootMargin = NEAR_ROOT_MARGIN,
+) {
+  const heroReady = useAfterHeroGate();
+  const [admitted, setAdmitted] = useState(false);
+
+  useEffect(() => {
+    const root = anchorRef.current;
+    if (!root || !heroReady || admitted) return;
+
+    if (typeof IntersectionObserver === "undefined") {
+      setAdmitted(true);
+      return;
+    }
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        setAdmitted(true);
+        io.disconnect();
+      },
+      { rootMargin, threshold: 0 },
+    );
+    io.observe(root);
+    return () => io.disconnect();
+  }, [anchorRef, heroReady, rootMargin, admitted]);
+
+  return admitted;
+}
+
+function readVisibility(
+  el: Element | null,
+  rootMarginPx: number,
+): number {
+  if (!el || typeof window === "undefined") return VIS_FAR;
+  const rect = el.getBoundingClientRect();
+  const vh = window.innerHeight || 0;
+  if (rect.bottom > 0 && rect.top < vh) return VIS_IN;
+  if (rect.bottom > -rootMarginPx && rect.top < vh + rootMarginPx) {
+    return VIS_NEAR;
+  }
+  return VIS_FAR;
+}
+
+/**
+ * `allowed` = may attach <video src>.
+ * Heroes always contend for the single pre-unlock slot.
+ * Others wait for hero + near/in-view, with max 2 concurrent.
  */
 export function useVideoLoadSlot(
   id: string,
   wantLoad: boolean,
-  priority = 50,
-  _anchorRef?: RefObject<Element | null>,
+  band = 50,
+  anchorRef?: RefObject<Element | null>,
 ) {
   const [allowed, setAllowed] = useState(false);
-  const isHero = isHeroPriority(priority);
+  const isHero = isHeroPriority(band);
 
   useEffect(() => {
     setAllowed(false);
@@ -225,18 +328,60 @@ export function useVideoLoadSlot(
 
     let cancelled = false;
     let acquired = false;
+    let io: IntersectionObserver | null = null;
+    const marginPx = 280;
 
-    void acquire(id, priority).then(() => {
-      if (cancelled) {
-        release(id);
-        return;
+    const enqueue = (visibility: number) => {
+      if (cancelled) return;
+      void acquire(id, band, visibility).then(() => {
+        if (cancelled) {
+          release(id);
+          return;
+        }
+        acquired = true;
+        setAllowed(true);
+      });
+    };
+
+    const syncFromDom = () => {
+      if (cancelled || acquired) return;
+      const visibility = isHero
+        ? VIS_IN
+        : readVisibility(anchorRef?.current ?? null, marginPx);
+
+      if (isHero || visibility <= VIS_NEAR) {
+        const pending = waiters.find((w) => w.id === id);
+        if (pending) updateVisibility(id, visibility);
+        else enqueue(visibility);
+      } else {
+        const index = waiters.findIndex((w) => w.id === id);
+        if (index >= 0) waiters.splice(index, 1);
       }
-      acquired = true;
-      setAllowed(true);
-    });
+    };
+
+    syncFromDom();
+
+    if (!isHero) {
+      const root = anchorRef?.current;
+      if (root && typeof IntersectionObserver !== "undefined") {
+        io = new IntersectionObserver(() => syncFromDom(), {
+          rootMargin: NEAR_ROOT_MARGIN,
+          threshold: [0, 0.01],
+        });
+        io.observe(root);
+      } else if (typeof window !== "undefined") {
+        window.addEventListener("scroll", syncFromDom, { passive: true });
+        window.addEventListener("resize", syncFromDom, { passive: true });
+      }
+    }
 
     return () => {
       cancelled = true;
+      io?.disconnect();
+      if (!isHero && typeof window !== "undefined") {
+        window.removeEventListener("scroll", syncFromDom);
+        window.removeEventListener("resize", syncFromDom);
+      }
       if (acquired) release(id);
       else {
         const index = waiters.findIndex((w) => w.id === id);
@@ -244,28 +389,35 @@ export function useVideoLoadSlot(
       }
       setAllowed(false);
     };
-  }, [id, wantLoad, priority]);
+  }, [id, wantLoad, band, isHero, anchorRef]);
 
-  const releaseSlot = () => {
+  const releaseSlot = useCallback(() => {
     if (isHero) unlockVideosAfterHero();
     release(id);
-  };
+  }, [id, isHero]);
 
   return { allowed, releaseSlot };
 }
 
 /**
- * Lower number = earlier in the serial queue.
- * Same-priority clips keep mount / registration order (page top → bottom).
+ * Lower band number = preferred when visibility ties.
  */
 export const VIDEO_LOAD_PRIORITY = {
   hero: 0,
   caseHero: 5,
-  /** Home support band — after hero, before insight covers */
   homeSupport: 15,
-  /** Mid-page clips (gallery + synced pairs) — DOM order via registration */
   syncedPair: 20,
   gallery: 20,
   coverCard: 30,
   footer: 40,
 } as const;
+
+/** Soften continued download after first frames are on screen */
+export function softenVideoDownload(el: HTMLVideoElement | null) {
+  if (!el) return;
+  try {
+    el.preload = "metadata";
+  } catch {
+    /* ignore */
+  }
+}

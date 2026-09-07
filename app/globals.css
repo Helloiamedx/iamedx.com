@@ -2369,7 +2369,7 @@ html[data-chrome-ready="1"] .hero__video.is-loaded {
   opacity: 1;
   visibility: visible;
   transition:
-    opacity 0.4s ease,
+    opacity 0.18s ease,
     visibility 0s linear 0s;
   /* Never steal taps — nav / filters / cards must stay clickable while videos load */
   pointer-events: none !important;
@@ -2383,8 +2383,8 @@ html[data-chrome-ready="1"] .hero__video.is-loaded {
   opacity: 0;
   visibility: hidden;
   transition:
-    opacity 0.4s ease,
-    visibility 0s linear 0.4s;
+    opacity 0.18s ease,
+    visibility 0s linear 0.18s;
 }
 
 /* First frame already showing — drop the black plate, keep the mark */
@@ -9440,27 +9440,39 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   transition: none;
 }
 
-/* Intrinsic file size — no forced padding box / cover crop */
+/* Native = padding box sized to the file’s intrinsic aspect (see ProjectFallbackVideo).
+   Fill edge-to-edge once the box matches — no letterbox bars. */
 .project-fallback-video--native {
-  height: auto;
-  overflow: visible;
-  background: transparent;
+  background: #000;
 }
 
 .project-fallback-video--native .project-fallback-video__media {
-  position: static;
-  width: 100%;
-  height: auto;
-  object-fit: unset;
+  object-fit: cover;
 }
 
-/* Full-width gallery clips — native aspect, no cover crop / zoom */
+/* Full-width gallery clips — no cover crop / zoom unless native box is locked */
 .project-case-demo__full--video .project-fallback-video__media {
   object-fit: contain;
 }
 
 .project-case-demo__full--video .project-fallback-video--native .project-fallback-video__media {
-  object-fit: unset;
+  object-fit: cover;
+}
+
+.project-case-demo__youtube {
+  position: relative;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  background: #000;
+}
+
+.project-case-demo__youtube-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
 }
 
 .project-case-demo__panel {

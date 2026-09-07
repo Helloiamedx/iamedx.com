@@ -280,7 +280,12 @@ function ensureHistoryScrollHooks() {
     "popstate",
     () => {
       navigationKind = "pop";
-      scheduleRestore(window.location.pathname, lenisForRestore);
+      /*
+       * Wait for usePathname to commit the destination before restoring.
+       * Restoring here runs against the page being left, then the pathname
+       * effect restores again and can fight a fast wheel/touch gesture.
+       */
+      endScrollRestore();
     },
     true,
   );

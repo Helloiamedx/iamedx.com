@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { useAfterHeroGate } from "@/lib/videoLoadQueue";
 import { cn } from "@/lib/utils";
 
 const STACK_INTERVAL_MS = 1125;
@@ -49,8 +50,7 @@ function initialStack(total: number): StackFrame {
   };
 }
 
-/** Image stack — hard cut; dual buffer keeps the previous frame until the next is ready.
- *  Waits out the home fullscreen intro so those bytes don’t fight the hero. */
+/** Image stack — waits for page hero unlock so preloads don’t fight the hero. */
 export function PanelImageStack({
   images,
   align,
@@ -58,36 +58,13 @@ export function PanelImageStack({
 }: PanelImageStackProps) {
   const n = images.length;
   const imagesKey = useMemo(() => images.join("\0"), [images]);
+  const heroReady = useAfterHeroGate();
 
   const [ready, setReady] = useState(n <= 1);
   const [stack, setStack] = useState<StackFrame>(() => initialStack(n));
-  const [introClear, setIntroClear] = useState(() =>
-    typeof document === "undefined"
-      ? true
-      : !document.documentElement.classList.contains("edx-loading"),
-  );
 
   useEffect(() => {
-    if (introClear) return;
-    if (!document.documentElement.classList.contains("edx-loading")) {
-      setIntroClear(true);
-      return;
-    }
-    const obs = new MutationObserver(() => {
-      if (!document.documentElement.classList.contains("edx-loading")) {
-        setIntroClear(true);
-        obs.disconnect();
-      }
-    });
-    obs.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-    return () => obs.disconnect();
-  }, [introClear]);
-
-  useEffect(() => {
-    if (!introClear) return;
+    if (!heroReady) return;
     if (n <= 1) {
       setReady(true);
       setStack(initialStack(n));
@@ -105,7 +82,7 @@ export function PanelImageStack({
     return () => {
       cancelled = true;
     };
-  }, [images, imagesKey, n, introClear]);
+  }, [images, imagesKey, n, heroReady]);
 
   useEffect(() => {
     if (!ready || n < 2) return;
@@ -137,21 +114,9 @@ export function PanelImageStack({
 
   if (n === 0) return null;
 
-  if (!ready) {
+  if (!heroReady || !ready) {
     return (
-      <div className={cn("panel-image-stack", className)} aria-hidden="true">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={images[0]}
-          alt=""
-          className={cn(
-            "panel-image-stack__img is-active",
-            alignClassFor(align, 0, n),
-          )}
-          draggable={false}
-          decoding="async"
-        />
-      </div>
+      <div className={cn("panel-image-stack", className)} aria-hidden="true" />
     );
   }
 

@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { resetVideoLoadGate } from "@/lib/videoLoadQueue";
 
-/** Reset hero→serial gate on each client navigation. */
+/** Reset hero→visibility media gate on each client navigation. */
 export function VideoLoadGateReset() {
   const pathname = usePathname();
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
 import {
   VideoLoadingCover,
@@ -9,8 +9,10 @@ import {
 import { useVideoRevealGate } from "@/lib/videoLoadMemory";
 import {
   VIDEO_LOAD_PRIORITY,
+  softenVideoDownload,
   useVideoLoadSlot,
 } from "@/lib/videoLoadQueue";
+import { useDriveVideoPlayback } from "@/lib/videoPlayback";
 import { cn } from "@/lib/utils";
 
 type CoverLoopVideoProps = {
@@ -20,15 +22,10 @@ type CoverLoopVideoProps = {
   ariaLabel?: string;
 };
 
-function isHomeIntroLoading() {
-  return document.documentElement.classList.contains("edx-loading");
-}
-
 /**
- * Index / Related card cover loop.
- * Loads one-at-a-time after the hero (serial queue, top→bottom).
- * When playable: play immediately. Mark loader only if still on-screen and
- * not yet revealed; off-screen clips unveil + play without waiting for scroll.
+ * Card / services / insights cover loop — same mark loader language as project clips.
+ * Show the site-mark cover as soon as the cell is on-screen (even while waiting
+ * for a queue slot). Buffer + play once allowed; unveil when playing.
  */
 export function CoverLoopVideo({
   src,
@@ -37,10 +34,8 @@ export function CoverLoopVideo({
 }: CoverLoopVideoProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [underIntro] = useState(() =>
-    typeof document !== "undefined" ? isHomeIntroLoading() : false,
-  );
-  const [nearView, setNearView] = useState(underIntro);
+  const [onScreen, setOnScreen] = useState(false);
+  const releasedRef = useRef(false);
   const { allowed, releaseSlot } = useVideoLoadSlot(
     src,
     true,
@@ -48,77 +43,57 @@ export function CoverLoopVideo({
     rootRef,
   );
   const loadKey = allowed ? src : "";
-  const { progress, ready } = useVideoLoadProgress(videoRef, loadKey);
+  const { progress, ready, failed } = useVideoLoadProgress(videoRef, loadKey);
   const { revealed, onCoverDone } = useVideoRevealGate(src);
-  const showMark = Boolean(allowed && nearView && !revealed && !underIntro);
+
+  const onSettled = () => {
+    if (releasedRef.current) return;
+    releasedRef.current = true;
+    softenVideoDownload(videoRef.current);
+    releaseSlot();
+  };
+
+  const { playing, settled } = useDriveVideoPlayback(
+    videoRef,
+    allowed,
+    onSettled,
+    src,
+  );
+
+  const coverReady = playing || settled || ready || failed;
+  /* Mark as soon as visible — don’t wait for the queue (avoids long black plate) */
+  const showMark = Boolean(onScreen && !revealed);
 
   useEffect(() => {
-    if (underIntro) {
-      setNearView(true);
-      return;
-    }
+    releasedRef.current = false;
+  }, [src]);
 
+  useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
 
-    const activate = () => setNearView(true);
-
     if (typeof IntersectionObserver === "undefined") {
-      activate();
-      return;
-    }
-
-    const rect = root.getBoundingClientRect();
-    if (rect.bottom > 0 && rect.top < window.innerHeight + 240) {
-      activate();
+      setOnScreen(true);
       return;
     }
 
     const io = new IntersectionObserver(
       ([entry]) => {
-        if (entry?.isIntersecting) {
-          activate();
-          io.disconnect();
-        }
+        setOnScreen(Boolean(entry?.isIntersecting));
       },
-      { rootMargin: "240px 0px", threshold: 0 },
+      { rootMargin: "160px 0px", threshold: 0 },
     );
     io.observe(root);
     return () => io.disconnect();
-  }, [underIntro]);
+  }, []);
 
+  /* Off-screen: unveil quietly once settled */
   useEffect(() => {
-    if (allowed && ready) releaseSlot();
-  }, [allowed, ready, releaseSlot]);
-
-  /* Always play when ready — do not wait for scroll */
-  useLayoutEffect(() => {
-    const el = videoRef.current;
-    if (!el || !ready) return;
-    void el.play().catch(() => {});
-  }, [ready, loadKey]);
-
-  /*
-   * Unveil as soon as playable unless an on-screen mark is finishing the fill.
-   * Off-screen / intro: no scroll gate.
-   */
-  useEffect(() => {
-    if (!allowed || !ready || revealed) return;
-    if (nearView && !underIntro) return;
+    if (!allowed || !coverReady || revealed || onScreen) return;
     onCoverDone();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allowed, ready, revealed, nearView, underIntro, src]);
-
-  /* Under fullscreen intro — no second mark loader; unveil when playable */
-  useEffect(() => {
-    if (!underIntro || !ready) return;
-    releaseSlot();
-    onCoverDone();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only when playable under intro
-  }, [underIntro, ready, src]);
+  }, [allowed, coverReady, revealed, onScreen, onCoverDone]);
 
   const handleDone = () => {
-    releaseSlot();
     onCoverDone();
   };
 
@@ -142,7 +117,7 @@ export function CoverLoopVideo({
         <VideoLoadingCover
           active
           progress={progress}
-          ready={ready}
+          ready={coverReady}
           cacheKey={src}
           onDone={handleDone}
         />

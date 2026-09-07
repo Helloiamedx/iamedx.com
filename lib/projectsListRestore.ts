@@ -18,7 +18,10 @@ export function projectsVisibleStorageKey(filterKey: string) {
 
 function dispatchProjectsCollapse() {
   if (typeof window === "undefined") return;
-  window.dispatchEvent(new Event(PROJECTS_COLLAPSE_EVENT));
+  /* Defer — pushState can run inside React insertion/commit; setState must not. */
+  queueMicrotask(() => {
+    window.dispatchEvent(new Event(PROJECTS_COLLAPSE_EVENT));
+  });
 }
 
 export function clearAllProjectsVisibleStorage() {

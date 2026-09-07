@@ -42,25 +42,6 @@ const LANGUAGES: IntroLanguage[] = [
   { lang: "zh-Hans", text: "嗨，我是 EDWARD XU" },
 ];
 
-/** Persist across visits so return / back navigation skips the wait. */
-export const INTRO_SEEN_KEY = "edx-intro-seen-v2";
-
-function hasSeenIntro() {
-  try {
-    return localStorage.getItem(INTRO_SEEN_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
-function markIntroSeen() {
-  try {
-    localStorage.setItem(INTRO_SEEN_KEY, "1");
-  } catch {
-    /* private mode */
-  }
-}
-
 function clamp(value: number) {
   return Math.max(0, Math.min(1, value));
 }
@@ -108,27 +89,26 @@ declare global {
 }
 
 /**
- * Home-only first-visit intro (also used by `/dev/intro-test` with `preview`).
- * Portaled to `document.body` so header / footer / blend modes can’t peek through.
- * Opaque veil until fill + reveal — only the mark + greeting are visible.
- * Outline loops until the home hero is playable (+ fonts), then fill and unveil.
- * Below-fold clips are intentionally not gates — they load after hero unlocks.
+ * Home intro — plays on **every** homepage load (hard refresh, client nav, bfcache).
+ * Fast when hero/fonts are warm; slower on cold network. No localStorage skip.
+ * Portaled to `document.body`. Outline loops until home hero is playable (+ fonts),
+ * then fill and unveil. Below-fold clips are not gates.
  */
 export function SiteIntroLoader({
   preview = false,
   previewReadyAfterMs = 7500,
   onPreviewDone,
 }: {
-  /** Dev preview: always play, never read/write localStorage */
+  /** Dev preview: always play (same as production now) */
   preview?: boolean;
   /** Preview only — when to treat resources as ready (then finish current stroke → fill) */
   previewReadyAfterMs?: number;
   onPreviewDone?: () => void;
 }) {
-  /* Always true on SSR + first client paint — reading localStorage here
-   * caused hydration mismatch when the visit was already marked seen. */
   const [active, setActive] = useState(true);
   const [mounted, setMounted] = useState(false);
+  /** Bumps to replay after bfcache restore */
+  const [playKey, setPlayKey] = useState(0);
   const loaderRef = useRef<HTMLDivElement>(null);
   const brandRef = useRef<HTMLDivElement>(null);
   const fillRef = useRef<SVGGElement>(null);
@@ -146,24 +126,16 @@ export function SiteIntroLoader({
   useLayoutEffect(() => {
     if (!mounted) return;
 
-    /* Back / bfcache / soft return — never replay once seen (skip in preview) */
-    const skipIfSeen = () => {
-      if (previewRef.current) return false;
-      if (!hasSeenIntro()) return false;
-      document.documentElement.classList.remove("edx-loading");
-      setActive(false);
-      return true;
-    };
-
-    if (skipIfSeen()) return;
-
     document.documentElement.classList.add("edx-loading");
+    setActive(true);
 
     const onPageShow = (event: PageTransitionEvent) => {
       if (previewRef.current) return;
-      if (event.persisted || hasSeenIntro()) {
-        document.documentElement.classList.remove("edx-loading");
-        setActive(false);
+      /* Back/forward cache — remount the animation */
+      if (event.persisted) {
+        document.documentElement.classList.add("edx-loading");
+        setActive(true);
+        setPlayKey((key) => key + 1);
       }
     };
     window.addEventListener("pageshow", onPageShow);
@@ -176,15 +148,6 @@ export function SiteIntroLoader({
     if (!loader || !brand || !fill || !greeting || !outlineGroup) {
       return () => window.removeEventListener("pageshow", onPageShow);
     }
-
-    /*
-     * Do NOT mark localStorage here — React Strict Mode remount would then
-     * skip the real play. Mark on finish + pagehide (leave mid-intro).
-     */
-    const onPageHide = () => {
-      if (!previewRef.current) markIntroSeen();
-    };
-    window.addEventListener("pagehide", onPageHide);
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -221,7 +184,6 @@ export function SiteIntroLoader({
       cancelAnimationFrame(frameId);
       window.clearTimeout(safetyId);
       window.clearTimeout(previewReadyId);
-      if (!previewRef.current) markIntroSeen();
       document.documentElement.classList.remove("edx-loading");
       unlockVideosAfterHero();
       setActive(false);
@@ -373,12 +335,11 @@ export function SiteIntroLoader({
       window.clearTimeout(safetyId);
       window.clearTimeout(previewReadyId);
       window.removeEventListener("pageshow", onPageShow);
-      window.removeEventListener("pagehide", onPageHide);
       if (window.edxLoader === api) {
         delete window.edxLoader;
       }
     };
-  }, [mounted, previewReadyAfterMs]);
+  }, [mounted, playKey, previewReadyAfterMs]);
 
   if (!active || !mounted) return null;
 

@@ -12,24 +12,19 @@ import {
   VIDEO_LOAD_PRIORITY,
   useVideoLoadSlot,
 } from "@/lib/videoLoadQueue";
+import { useDriveVideoPlayback } from "@/lib/videoPlayback";
 import { asset } from "@/lib/assets";
 
-function isHomeIntroLoading() {
-  return document.documentElement.classList.contains("edx-loading");
-}
-
 /**
- * Footer underlay — last in the serial top→bottom queue.
- * No black wait plate; mark only while this clip’s turn is active.
+ * Footer underlay — near-viewport after hero, concurrency-capped.
  */
 export function FooterVideoMarquee() {
   const clip = footerMarqueeVideos[0];
   const rootRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const src = asset(clip.src);
-  const [underIntro] = useState(() =>
-    typeof document !== "undefined" ? isHomeIntroLoading() : false,
-  );
+  const releasedRef = useRef(false);
+  const [animationDone, setAnimationDone] = useState(false);
   const { allowed, releaseSlot } = useVideoLoadSlot(
     src,
     true,
@@ -37,29 +32,36 @@ export function FooterVideoMarquee() {
     rootRef,
   );
   const loadKey = allowed ? src : "";
-  const { progress, ready } = useVideoLoadProgress(videoRef, loadKey);
+  const { progress, ready, failed } = useVideoLoadProgress(videoRef, loadKey);
   const { revealed, onCoverDone } = useVideoRevealGate(src);
 
-  useEffect(() => {
-    if (allowed && ready) releaseSlot();
-  }, [allowed, ready, releaseSlot]);
-
-  useEffect(() => {
-    const el = videoRef.current;
-    if (!el || !ready) return;
-    void el.play().catch(() => {});
-  }, [ready]);
-
-  useEffect(() => {
-    if (!underIntro || !ready) return;
+  const onSettled = () => {
+    if (releasedRef.current) return;
+    releasedRef.current = true;
     releaseSlot();
     onCoverDone();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only when playable under intro
-  }, [underIntro, ready, src]);
+  };
+
+  useDriveVideoPlayback(
+    videoRef,
+    allowed && animationDone,
+    onSettled,
+    src,
+  );
+
+  const coverReady = ready || failed;
+
+  useEffect(() => {
+    releasedRef.current = false;
+    setAnimationDone(false);
+  }, [src]);
 
   const handleDone = () => {
-    releaseSlot();
-    onCoverDone();
+    if (failed) {
+      onSettled();
+      return;
+    }
+    setAnimationDone(true);
   };
 
   return (
@@ -79,11 +81,11 @@ export function FooterVideoMarquee() {
           style={{ objectFit: "cover", objectPosition: "top center" }}
         />
       ) : null}
-      {underIntro || revealed ? null : allowed ? (
+      {revealed ? null : allowed ? (
         <VideoLoadingCover
           active
           progress={progress}
-          ready={ready}
+          ready={coverReady}
           cacheKey={src}
           onDone={handleDone}
         />

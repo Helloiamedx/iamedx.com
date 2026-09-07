@@ -18,7 +18,7 @@ import { ProjectCardTags } from "@/components/ProjectCardTags";
 import { asset } from "@/lib/assets";
 import {
   unlockVideosAfterHero,
-  useAfterHeroGate,
+  useNearViewportMedia,
 } from "@/lib/videoLoadQueue";
 
 type StillFrame = {
@@ -68,6 +68,13 @@ type MediaItem =
       right: { primary: string; fallback?: string; alt: string };
       ratio?: string;
       nativeAspect?: boolean;
+    }
+  | {
+      kind: "youtube";
+      videoId: string;
+      title: string;
+      /** CSS padding-bottom ratio; default 16:9 */
+      ratio?: string;
     };
 
 function readCssPx(name: string, fallback: number) {
@@ -112,19 +119,25 @@ function Frame({
   ratio?: string;
   fillCell?: boolean;
 }) {
-  const heroReady = useAfterHeroGate();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const canLoad = useNearViewportMedia(rootRef);
   const useNative = !fillCell && !ratio;
 
   if (useNative) {
     return (
-      <div className="project-case-demo__frame project-case-demo__frame--native">
+      <div
+        ref={rootRef}
+        className="project-case-demo__frame project-case-demo__frame--native"
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        {heroReady ? (
+        {canLoad ? (
           <img
             src={src}
             alt={alt}
             className="project-case-demo__img project-case-demo__img--native"
             draggable={false}
+            loading="lazy"
+            decoding="async"
           />
         ) : null}
       </div>
@@ -133,6 +146,7 @@ function Frame({
 
   return (
     <div
+      ref={rootRef}
       className={
         fillCell
           ? "project-case-demo__frame project-case-demo__frame--fill"
@@ -141,7 +155,7 @@ function Frame({
       style={fillCell ? undefined : { paddingBottom: ratio }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      {heroReady ? (
+      {canLoad ? (
         <img
           src={src}
           alt={alt}
@@ -151,6 +165,8 @@ function Frame({
               : "project-case-demo__img"
           }
           draggable={false}
+          loading="lazy"
+          decoding="async"
         />
       ) : null}
     </div>
@@ -177,7 +193,8 @@ function buildCaseMedia(project: Project): MediaItem[] {
           primary: clip.primary,
           fallback: clip.fallback,
           alt: clip.alt,
-          ratio: clip.nativeAspect ? undefined : (clip.ratio ?? "56.25%"),
+          /* Keep a ratio hint so nativeAspect can reserve height before metadata */
+          ratio: clip.ratio ?? "56.25%",
           nativeAspect: clip.nativeAspect,
         });
       }
@@ -187,9 +204,7 @@ function buildCaseMedia(project: Project): MediaItem[] {
         primary: project.afterCoverVideo.primary,
         fallback: project.afterCoverVideo.fallback,
         alt: project.afterCoverVideo.alt,
-        ratio: project.afterCoverVideo.nativeAspect
-          ? undefined
-          : (project.afterCoverVideo.ratio ?? "56.25%"),
+        ratio: project.afterCoverVideo.ratio ?? "56.25%",
         nativeAspect: project.afterCoverVideo.nativeAspect,
       });
     }
@@ -234,9 +249,7 @@ function buildCaseMedia(project: Project): MediaItem[] {
       kind: "video-pair",
       left: project.afterCoverVideoPair.left,
       right: project.afterCoverVideoPair.right,
-      ratio: project.afterCoverVideoPair.nativeAspect
-        ? undefined
-        : (project.afterCoverVideoPair.ratio ?? "100%"),
+      ratio: project.afterCoverVideoPair.ratio ?? "100%",
       nativeAspect: project.afterCoverVideoPair.nativeAspect,
     });
   }
@@ -370,9 +383,7 @@ function buildCaseMedia(project: Project): MediaItem[] {
       kind: "video-pair",
       left: project.endVideoPair.left,
       right: project.endVideoPair.right,
-      ratio: project.endVideoPair.nativeAspect
-        ? undefined
-        : (project.endVideoPair.ratio ?? "177.78%"),
+      ratio: project.endVideoPair.ratio ?? "177.78%",
       nativeAspect: project.endVideoPair.nativeAspect,
     });
   }
@@ -396,10 +407,17 @@ function buildCaseMedia(project: Project): MediaItem[] {
       primary: project.endVideo.primary,
       fallback: project.endVideo.fallback,
       alt: project.endVideo.alt,
-      ratio: project.endVideo.nativeAspect
-        ? undefined
-        : (project.endVideo.ratio ?? "56.25%"),
+      ratio: project.endVideo.ratio ?? "56.25%",
       nativeAspect: project.endVideo.nativeAspect,
+    });
+  }
+
+  if (project.endYoutubeId) {
+    media.push({
+      kind: "youtube",
+      videoId: project.endYoutubeId,
+      title: project.endYoutubeTitle ?? project.title,
+      ratio: "56.25%",
     });
   }
 
@@ -684,6 +702,28 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
                         ratio={item.ratio}
                         nativeAspect={item.nativeAspect}
                       />
+                    </div>
+                  );
+                }
+                if (item.kind === "youtube") {
+                  return (
+                    <div
+                      key={`youtube-${index}`}
+                      className="project-case-demo__full project-case-demo__full--youtube"
+                    >
+                      <div
+                        className="project-case-demo__youtube"
+                        style={{ paddingBottom: item.ratio ?? "56.25%" }}
+                      >
+                        <iframe
+                          className="project-case-demo__youtube-frame"
+                          src={`https://www.youtube-nocookie.com/embed/${item.videoId}?autoplay=1&mute=1&playsinline=1&loop=1&playlist=${item.videoId}&rel=0`}
+                          title={item.title}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                          referrerPolicy="strict-origin-when-cross-origin"
+                        />
+                      </div>
                     </div>
                   );
                 }
