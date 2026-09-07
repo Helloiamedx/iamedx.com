@@ -2873,7 +2873,7 @@ html[data-hero-copy-ready="1"] .hero__content {
 
 .home-page .project-showcase__media,
 .home-page .insight-showcase__media {
-  background: #1a1a1a;
+  background: #000;
 }
 
 .home-page .project-featured {
@@ -4550,7 +4550,7 @@ html[data-hero-copy-ready="1"] .hero__content {
 }
 
 .projects-page .project-showcase__media {
-  background: #1a1a1a;
+  background: #000;
 }
 
 .projects-page .project-featured__media {
@@ -5969,7 +5969,7 @@ html[data-hero-copy-ready="1"] .hero__content {
 .collection-detail__project-media-frame {
   position: relative;
   overflow: hidden;
-  background: #141414;
+  background: #000;
   /* Case hero is 16:9 — not the index card ratio */
   aspect-ratio: 16 / 9;
 }
@@ -6154,7 +6154,7 @@ html[data-hero-copy-ready="1"] .hero__content {
   width: 100%;
   aspect-ratio: 1920 / 1080;
   border-radius: var(--portfolio-card-radius, 0);
-  background: #1a1a1a;
+  background: #000;
 }
 
 .project-showcase-full__image,
@@ -6227,7 +6227,7 @@ html[data-hero-copy-ready="1"] .hero__content {
 .project-showcase__media {
   position: relative;
   overflow: hidden;
-  background: #e4e4e1;
+  background: #000;
   width: 100%;
   aspect-ratio: 3000 / 1687;
   border-radius: var(--portfolio-card-radius, 0);
@@ -6644,7 +6644,7 @@ html[data-hero-copy-ready="1"] .hero__content {
 
 .project-card__media {
   overflow: hidden;
-  background: #ddd;
+  background: #000;
   margin-bottom: 0.75rem;
 }
 
@@ -6726,7 +6726,7 @@ html[data-hero-copy-ready="1"] .hero__content {
 }
 
 .project-detail .project-showcase__media {
-  background: #1a1a1a;
+  background: #000;
 }
 
 .project-case-copy {
@@ -8515,7 +8515,7 @@ html[data-hero-copy-ready="1"] .hero__content {
   width: 100%;
   aspect-ratio: 3000 / 1687;
   border-radius: var(--portfolio-card-radius, 0);
-  background: #1a1a1a;
+  background: #000;
 }
 
 .insights-lead__image,
@@ -8589,7 +8589,7 @@ html[data-hero-copy-ready="1"] .hero__content {
   width: 100%;
   aspect-ratio: 3000 / 1687;
   border-radius: var(--portfolio-card-radius, 0);
-  background: #1a1a1a;
+  background: #000;
 }
 
 .insight-showcase__media .insight-showcase__cover-video {
@@ -9352,7 +9352,7 @@ html[data-chrome-ready="1"] .project-case-demo__hero-video:not(
   width: 100%;
   height: 0;
   overflow: hidden;
-  background: #1a1a1a;
+  background: #000;
   /* Display-only — no lightbox */
   pointer-events: none;
   user-select: none;

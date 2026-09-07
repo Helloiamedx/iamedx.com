@@ -1152,10 +1152,7 @@ const EIGHTH_PROJECT_HERO_VIDEO = projectCoverFromName(
   "Recore Collector's Edition Statue.mp4.mp4",
 );
 const EIGHTH_PROJECT_HOVER_STILLS = [
-  projectCoverFromName(
-    EIGHTH_PROJECT_CDN_FOLDER,
-    "Recore Collector's Edition Statue1.jpg",
-  ),
+  projectCoverFromName(EIGHTH_PROJECT_CDN_FOLDER, "1f.jpg"),
   projectCoverFromName(
     EIGHTH_PROJECT_CDN_FOLDER,
     "Recore Collector's Edition Statue2.jpg",
