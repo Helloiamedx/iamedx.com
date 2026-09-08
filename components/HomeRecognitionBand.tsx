@@ -13,13 +13,6 @@ import { useReducedMotion } from "motion/react";
 import { homeRecognition } from "@/content/homeCopy";
 import { useSwipeNav } from "@/lib/useSwipeNav";
 
-function isHomeIntroLoading() {
-  return (
-    typeof document !== "undefined" &&
-    document.documentElement.classList.contains("edx-loading")
-  );
-}
-
 /**
  * Home recognition — Apple-style highlights carousel demo.
  * Square cards, autoplay + progress dots, portrait cards on mobile.
@@ -28,11 +21,17 @@ export function HomeRecognitionBand() {
   const { id, headlineBefore, headlineAfter, slides, slideDurationMs } =
     homeRecognition;
   const headline = `${headlineBefore} ${headlineAfter}`.trim();
-  const reduceMotion = useReducedMotion();
+  const reduceMotionMq = useReducedMotion();
+  /** Defer MQ to after mount so SSR + first client paint match */
+  const [reduceMotion, setReduceMotion] = useState(false);
   const [index, setIndex] = useState(0);
-  /** Don't autoplay under the fullscreen intro — clock would skip past slide 1 */
-  const [introReady, setIntroReady] = useState(() => !isHomeIntroLoading());
-  const [playing, setPlaying] = useState(() => !isHomeIntroLoading());
+  /*
+   * Always start locked — SSR has no `document`, but the boot script adds
+   * `edx-loading` before hydrate. Reading the class in useState caused
+   * pause/play SVG + progress-dot mismatches.
+   */
+  const [introReady, setIntroReady] = useState(false);
+  const [playing, setPlaying] = useState(false);
   const [progressKey, setProgressKey] = useState(0);
   const [offsetPx, setOffsetPx] = useState(0);
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -45,6 +44,10 @@ export function HomeRecognitionBand() {
   );
   const canAutoplayRef = useRef(canAutoplay);
   canAutoplayRef.current = canAutoplay;
+
+  useEffect(() => {
+    setReduceMotion(Boolean(reduceMotionMq));
+  }, [reduceMotionMq]);
 
   /* Hold on slide 1 until SiteIntroLoader drops `edx-loading` */
   useEffect(() => {

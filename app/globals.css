@@ -207,6 +207,8 @@
   --input: rgba(11, 11, 11, 0.14);
   --ring: #0076dd;
   --line: rgba(11, 11, 11, 0.12);
+  /* Sitewide control corners — soft, same language as index cards */
+  --button-radius: 8px;
   /* Body / 正文 */
   --font-sans: "Grtsk", "Helvetica Neue", Helvetica, Arial, sans-serif;
   /* 大标题 → Grtsk (SemiBold when weight 600; nearest cut for 700) */
@@ -732,6 +734,7 @@ a {
   mix-blend-mode: difference;
   transform: translateZ(0);
   pointer-events: none;
+  border-radius: var(--button-radius);
 }
 
 a.origin-button,
@@ -752,7 +755,7 @@ button.origin-button {
   line-height: 1;
   text-transform: uppercase;
   text-decoration: none;
-  border-radius: 0;
+  border-radius: var(--button-radius);
   border: 1px solid #fff;
   background: transparent;
   color: inherit;
@@ -2679,7 +2682,8 @@ html[data-hero-copy-ready="1"] .hero__content {
    * Shared chip / approach keyword labels — Support chips + Approach points.
    */
   --home-chip-label-font: "Grtsk", var(--font-sans);
-  --home-chip-label-size: calc(clamp(0.875rem, 1.05vw, 1.0625rem) - 3px);
+  /* Collapsed Support chip labels — +2px vs prior recipe */
+  --home-chip-label-size: calc(clamp(0.875rem, 1.05vw, 1.0625rem) - 3px + 2px);
   --home-chip-label-weight: 500;
   --home-chip-label-tracking: -0.01em;
   --home-chip-label-leading: 1.2;
@@ -3410,17 +3414,17 @@ body:has(.home-page) .site-footer__gap {
   z-index: 3;
   display: flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.65rem;
   pointer-events: auto;
 }
 
 .home-recognition__pager {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  min-height: 2.25rem;
-  padding: 0.55rem 0.7rem;
-  border-radius: 0;
+  gap: 0.55rem;
+  min-height: 2.85rem;
+  padding: 0.7rem 1.05rem;
+  border-radius: 9999px;
   background: rgba(0, 0, 0, 0.42);
   backdrop-filter: blur(16px) saturate(1.2);
   -webkit-backdrop-filter: blur(16px) saturate(1.2);
@@ -3429,11 +3433,11 @@ body:has(.home-page) .site-footer__gap {
 .home-recognition__dot {
   position: relative;
   box-sizing: border-box;
-  width: calc(0.45rem * 0.95);
-  height: calc(0.45rem * 0.95);
+  width: 0.55rem;
+  height: 0.55rem;
   padding: 0;
   border: 0;
-  border-radius: 0;
+  border-radius: 9999px;
   background: rgba(255, 255, 255, 0.38);
   cursor: pointer;
   overflow: hidden;
@@ -3443,7 +3447,7 @@ body:has(.home-page) .site-footer__gap {
 }
 
 .home-recognition__dot.is-active {
-  width: calc(2.35rem * 0.95);
+  width: 2.85rem;
   background: rgba(255, 255, 255, 0.28);
 }
 
@@ -3475,7 +3479,7 @@ body:has(.home-page) .site-footer__gap {
   position: absolute;
   inset: 0 auto 0 0;
   width: 0%;
-  border-radius: 0;
+  border-radius: inherit;
   background: #fff;
   animation: home-recognition-progress var(--home-recognition-autoplay-ms)
     linear forwards;
@@ -3496,14 +3500,14 @@ body:has(.home-page) .site-footer__gap {
 
 .home-recognition__playback {
   box-sizing: border-box;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2.85rem;
+  height: 2.85rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   border: 0;
-  border-radius: 0;
+  border-radius: 9999px;
   background: rgba(0, 0, 0, 0.42);
   color: #fff;
   cursor: pointer;
@@ -3516,8 +3520,8 @@ body:has(.home-page) .site-footer__gap {
 }
 
 .home-recognition__playback-icon {
-  width: 0.95rem;
-  height: 0.95rem;
+  width: 1.05rem;
+  height: 1.05rem;
   display: block;
 }
 
@@ -3673,7 +3677,6 @@ body:has(.home-page) .site-footer__gap {
 
 /* One card container — solid black plate; copy on top; keyword + cutout below */
 .home-different__feature {
-  --polish: 0;
   /* Dim body + lit highlight phrase (font size stays --home-band-body-*) */
   --home-different-dim: var(--home-point-body-color);
   --home-different-lit: #fff;
@@ -3703,7 +3706,7 @@ body:has(.home-page) .site-footer__gap {
   letter-spacing: var(--home-band-body-tracking);
   line-height: var(--home-band-body-leading);
   text-wrap: pretty;
-  /* Cards: dim body ink so highlight phrase can polish to white */
+  /* Cards: dim body ink; highlight phrase stays full white */
   color: var(--home-different-dim);
   /* Cap trim — optical top matches left/right pad (not half-leading) */
   text-box-trim: trim-start;
@@ -3716,17 +3719,9 @@ body:has(.home-page) .site-footer__gap {
   }
 }
 
-/* Emphasis phrase — glyph-by-glyph dim → lit (not row wipe) */
+/* Emphasis phrase — static lit ink (no polish animation) */
 .home-different__feature-hl {
-  display: inline;
-}
-
-.home-different__feature-hl-char {
-  color: color-mix(
-    in srgb,
-    var(--home-different-lit) calc(var(--char-lit, 0) * 100%),
-    var(--home-different-dim)
-  );
+  color: var(--home-different-lit);
 }
 
 .home-different__feature-keyword {
@@ -3795,12 +3790,6 @@ body:has(.home-page) .site-footer__gap {
 
   .home-different__feature {
     min-height: clamp(18rem, 48vh, 26rem);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .home-different__feature {
-    --polish: 1;
   }
 }
 
@@ -4053,7 +4042,7 @@ body:has(.home-page) .site-footer__gap {
   justify-content: center;
   padding: 0;
   border: 0;
-  border-radius: 0;
+  border-radius: 9999px;
   background: rgba(0, 0, 0, 0.72);
   color: #fff;
   cursor: pointer;
@@ -4064,8 +4053,8 @@ body:has(.home-page) .site-footer__gap {
 }
 
 .support-know__close svg {
-  width: 0.95rem;
-  height: 0.95rem;
+  width: 1.15rem;
+  height: 1.15rem;
   display: block;
 }
 
@@ -4086,7 +4075,7 @@ body:has(.home-page) .site-footer__gap {
   justify-content: center;
   padding: 0;
   border: 0;
-  border-radius: 0;
+  border-radius: 9999px;
   background: var(--support-know-frost);
   color: var(--support-know-frost-ink);
   backdrop-filter: var(--support-know-frost-blur);
@@ -4094,8 +4083,14 @@ body:has(.home-page) .site-footer__gap {
   cursor: pointer;
 }
 
-.support-know__step:hover {
+.support-know__step:hover:not(:disabled) {
   background: var(--support-know-frost-hover);
+}
+
+.support-know__step:disabled {
+  background: rgba(29, 29, 31, 0.28);
+  color: rgba(255, 255, 255, 0.42);
+  cursor: default;
 }
 
 .support-know__step svg {
@@ -4140,7 +4135,8 @@ body:has(.home-page) .site-footer__gap {
   margin: 0;
   padding: 0.7rem 1rem 0.7rem 0.75rem;
   border: 0;
-  border-radius: 0;
+  /* Collapsed chip — full pill */
+  border-radius: 9999px;
   background: var(--support-know-frost);
   color: var(--support-know-frost-ink);
   backdrop-filter: var(--support-know-frost-blur);
@@ -4159,6 +4155,8 @@ body:has(.home-page) .site-footer__gap {
   width: 100%;
   padding: clamp(1.1rem, 2vw, 1.45rem);
   cursor: default;
+  /* Expanded detail — soft corners, not pill */
+  border-radius: var(--button-radius, 8px);
 }
 
 .support-know__chip-inner {
@@ -4177,7 +4175,7 @@ body:has(.home-page) .site-footer__gap {
   align-items: center;
   justify-content: center;
   border: 1px solid rgba(255, 255, 255, 0.55);
-  border-radius: 0;
+  border-radius: 9999px;
   font-size: 0.95rem;
   line-height: 1;
   font-weight: 400;
@@ -4266,14 +4264,15 @@ body:has(.home-page) .site-footer__gap {
     inset: auto 0 0 0;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
-    align-items: center;
+    /* Whole bar (← chip →) sits on the stage floor */
+    align-items: end;
     column-gap: 0.3rem;
     width: 100%;
     max-width: none;
     height: auto;
     min-height: 0;
-    /* Buttons flush to stage edges; only bottom air + gap beside chip */
-    padding: 0 0 clamp(0.7rem, 3.2vw, 1.05rem);
+    /* Tighter bottom air — controls sit lower on the media */
+    padding: 0 0 clamp(0.2rem, 1.2vw, 0.4rem);
   }
 
   .support-know__stepper {
@@ -4283,13 +4282,13 @@ body:has(.home-page) .site-footer__gap {
   .support-know__step--prev {
     grid-column: 1;
     grid-row: 1;
-    align-self: center;
+    align-self: end;
   }
 
   .support-know__step--next {
     grid-column: 3;
     grid-row: 1;
-    align-self: center;
+    align-self: end;
   }
 
   .support-know__step {
@@ -4781,7 +4780,7 @@ body:has(.home-page) .site-footer__gap {
   height: calc(1rem * 0.95);
   margin: 0.15em 0 0;
   border: 1px solid #0a0a0a;
-  border-radius: 0;
+  border-radius: var(--button-radius, 8px);
   background: transparent;
   cursor: pointer;
 }
@@ -4807,7 +4806,7 @@ body:has(.home-page) .site-footer__gap {
   min-height: calc(2.375rem * 0.95);
   padding: 0 calc(1.15rem * 0.95);
   border: 1px solid #0a0a0a;
-  border-radius: 0;
+  border-radius: var(--button-radius, 8px);
   background: transparent;
   font-family: var(--font-label);
   font-size: calc(clamp(0.625rem, 0.58rem + 0.2vw, 0.75rem) * 0.95);
@@ -4857,6 +4856,19 @@ body:has(.home-page) .site-footer__gap {
   margin-bottom: var(--filter-band-gap);
 }
 
+/* Projects involvement filter — full pill (same as Insights) */
+.projects-page .project-involvement .project-involvement__track,
+.projects-page .project-involvement .project-involvement__thumb,
+.projects-page .project-involvement .project-involvement__pill {
+  border-radius: 9999px;
+}
+
+@media (max-width: 860px) {
+  .projects-page .project-involvement .project-involvement__pill {
+    border-radius: 9999px;
+  }
+}
+
 /* Filter results shell — single active set (no stacked old/new layers) */
 .filter-results__stack {
   display: block;
@@ -4872,7 +4884,8 @@ body:has(.home-page) .site-footer__gap {
   color: #0a0a0a;
   --card-meta-type-font: var(--font-title);
   --card-meta-type-weight: 400;
-  --portfolio-card-radius: 0;
+  --index-card-radius: 8px;
+  --portfolio-card-radius: var(--index-card-radius);
   --type-label-color: rgba(10, 10, 10, 0.5);
   --type-chip-font: clamp(
     calc(0.5625rem * 0.97),
@@ -5743,7 +5756,7 @@ body:has(.home-page) .site-footer__gap {
   justify-content: center;
   gap: 0.15rem;
   padding: 0.28rem;
-  border-radius: 0;
+  border-radius: var(--button-radius);
   background: #fff;
   max-width: 100%;
 }
@@ -5755,7 +5768,7 @@ body:has(.home-page) .site-footer__gap {
   left: 0;
   z-index: 0;
   height: calc(100% - 0.56rem);
-  border-radius: 0;
+  border-radius: var(--button-radius);
   background: #1d1d1f;
   pointer-events: none;
   opacity: 0;
@@ -5778,7 +5791,7 @@ body:has(.home-page) .site-footer__gap {
   justify-content: center;
   padding: 0.55rem 1.05rem;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--button-radius);
   font-family: var(--font-label); /* FK Grotesk Mono Medium */
   font-size: calc(0.8125rem - 2px);
   font-weight: 500;
@@ -5852,7 +5865,7 @@ body:has(.home-page) .site-footer__gap {
     flex: 0 0 auto;
     justify-content: center;
     padding: calc(0.4rem * 0.97) calc(0.75rem * 0.97);
-    border-radius: 0;
+    border-radius: var(--button-radius);
     background: #fff;
     color: #1d1d1f;
     font-family: var(--font-label);
@@ -5940,6 +5953,7 @@ body:has(.home-page) .site-footer__gap {
   background: #000;
   color: #fff;
   overflow: hidden;
+  border-radius: var(--index-card-radius, var(--portfolio-card-radius, 8px));
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -6042,6 +6056,7 @@ body:has(.home-page) .site-footer__gap {
   height: var(--collection-panel-height);
   overflow: hidden;
   background: #141414;
+  border-radius: var(--index-card-radius, var(--portfolio-card-radius, 8px));
 }
 
 .projects-collection__panel-cycle {
@@ -6201,6 +6216,8 @@ body:has(.home-page) .site-footer__gap {
   min-height: 100svh;
   background: var(--site-bg);
   color: #0a0a0a;
+  --index-card-radius: 8px;
+  --portfolio-card-radius: var(--index-card-radius);
   --type-label-color: rgba(10, 10, 10, 0.5);
   --type-chip-font: clamp(
     calc(0.5625rem * 0.97),
@@ -6320,6 +6337,7 @@ body:has(.home-page) .site-footer__gap {
   position: relative;
   overflow: hidden;
   background: var(--site-bg);
+  border-radius: var(--index-card-radius, var(--portfolio-card-radius, 8px));
   /* Case hero is 16:9 — not the index card ratio */
   aspect-ratio: 16 / 9;
 }
@@ -7019,7 +7037,8 @@ body:has(.home-page) .site-footer__gap {
 .project-detail {
   background: var(--site-bg);
   color: #0a0a0a;
-  --portfolio-card-radius: 0;
+  --index-card-radius: 8px;
+  --portfolio-card-radius: var(--index-card-radius);
   /* Challenge bottom ↔ Related rule ↔ Related title — equal air */
   --related-rule-gap: clamp(1.75rem, 3.5vw, 2.75rem);
   --detail-related-label-size: clamp(
@@ -7414,6 +7433,8 @@ body:has(.home-page) .site-footer__gap {
   color: #0a0a0a;
   /* Climb through sticky header spacer — content paints under transparent nav */
   margin-top: calc(-1 * var(--header-offset));
+  --index-card-radius: 8px;
+  --portfolio-card-radius: var(--index-card-radius);
 }
 
 .svc-demo {
@@ -7778,6 +7799,7 @@ body:has(.home-page) .site-footer__gap {
   margin: 0 0 clamp(1rem, 2vw, 1.35rem);
   width: 100%;
   overflow: hidden;
+  border-radius: var(--index-card-radius, var(--button-radius, 8px));
   background: #ddd9cf;
   aspect-ratio: 16 / 9;
 }
@@ -7960,7 +7982,8 @@ body:has(.home-page) .site-footer__gap {
   background: rgba(234, 234, 225, 0.42);
   backdrop-filter: blur(48px) saturate(165%);
   -webkit-backdrop-filter: blur(48px) saturate(165%);
-  cursor: pointer;
+  /* Decorative veil only — dismiss via close control. */
+  pointer-events: none;
   touch-action: none;
 }
 
@@ -7982,10 +8005,22 @@ body:has(.home-page) .site-footer__gap {
   max-width: 85vw;
   max-height: min(88svh, 52rem);
   min-height: min(58svh, 26rem);
-  overflow: hidden;
-  border-radius: 0;
-  background: #fff;
+  padding: 0;
+  overflow: visible;
+  background: transparent;
   color: #0a0a0a;
+  box-shadow: none;
+}
+
+.svc-workflow__surface {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: clamp(0.85rem, 1.8vw, 1.15rem);
+  background: #fff;
   box-shadow: 0 28px 100px rgba(0, 0, 0, 0.2);
 }
 
@@ -8010,7 +8045,7 @@ body:has(.home-page) .site-footer__gap {
   margin: 0;
   padding: 0;
   border: 0;
-  border-radius: 0;
+  border-radius: 9999px;
   background: #1d1d1f;
   color: #fff;
   cursor: pointer;
@@ -8018,8 +8053,8 @@ body:has(.home-page) .site-footer__gap {
 
 .svc-workflow__close-icon {
   display: block;
-  width: 0.8rem;
-  height: 0.8rem;
+  width: 1.15rem;
+  height: 1.15rem;
 }
 
 .svc-workflow__body {
@@ -8217,7 +8252,7 @@ body:has(.home-page) .site-footer__gap {
   min-height: 100%;
   padding: 0.85rem 0.7rem 1rem;
   border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
-  border-radius: 0.35rem;
+  border-radius: var(--index-card-radius, var(--button-radius, 8px));
   background: color-mix(in srgb, canvas 88%, currentColor 12%);
   color: inherit;
   text-align: left;
@@ -8298,7 +8333,7 @@ body:has(.home-page) .site-footer__gap {
   margin: 0;
   padding: 0.85rem 0.9rem 1rem;
   border: 1px solid color-mix(in srgb, currentColor 16%, transparent);
-  border-radius: 0.35rem;
+  border-radius: var(--index-card-radius, var(--button-radius, 8px));
   background: color-mix(in srgb, canvas 90%, currentColor 10%);
   min-height: 7.5rem;
 }
@@ -8517,7 +8552,8 @@ body:has(.home-page) .site-footer__gap {
   --insight-title-scale: 1.1;
   /* Body clearly narrower than the cover — desktop +8% vs prior 0.578 */
   --insight-copy-scale: 0.624;
-  --portfolio-card-radius: 0;
+  --index-card-radius: 8px;
+  --portfolio-card-radius: var(--index-card-radius);
   background: var(--site-bg);
   color: #0a0a0a;
   margin-top: calc(-1 * var(--header-offset));
@@ -8588,6 +8624,7 @@ body:has(.home-page) .site-footer__gap {
   width: 100%;
   margin: 0 0 clamp(2.5rem, 5vw, 4rem);
   overflow: hidden;
+  border-radius: var(--index-card-radius);
   background: #1a1a1a;
   aspect-ratio: 3000 / 1687;
 }
@@ -8792,7 +8829,8 @@ body:has(.home-page) .site-footer__gap {
   --insight-meta-gap: 1.75rem;
   --card-meta-type-font: var(--font-title);
   --card-meta-type-weight: 400;
-  --portfolio-card-radius: 0;
+  --index-card-radius: 8px;
+  --portfolio-card-radius: var(--index-card-radius);
   --type-label-color: rgba(10, 10, 10, 0.5);
   --type-chip-font: clamp(
     calc(0.5625rem * 0.97),
@@ -8883,6 +8921,19 @@ body:has(.home-page) .site-footer__gap {
 
 .insights-page .insight-filter-bar {
   margin-bottom: var(--filter-band-gap);
+}
+
+/* Insights filter — full pill (track + thumb + pills) */
+.insights-page .insight-filter-bar .project-involvement__track,
+.insights-page .insight-filter-bar .project-involvement__thumb,
+.insights-page .insight-filter-bar .project-involvement__pill {
+  border-radius: 9999px;
+}
+
+@media (max-width: 860px) {
+  .insights-page .insight-filter-bar .project-involvement__pill {
+    border-radius: 9999px;
+  }
 }
 
 /*
@@ -11571,4 +11622,56 @@ body:has(.about-page) .site-end {
   .service-summary {
     position: static;
   }
+}
+
+/*
+ * TEMP preview — rounded media (home bands only).
+ * Home project/insight cards share index 8px with /projects and /thoughts.
+ */
+.home-page {
+  --home-preview-radius: 16px;
+  --index-card-radius: 8px;
+}
+
+.home-page .home-recognition__card,
+.home-page .home-different__feature,
+.home-page .support-know__stage,
+.home-page .support-know__media,
+.home-page .support-know__media-layer {
+  border-radius: var(--home-preview-radius);
+  overflow: hidden;
+}
+
+/*
+ * Projects + Insights + Services + project detail gallery — one 8px radius.
+ * Case hero stays square (full-bleed).
+ */
+.home-page .project-featured__media,
+.home-page .project-showcase__media,
+.home-page .insight-showcase__media,
+.home-page .insights-lead__media,
+.projects-page .project-featured__media,
+.projects-page .project-showcase__media,
+.projects-page .projects-collection,
+.projects-page .projects-collection__panel,
+.insights-page .insights-lead__media,
+.insights-page .insight-showcase__media,
+.services-page .svc-item__media,
+.collection-detail .collection-detail__entry-media-frame,
+.collection-detail .collection-detail__project-media-frame,
+.insight-detail .insight-detail__cover,
+.project-detail .project-case-demo__frame,
+.project-detail .project-case-demo__full,
+.project-detail .project-case-demo__youtube,
+.project-detail .project-case-demo__pair,
+.project-detail .project-showcase__media {
+  border-radius: var(--index-card-radius);
+  overflow: hidden;
+}
+
+.project-detail .project-case-demo__hero,
+.project-detail .project-case-demo__hero-media,
+.project-detail .project-case-demo__hero-media .hero-segment-video,
+.project-detail .project-case-demo__hero-media .project-case-demo__hero-video {
+  border-radius: 0;
 }

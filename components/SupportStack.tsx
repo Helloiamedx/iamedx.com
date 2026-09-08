@@ -415,13 +415,11 @@ export function SupportStack() {
 
   const layoutTransition = reduceMotion
     ? { duration: 0 }
-    : { type: "spring" as const, stiffness: 420, damping: 34, mass: 0.8 };
+    : { duration: 0.46, ease: [0.22, 1, 0.36, 1] as const };
 
   const selectAt = (index: number) => {
-    // Mobile: clamp at ends (no infinite loop). Desktop: wrap.
-    const next = compact
-      ? Math.max(0, Math.min(CARDS.length - 1, index))
-      : ((index % CARDS.length) + CARDS.length) % CARDS.length;
+    // Clamp at ends — no wrap; end buttons disable instead.
+    const next = Math.max(0, Math.min(CARDS.length - 1, index));
     if (next === activeIndex) return;
     setNavDir(navDirection(activeIndex, next, CARDS.length));
     setActiveIndex(next);
@@ -431,6 +429,9 @@ export function SupportStack() {
   const step = (delta: number) => {
     selectAt(activeIndex + delta);
   };
+
+  const atStart = activeIndex <= 0;
+  const atEnd = activeIndex >= CARDS.length - 1;
 
   const closeToFirst = () => {
     if (compact || activeIndex === 0) return;
@@ -470,11 +471,11 @@ export function SupportStack() {
             >
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path
-                  d="M6.5 6.5 17.5 17.5M17.5 6.5 6.5 17.5"
+                  d="M7.5 7.5 16.5 16.5M16.5 7.5 7.5 16.5"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="square"
+                  strokeWidth="2.75"
+                  strokeLinecap="round"
                 />
               </svg>
             </button>
@@ -486,6 +487,7 @@ export function SupportStack() {
                 type="button"
                 className="support-know__step support-know__step--prev"
                 aria-label="Previous service"
+                disabled={atStart}
                 onClick={() => step(-1)}
               >
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -503,6 +505,7 @@ export function SupportStack() {
                 type="button"
                 className="support-know__step support-know__step--next"
                 aria-label="Next service"
+                disabled={atEnd}
                 onClick={() => step(1)}
               >
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -621,14 +624,22 @@ export function SupportStack() {
                   return (
                     <motion.li
                       key={card.id}
-                      layout={!reduceMotion}
+                      layout={reduceMotion ? false : "position"}
                       className={`support-know__item${expanded ? " is-expanded" : ""}`}
                       transition={{ layout: layoutTransition }}
                     >
                       <motion.div
                         layout={!reduceMotion}
                         className={`support-know__tile${expanded ? " is-expanded" : ""}`}
-                        transition={{ layout: layoutTransition }}
+                        // Finite radii interpolate immediately; 9999px stays clamped
+                        // to a pill for almost the entire transition.
+                        initial={false}
+                        animate={{ borderRadius: expanded ? 16 : 40 }}
+                        style={{ borderRadius: 40, position: "relative" }}
+                        transition={{
+                          layout: layoutTransition,
+                          borderRadius: layoutTransition,
+                        }}
                         role={expanded ? undefined : "button"}
                         tabIndex={expanded ? undefined : 0}
                         aria-current={expanded ? "true" : undefined}
@@ -657,42 +668,36 @@ export function SupportStack() {
                           {expanded ? (
                             <motion.div
                               key="detail"
+                              layout={reduceMotion ? false : "position"}
                               className="support-know__detail-inner"
                               initial={
                                 reduceMotion
                                   ? false
                                   : {
                                       opacity: 0,
-                                      // Desktop keeps original direction mapping
-                                      x: navDir > 0 ? -16 : 16,
-                                      y: 12,
-                                      filter: "blur(4px)",
+                                      y: 6,
                                     }
                               }
                               animate={{
                                 opacity: 1,
-                                x: 0,
                                 y: 0,
-                                filter: "blur(0px)",
                               }}
                               exit={
                                 reduceMotion
                                   ? undefined
                                   : {
                                       opacity: 0,
-                                      x: navDir > 0 ? 12 : -12,
-                                      y: 8,
-                                      filter: "blur(2px)",
+                                      y: 0,
+                                      transition: { duration: 0.1, delay: 0 },
                                     }
                               }
                               transition={
                                 reduceMotion
                                   ? { duration: 0 }
                                   : {
-                                      opacity: { duration: 0.3, delay: 0.16 },
-                                      x: { duration: 0.34, delay: 0.16 },
-                                      y: { duration: 0.34, delay: 0.16 },
-                                      filter: { duration: 0.3, delay: 0.16 },
+                                      layout: layoutTransition,
+                                      opacity: { duration: 0.22, delay: 0.14 },
+                                      y: { duration: 0.3, delay: 0.14 },
                                     }
                               }
                             >
@@ -706,6 +711,7 @@ export function SupportStack() {
                           ) : (
                             <motion.div
                               key="chip"
+                              layout={reduceMotion ? false : "position"}
                               className="support-know__chip-inner"
                               initial={
                                 reduceMotion ? false : { opacity: 0 }
@@ -722,7 +728,10 @@ export function SupportStack() {
                               transition={
                                 reduceMotion
                                   ? { duration: 0 }
-                                  : { duration: 0.16 }
+                                  : {
+                                      layout: layoutTransition,
+                                      opacity: { duration: 0.18, delay: 0.12 },
+                                    }
                               }
                             >
                               <span

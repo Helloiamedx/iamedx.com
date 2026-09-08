@@ -36,9 +36,7 @@ export function HeroBackgroundVideo() {
   const holdAttachRef = useRef(false);
   const [src, setSrc] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(false);
-  const [underIntro, setUnderIntro] = useState(() =>
-    typeof document !== "undefined" ? isSiteIntroActive() : false,
-  );
+  const [underIntro, setUnderIntro] = useState(false);
 
   /*
    * Boot script / SiteIntroLoader may flip `edx-loading` after our first paint.

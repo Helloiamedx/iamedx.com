@@ -125,7 +125,8 @@ export function ServiceWorkflowDialog({
     }
 
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") onCloseRef.current();
+      // Escape does not dismiss — close control only.
+      if (event.key === "Escape") event.preventDefault();
     }
 
     const blockPageScroll = (event: Event) => {
@@ -173,45 +174,42 @@ export function ServiceWorkflowDialog({
       role="presentation"
       data-lenis-prevent
     >
-      <button
-        type="button"
-        className="svc-workflow__backdrop"
-        aria-label="Close workflow"
-        onClick={onClose}
-      />
+      <div className="svc-workflow__backdrop" aria-hidden="true" />
       <div
         className="svc-workflow__panel"
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
       >
-        <button
-          type="button"
-          className="svc-workflow__close"
-          aria-label="Close workflow"
-          onClick={onClose}
-        >
-          <svg
-            className="svc-workflow__close-icon"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-            focusable="false"
+        <div className="svc-workflow__surface">
+          <button
+            type="button"
+            className="svc-workflow__close"
+            aria-label="Close workflow"
+            onClick={onClose}
           >
-            <path
-              d="M7 7l10 10M17 7L7 17"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.75"
-              strokeLinecap="square"
-            />
-          </svg>
-        </button>
+            <svg
+              className="svc-workflow__close-icon"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M7.5 7.5 16.5 16.5M16.5 7.5 7.5 16.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.75"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
 
-        <div className="svc-workflow__body" data-lenis-prevent>
-          <p id={titleId} className="svc-workflow__sr-title">
-            {title}
-          </p>
-          {/* Workflow copy / media — supplied later */}
+          <div className="svc-workflow__body" data-lenis-prevent>
+            <p id={titleId} className="svc-workflow__sr-title">
+              {title}
+            </p>
+            {/* Workflow copy / media — supplied later */}
+          </div>
         </div>
       </div>
     </div>,

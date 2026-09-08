@@ -32,7 +32,7 @@ export type HomeCopySection = {
 export const whatSetsMeApart: HomeCopySection = {
   id: "what-sets-me-apart",
   eyebrow: "Character",
-  title: "What Makes Me Stand Out",
+  title: "What makes me stand out",
   subtitle: "",
   /* Solid gray plate — photo underlay retired */
   backgroundImage: undefined,
