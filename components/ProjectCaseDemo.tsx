@@ -1,7 +1,16 @@
 "use client";
 
 import { useLenis } from "lenis/react";
-import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import { HeroSegmentVideo } from "@/components/HeroSegmentVideo";
 import { OriginButton } from "@/components/ui/origin-button";
@@ -18,7 +27,7 @@ import { ProjectCardTags } from "@/components/ProjectCardTags";
 import { asset } from "@/lib/assets";
 import {
   unlockVideosAfterHero,
-  useNearViewportMedia,
+  useAfterHeroGate,
 } from "@/lib/videoLoadQueue";
 
 type StillFrame = {
@@ -108,6 +117,92 @@ function easeInOutCubic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
+type StillSize = { w: number; h: number };
+
+type GalleryStillsGate = {
+  ready: boolean;
+  sizes: Record<string, StillSize>;
+};
+
+const GalleryStillsContext = createContext<GalleryStillsGate>({
+  ready: false,
+  sizes: {},
+});
+
+function collectStillSrcs(media: MediaItem[]): string[] {
+  const srcs: string[] = [];
+  for (const item of media) {
+    if (item.kind === "full") srcs.push(item.src);
+    else if (item.kind === "pair") {
+      srcs.push(item.left.src, item.right.src);
+    } else if (item.kind === "row") {
+      for (const frame of item.items) srcs.push(frame.src);
+    } else if (item.kind === "still-video-pair") {
+      srcs.push(item.still.src);
+    }
+  }
+  return [...new Set(srcs)];
+}
+
+function preloadStill(src: string): Promise<StillSize & { src: string }> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const done = () =>
+      resolve({
+        src,
+        w: img.naturalWidth || 0,
+        h: img.naturalHeight || 0,
+      });
+    img.addEventListener("load", done, { once: true });
+    img.addEventListener("error", done, { once: true });
+    img.decoding = "async";
+    img.src = src;
+    if (img.complete) done();
+  });
+}
+
+/** After hero unlock: preload every gallery still, then reveal them together. */
+function useGalleryStillsGate(srcs: string[]): GalleryStillsGate {
+  const heroReady = useAfterHeroGate();
+  const srcKey = srcs.join("\0");
+  const [ready, setReady] = useState(srcs.length === 0);
+  const [sizes, setSizes] = useState<Record<string, StillSize>>({});
+
+  useEffect(() => {
+    if (srcs.length === 0) {
+      setReady(true);
+      setSizes({});
+      return;
+    }
+    if (!heroReady) {
+      setReady(false);
+      return;
+    }
+
+    let cancelled = false;
+    setReady(false);
+    setSizes({});
+
+    void Promise.all(srcs.map(preloadStill)).then((results) => {
+      if (cancelled) return;
+      const next: Record<string, StillSize> = {};
+      for (const item of results) {
+        next[item.src] = { w: item.w, h: item.h };
+      }
+      setSizes(next);
+      setReady(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+    // srcKey stands in for srcs identity
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [heroReady, srcKey]);
+
+  return { ready, sizes };
+}
+
 function Frame({
   src,
   alt,
@@ -119,34 +214,40 @@ function Frame({
   ratio?: string;
   fillCell?: boolean;
 }) {
-  const rootRef = useRef<HTMLDivElement>(null);
-  const canLoad = useNearViewportMedia(rootRef);
+  const { ready, sizes } = useContext(GalleryStillsContext);
   const useNative = !fillCell && !ratio;
+  const measured = sizes[src];
+  const waitRatio =
+    measured && measured.w > 0 && measured.h > 0
+      ? `${(measured.h / measured.w) * 100}%`
+      : "66.67%";
 
   if (useNative) {
+    if (!ready) {
+      return (
+        <div
+          className="project-case-demo__frame"
+          style={{ paddingBottom: waitRatio }}
+          aria-hidden="true"
+        />
+      );
+    }
     return (
-      <div
-        ref={rootRef}
-        className="project-case-demo__frame project-case-demo__frame--native"
-      >
+      <div className="project-case-demo__frame project-case-demo__frame--native">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        {canLoad ? (
-          <img
-            src={src}
-            alt={alt}
-            className="project-case-demo__img project-case-demo__img--native"
-            draggable={false}
-            loading="lazy"
-            decoding="async"
-          />
-        ) : null}
+        <img
+          src={src}
+          alt={alt}
+          className="project-case-demo__img project-case-demo__img--native"
+          draggable={false}
+          decoding="async"
+        />
       </div>
     );
   }
 
   return (
     <div
-      ref={rootRef}
       className={
         fillCell
           ? "project-case-demo__frame project-case-demo__frame--fill"
@@ -154,8 +255,8 @@ function Frame({
       }
       style={fillCell ? undefined : { paddingBottom: ratio }}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      {canLoad ? (
+      {ready ? (
+        /* eslint-disable-next-line @next/next/no-img-element */
         <img
           src={src}
           alt={alt}
@@ -165,7 +266,6 @@ function Frame({
               : "project-case-demo__img"
           }
           draggable={false}
-          loading="lazy"
           decoding="async"
         />
       ) : null}
@@ -428,7 +528,9 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
   const copySections = getCaseCopySections(project);
   const specialThanks = getProjectSpecialThanks(project);
   const collaborators = getProjectCollaborators(project);
-  const media = buildCaseMedia(project);
+  const media = useMemo(() => buildCaseMedia(project), [project]);
+  const stillSrcs = useMemo(() => collectStillSrcs(media), [media]);
+  const stillsGate = useGalleryStillsGate(stillSrcs);
 
   const [open, setOpen] = useState(false);
   const [mobileSheet, setMobileSheet] = useState(false);
@@ -648,6 +750,7 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
         <div className="project-case-demo__columns">
           <div ref={mediaColRef} className="project-case-demo__media-col">
             <div ref={mediaStackRef} className="project-case-demo__media-stack">
+              <GalleryStillsContext.Provider value={stillsGate}>
               {media.map((item, index) => {
                 if (item.kind === "video-pair") {
                   return (
@@ -771,6 +874,7 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
                   </div>
                 );
               })}
+              </GalleryStillsContext.Provider>
             </div>
           </div>
 

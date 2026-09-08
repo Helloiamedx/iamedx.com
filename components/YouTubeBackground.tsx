@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { VideoLoadingCover } from "@/components/VideoLoadingCover";
 import {
   unlockVideosAfterHero,
   useAfterHeroGate,
@@ -116,7 +115,6 @@ export function YouTubeBackground({
   const hostId = `yt-bg-${reactId}`;
   const playerRef = useRef<YtPlayer | null>(null);
   const [ready, setReady] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const afterHero = useAfterHeroGate();
   const canLoad = isPageHero || afterHero;
@@ -129,7 +127,6 @@ export function YouTubeBackground({
     let watchId = 0;
     let playingSince: number | null = null;
     setReady(false);
-    setProgress(0);
     setRevealed(false);
 
     const restart = (target: YtPlayer) => {
@@ -140,12 +137,6 @@ export function YouTubeBackground({
     };
 
     const inStartWindow = (t: number) => t >= Math.max(0, startSeconds - 0.25);
-
-    /* Soft crawl toward ~90% while waiting for stable PLAYING */
-    const crawlId = window.setInterval(() => {
-      if (cancelled || revealedBuffer) return;
-      setProgress((p) => (p >= 90 ? p : Math.min(90, p + 3 + Math.random() * 4)));
-    }, 180);
 
     void loadYouTubeApi().then((YT) => {
       if (cancelled) return;
@@ -177,7 +168,6 @@ export function YouTubeBackground({
             if (playingSince == null) playingSince = now;
             if (now - playingSince >= REVEAL_HOLD_MS) {
               revealedBuffer = true;
-              setProgress(100);
               setReady(true);
             }
           } else {
@@ -200,7 +190,6 @@ export function YouTubeBackground({
               event.target.seekTo(startSeconds, true);
             }
             event.target.playVideo();
-            setProgress((p) => Math.max(p, 35));
 
             watchId = window.setInterval(() => {
               try {
@@ -220,7 +209,6 @@ export function YouTubeBackground({
           onStateChange: (event) => {
             if (event.data === YT.PlayerState.PLAYING) {
               event.target.mute();
-              setProgress((p) => Math.max(p, 75));
               tryReveal(event.target);
             } else if (
               event.data === YT.PlayerState.PAUSED ||
@@ -245,7 +233,6 @@ export function YouTubeBackground({
 
     return () => {
       cancelled = true;
-      window.clearInterval(crawlId);
       if (watchId) window.clearInterval(watchId);
       try {
         playerRef.current?.destroy();
@@ -261,6 +248,10 @@ export function YouTubeBackground({
     unlockVideosAfterHero();
   }, [ready, isPageHero]);
 
+  useEffect(() => {
+    if (ready) setRevealed(true);
+  }, [ready]);
+
   return (
     <div
       className={`youtube-background${revealed ? " is-ready" : ""}${className ? ` ${className}` : ""}`}
@@ -271,14 +262,10 @@ export function YouTubeBackground({
       ) : (
         <div className="youtube-background__host" title={title} />
       )}
-      {/* Opaque until cover settles — blocks YouTube title + big play */}
-      <VideoLoadingCover
-        active={canLoad}
-        progress={progress}
-        ready={ready}
-        cacheKey={`youtube:${videoId}`}
-        onDone={() => setRevealed(true)}
-      />
+      {/* Solid plate until PLAYING is stable — blocks YouTube title + big play */}
+      {revealed ? null : (
+        <div className="youtube-background__veil" aria-hidden="true" />
+      )}
     </div>
   );
 }

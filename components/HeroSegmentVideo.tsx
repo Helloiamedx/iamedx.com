@@ -1,12 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
-import {
-  VideoLoadingCover,
-  useVideoLoadProgress,
-} from "@/components/VideoLoadingCover";
-import { useVideoRevealGate } from "@/lib/videoLoadMemory";
 import {
   VIDEO_LOAD_PRIORITY,
   unlockVideosAfterHero,
@@ -30,6 +25,7 @@ type HeroSegmentVideoProps = {
 
 /**
  * Full-bleed muted hero clip. Optional `[start, end]` loop via currentTime.
+ * Site-bg plate until frames paint — no site-mark load cover.
  * Unlocks the page media gate when playback actually starts (or hard-fails).
  */
 export function HeroSegmentVideo({
@@ -42,16 +38,12 @@ export function HeroSegmentVideo({
   const rootRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const releasedRef = useRef(false);
-  const [animationDone, setAnimationDone] = useState(false);
   const { allowed, releaseSlot } = useVideoLoadSlot(
     src,
     true,
     priority,
     rootRef,
   );
-  const loadKey = allowed ? src : "";
-  const { progress, ready, failed } = useVideoLoadProgress(videoRef, loadKey);
-  const { revealed, onCoverDone } = useVideoRevealGate(src);
   const segmentLoop = endSeconds != null && endSeconds > startSeconds;
   const isPageHero = priority <= VIDEO_LOAD_PRIORITY.caseHero;
 
@@ -60,21 +52,18 @@ export function HeroSegmentVideo({
     releasedRef.current = true;
     if (isPageHero) unlockVideosAfterHero();
     releaseSlot();
-    onCoverDone();
   };
 
-  useDriveVideoPlayback(
+  const { playing, settled } = useDriveVideoPlayback(
     videoRef,
-    allowed && animationDone,
+    allowed,
     onSettled,
     src,
   );
-
-  const coverReady = ready || failed;
+  const ready = playing || settled;
 
   useEffect(() => {
     releasedRef.current = false;
-    setAnimationDone(false);
   }, [src]);
 
   useEffect(() => {
@@ -112,18 +101,10 @@ export function HeroSegmentVideo({
     };
   }, [allowed, src, startSeconds, endSeconds, segmentLoop]);
 
-  const handleDone = () => {
-    if (failed) {
-      onSettled();
-      return;
-    }
-    setAnimationDone(true);
-  };
-
   return (
     <div
       ref={rootRef}
-      className={`hero-segment-video${revealed ? " is-ready" : ""}${className ? ` ${className}` : ""}`}
+      className={`hero-segment-video${ready ? " is-ready" : ""}${className ? ` ${className}` : ""}`}
       aria-hidden="true"
     >
       {allowed ? (
@@ -134,15 +115,6 @@ export function HeroSegmentVideo({
           preload="auto"
           autoPlay={false}
           loop={!segmentLoop}
-        />
-      ) : null}
-      {allowed && !revealed ? (
-        <VideoLoadingCover
-          active
-          progress={progress}
-          ready={coverReady}
-          cacheKey={src}
-          onDone={handleDone}
         />
       ) : null}
     </div>

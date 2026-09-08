@@ -3,13 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { type CSSProperties } from "react";
-import { motion, useReducedMotion } from "motion/react";
-import {
-  filterCardItemVariants,
-  filterCardItemVariantsReduced,
-  filterCardListVariants,
-  filterCardListVariantsReduced,
-} from "@/components/filterCardMotion";
+import { useReducedMotion } from "motion/react";
 import { ProjectCardTags } from "@/components/ProjectCardTags";
 import { type Project } from "@/content/projects";
 
@@ -138,26 +132,8 @@ export function ProjectMasonry({
   layout = "tri",
   enableHoverSwap = false,
 }: ProjectMasonryProps) {
-  const reduceMotion = useReducedMotion();
-  const listVariants = reduceMotion
-    ? filterCardListVariantsReduced
-    : filterCardListVariants;
-  const itemVariants = reduceMotion
-    ? filterCardItemVariantsReduced
-    : filterCardItemVariants;
-
   if (projects.length === 0) {
-    return (
-      <motion.p
-        className="empty-state"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: reduceMotion ? 0.01 : 0.2 }}
-      >
-        {emptyLabel}
-      </motion.p>
-    );
+    return <p className="empty-state">{emptyLabel}</p>;
   }
 
   const listClass =
@@ -170,26 +146,16 @@ export function ProjectMasonry({
       : "(max-width: 700px) 100vw, (max-width: 1400px) 33vw, 480px";
 
   return (
-    <motion.ul
-      className={listClass}
-      variants={listVariants}
-      initial="hidden"
-      animate="show"
-      exit="exit"
-    >
+    <ul className={listClass}>
       {projects.map((project) => (
-        <motion.li
-          key={project.slug}
-          className="project-showcase__item"
-          variants={itemVariants}
-        >
+        <li key={project.slug} className="project-showcase__item">
           <ProjectShowcaseCard
             project={project}
             sizes={sizes}
             enableHoverSwap={enableHoverSwap}
           />
-        </motion.li>
+        </li>
       ))}
-    </motion.ul>
+    </ul>
   );
 }

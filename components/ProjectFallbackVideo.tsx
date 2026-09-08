@@ -3,11 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
 import {
-  VideoLoadingCover,
-  useVideoLoadProgress,
-} from "@/components/VideoLoadingCover";
-import { useVideoRevealGate } from "@/lib/videoLoadMemory";
-import {
   VIDEO_LOAD_PRIORITY,
   softenVideoDownload,
   useVideoLoadSlot,
@@ -37,8 +32,7 @@ export type ProjectFallbackVideoProps = {
 
 /**
  * Gallery clip — near-viewport after hero (queue), reserved padding box.
- * Once allowed: buffer and play in the background (do not wait for scroll).
- * Mark loader only while the cell is on-screen.
+ * Once allowed: buffer and play. Site-bg plate until frames paint — no mark cover.
  */
 export function ProjectFallbackVideo({
   primarySrc,
@@ -53,7 +47,6 @@ export function ProjectFallbackVideo({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [src, setSrc] = useState(primarySrc);
   const [usedFallback, setUsedFallback] = useState(false);
-  const [onScreen, setOnScreen] = useState(false);
   const [boxRatio, setBoxRatio] = useState(ratio);
   const releasedRef = useRef(false);
   const { allowed, releaseSlot } = useVideoLoadSlot(
@@ -62,9 +55,6 @@ export function ProjectFallbackVideo({
     VIDEO_LOAD_PRIORITY.gallery,
     rootRef,
   );
-  const loadKey = allowed ? src : "";
-  const { progress, ready, failed } = useVideoLoadProgress(videoRef, loadKey);
-  const { revealed, onCoverDone } = useVideoRevealGate(src);
 
   const onSettled = () => {
     if (releasedRef.current) return;
@@ -79,9 +69,7 @@ export function ProjectFallbackVideo({
     onSettled,
     src,
   );
-
-  const coverReady = playing || settled || ready || failed;
-  const showMark = allowed && onScreen && !revealed;
+  const ready = playing || settled;
 
   useEffect(() => {
     releasedRef.current = false;
@@ -111,61 +99,33 @@ export function ProjectFallbackVideo({
   }, [nativeAspect, allowed, src]);
 
   useEffect(() => {
-    const root = rootRef.current;
-    if (!root) return;
-    if (typeof IntersectionObserver === "undefined") {
-      setOnScreen(true);
-      return;
-    }
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        setOnScreen(Boolean(entry?.isIntersecting));
-      },
-      { rootMargin: "120px 0px", threshold: 0 },
-    );
-    io.observe(root);
-    return () => io.disconnect();
-  }, []);
-
-  useEffect(() => {
     setSrc(primarySrc);
     setUsedFallback(false);
   }, [primarySrc, fallbackSrc]);
 
-  /* Off-screen: unveil once settled so we don’t leave a stuck cover state */
-  useEffect(() => {
-    if (!allowed || !coverReady || revealed || onScreen) return;
-    onCoverDone();
-  }, [allowed, coverReady, revealed, onScreen, onCoverDone]);
-
   useEffect(() => {
     if (!allowed) return;
-    if (!fallbackSrc || usedFallback || ready || src === fallbackSrc) return;
+    if (!fallbackSrc || usedFallback || playing || src === fallbackSrc) return;
     const id = window.setTimeout(() => {
       setUsedFallback(true);
       setSrc(fallbackSrc);
     }, primaryTimeoutMs);
     return () => window.clearTimeout(id);
-  }, [allowed, src, fallbackSrc, usedFallback, ready, primaryTimeoutMs]);
+  }, [allowed, src, fallbackSrc, usedFallback, playing, primaryTimeoutMs]);
 
   const switchToFallback = () => {
     if (!fallbackSrc || usedFallback || src === fallbackSrc) {
       onSettled();
-      onCoverDone();
       return;
     }
     setUsedFallback(true);
     setSrc(fallbackSrc);
   };
 
-  const handleDone = () => {
-    onCoverDone();
-  };
-
   return (
     <div
       ref={rootRef}
-      className={`project-fallback-video${nativeAspect ? " project-fallback-video--native" : ""}${revealed ? " is-ready" : ""}${className ? ` ${className}` : ""}`}
+      className={`project-fallback-video${nativeAspect ? " project-fallback-video--native" : ""}${ready ? " is-ready" : ""}${className ? ` ${className}` : ""}`}
       style={{ paddingBottom: boxRatio }}
     >
       {allowed ? (
@@ -178,16 +138,6 @@ export function ProjectFallbackVideo({
           autoPlay={false}
           aria-label={alt}
           onError={switchToFallback}
-        />
-      ) : null}
-
-      {showMark ? (
-        <VideoLoadingCover
-          active
-          progress={progress}
-          ready={coverReady}
-          cacheKey={src}
-          onDone={handleDone}
         />
       ) : null}
     </div>

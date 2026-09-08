@@ -1,12 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
-import {
-  VideoLoadingCover,
-  useVideoLoadProgress,
-} from "@/components/VideoLoadingCover";
-import { useVideoRevealGate } from "@/lib/videoLoadMemory";
 import {
   VIDEO_LOAD_PRIORITY,
   softenVideoDownload,
@@ -23,9 +18,8 @@ type CoverLoopVideoProps = {
 };
 
 /**
- * Card / services / insights cover loop — same mark loader language as project clips.
- * Show the site-mark cover as soon as the cell is on-screen (even while waiting
- * for a queue slot). Buffer + play once allowed; unveil when playing.
+ * Card / services / insights cover loop.
+ * Site-bg plate until playing — no site-mark load cover.
  */
 export function CoverLoopVideo({
   src,
@@ -34,7 +28,6 @@ export function CoverLoopVideo({
 }: CoverLoopVideoProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [onScreen, setOnScreen] = useState(false);
   const releasedRef = useRef(false);
   const { allowed, releaseSlot } = useVideoLoadSlot(
     src,
@@ -42,9 +35,6 @@ export function CoverLoopVideo({
     VIDEO_LOAD_PRIORITY.coverCard,
     rootRef,
   );
-  const loadKey = allowed ? src : "";
-  const { progress, ready, failed } = useVideoLoadProgress(videoRef, loadKey);
-  const { revealed, onCoverDone } = useVideoRevealGate(src);
 
   const onSettled = () => {
     if (releasedRef.current) return;
@@ -59,48 +49,16 @@ export function CoverLoopVideo({
     onSettled,
     src,
   );
-
-  const coverReady = playing || settled || ready || failed;
-  /* Mark as soon as visible — don’t wait for the queue (avoids long black plate) */
-  const showMark = Boolean(onScreen && !revealed);
+  const ready = playing || settled;
 
   useEffect(() => {
     releasedRef.current = false;
   }, [src]);
 
-  useEffect(() => {
-    const root = rootRef.current;
-    if (!root) return;
-
-    if (typeof IntersectionObserver === "undefined") {
-      setOnScreen(true);
-      return;
-    }
-
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        setOnScreen(Boolean(entry?.isIntersecting));
-      },
-      { rootMargin: "160px 0px", threshold: 0 },
-    );
-    io.observe(root);
-    return () => io.disconnect();
-  }, []);
-
-  /* Off-screen: unveil quietly once settled */
-  useEffect(() => {
-    if (!allowed || !coverReady || revealed || onScreen) return;
-    onCoverDone();
-  }, [allowed, coverReady, revealed, onScreen, onCoverDone]);
-
-  const handleDone = () => {
-    onCoverDone();
-  };
-
   return (
     <div
       ref={rootRef}
-      className={cn("cover-loop-video", revealed && "is-ready")}
+      className={cn("cover-loop-video", ready && "is-ready")}
       aria-hidden={ariaLabel ? undefined : true}
     >
       {allowed ? (
@@ -111,15 +69,6 @@ export function CoverLoopVideo({
           preload="auto"
           autoPlay={false}
           aria-label={ariaLabel}
-        />
-      ) : null}
-      {showMark ? (
-        <VideoLoadingCover
-          active
-          progress={progress}
-          ready={coverReady}
-          cacheKey={src}
-          onDone={handleDone}
         />
       ) : null}
     </div>

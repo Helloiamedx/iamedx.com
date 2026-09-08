@@ -24,7 +24,7 @@ const workTools = [
   "Smartsheet",
   "Keynote",
   "Slack",
-  "Google Sheets",
+  "Google Workspace",
   "Microsoft Office",
   "Adobe Illustrator",
   "Adobe Photoshop",

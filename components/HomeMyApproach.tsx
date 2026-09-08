@@ -1,10 +1,10 @@
-import { HomeSectionIntro } from "@/components/HomeSectionIntro";
 import { myApproach } from "@/content/homeCopy";
 
 const POINTS = myApproach.points;
 
 /**
- * My Approach — intro on top, points grid below (3 per row).
+ * My Approach — title left, 2×3 copy grid right, gray plate.
+ * Mobile: title sticks while the long right column scrolls.
  */
 export function HomeMyApproach() {
   return (
@@ -14,11 +14,11 @@ export function HomeMyApproach() {
       aria-labelledby={`${myApproach.id}-title`}
     >
       <div className="home-someone__inner">
-        <HomeSectionIntro
-          titleId={`${myApproach.id}-title`}
-          label={myApproach.eyebrow}
-          title={myApproach.title}
-        />
+        <div className="home-someone__rail">
+          <h2 id={`${myApproach.id}-title`} className="home-someone__title">
+            {myApproach.title}
+          </h2>
+        </div>
 
         <ul className="home-someone__grid">
           {POINTS.map((item) => (

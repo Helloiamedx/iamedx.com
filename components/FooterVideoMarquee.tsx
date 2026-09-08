@@ -1,13 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { footerMarqueeVideos } from "@/content/nav";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
-import {
-  VideoLoadingCover,
-  useVideoLoadProgress,
-} from "@/components/VideoLoadingCover";
-import { useVideoRevealGate } from "@/lib/videoLoadMemory";
 import {
   VIDEO_LOAD_PRIORITY,
   useVideoLoadSlot,
@@ -17,6 +12,7 @@ import { asset } from "@/lib/assets";
 
 /**
  * Footer underlay — near-viewport after hero, concurrency-capped.
+ * Black plate until playing — no site-mark load cover.
  */
 export function FooterVideoMarquee() {
   const clip = footerMarqueeVideos[0];
@@ -24,50 +20,35 @@ export function FooterVideoMarquee() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const src = asset(clip.src);
   const releasedRef = useRef(false);
-  const [animationDone, setAnimationDone] = useState(false);
   const { allowed, releaseSlot } = useVideoLoadSlot(
     src,
     true,
     VIDEO_LOAD_PRIORITY.footer,
     rootRef,
   );
-  const loadKey = allowed ? src : "";
-  const { progress, ready, failed } = useVideoLoadProgress(videoRef, loadKey);
-  const { revealed, onCoverDone } = useVideoRevealGate(src);
 
   const onSettled = () => {
     if (releasedRef.current) return;
     releasedRef.current = true;
     releaseSlot();
-    onCoverDone();
   };
 
-  useDriveVideoPlayback(
+  const { playing, settled } = useDriveVideoPlayback(
     videoRef,
-    allowed && animationDone,
+    allowed,
     onSettled,
     src,
   );
-
-  const coverReady = ready || failed;
+  const ready = playing || settled;
 
   useEffect(() => {
     releasedRef.current = false;
-    setAnimationDone(false);
   }, [src]);
-
-  const handleDone = () => {
-    if (failed) {
-      onSettled();
-      return;
-    }
-    setAnimationDone(true);
-  };
 
   return (
     <div
       ref={rootRef}
-      className={`footer-video-fill${revealed ? " is-ready" : ""}`}
+      className={`footer-video-fill${ready ? " is-ready" : ""}`}
       aria-hidden="true"
     >
       {allowed ? (
@@ -79,15 +60,6 @@ export function FooterVideoMarquee() {
           autoPlay={false}
           aria-label={clip.label}
           style={{ objectFit: "cover", objectPosition: "top center" }}
-        />
-      ) : null}
-      {revealed ? null : allowed ? (
-        <VideoLoadingCover
-          active
-          progress={progress}
-          ready={coverReady}
-          cacheKey={src}
-          onDone={handleDone}
         />
       ) : null}
     </div>

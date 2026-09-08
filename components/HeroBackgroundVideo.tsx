@@ -2,19 +2,13 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
-import {
-  VideoLoadingCover,
-  useVideoLoadProgress,
-} from "@/components/VideoLoadingCover";
 import { useDriveVideoPlayback } from "@/lib/videoPlayback";
 import { HERO_VIDEO_SRC } from "@/lib/heroMedia";
 import {
-  HERO_CHROME_ATTR,
   HERO_COPY_ATTR,
   HERO_VIDEO_ATTR,
   HERO_VIDEO_PLAYABLE_ATTR,
   setHeroFlag,
-  whenHeroFlag,
 } from "@/lib/heroSequence";
 import {
   VIDEO_LOAD_PRIORITY,
@@ -32,22 +26,31 @@ function isSiteIntroActive() {
 /**
  * Home hero video.
  * Under the homepage intro veil: bypass the load queue so hero bytes start immediately.
- * Every homepage visit plays the intro — cold loads feel slower, warm loads finish faster.
+ * SiteIntroLoader is the only load animation — no per-video mark cover.
+ * Once the <video> attaches, keep it mounted through intro unveil so playback
+ * does not restart from ~0 when `edx-loading` drops.
  */
 export function HeroBackgroundVideo() {
   const rootRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const holdAttachRef = useRef(false);
   const [src, setSrc] = useState<string | null>(null);
-  const [coverReady, setCoverReady] = useState(false);
-  const [animationDone, setAnimationDone] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [underIntro, setUnderIntro] = useState(() =>
     typeof document !== "undefined" ? isSiteIntroActive() : false,
   );
 
-  /* Client nav to `/` may add edx-loading after this component’s first render */
+  /*
+   * Boot script / SiteIntroLoader may flip `edx-loading` after our first paint.
+   * Keep underIntro in sync so we always bypass the queue under the veil.
+   */
   useLayoutEffect(() => {
-    if (isSiteIntroActive()) setUnderIntro(true);
+    const sync = () => setUnderIntro(isSiteIntroActive());
+    sync();
+    const root = document.documentElement;
+    const obs = new MutationObserver(sync);
+    obs.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => obs.disconnect();
   }, []);
 
   /* Under intro: bypass queue (intro gate needs hero bytes). Else: top of page. */
@@ -57,11 +60,12 @@ export function HeroBackgroundVideo() {
     VIDEO_LOAD_PRIORITY.hero,
     rootRef,
   );
-  const canLoad = Boolean(src) && (underIntro || allowed);
-  const { progress, ready, failed } = useVideoLoadProgress(
-    videoRef,
-    canLoad && src ? src : "",
-  );
+  /*
+   * Do NOT drop canLoad when intro ends before the queue re-grants `allowed` —
+   * that unmounted <video> and restarted from the start (~1s jump).
+   */
+  if (underIntro || allowed) holdAttachRef.current = true;
+  const canLoad = Boolean(src) && (underIntro || allowed || holdAttachRef.current);
 
   useEffect(() => {
     let cancelled = false;
@@ -86,13 +90,18 @@ export function HeroBackgroundVideo() {
     };
   }, []);
 
-  useDriveVideoPlayback(videoRef, canLoad && (underIntro || animationDone), () => {
-    unlockVideosAfterHero();
-    releaseSlot();
-    setHeroFlag(HERO_VIDEO_PLAYABLE_ATTR);
-    setRevealed(true);
-    setHeroFlag(HERO_VIDEO_ATTR);
-  }, src ?? "");
+  useDriveVideoPlayback(
+    videoRef,
+    canLoad,
+    () => {
+      unlockVideosAfterHero();
+      releaseSlot();
+      setHeroFlag(HERO_VIDEO_PLAYABLE_ATTR);
+      setRevealed(true);
+      setHeroFlag(HERO_VIDEO_ATTR);
+    },
+    src ?? "",
+  );
 
   useEffect(() => {
     if (!underIntro || !revealed) return;
@@ -117,15 +126,6 @@ export function HeroBackgroundVideo() {
   }, [underIntro, revealed]);
 
   useEffect(() => {
-    if (underIntro || (!ready && !failed) || coverReady) return;
-    const ac = new AbortController();
-    void whenHeroFlag(HERO_CHROME_ATTR, { signal: ac.signal }).then(() => {
-      if (!ac.signal.aborted) setCoverReady(true);
-    });
-    return () => ac.abort();
-  }, [underIntro, ready, failed, coverReady]);
-
-  useEffect(() => {
     if (underIntro || !revealed) return;
     const reduceMotion =
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -135,10 +135,6 @@ export function HeroBackgroundVideo() {
     }, delay);
     return () => window.clearTimeout(copyTimer);
   }, [underIntro, revealed]);
-
-  const handleCoverDone = () => {
-    setAnimationDone(true);
-  };
 
   if (!src) {
     return <div ref={rootRef} className="hero__video-wrap" />;
@@ -155,15 +151,6 @@ export function HeroBackgroundVideo() {
           autoPlay={false}
           // @ts-expect-error — fetchPriority on HTMLVideoElement (Chromium+)
           fetchPriority="high"
-        />
-      ) : null}
-      {underIntro || revealed ? null : canLoad ? (
-        <VideoLoadingCover
-          active
-          progress={progress}
-          ready={coverReady}
-          cacheKey={src}
-          onDone={handleCoverDone}
         />
       ) : null}
     </div>

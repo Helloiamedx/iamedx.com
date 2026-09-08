@@ -177,7 +177,7 @@ export const servicePackagePhases: ServicePackagePhase[] = [
           "Adobe Illustrator",
           "Adobe Acrobat",
           "Autodesk Fusion 360",
-          "Google Sheets",
+          "Google Workspace",
         ],
         deliverables: [
           "Manufacturing Instruction Document",

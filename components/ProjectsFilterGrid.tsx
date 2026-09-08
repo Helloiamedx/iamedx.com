@@ -210,14 +210,14 @@ export function ProjectsFilterGrid({
 
   if (layout !== "related") {
     return (
-      <>
+      <div>
         <ProjectMasonry
           projects={visibleProjects}
           layout={layout}
           enableHoverSwap={enableHoverSwap}
         />
         {seeMore}
-      </>
+      </div>
     );
   }
 

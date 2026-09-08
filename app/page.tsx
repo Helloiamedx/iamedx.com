@@ -52,11 +52,11 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* recognition → support → my approach → character → … */}
+        {/* recognition → support → character → my approach → … */}
         <HomeRecognitionBand />
         <SupportBento />
-        <HomeMyApproach />
         <HomeDifferentCards />
+        <HomeMyApproach />
 
         <section
           className="section home-page__section"

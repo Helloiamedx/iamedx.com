@@ -17,6 +17,11 @@ export type SupportKnowCard = {
   panelVideo?: string;
   /** HTMLMediaElement.playbackRate when panelVideo is set */
   panelVideoPlaybackRate?: number;
+  /**
+   * Right-panel media fit. Default `true` = cover the media pane edge-to-edge.
+   * Set `false` only when the asset must stay letterboxed / not cropped.
+   */
+  panelFullscreen?: boolean;
 };
 
 /**
@@ -54,7 +59,7 @@ export const supportKnowCards: SupportKnowCard[] = [
     headline: "Prototype Development",
     size: "xl",
     panelVideo:
-      "https://assets.iamedx.com/images/home/Prototype%20Development.mov",
+      "https://assets.iamedx.com/images/home/Prototype%20Development.mp4",
     description:
       "Support the transition from concept to physical product by reviewing designs, identifying manufacturing challenges, coordinating prototypes, and refining details through multiple iterations. The goal is to ensure the final design is not only visually accurate but also practical for mass production.",
   },
@@ -63,7 +68,7 @@ export const supportKnowCards: SupportKnowCard[] = [
     headline: "Production Management",
     size: "xl",
     panelVideo:
-      "https://assets.iamedx.com/images/home/Production%20Management.mov",
+      "https://assets.iamedx.com/images/home/Production%20Management.mp4",
     description:
       "Coordinate communication between you and suppliers throughout the production process, tracking progress, resolving issues, and ensuring every critical detail is properly managed. From initial production preparation to final completion, help keep projects moving smoothly and efficiently.",
   },
@@ -72,7 +77,7 @@ export const supportKnowCards: SupportKnowCard[] = [
     headline: "Quality Control & Compliance Assurance",
     size: "md",
     panelVideo:
-      "https://assets.iamedx.com/images/home/Quality%20Control%20%26%20Compliance%20Assurance.mov",
+      "https://assets.iamedx.com/images/home/Quality%20Control%20%26amp%3B%20Compliance%20Assurance.mp4",
     description:
       "Establish clear quality standards, monitor production processes, and identify potential risks before they become costly problems. Through inspections, testing coordination, and on-site follow-up, help ensure products meet your expectations and required market standards.",
   },
@@ -99,9 +104,7 @@ export const supportKnowCards: SupportKnowCard[] = [
 ];
 
 export const supportBentoSection = {
-  eyebrow: "main service",
-  title: "End-to-End Support Across Your Entire Supply Chain",
-  backgroundImage: asset("/images/home/home3.jpg"),
+  title: "From concept to delivery.",
 } as const;
 
 /** @deprecated Prefer supportKnowCards */

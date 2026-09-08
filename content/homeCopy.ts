@@ -32,9 +32,10 @@ export type HomeCopySection = {
 export const whatSetsMeApart: HomeCopySection = {
   id: "what-sets-me-apart",
   eyebrow: "Character",
-  title: "What Makes Me Stand Out From Other Candidates?",
+  title: "What Makes Me Stand Out",
   subtitle: "",
-  backgroundImage: asset("/images/home/End-to-End Support.jpg"),
+  /* Solid gray plate — photo underlay retired */
+  backgroundImage: undefined,
   points: [
     {
       id: "loyalty",
@@ -139,51 +140,49 @@ export type MyApproachPoint = {
 
 export const myApproach = {
   id: "my-approach",
-  /** Small label above My Approach title */
-  eyebrow: "how i do",
-  title: "My Approach",
+  /** Left-column section title */
+  title: "My approach.",
   points: [
     {
       id: "i-dont-lie",
-      title: "I Don't Lie",
+      title: "I don't lie",
       body: "I tell you what is actually happening — even when the answer isn't good. No hiding problems, no making promises I can't keep. I'd rather tell you the truth early than make you regret trusting me later.",
     },
     {
       id: "i-think-different",
-      title: "I Think Different",
+      title: "I think different",
       body: "I don't always follow the obvious way. When the usual solution doesn't work, I look for another one — whether it's a different material, process, supplier, or way to solve the problem.",
     },
     {
       id: "i-work-hard",
-      title: "I Work Hard",
+      title: "I work hard",
       body: "I don't just give instructions and wait for things to happen. I get into the details, talk to factories, check samples, solve problems, and keep things moving until the job is done.",
     },
     {
       id: "i-pursue-real",
-      title: "I Pursue Real",
+      title: "I pursue real",
       body: "Ideas are easy. Making them real is the hard part. I care about what can actually be produced, shipped, sold, and loved — not just what looks good on a screen.",
     },
     {
-      id: "i-care-your-review",
-      title: "I Care Your Review",
+      id: "i-care-you",
+      title: "I care you",
       body: "Your feedback tells me whether I actually did a good job. I listen, I ask questions, and I make changes when something can be better. A successful project isn't just one that gets delivered — it's one you're happy to receive.",
     },
     {
       id: "i-own-it",
-      title: "I Own It",
+      title: "I own it",
       body: "Once I take on a project, I take responsibility for it. If something goes wrong, I don't look for someone to blame. I figure out what happened, find a solution, and stay with it until it's fixed.",
     },
   ] satisfies MyApproachPoint[],
 };
-/** Home recognition / metrics band — layout locked; swap copy & figures when ready. */
-export type HomeRecognitionMetric = {
+/** Home recognition — Apple-style highlights carousel (demo; refine media later). */
+export type HomeRecognitionSlide = {
   id: string;
-  /** Large figure or short value */
-  value: string;
-  /** Small uppercase label under the value */
-  label: string;
-  /** One-line blurb under the label */
-  blurb: string;
+  /** Card title — Grtsk SemiBold; no all-caps */
+  title: string;
+  /** Card body — Grtsk Regular */
+  body: string;
+  image: string;
 };
 
 export type HomeRecognitionCopy = {
@@ -198,41 +197,59 @@ export type HomeRecognitionCopy = {
   headlineAfter: string;
   /** Optional square cut-in inside the headline — unused in current layout */
   portrait?: string;
-  metrics: HomeRecognitionMetric[];
+  /** Autoplay duration per slide (ms) */
+  slideDurationMs: number;
+  slides: HomeRecognitionSlide[];
 };
 
 export const homeRecognition: HomeRecognitionCopy = {
   id: "client-recognition",
-  eyebrow: "recognition",
-  headlineBefore: "Client Recognition Has Always",
-  headlineAfter: "Been The Starting Point Of Everything I Do.",
+  eyebrow: "",
+  headlineBefore: "Recognition comes first.",
+  headlineAfter: "",
   portrait: asset(`/images/about/${encodeURIComponent("My Profile.jpg")}`),
-  metrics: [
+  slideDurationMs: 6000,
+  /* Demo stills — swap for dedicated recognition media later */
+  slides: [
     {
-      id: "years",
-      value: "10+",
-      label: "Years hands-on experience",
-      blurb:
-        "From ideas to production, with over a decade on the front line.",
+      id: "client-rehire",
+      title: "Client rehire rate",
+      body: "Clients rehire me when they need to develop complex or highly customized products without an existing solution.",
+      image: asset(
+        `/images/projects/${encodeURIComponent("Dragon Age Writing Bundle")}/${encodeURIComponent("VARRIC TETHRAS cover.jpg")}`,
+      ),
     },
     {
-      id: "brands",
-      value: "20+",
-      label: "IP brands served",
-      blurb:
-        "Worked across a diverse range of gaming and entertainment IPs.",
+      id: "positive-reviews",
+      title: "Positive reviews",
+      body: "Products receive positive feedback from clients and end consumers after delivery.",
+      image: asset(
+        `/images/projects/${encodeURIComponent("Mass Effect Tali Companion Bundle")}/${encodeURIComponent("Mass Effect Tali Companion Bundle.jpg")}`,
+      ),
     },
     {
-      id: "pass-rate",
-      value: "100%",
-      label: "Product pass rate",
-      blurb: "Focused on quality from prototype to final delivery.",
+      id: "reordered",
+      title: "Products reordered rate",
+      body: "Strong sales often lead clients to place repeat orders soon after the first production run.",
+      image: asset(
+        `/images/projects/${encodeURIComponent("The Witcher White Wolf Messenger Bag")}/${encodeURIComponent("h1.jpg")}`,
+      ),
     },
     {
-      id: "retained",
-      value: "95%",
-      label: "Long-term supplier retention",
-      blurb: "Built on trust, transparency, and long-term collaboration.",
+      id: "series",
+      title: "Products developed into a series",
+      body: "When the first small-batch product sells well, clients continue developing more products based on the same proven design.",
+      image: asset(
+        `/images/projects/${encodeURIComponent("The Elder Scrolls Online 10-Year Coin Shadowbox")}/${encodeURIComponent("cover.jpg")}`,
+      ),
+    },
+    {
+      id: "supplier-retention",
+      title: "95% long-term supplier retention",
+      body: "I maintain strong relationships with factories, small workshops, material suppliers, and key process specialists, allowing me to quickly access the manufacturing information I need.",
+      image: asset(
+        `/images/projects/${encodeURIComponent("Halo 5 Guardians Limited Edition Collectors Statue")}/${encodeURIComponent("1.jpg")}`,
+      ),
     },
   ],
 };

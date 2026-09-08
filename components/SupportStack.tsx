@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { HomeSectionIntro } from "@/components/HomeSectionIntro";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { PanelImageStack } from "@/components/PanelImageStack";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
 import {
@@ -9,96 +9,64 @@ import {
   supportKnowCards,
   type SupportKnowCard,
 } from "@/content/supportBento";
-import {
-  VIDEO_LOAD_PRIORITY,
-  useVideoLoadSlot,
-} from "@/lib/videoLoadQueue";
 import { useDriveVideoPlayback } from "@/lib/videoPlayback";
-import { cn } from "@/lib/utils";
+import { useSwipeNav } from "@/lib/useSwipeNav";
 
 const CARDS = supportKnowCards;
 
-/** Lock axis after this much dominant movement (px). */
-const LOCK_THRESHOLD = 6;
-const WHEEL_IDLE_MS = 120;
-const MOMENTUM_FRICTION = 0.945;
-const MOMENTUM_MIN_V = 0.08;
-const WHEEL_GAIN = 1;
-const BUTTON_LERP = 0.18;
-
-type Axis = "x" | "y" | null;
-
+/**
+ * Stage clips bypass the global video load queue.
+ * Queue concurrency (2) + slow moov-at-end files (e.g. Prototype) was
+ * blocking the active switch and starving every clip after it.
+ */
 function SupportPanelVideo({
   src,
   playbackRate = 1,
+  fullscreen = true,
 }: {
   src: string;
   playbackRate?: number;
+  fullscreen?: boolean;
 }) {
-  const rootRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const releasedRef = useRef(false);
-  const { allowed, releaseSlot } = useVideoLoadSlot(
-    src,
-    true,
-    VIDEO_LOAD_PRIORITY.homeSupport,
-    rootRef,
-  );
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !allowed) return;
+    if (!video) return;
     video.playbackRate = playbackRate;
-  }, [playbackRate, src, allowed]);
+    video.preload = "auto";
+    void video.play().catch(() => {});
+  }, [playbackRate, src]);
 
-  const onSettled = () => {
-    if (releasedRef.current) return;
-    releasedRef.current = true;
-    releaseSlot();
-  };
-
-  useDriveVideoPlayback(
-    videoRef,
-    allowed,
-    onSettled,
-    src,
-  );
-
-  useEffect(() => {
-    releasedRef.current = false;
-  }, [src]);
+  useDriveVideoPlayback(videoRef, true, () => {}, src);
 
   return (
     <div
-      ref={rootRef}
-      className="support-know__panel support-know__panel--video"
+      className={`support-know__panel support-know__panel--video${fullscreen ? "" : " is-fit-contain"}`}
       aria-hidden="true"
     >
-      {allowed ? (
-        <ProtectedVideo
-          ref={videoRef}
-          className="support-know__panel-video"
-          src={src}
-          preload="auto"
-          autoPlay={false}
-          onLoadedMetadata={(event) => {
-            event.currentTarget.playbackRate = playbackRate;
-          }}
-          onPlay={(event) => {
-            event.currentTarget.playbackRate = playbackRate;
-          }}
-        />
-      ) : null}
+      <ProtectedVideo
+        ref={videoRef}
+        className="support-know__panel-video"
+        src={src}
+        muted
+        loop
+        playsInline
+        preload="auto"
+      />
     </div>
   );
 }
 
 function SupportPanel({ card }: { card: SupportKnowCard }) {
+  const fullscreen = card.panelFullscreen !== false;
+
   if (card.panelVideo) {
     return (
       <SupportPanelVideo
         src={card.panelVideo}
         playbackRate={card.panelVideoPlaybackRate ?? 1}
+        fullscreen={fullscreen}
       />
     );
   }
@@ -107,8 +75,11 @@ function SupportPanel({ card }: { card: SupportKnowCard }) {
   if (!images?.length) {
     return <div className="support-know__panel" aria-hidden="true" />;
   }
+
   return (
-    <div className="support-know__panel support-know__panel--stack">
+    <div
+      className={`support-know__panel support-know__panel--stack${fullscreen ? "" : " is-fit-contain"}`}
+    >
       <PanelImageStack
         images={images}
         align={card.panelImageAlign}
@@ -118,466 +89,661 @@ function SupportPanel({ card }: { card: SupportKnowCard }) {
   );
 }
 
+function navDirection(from: number, to: number, total: number) {
+  if (from === total - 1 && to === 0) return 1;
+  if (from === 0 && to === total - 1) return -1;
+  return to > from ? 1 : -1;
+}
+
+function sleep(ms: number) {
+  return new Promise<void>((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
+}
+
+function isLayerPaintReady(layer: HTMLElement | null | undefined): boolean {
+  if (!layer) return false;
+
+  const video = layer.querySelector("video");
+  if (video) {
+    if (video.error) return false;
+    return (
+      video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
+      video.videoWidth > 0
+    );
+  }
+
+  const images = [...layer.querySelectorAll("img")];
+  if (images.length) {
+    return images.every((img) => img.complete && img.naturalWidth > 0);
+  }
+
+  // Empty / still panels count as ready so we never hang forever.
+  return !layer.querySelector(".support-know__panel--video");
+}
+
+/** Poll until incoming can paint, errors out, or timeout. */
+async function waitForLayerMedia(
+  layer: HTMLElement,
+  timeoutMs: number,
+): Promise<"ready" | "error" | "timeout"> {
+  const deadline = performance.now() + timeoutMs;
+
+  while (performance.now() < deadline) {
+    const video = layer.querySelector("video");
+    if (video?.error) return "error";
+    if (isLayerPaintReady(layer)) {
+      if (video) void video.play().catch(() => {});
+      return "ready";
+    }
+    if (video) {
+      video.preload = "auto";
+      void video.play().catch(() => {});
+    }
+    await sleep(32);
+  }
+
+  const video = layer.querySelector("video");
+  if (video?.error) return "error";
+  return isLayerPaintReady(layer) ? "ready" : "timeout";
+}
+
 /**
- * Apple-style horizontal frosted panels — transform rail + trackpad direction lock,
- * momentum damping, and one-card button steps. Variable card widths, uniform panel height.
+ * Media switch — progress-driven corner grow (ChatGPT diagonal draw).
+ * Outgoing stays covering until incoming can paint — no black reveal.
  */
-export function SupportStack() {
-  const viewportRef = useRef<HTMLDivElement>(null);
-  const railRef = useRef<HTMLDivElement>(null);
-
-  const xRef = useRef(0);
-  const vRef = useRef(0);
-  const maxXRef = useRef(0);
-  const axisRef = useRef<Axis>(null);
-  const wheelIdleRef = useRef(0);
+function SupportMediaStage({
+  cards,
+  activeIndex,
+  navDir,
+  reduceMotion,
+  compact,
+}: {
+  cards: readonly SupportKnowCard[];
+  activeIndex: number;
+  navDir: number;
+  reduceMotion: boolean | null;
+  compact: boolean;
+}) {
+  const currentRef = useRef(activeIndex);
+  const busyRef = useRef(false);
   const rafRef = useRef(0);
-  const lastTsRef = useRef(0);
-  const pointerIdRef = useRef<number | null>(null);
-  const pointerLastXRef = useRef(0);
-  const pointerLastYRef = useRef(0);
-  const pointerLastTRef = useRef(0);
-  const reducedRef = useRef(false);
+  const layerRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [current, setCurrent] = useState(activeIndex);
+  const [target, setTarget] = useState<number | null>(null);
 
-  const [canPrev, setCanPrev] = useState(false);
-  const [canNext, setCanNext] = useState(true);
+  const resetLayers = (active: number) => {
+    layerRefs.current.forEach((layer, index) => {
+      if (!layer) return;
+      const on = index === active;
+      layer.style.visibility = on ? "visible" : "hidden";
+      layer.style.transform = "none";
+      layer.style.transformOrigin = "center";
+      layer.style.opacity = on ? "1" : "0";
+      layer.style.zIndex = on ? "2" : "0";
+    });
+  };
 
-  const applyTransform = useCallback(() => {
-    const rail = railRef.current;
-    if (!rail) return;
-    rail.style.transform = `translate3d(${xRef.current}px, 0, 0)`;
+  const draw = (
+    from: number,
+    to: number,
+    direction: number,
+    p: number,
+    preferReduced: boolean,
+  ) => {
+    const outgoing = layerRefs.current[from];
+    const incoming = layerRefs.current[to];
+    if (!outgoing || !incoming) return;
 
-    const prev = xRef.current < -1;
-    const next = xRef.current > -maxXRef.current + 1;
-    setCanPrev((was) => (was === prev ? was : prev));
-    setCanNext((was) => (was === next ? was : next));
+    // Mobile: gesture-aligned (right swipe from left-bottom).
+    // Desktop: original mapping (unchanged).
+    const fromLeft = compact ? direction < 0 : direction > 0;
+    const sign = fromLeft ? 1 : -1;
+
+    outgoing.style.visibility = "visible";
+    incoming.style.visibility = "visible";
+    outgoing.style.zIndex = p < 0.72 ? "2" : "1";
+    incoming.style.zIndex = p < 0.72 ? "1" : "2";
+
+    if (preferReduced) {
+      outgoing.style.transform = "none";
+      incoming.style.transform = "none";
+      outgoing.style.transformOrigin = "center";
+      incoming.style.transformOrigin = "center";
+      outgoing.style.opacity = String(1 - p);
+      incoming.style.opacity = String(p);
+      return;
+    }
+
+    outgoing.style.transformOrigin = fromLeft ? "100% 100%" : "0% 100%";
+    outgoing.style.transform = `
+      translate3d(${10 * sign * p}%, ${5 * p}%, 0)
+      scale(${1 - 0.96 * p})
+    `;
+    outgoing.style.opacity = String(1 - p);
+
+    incoming.style.transformOrigin = fromLeft ? "0% 100%" : "100% 100%";
+    incoming.style.transform = `
+      translate3d(${-8 * sign * (1 - p)}%, ${4 * (1 - p)}%, 0)
+      scale(${0.04 + 0.96 * p})
+    `;
+    incoming.style.opacity = String(p);
+  };
+
+  useEffect(() => {
+    resetLayers(currentRef.current);
   }, []);
 
-  const clampX = useCallback((value: number) => {
-    const max = maxXRef.current;
-    if (value > 0) return 0;
-    if (value < -max) return -max;
-    return value;
-  }, []);
+  useEffect(() => {
+    if (activeIndex === currentRef.current) return;
 
-  const measure = useCallback(() => {
-    const viewport = viewportRef.current;
-    const rail = railRef.current;
-    if (!viewport || !rail) return;
+    const from = currentRef.current;
+    const to = activeIndex;
+    const direction = navDir;
+    const preferReduced = Boolean(reduceMotion);
+    let cancelled = false;
 
-    maxXRef.current = Math.max(0, rail.scrollWidth - viewport.clientWidth);
-    xRef.current = clampX(xRef.current);
-    applyTransform();
-  }, [applyTransform, clampX]);
-
-  const stopRaf = useCallback(() => {
-    if (rafRef.current) {
+    if (busyRef.current) {
       cancelAnimationFrame(rafRef.current);
-      rafRef.current = 0;
-    }
-  }, []);
-
-  const tickMomentum = useCallback(() => {
-    rafRef.current = 0;
-    const now = performance.now();
-    const dt = Math.min(32, now - (lastTsRef.current || now));
-    lastTsRef.current = now;
-
-    const steps = dt / 16.67;
-    vRef.current *= MOMENTUM_FRICTION ** steps;
-
-    if (Math.abs(vRef.current) < MOMENTUM_MIN_V) {
-      vRef.current = 0;
-      xRef.current = clampX(xRef.current);
-      applyTransform();
-      return;
     }
 
-    xRef.current = clampX(xRef.current + vRef.current * steps);
-    if (xRef.current === 0 || xRef.current === -maxXRef.current) {
-      vRef.current = 0;
-    }
-    applyTransform();
-    rafRef.current = requestAnimationFrame(tickMomentum);
-  }, [applyTransform, clampX]);
+    busyRef.current = true;
+    setTarget(to);
 
-  const startMomentum = useCallback(() => {
-    if (reducedRef.current) {
-      vRef.current = 0;
-      return;
-    }
-    if (Math.abs(vRef.current) < MOMENTUM_MIN_V) {
-      vRef.current = 0;
-      return;
-    }
-    stopRaf();
-    lastTsRef.current = performance.now();
-    rafRef.current = requestAnimationFrame(tickMomentum);
-  }, [stopRaf, tickMomentum]);
+    const finish = (settledTo: number) => {
+      if (cancelled) return;
+      currentRef.current = settledTo;
+      setCurrent(settledTo);
+      setTarget(null);
+      resetLayers(settledTo);
+      const settled = layerRefs.current[settledTo];
+      const video = settled?.querySelector("video");
+      if (video) void video.play().catch(() => {});
+      busyRef.current = false;
+    };
 
-  const animateTo = useCallback(
-    (target: number) => {
-      stopRaf();
-      vRef.current = 0;
-      const goal = clampX(target);
+    const run = async () => {
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+      });
+      if (cancelled) return;
 
-      if (reducedRef.current) {
-        xRef.current = goal;
-        applyTransform();
+      const outgoing = layerRefs.current[from];
+      const incoming = layerRefs.current[to];
+      if (outgoing) {
+        outgoing.style.visibility = "visible";
+        outgoing.style.opacity = "1";
+        outgoing.style.zIndex = "3";
+        outgoing.style.transform = "none";
+      }
+      if (incoming) {
+        incoming.style.visibility = "visible";
+        incoming.style.opacity = "0";
+        incoming.style.zIndex = "1";
+      }
+
+      /*
+       * Hold the current frame until the next clip can paint, then draw.
+       * Hard cap so a slow / broken file (Prototype moov-at-end) cannot
+       * freeze the stepper and poison later switches.
+       */
+      const status = incoming
+        ? await waitForLayerMedia(incoming, 6000)
+        : "ready";
+      if (cancelled) return;
+
+      if (status !== "ready") {
+        /*
+         * Do not reveal an empty layer. Advance the stage index so later
+         * chips/arrows still work, keep the outgoing frame up, and cut over
+         * once the clip finally paints.
+         */
+        currentRef.current = to;
+        setCurrent(to);
+        setTarget(null);
+        busyRef.current = false;
+
+        if (incoming) {
+          void (async () => {
+            const later = await waitForLayerMedia(incoming, 20000);
+            if (cancelled || currentRef.current !== to) return;
+            if (later === "ready") {
+              resetLayers(to);
+              const video = incoming.querySelector("video");
+              if (video) void video.play().catch(() => {});
+            }
+          })();
+        }
         return;
       }
 
-      const step = () => {
-        rafRef.current = 0;
-        const next = xRef.current + (goal - xRef.current) * BUTTON_LERP;
-        if (Math.abs(goal - next) < 0.5) {
-          xRef.current = goal;
-          applyTransform();
+      draw(from, to, direction, 0, preferReduced);
+
+      const started = performance.now();
+      const duration = preferReduced ? 100 : 480;
+
+      const tick = (now: number) => {
+        if (cancelled) return;
+        const t = Math.min(1, (now - started) / duration);
+        const eased = 1 - Math.pow(1 - t, 3);
+        draw(from, to, direction, eased, preferReduced);
+
+        if (t < 1) {
+          rafRef.current = requestAnimationFrame(tick);
           return;
         }
-        xRef.current = next;
-        applyTransform();
-        rafRef.current = requestAnimationFrame(step);
+
+        finish(to);
       };
-      rafRef.current = requestAnimationFrame(step);
-    },
-    [applyTransform, clampX, stopRaf],
-  );
 
-  const cardTargets = useCallback(() => {
-    const rail = railRef.current;
-    if (!rail) return [0];
-    const cards = [
-      ...rail.querySelectorAll<HTMLElement>(".support-know__card"),
-    ];
-    const styles = getComputedStyle(rail);
-    const gap =
-      Number.parseFloat(styles.columnGap || styles.gap || "20") || 20;
-    let acc = 0;
-    return cards.map((card, index) => {
-      const x = -acc;
-      acc +=
-        card.getBoundingClientRect().width +
-        (index < cards.length - 1 ? gap : 0);
-      return x;
-    });
-  }, []);
+      rafRef.current = requestAnimationFrame(tick);
+    };
 
-  const currentIndex = useCallback(() => {
-    const targets = cardTargets();
-    let best = 0;
-    let bestDist = Infinity;
-    targets.forEach((target, index) => {
-      const dist = Math.abs(target - xRef.current);
-      if (dist < bestDist) {
-        bestDist = dist;
-        best = index;
-      }
-    });
-    return best;
-  }, [cardTargets]);
+    void run();
 
-  const scrollByCard = useCallback(
-    (direction: -1 | 1) => {
-      const targets = cardTargets();
-      if (!targets.length) return;
-      const next = Math.max(
-        0,
-        Math.min(targets.length - 1, currentIndex() + direction),
-      );
-      animateTo(targets[next] ?? 0);
-    },
-    [animateTo, cardTargets, currentIndex],
-  );
-
-  useEffect(() => {
-    reducedRef.current = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    measure();
-    const viewport = viewportRef.current;
-    if (!viewport) return;
-
-    const ro = new ResizeObserver(() => measure());
-    ro.observe(viewport);
-    if (railRef.current) ro.observe(railRef.current);
-    window.addEventListener("resize", measure, { passive: true });
     return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", measure);
-      stopRaf();
-      window.clearTimeout(wheelIdleRef.current);
+      cancelled = true;
+      cancelAnimationFrame(rafRef.current);
+      busyRef.current = false;
     };
-  }, [measure, stopRaf]);
+  }, [activeIndex, navDir, reduceMotion, compact]);
 
-  useEffect(() => {
-    const viewport = viewportRef.current;
-    if (!viewport) return;
-
-    const isOnSlideArea = (target: EventTarget | null) => {
-      if (!(target instanceof Element)) return false;
-      /* Copy must not drag — but panels, card chrome, and gaps (hit the rail) do */
-      if (target.closest(".support-know__copy")) return false;
-      return Boolean(target.closest(".support-know__rail"));
-    };
-
-    const endWheelGesture = () => {
-      axisRef.current = null;
-      startMomentum();
-    };
-
-    const onWheel = (event: WheelEvent) => {
-      /* Horizontal drag on panels + inter-card gaps; not on copy */
-      if (!isOnSlideArea(event.target)) {
-        axisRef.current = null;
-        return;
-      }
-
-      const dx = event.deltaX * WHEEL_GAIN;
-      const dy = event.deltaY * WHEEL_GAIN;
-      const absX = Math.abs(dx);
-      const absY = Math.abs(dy);
-
-      if (absY > absX + 1 && absY >= LOCK_THRESHOLD) {
-        axisRef.current = "y";
-        window.clearTimeout(wheelIdleRef.current);
-        wheelIdleRef.current = window.setTimeout(() => {
-          axisRef.current = null;
-        }, WHEEL_IDLE_MS);
-        return;
-      }
-
-      window.clearTimeout(wheelIdleRef.current);
-      wheelIdleRef.current = window.setTimeout(endWheelGesture, WHEEL_IDLE_MS);
-
-      if (!axisRef.current) {
-        if (absX < 0.5 && absY < 0.5 && !event.shiftKey) return;
-        if (event.shiftKey || absX >= absY) {
-          if (event.shiftKey || absX >= LOCK_THRESHOLD || absX > absY + 1) {
-            axisRef.current = "x";
-          } else if (absY >= LOCK_THRESHOLD) {
-            axisRef.current = "y";
-          } else {
-            return;
-          }
-        } else if (absY >= LOCK_THRESHOLD) {
-          axisRef.current = "y";
-        } else {
-          return;
-        }
-      }
-
-      if (axisRef.current === "y") {
-        return;
-      }
-
-      const delta = event.shiftKey ? dy : dx;
-      const nextX = clampX(xRef.current - delta);
-      const atEdge = nextX === xRef.current;
-
-      if (atEdge) {
-        axisRef.current = null;
-        vRef.current = 0;
-        return;
-      }
-
-      event.preventDefault();
-      event.stopPropagation();
-      stopRaf();
-      xRef.current = nextX;
-      vRef.current = -delta;
-      applyTransform();
-    };
-
-    viewport.addEventListener("wheel", onWheel, {
-      passive: false,
-      capture: true,
-    });
-    return () => {
-      viewport.removeEventListener("wheel", onWheel, true);
-      window.clearTimeout(wheelIdleRef.current);
-    };
-  }, [applyTransform, clampX, startMomentum, stopRaf]);
-
-  useEffect(() => {
-    const viewport = viewportRef.current;
-    if (!viewport) return;
-
-    const isOnSlideArea = (target: EventTarget | null) => {
-      if (!(target instanceof Element)) return false;
-      if (target.closest(".support-know__copy")) return false;
-      return Boolean(target.closest(".support-know__rail"));
-    };
-
-    const onPointerDown = (event: PointerEvent) => {
-      if (event.button !== 0) return;
-      if (!isOnSlideArea(event.target)) return;
-      pointerIdRef.current = event.pointerId;
-      pointerLastXRef.current = event.clientX;
-      pointerLastYRef.current = event.clientY;
-      pointerLastTRef.current = performance.now();
-      axisRef.current = null;
-      vRef.current = 0;
-      stopRaf();
-      viewport.setPointerCapture(event.pointerId);
-    };
-
-    const onPointerMove = (event: PointerEvent) => {
-      if (pointerIdRef.current !== event.pointerId) return;
-
-      const now = performance.now();
-      const dt = Math.max(1, now - pointerLastTRef.current);
-      const mx = event.clientX - pointerLastXRef.current;
-      const my = event.clientY - pointerLastYRef.current;
-      pointerLastXRef.current = event.clientX;
-      pointerLastYRef.current = event.clientY;
-      pointerLastTRef.current = now;
-
-      if (!axisRef.current) {
-        const absX = Math.abs(mx);
-        const absY = Math.abs(my);
-        if (absX < 1 && absY < 1) return;
-        if (absX + absY < LOCK_THRESHOLD) return;
-        axisRef.current = absX >= absY ? "x" : "y";
-      }
-
-      if (axisRef.current !== "x") return;
-
-      event.preventDefault();
-      xRef.current = clampX(xRef.current + mx);
-      vRef.current = (mx / dt) * 16.67;
-      applyTransform();
-    };
-
-    const onPointerUp = (event: PointerEvent) => {
-      if (pointerIdRef.current !== event.pointerId) return;
-      pointerIdRef.current = null;
-      const wasX = axisRef.current === "x";
-      axisRef.current = null;
-      try {
-        viewport.releasePointerCapture(event.pointerId);
-      } catch {
-        /* already released */
-      }
-      if (wasX) startMomentum();
-    };
-
-    viewport.addEventListener("pointerdown", onPointerDown);
-    viewport.addEventListener("pointermove", onPointerMove);
-    viewport.addEventListener("pointerup", onPointerUp);
-    viewport.addEventListener("pointercancel", onPointerUp);
-    return () => {
-      viewport.removeEventListener("pointerdown", onPointerDown);
-      viewport.removeEventListener("pointermove", onPointerMove);
-      viewport.removeEventListener("pointerup", onPointerUp);
-      viewport.removeEventListener("pointercancel", onPointerUp);
-    };
-  }, [applyTransform, clampX, startMomentum, stopRaf]);
+  const mounted = new Set<number>([current, activeIndex]);
+  if (target != null) mounted.add(target);
+  if (current > 0) mounted.add(current - 1);
+  if (current < cards.length - 1) mounted.add(current + 1);
+  if (activeIndex > 0) mounted.add(activeIndex - 1);
+  if (activeIndex < cards.length - 1) mounted.add(activeIndex + 1);
 
   return (
-    <section className="support-know" aria-labelledby="support-know-title">
-      <div
-        className="support-know__bg"
-        aria-hidden="true"
-        style={{
-          backgroundImage: `url("${supportBentoSection.backgroundImage}")`,
-        }}
-      />
-      <div className="support-know__frost" aria-hidden="true" />
-
-      <HomeSectionIntro
-        titleId="support-know-title"
-        label={supportBentoSection.eyebrow}
-        title={supportBentoSection.title}
-      />
-
-      <div className="support-know__shell">
-        <div
-          ref={viewportRef}
-          className="support-know__viewport"
-          tabIndex={0}
-          role="region"
-          aria-label="Support services"
-          data-lenis-prevent-horizontal
-          onKeyDown={(event) => {
-            if (event.key === "ArrowRight") {
-              event.preventDefault();
-              scrollByCard(1);
-            } else if (event.key === "ArrowLeft") {
-              event.preventDefault();
-              scrollByCard(-1);
-            }
-          }}
-        >
-          <div ref={railRef} className="support-know__rail" role="list">
-            {CARDS.map((card) => (
-              <article
-                key={card.id}
-                className={cn(
-                  "support-know__card",
-                  `support-know__card--${card.size}`,
-                )}
-                role="listitem"
-              >
-                <SupportPanel card={card} />
-                <p className="support-know__copy">
-                  <strong className="support-know__headline">
-                    {card.headline}.{" "}
-                  </strong>
-                  <span className="support-know__desc">{card.description}</span>
-                </p>
-              </article>
-            ))}
+    <div className="support-know__media" aria-hidden="true">
+      {cards.map((card, index) => {
+        if (!mounted.has(index)) return null;
+        return (
+          <div
+            key={card.id}
+            className="support-know__media-layer"
+            ref={(node) => {
+              layerRefs.current[index] = node;
+            }}
+          >
+            <SupportPanel card={card} />
           </div>
-        </div>
+        );
+      })}
+    </div>
+  );
+}
 
-        <div className="support-know__controls">
-          <button
-            type="button"
-            className="support-know__nav"
-            aria-label="Previous cards"
-            disabled={!canPrev}
-            onClick={() => scrollByCard(-1)}
-          >
-            <svg
-              className="support-know__nav-icon"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              focusable="false"
+/**
+ * Main service — media fills the whole stage; chips + ↑↓ overlay on the left.
+ * One chip expands on scroll-in; stepper / chip click switches the active card.
+ */
+export function SupportStack() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [entered, setEntered] = useState(false);
+  const [compact, setCompact] = useState(false);
+  const [navDir, setNavDir] = useState(1);
+  const activeCard = CARDS[activeIndex] ?? CARDS[0];
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 900px)");
+    const sync = () => setCompact(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el || entered) return;
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        setEntered(true);
+        io.disconnect();
+      },
+      { threshold: 0.28, rootMargin: "0px 0px -8% 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [entered]);
+
+  const layoutTransition = reduceMotion
+    ? { duration: 0 }
+    : { type: "spring" as const, stiffness: 420, damping: 34, mass: 0.8 };
+
+  const selectAt = (index: number) => {
+    // Mobile: clamp at ends (no infinite loop). Desktop: wrap.
+    const next = compact
+      ? Math.max(0, Math.min(CARDS.length - 1, index))
+      : ((index % CARDS.length) + CARDS.length) % CARDS.length;
+    if (next === activeIndex) return;
+    setNavDir(navDirection(activeIndex, next, CARDS.length));
+    setActiveIndex(next);
+    setEntered(true);
+  };
+
+  const step = (delta: number) => {
+    selectAt(activeIndex + delta);
+  };
+
+  const closeToFirst = () => {
+    if (compact || activeIndex === 0) return;
+    selectAt(0);
+  };
+
+  useSwipeNav(stageRef, (dir) => step(dir), CARDS.length > 1);
+
+  return (
+    <section
+      ref={sectionRef}
+      className="support-know"
+      aria-labelledby="support-know-title"
+    >
+      <div className="support-know__shell">
+        <header className="home-section-intro support-know__intro">
+          <h2 id="support-know-title" className="home-section-intro__title">
+            {supportBentoSection.title}
+          </h2>
+        </header>
+
+        <div ref={stageRef} className="support-know__stage">
+          <SupportMediaStage
+            cards={CARDS}
+            activeIndex={activeIndex}
+            navDir={navDir}
+            reduceMotion={reduceMotion}
+            compact={compact}
+          />
+
+          {!compact && activeIndex > 0 ? (
+            <button
+              type="button"
+              className="support-know__close"
+              aria-label="Back to first service"
+              onClick={closeToFirst}
             >
-              <path
-                d="M15 6l-6 6 6 6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.75"
-                strokeLinecap="square"
-                strokeLinejoin="miter"
-              />
-            </svg>
-          </button>
-          <button
-            type="button"
-            className="support-know__nav"
-            aria-label="Next cards"
-            disabled={!canNext}
-            onClick={() => scrollByCard(1)}
-          >
-            <svg
-              className="support-know__nav-icon"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <path
-                d="M9 6l6 6-6 6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.75"
-                strokeLinecap="square"
-                strokeLinejoin="miter"
-              />
-            </svg>
-          </button>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M6.5 6.5 17.5 17.5M17.5 6.5 6.5 17.5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="square"
+                />
+              </svg>
+            </button>
+          ) : null}
+
+          <div className="support-know__menu">
+            <div className="support-know__stepper" aria-label="Browse services">
+              <button
+                type="button"
+                className="support-know__step support-know__step--prev"
+                aria-label="Previous service"
+                onClick={() => step(-1)}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M6 14.5 12 8.5l6 6"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.35"
+                    strokeLinecap="square"
+                    strokeLinejoin="miter"
+                  />
+                </svg>
+              </button>
+              <button
+                type="button"
+                className="support-know__step support-know__step--next"
+                aria-label="Next service"
+                onClick={() => step(1)}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M6 9.5 12 15.5l6-6"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.35"
+                    strokeLinecap="square"
+                    strokeLinejoin="miter"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {compact ? (
+              <ul className="support-know__chips">
+                <AnimatePresence mode="popLayout" initial={false} custom={navDir}>
+                  {entered && activeCard ? (
+                    <motion.li
+                      key={activeCard.id}
+                      className="support-know__item is-expanded is-active"
+                      custom={navDir}
+                      initial={
+                        reduceMotion
+                          ? false
+                          : {
+                              opacity: 0,
+                              // Mobile only: right swipe from left-bottom.
+                              // (Desktop uses the list morph — this branch is compact.)
+                              x: navDir < 0 ? -22 : 22,
+                              y: 18,
+                              scale: 0.72,
+                              transformOrigin:
+                                navDir < 0 ? "left bottom" : "right bottom",
+                            }
+                      }
+                      animate={{
+                        opacity: 1,
+                        x: 0,
+                        y: 0,
+                        scale: 1,
+                        transformOrigin:
+                          navDir < 0 ? "left bottom" : "right bottom",
+                      }}
+                      exit={
+                        reduceMotion
+                          ? undefined
+                          : {
+                              opacity: 0,
+                              x: navDir < 0 ? 18 : -18,
+                              y: 14,
+                              scale: 0.72,
+                              transformOrigin:
+                                navDir < 0 ? "right bottom" : "left bottom",
+                            }
+                      }
+                      transition={
+                        reduceMotion
+                          ? { duration: 0 }
+                          : {
+                              type: "spring",
+                              stiffness: 420,
+                              damping: 34,
+                              mass: 0.8,
+                            }
+                      }
+                    >
+                      <div className="support-know__tile is-expanded">
+                        <motion.div
+                          className="support-know__detail-inner"
+                          initial={
+                            reduceMotion
+                              ? false
+                              : {
+                                  opacity: 0,
+                                  // Same corner as chip: right swipe from left-bottom
+                                  x: navDir < 0 ? -16 : 16,
+                                  y: 12,
+                                  filter: "blur(5px)",
+                                }
+                          }
+                          animate={{
+                            opacity: 1,
+                            x: 0,
+                            y: 0,
+                            filter: "blur(0px)",
+                          }}
+                          transition={
+                            reduceMotion
+                              ? { duration: 0 }
+                              : {
+                                  opacity: { duration: 0.32, delay: 0.2 },
+                                  x: { duration: 0.36, delay: 0.2 },
+                                  y: { duration: 0.36, delay: 0.2 },
+                                  filter: { duration: 0.32, delay: 0.2 },
+                                }
+                          }
+                        >
+                          <p className="support-know__detail-copy">
+                            <strong className="support-know__detail-title">
+                              {activeCard.headline}.
+                            </strong>{" "}
+                            {activeCard.description}
+                          </p>
+                        </motion.div>
+                      </div>
+                    </motion.li>
+                  ) : null}
+                </AnimatePresence>
+              </ul>
+            ) : (
+              <ul className="support-know__chips">
+                {CARDS.map((card, index) => {
+                  const expanded = entered && activeIndex === index;
+                  return (
+                    <motion.li
+                      key={card.id}
+                      layout={!reduceMotion}
+                      className={`support-know__item${expanded ? " is-expanded" : ""}`}
+                      transition={{ layout: layoutTransition }}
+                    >
+                      <motion.div
+                        layout={!reduceMotion}
+                        className={`support-know__tile${expanded ? " is-expanded" : ""}`}
+                        transition={{ layout: layoutTransition }}
+                        role={expanded ? undefined : "button"}
+                        tabIndex={expanded ? undefined : 0}
+                        aria-current={expanded ? "true" : undefined}
+                        onClick={
+                          expanded
+                            ? undefined
+                            : () => {
+                                selectAt(index);
+                              }
+                        }
+                        onKeyDown={
+                          expanded
+                            ? undefined
+                            : (event) => {
+                                if (
+                                  event.key === "Enter" ||
+                                  event.key === " "
+                                ) {
+                                  event.preventDefault();
+                                  selectAt(index);
+                                }
+                              }
+                        }
+                      >
+                        <AnimatePresence mode="popLayout" initial={false}>
+                          {expanded ? (
+                            <motion.div
+                              key="detail"
+                              className="support-know__detail-inner"
+                              initial={
+                                reduceMotion
+                                  ? false
+                                  : {
+                                      opacity: 0,
+                                      // Desktop keeps original direction mapping
+                                      x: navDir > 0 ? -16 : 16,
+                                      y: 12,
+                                      filter: "blur(4px)",
+                                    }
+                              }
+                              animate={{
+                                opacity: 1,
+                                x: 0,
+                                y: 0,
+                                filter: "blur(0px)",
+                              }}
+                              exit={
+                                reduceMotion
+                                  ? undefined
+                                  : {
+                                      opacity: 0,
+                                      x: navDir > 0 ? 12 : -12,
+                                      y: 8,
+                                      filter: "blur(2px)",
+                                    }
+                              }
+                              transition={
+                                reduceMotion
+                                  ? { duration: 0 }
+                                  : {
+                                      opacity: { duration: 0.3, delay: 0.16 },
+                                      x: { duration: 0.34, delay: 0.16 },
+                                      y: { duration: 0.34, delay: 0.16 },
+                                      filter: { duration: 0.3, delay: 0.16 },
+                                    }
+                              }
+                            >
+                              <p className="support-know__detail-copy">
+                                <strong className="support-know__detail-title">
+                                  {card.headline}.
+                                </strong>{" "}
+                                {card.description}
+                              </p>
+                            </motion.div>
+                          ) : (
+                            <motion.div
+                              key="chip"
+                              className="support-know__chip-inner"
+                              initial={
+                                reduceMotion ? false : { opacity: 0 }
+                              }
+                              animate={{ opacity: 1 }}
+                              exit={
+                                reduceMotion
+                                  ? undefined
+                                  : {
+                                      opacity: 0,
+                                      transition: { duration: 0.1 },
+                                    }
+                              }
+                              transition={
+                                reduceMotion
+                                  ? { duration: 0 }
+                                  : { duration: 0.16 }
+                              }
+                            >
+                              <span
+                                className="support-know__chip-icon"
+                                aria-hidden="true"
+                              >
+                                +
+                              </span>
+                              <span className="support-know__chip-label">
+                                {card.headline}
+                              </span>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </motion.div>
+                    </motion.li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
         </div>
       </div>
     </section>
