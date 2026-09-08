@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { type CSSProperties } from "react";
 import { useReducedMotion } from "motion/react";
+import { ProjectCardLink } from "@/components/ProjectCardLink";
 import { ProjectCardTags } from "@/components/ProjectCardTags";
 import { type Project } from "@/content/projects";
 
@@ -52,10 +52,11 @@ function ProjectShowcaseCard({
     : "project-showcase__media";
 
   return (
-    <Link
+    <ProjectCardLink
       href={`/projects/${project.slug}`}
       className="project-showcase__link"
       prefetch={false}
+      enableSwapFlash={useSwap}
     >
       <div className={mediaClass}>
         {useSwap ? (
@@ -122,7 +123,7 @@ function ProjectShowcaseCard({
         </div>
         <p className="project-window__tagline">{tagline}</p>
       </div>
-    </Link>
+    </ProjectCardLink>
   );
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useReducedMotion } from "motion/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { OriginButton } from "@/components/ui/origin-button";
 import {
   COLLECTIONS_DETAIL_LIVE,
@@ -13,11 +13,10 @@ const PANEL_W = 240;
 const PANEL_H = 300;
 /** Desktop: keep images clear of title / button chrome */
 const PANEL_IMAGE_GAP_MIN = 44;
+/** Mobile: inset so the panel never clips; larger pad = shorter travel */
+const MOBILE_EDGE_PAD = 22;
 const PARALLAX_FACTOR = 0.45;
-/** Mobile: soft one-way drift after center — shorter than before */
 const PARALLAX_FACTOR_MOBILE = 0.38;
-const MOBILE_TRAVEL_MIN = 28;
-const MOBILE_TRAVEL_MAX = 52;
 /** Lerp toward scroll target — softens hard cut on touch scroll */
 const SMOOTH_MOBILE = 0.14;
 const SMOOTH_DESKTOP = 0.22;
@@ -33,6 +32,20 @@ function isCollectionMobile() {
   );
 }
 
+function useCollectionMobile() {
+  const [mobile, setMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 899px)");
+    const sync = () => setMobile(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  return mobile;
+}
+
 function getMaxImageTravel(section: HTMLElement): number {
   const panelField = section.querySelector<HTMLElement>(
     ".projects-collection__panel-field",
@@ -42,18 +55,19 @@ function getMaxImageTravel(section: HTMLElement): number {
   const fieldHeight = panelField.clientHeight;
   if (fieldHeight <= 0) return 0;
 
-  if (isCollectionMobile()) {
-    return Math.min(
-      MOBILE_TRAVEL_MAX,
-      Math.max(MOBILE_TRAVEL_MIN, fieldHeight * 0.12),
-    );
-  }
-
   const panel =
     section.querySelector<HTMLElement>(".projects-collection__panel") ?? null;
   const panelHeight = panel?.offsetHeight || PANEL_H;
   if (fieldHeight <= panelHeight) return 0;
+
+  /* Half the free space above/below the panel — travel must stay inside this */
   const slack = (fieldHeight - panelHeight) / 2;
+
+  if (isCollectionMobile()) {
+    /* Phone only: clamp to real slack so the middle still is never cropped */
+    return Math.max(0, slack - MOBILE_EDGE_PAD);
+  }
+
   return Math.max(0, slack - PANEL_IMAGE_GAP_MIN);
 }
 
@@ -66,6 +80,10 @@ function CollectionPanelMedia({
 }) {
   const frames = panel.frames.filter(Boolean);
   const cycle = !reduceMotion && frames.length >= 2;
+  const cycleClass =
+    frames.length >= 6
+      ? "projects-collection__panel-cycle projects-collection__panel-cycle--6"
+      : "projects-collection__panel-cycle";
 
   if (!cycle) {
     const src = frames[0];
@@ -84,11 +102,11 @@ function CollectionPanelMedia({
   }
 
   return (
-    <div className="projects-collection__panel-cycle" aria-hidden="true">
+    <div className={cycleClass} aria-hidden="true">
       {frames.map((src, index) => (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          key={src}
+          key={`${src}-${index}`}
           src={src}
           alt=""
           width={PANEL_W}
@@ -112,6 +130,19 @@ export function ProjectsCollectionSection({
   const sectionRef = useRef<HTMLElement>(null);
   const panelsRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
+  const mobile = useCollectionMobile();
+
+  /** Phone: one slot cycles all six stills; desktop: three panels × two frames */
+  const displayPanels = useMemo((): CollectionPanel[] => {
+    if (!mobile) return [...collection.panels];
+    return [
+      {
+        frames: collection.panels.flatMap((panel) =>
+          panel.frames.filter(Boolean),
+        ),
+      },
+    ];
+  }, [collection.panels, mobile]);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -133,30 +164,20 @@ export function ProjectsCollectionSection({
       const vh = window.innerHeight || 1;
       const sectionCenter = rect.top + rect.height / 2;
       const viewportCenter = vh / 2;
-      const mobile = isCollectionMobile();
+      const isMobile = isCollectionMobile();
       const maxTravel = getMaxImageTravel(section);
       const delta = viewportCenter - sectionCenter;
-
-      if (mobile) {
-        /*
-         * Entering from below → keep centered (no negative offset / top park).
-         * Past viewport center → soft drift down only (shorter travel).
-         */
-        const raw = delta * PARALLAX_FACTOR_MOBILE;
-        return Math.max(0, Math.min(maxTravel, raw));
-      }
-
-      return Math.max(
-        -maxTravel,
-        Math.min(maxTravel, delta * PARALLAX_FACTOR),
-      );
+      const factor = isMobile ? PARALLAX_FACTOR_MOBILE : PARALLAX_FACTOR;
+      const raw = delta * factor;
+      /* Both breakpoints: travel up and down within the field */
+      return Math.max(-maxTravel, Math.min(maxTravel, raw));
     };
 
     const tick = () => {
       raf = 0;
       target = readTarget();
-      const mobile = isCollectionMobile();
-      const smooth = mobile ? SMOOTH_MOBILE : SMOOTH_DESKTOP;
+      const isMobile = isCollectionMobile();
+      const smooth = isMobile ? SMOOTH_MOBILE : SMOOTH_DESKTOP;
       current += (target - current) * smooth;
 
       if (Math.abs(target - current) < 0.15) {
@@ -207,7 +228,7 @@ export function ProjectsCollectionSection({
       window.visualViewport?.removeEventListener("resize", schedule);
       ro?.disconnect();
     };
-  }, [reduceMotion]);
+  }, [reduceMotion, mobile]);
 
   return (
     <section
@@ -220,7 +241,7 @@ export function ProjectsCollectionSection({
       <div className="projects-collection__panel-field">
         <div className="projects-collection__canvas" aria-hidden="true">
           <div ref={panelsRef} className="projects-collection__panels">
-            {collection.panels.map((panel, index) => (
+            {displayPanels.map((panel, index) => (
               <div
                 key={`${collection.slug}-panel-${index}`}
                 className="projects-collection__panel"

@@ -13,7 +13,13 @@ import { ProjectFeaturedLead } from "@/components/ProjectFeaturedLead";
 import { ProjectMasonry } from "@/components/ProjectMasonry";
 import { SiteIntroLoader } from "@/components/SiteIntroLoader";
 import { SupportBento } from "@/components/SupportBento";
-import { projects, projectsFeaturedLead } from "@/content/projects";
+import {
+  getProjectBySlug,
+  projectSlugFromName,
+  projects,
+  projectsFeaturedLead,
+  type Project,
+} from "@/content/projects";
 import { HERO_VIDEO_SRC } from "@/lib/heroMedia";
 import { getAllInsights, getInsightsFeaturedLead } from "@/lib/insights";
 import { shuffleArray } from "@/lib/utils";
@@ -21,11 +27,24 @@ import { shuffleArray } from "@/lib/utils";
 /** Fresh random picks on each request */
 export const dynamic = "force-dynamic";
 
+/** Home cards under featured lead — first slot fixed; second stays random */
+const HOME_FIXED_PROJECT_CARD_SLUG = projectSlugFromName("The Witcher Banner");
+
+function getHomeProjectCards(): Project[] {
+  const fixed = getProjectBySlug(HOME_FIXED_PROJECT_CARD_SLUG);
+  const random = shuffleArray(
+    projects.filter(
+      (project) =>
+        project.slug !== projectsFeaturedLead.slug &&
+        project.slug !== HOME_FIXED_PROJECT_CARD_SLUG,
+    ),
+  )[0];
+  return [fixed, random].filter((project): project is Project => Boolean(project));
+}
+
 export default function HomePage() {
   const featuredInsight = getInsightsFeaturedLead();
-  const selectedProjects = shuffleArray(
-    projects.filter((project) => project.slug !== projectsFeaturedLead.slug),
-  ).slice(0, 2);
+  const selectedProjects = getHomeProjectCards();
   const selectedInsights = shuffleArray(
     getAllInsights().filter((insight) => insight.slug !== featuredInsight?.slug),
   ).slice(0, 2);

@@ -5314,27 +5314,37 @@ export function buildCountryQueryValue(
   return selection.join(",");
 }
 
-/** Related strip: same involvement-tag projects only (stable order), capped. */
-export function getRelatedProjects(
+/** Same involvement-tag peers only (current slug excluded). */
+export function getSameTagPeers(
   excludeSlugs: string[],
-  limit = 5,
   preferTags: string[] = [],
 ): Project[] {
   const exclude = new Set(excludeSlugs);
   const tags = new Set(preferTags.filter(Boolean));
   if (tags.size === 0) return [];
 
-  const sameTag = projects.filter(
+  return projects.filter(
     (project) =>
       !exclude.has(project.slug) &&
       project.tags.some((tag) => tags.has(tag)),
   );
-  const ranked = [...sameTag].sort((a, b) => {
-    const ha = hashSlug(a.slug);
-    const hb = hashSlug(b.slug);
-    return ha - hb;
-  });
-  return ranked.slice(0, limit);
+}
+
+/**
+ * Related strip helper — same involvement-tag only.
+ * Detail pages prefer client queue rotation (`RelatedProjects`); this remains
+ * for static / non-interactive callers.
+ */
+export function getRelatedProjects(
+  excludeSlugs: string[],
+  limit = 5,
+  preferTags: string[] = [],
+): Project[] {
+  const sameTag = getSameTagPeers(excludeSlugs, preferTags);
+  if (sameTag.length === 0) return [];
+
+  const seed = excludeSlugs[0] ?? "";
+  return seededShuffle(sameTag, seed).slice(0, limit);
 }
 
 function hashSlug(slug: string) {
@@ -5343,6 +5353,21 @@ function hashSlug(slug: string) {
     h = (h * 31 + slug.charCodeAt(i)) >>> 0;
   }
   return h;
+}
+
+/** Deterministic shuffle — same seed → same order (SSG-safe). */
+function seededShuffle<T>(items: T[], seed: string): T[] {
+  const arr = [...items];
+  let h = hashSlug(seed) || 1;
+  for (let i = arr.length - 1; i > 0; i--) {
+    h = Math.imul(h, 1664525) + 1013904223;
+    h >>>= 0;
+    const j = h % (i + 1);
+    const tmp = arr[i]!;
+    arr[i] = arr[j]!;
+    arr[j] = tmp;
+  }
+  return arr;
 }
 
 /** @deprecated use filterProjects */

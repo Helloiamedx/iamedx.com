@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { FrostIndexLink } from "@/components/FrostIndexLink";
 import { ProjectCaseDemo } from "@/components/ProjectCaseDemo";
-import { ProjectMasonry } from "@/components/ProjectMasonry";
+import { RelatedProjects } from "@/components/RelatedProjects";
 import { ChallengeCta } from "@/components/ServicesChallengeCta";
 import {
   getProjectBySlug,
-  getRelatedProjects,
+  getSameTagPeers,
   projects,
 } from "@/content/projects";
 
@@ -35,7 +34,8 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   const project = getProjectBySlug(slug);
   if (!project) notFound();
 
-  const related = getRelatedProjects([project.slug], 2, project.tags);
+  const peers = getSameTagPeers([project.slug], project.tags);
+  const tagKey = project.tags[0] ?? project.involvement;
 
   return (
     <main className="project-detail">
@@ -49,17 +49,12 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
         <ChallengeCta />
       </section>
 
-      {related.length > 0 ? (
-        <section className="section projects-related project-detail__related">
-          <h2 className="projects-related__title">Related</h2>
-          <ProjectMasonry projects={related} layout="related" enableHoverSwap />
-          <FrostIndexLink href="/projects">All projects</FrostIndexLink>
-        </section>
-      ) : (
-        <section className="section project-detail__related">
-          <FrostIndexLink href="/projects">All projects</FrostIndexLink>
-        </section>
-      )}
+      <RelatedProjects
+        key={`related-${slug}`}
+        currentSlug={slug}
+        peers={peers}
+        tagKey={tagKey}
+      />
     </main>
   );
 }

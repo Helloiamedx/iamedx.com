@@ -6078,7 +6078,7 @@ body:has(.home-page) .site-footer__gap {
   opacity: 0;
 }
 
-/* Same 0.85s step cycle as project-card hover stills (2 frames → 50/50). */
+/* Same per-frame dwell as 2-up (0.425s) — 2 frames → 0.85s */
 .projects-collection__panel-frame--1 {
   animation: projects-collection-panel-frame-1 0.85s step-end infinite;
 }
@@ -6109,9 +6109,110 @@ body:has(.home-page) .site-footer__gap {
   }
 }
 
+/*
+ * Mobile single-slot — all 6 collection stills (3 panels × 2).
+ * Same dwell per frame as desktop (0.425s × 6 = 2.55s).
+ */
+.projects-collection__panel-cycle--6 .projects-collection__panel-frame--1 {
+  animation: projects-collection-panel-frame-6-1 2.55s step-end infinite;
+}
+.projects-collection__panel-cycle--6 .projects-collection__panel-frame--2 {
+  animation: projects-collection-panel-frame-6-2 2.55s step-end infinite;
+}
+.projects-collection__panel-cycle--6 .projects-collection__panel-frame--3 {
+  animation: projects-collection-panel-frame-6-3 2.55s step-end infinite;
+}
+.projects-collection__panel-cycle--6 .projects-collection__panel-frame--4 {
+  animation: projects-collection-panel-frame-6-4 2.55s step-end infinite;
+}
+.projects-collection__panel-cycle--6 .projects-collection__panel-frame--5 {
+  animation: projects-collection-panel-frame-6-5 2.55s step-end infinite;
+}
+.projects-collection__panel-cycle--6 .projects-collection__panel-frame--6 {
+  animation: projects-collection-panel-frame-6-6 2.55s step-end infinite;
+}
+
+@keyframes projects-collection-panel-frame-6-1 {
+  0%,
+  16.65% {
+    opacity: 1;
+  }
+  16.66%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes projects-collection-panel-frame-6-2 {
+  0%,
+  16.65% {
+    opacity: 0;
+  }
+  16.66%,
+  33.31% {
+    opacity: 1;
+  }
+  33.32%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes projects-collection-panel-frame-6-3 {
+  0%,
+  33.31% {
+    opacity: 0;
+  }
+  33.32%,
+  49.97% {
+    opacity: 1;
+  }
+  49.98%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes projects-collection-panel-frame-6-4 {
+  0%,
+  49.97% {
+    opacity: 0;
+  }
+  49.98%,
+  66.63% {
+    opacity: 1;
+  }
+  66.64%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes projects-collection-panel-frame-6-5 {
+  0%,
+  66.63% {
+    opacity: 0;
+  }
+  66.64%,
+  83.29% {
+    opacity: 1;
+  }
+  83.3%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes projects-collection-panel-frame-6-6 {
+  0%,
+  83.29% {
+    opacity: 0;
+  }
+  83.3%,
+  100% {
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .projects-collection__panel-frame--1,
-  .projects-collection__panel-frame--2 {
+  .projects-collection__panel-frame--2,
+  .projects-collection__panel-cycle--6 .projects-collection__panel-frame {
     animation: none;
   }
 
@@ -6119,7 +6220,9 @@ body:has(.home-page) .site-footer__gap {
     opacity: 1;
   }
 
-  .projects-collection__panel-frame--2 {
+  .projects-collection__panel-frame--2,
+  .projects-collection__panel-cycle--6
+    .projects-collection__panel-frame:not(.projects-collection__panel-frame--1) {
     opacity: 0;
   }
 }
@@ -6179,8 +6282,8 @@ body:has(.home-page) .site-footer__gap {
     --collection-eyebrow-size: clamp(0.65rem, 3.2vw, 0.75rem);
     --collection-frame-pad-block: clamp(0.85rem, 3.5vw, 1.15rem);
     --collection-chrome-gap: clamp(0.35rem, 1.75vw, 0.55rem);
-    /* 95 − 45 = 50; mobile −3px from 32 */
-    --collection-headline-size: 29px;
+    /* 95 − 45 = 50; mobile −3px from 32, then +3px */
+    --collection-headline-size: 32px;
     padding-inline: clamp(0.75rem, 3.5vw, 1.25rem);
   }
 
@@ -6189,9 +6292,9 @@ body:has(.home-page) .site-footer__gap {
     padding-inline: clamp(0.75rem, 3.5vw, 1.25rem);
   }
 
-  /* Title container = 80% of field width */
+  /* Title container = 90% of collection field */
   .projects-collection__headline-wrap {
-    padding-inline: 10%;
+    padding-inline: 5%;
   }
 
   .projects-collection__headline {
@@ -6201,11 +6304,7 @@ body:has(.home-page) .site-footer__gap {
     max-width: 100%;
   }
 
-  /* Only the center panel (flash cycle); hide left / right */
-  .projects-collection__panel:first-child,
-  .projects-collection__panel:last-child {
-    display: none;
-  }
+  /* Single center slot on phone — component flattens all 6 frames into one panel */
 }
 
 /* Collection detail — intro shares Services / Projects index hero rhythm */
@@ -6725,53 +6824,126 @@ body:has(.home-page) .site-footer__gap {
   opacity: 0;
 }
 
-/* Media only — not title / type / description */
-.project-showcase__media--swap-3:hover .project-showcase__swap-layer--cover,
-.project-featured__media.project-showcase__media--swap-3:hover
+/*
+ * Cover swap — desktop: hover the image only.
+ * Touch: JS adds .is-swapping for one full cycle, then navigates.
+ * Do not use sticky :hover on touch — that forces tap-1 = swap, tap-2 = navigate.
+ */
+@media (hover: hover) {
+  /* Media only — not title / type / description */
+  .project-showcase__media--swap-3:hover .project-showcase__swap-layer--cover,
+  .project-featured__media.project-showcase__media--swap-3:hover
+    .project-showcase__swap-layer--cover,
+  .project-showcase-full__media.project-showcase__media--swap-3:hover
+    .project-showcase__swap-layer--cover {
+    opacity: 0;
+  }
+
+  .project-showcase__media--swap-3:hover .project-showcase__swap-layer--cycle,
+  .project-featured__media.project-showcase__media--swap-3:hover
+    .project-showcase__swap-layer--cycle,
+  .project-showcase-full__media.project-showcase__media--swap-3:hover
+    .project-showcase__swap-layer--cycle {
+    opacity: 1;
+    animation: project-showcase-color-cycle 0.85s step-end infinite;
+  }
+
+  .project-showcase__media--swap-images:hover .project-showcase__swap-layer--cycle,
+  .project-featured__media.project-showcase__media--swap-images:hover
+    .project-showcase__swap-layer--cycle,
+  .project-showcase-full__media.project-showcase__media--swap-images:hover
+    .project-showcase__swap-layer--cycle {
+    animation: none;
+    background-color: transparent;
+  }
+
+  .project-showcase__media--swap-images:hover .project-showcase__swap-frame--1,
+  .project-featured__media.project-showcase__media--swap-images:hover
+    .project-showcase__swap-frame--1,
+  .project-showcase-full__media.project-showcase__media--swap-images:hover
+    .project-showcase__swap-frame--1 {
+    animation: project-showcase-hover-frame-1 0.85s step-end infinite;
+  }
+
+  .project-showcase__media--swap-images:hover .project-showcase__swap-frame--2,
+  .project-featured__media.project-showcase__media--swap-images:hover
+    .project-showcase__swap-frame--2,
+  .project-showcase-full__media.project-showcase__media--swap-images:hover
+    .project-showcase__swap-frame--2 {
+    animation: project-showcase-hover-frame-2 0.85s step-end infinite;
+  }
+
+  .project-showcase__media--swap-images:hover .project-showcase__swap-frame--3,
+  .project-featured__media.project-showcase__media--swap-images:hover
+    .project-showcase__swap-frame--3,
+  .project-showcase-full__media.project-showcase__media--swap-images:hover
+    .project-showcase__swap-frame--3 {
+    animation: project-showcase-hover-frame-3 0.85s step-end infinite;
+  }
+}
+
+/* Mobile — one full cut cycle (same frames / timing as desktop hover) */
+.project-showcase__link.is-swapping
+  .project-showcase__media--swap-3
   .project-showcase__swap-layer--cover,
-.project-showcase-full__media.project-showcase__media--swap-3:hover
+.project-featured__link.is-swapping
+  .project-featured__media.project-showcase__media--swap-3
+  .project-showcase__swap-layer--cover,
+.project-showcase-full__link.is-swapping
+  .project-showcase-full__media.project-showcase__media--swap-3
   .project-showcase__swap-layer--cover {
   opacity: 0;
 }
 
-.project-showcase__media--swap-3:hover .project-showcase__swap-layer--cycle,
-.project-featured__media.project-showcase__media--swap-3:hover
+.project-showcase__link.is-swapping
+  .project-showcase__media--swap-3
   .project-showcase__swap-layer--cycle,
-.project-showcase-full__media.project-showcase__media--swap-3:hover
+.project-featured__link.is-swapping
+  .project-featured__media.project-showcase__media--swap-3
+  .project-showcase__swap-layer--cycle,
+.project-showcase-full__link.is-swapping
+  .project-showcase-full__media.project-showcase__media--swap-3
   .project-showcase__swap-layer--cycle {
   opacity: 1;
   animation: project-showcase-color-cycle 0.85s step-end infinite;
 }
 
-.project-showcase__media--swap-images:hover .project-showcase__swap-layer--cycle,
-.project-featured__media.project-showcase__media--swap-images:hover
+.project-showcase__link.is-swapping
+  .project-showcase__media--swap-images
   .project-showcase__swap-layer--cycle,
-.project-showcase-full__media.project-showcase__media--swap-images:hover
+.project-featured__link.is-swapping
+  .project-featured__media.project-showcase__media--swap-images
+  .project-showcase__swap-layer--cycle,
+.project-showcase-full__link.is-swapping
+  .project-showcase-full__media.project-showcase__media--swap-images
   .project-showcase__swap-layer--cycle {
   animation: none;
   background-color: transparent;
 }
 
-.project-showcase__media--swap-images:hover .project-showcase__swap-frame--1,
-.project-featured__media.project-showcase__media--swap-images:hover
+.project-showcase__link.is-swapping
   .project-showcase__swap-frame--1,
-.project-showcase-full__media.project-showcase__media--swap-images:hover
+.project-featured__link.is-swapping
+  .project-showcase__swap-frame--1,
+.project-showcase-full__link.is-swapping
   .project-showcase__swap-frame--1 {
   animation: project-showcase-hover-frame-1 0.85s step-end infinite;
 }
 
-.project-showcase__media--swap-images:hover .project-showcase__swap-frame--2,
-.project-featured__media.project-showcase__media--swap-images:hover
+.project-showcase__link.is-swapping
   .project-showcase__swap-frame--2,
-.project-showcase-full__media.project-showcase__media--swap-images:hover
+.project-featured__link.is-swapping
+  .project-showcase__swap-frame--2,
+.project-showcase-full__link.is-swapping
   .project-showcase__swap-frame--2 {
   animation: project-showcase-hover-frame-2 0.85s step-end infinite;
 }
 
-.project-showcase__media--swap-images:hover .project-showcase__swap-frame--3,
-.project-featured__media.project-showcase__media--swap-images:hover
+.project-showcase__link.is-swapping
   .project-showcase__swap-frame--3,
-.project-showcase-full__media.project-showcase__media--swap-images:hover
+.project-featured__link.is-swapping
+  .project-showcase__swap-frame--3,
+.project-showcase-full__link.is-swapping
   .project-showcase__swap-frame--3 {
   animation: project-showcase-hover-frame-3 0.85s step-end infinite;
 }
@@ -6835,34 +7007,7 @@ body:has(.home-page) .site-footer__gap {
   }
 }
 
-.home-page
-  .project-showcase__media--swap-3:not(.project-showcase__media--swap-images):hover
-  .project-showcase__swap-layer--cycle,
-.projects-page
-  .project-showcase__media--swap-3:not(.project-showcase__media--swap-images):hover
-  .project-showcase__swap-layer--cycle,
-.project-detail
-  .project-showcase__media--swap-3:not(.project-showcase__media--swap-images):hover
-  .project-showcase__swap-layer--cycle,
-.home-page
-  .project-featured__media.project-showcase__media--swap-3:not(
-    .project-showcase__media--swap-images
-  ):hover
-  .project-showcase__swap-layer--cycle,
-.projects-page
-  .project-featured__media.project-showcase__media--swap-3:not(
-    .project-showcase__media--swap-images
-  ):hover
-  .project-showcase__swap-layer--cycle {
-  animation: project-showcase-color-cycle 0.85s step-end infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .project-showcase__media::after {
-    transition: none;
-    opacity: 0;
-  }
-
+@media (hover: hover) {
   .home-page
     .project-showcase__media--swap-3:not(.project-showcase__media--swap-images):hover
     .project-showcase__swap-layer--cycle,
@@ -6882,43 +7027,74 @@ body:has(.home-page) .site-footer__gap {
       .project-showcase__media--swap-images
     ):hover
     .project-showcase__swap-layer--cycle {
-    animation: none;
-    background-color: var(--swap-color-2, #0076dd);
+    animation: project-showcase-color-cycle 0.85s step-end infinite;
   }
+}
 
-  .home-page .project-showcase__media--swap-images:hover .project-showcase__swap-frame--1,
-  .projects-page .project-showcase__media--swap-images:hover .project-showcase__swap-frame--1,
-  .project-detail .project-showcase__media--swap-images:hover .project-showcase__swap-frame--1,
-  .home-page
-    .project-featured__media.project-showcase__media--swap-images:hover
-    .project-showcase__swap-frame--1,
-  .projects-page
-    .project-featured__media.project-showcase__media--swap-images:hover
-    .project-showcase__swap-frame--1 {
-    animation: none;
-    opacity: 1;
-  }
-
-  .home-page .project-showcase__media--swap-images:hover .project-showcase__swap-frame--2,
-  .projects-page .project-showcase__media--swap-images:hover .project-showcase__swap-frame--2,
-  .project-detail .project-showcase__media--swap-images:hover .project-showcase__swap-frame--2,
-  .home-page .project-showcase__media--swap-images:hover .project-showcase__swap-frame--3,
-  .projects-page .project-showcase__media--swap-images:hover .project-showcase__swap-frame--3,
-  .project-detail .project-showcase__media--swap-images:hover .project-showcase__swap-frame--3,
-  .home-page
-    .project-featured__media.project-showcase__media--swap-images:hover
-    .project-showcase__swap-frame--2,
-  .projects-page
-    .project-featured__media.project-showcase__media--swap-images:hover
-    .project-showcase__swap-frame--2,
-  .home-page
-    .project-featured__media.project-showcase__media--swap-images:hover
-    .project-showcase__swap-frame--3,
-  .projects-page
-    .project-featured__media.project-showcase__media--swap-images:hover
-    .project-showcase__swap-frame--3 {
-    animation: none;
+@media (prefers-reduced-motion: reduce) {
+  .project-showcase__media::after {
+    transition: none;
     opacity: 0;
+  }
+
+  @media (hover: hover) {
+    .home-page
+      .project-showcase__media--swap-3:not(.project-showcase__media--swap-images):hover
+      .project-showcase__swap-layer--cycle,
+    .projects-page
+      .project-showcase__media--swap-3:not(.project-showcase__media--swap-images):hover
+      .project-showcase__swap-layer--cycle,
+    .project-detail
+      .project-showcase__media--swap-3:not(.project-showcase__media--swap-images):hover
+      .project-showcase__swap-layer--cycle,
+    .home-page
+      .project-featured__media.project-showcase__media--swap-3:not(
+        .project-showcase__media--swap-images
+      ):hover
+      .project-showcase__swap-layer--cycle,
+    .projects-page
+      .project-featured__media.project-showcase__media--swap-3:not(
+        .project-showcase__media--swap-images
+      ):hover
+      .project-showcase__swap-layer--cycle {
+      animation: none;
+      background-color: var(--swap-color-2, #0076dd);
+    }
+
+    .home-page .project-showcase__media--swap-images:hover .project-showcase__swap-frame--1,
+    .projects-page .project-showcase__media--swap-images:hover .project-showcase__swap-frame--1,
+    .project-detail .project-showcase__media--swap-images:hover .project-showcase__swap-frame--1,
+    .home-page
+      .project-featured__media.project-showcase__media--swap-images:hover
+      .project-showcase__swap-frame--1,
+    .projects-page
+      .project-featured__media.project-showcase__media--swap-images:hover
+      .project-showcase__swap-frame--1 {
+      animation: none;
+      opacity: 1;
+    }
+
+    .home-page .project-showcase__media--swap-images:hover .project-showcase__swap-frame--2,
+    .projects-page .project-showcase__media--swap-images:hover .project-showcase__swap-frame--2,
+    .project-detail .project-showcase__media--swap-images:hover .project-showcase__swap-frame--2,
+    .home-page .project-showcase__media--swap-images:hover .project-showcase__swap-frame--3,
+    .projects-page .project-showcase__media--swap-images:hover .project-showcase__swap-frame--3,
+    .project-detail .project-showcase__media--swap-images:hover .project-showcase__swap-frame--3,
+    .home-page
+      .project-featured__media.project-showcase__media--swap-images:hover
+      .project-showcase__swap-frame--2,
+    .projects-page
+      .project-featured__media.project-showcase__media--swap-images:hover
+      .project-showcase__swap-frame--2,
+    .home-page
+      .project-featured__media.project-showcase__media--swap-images:hover
+      .project-showcase__swap-frame--3,
+    .projects-page
+      .project-featured__media.project-showcase__media--swap-images:hover
+      .project-showcase__swap-frame--3 {
+      animation: none;
+      opacity: 0;
+    }
   }
 }
 
@@ -7594,7 +7770,7 @@ body:has(.home-page) .site-footer__gap {
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-size: calc(clamp(1.75rem, 5.5vw, 3.25rem) + 3px);
+  font-size: calc(clamp(1.75rem, 5.5vw, 3.25rem) + 3px - 3px);
   letter-spacing: 0.04em;
   line-height: 1.05;
   text-transform: uppercase;
@@ -7605,7 +7781,7 @@ body:has(.home-page) .site-footer__gap {
 
 @media (min-width: 900px) {
   .svc-challenge__headline {
-    font-size: calc(clamp(1.75rem, 5.5vw, 3.25rem) + 8px);
+    font-size: calc(clamp(1.75rem, 5.5vw, 3.25rem) + 8px - 3px);
   }
 }
 
@@ -9116,8 +9292,10 @@ body:has(.home-page) .site-footer__gap {
     var(--shell-gutter),
     calc((100% - min(var(--shell-max), 100% - var(--shell-gutter) * 2)) / 2)
   );
+  /* Gallery row + column gap (pairs / stacks share this) */
+  --case-media-gap: var(--shell-gutter);
   /* Hero → first gallery: same as media-stack row gap (not ultra-wide side inset) */
-  --case-gallery-top-gap: var(--shell-gutter);
+  --case-gallery-top-gap: var(--case-media-gap);
   color: #0a0a0a;
   background: var(--site-bg);
 }
@@ -9734,8 +9912,8 @@ body:has(.home-page) .site-footer__gap {
 .project-case-demo__media-stack {
   display: flex;
   flex-direction: column;
-  /* Row gap = browser/shell padding */
-  gap: var(--shell-gutter);
+  /* Row gap = case media gap (shell gutter on desktop; tighter on phone) */
+  gap: var(--case-media-gap);
 }
 
 .project-case-demo__frame {
@@ -9776,14 +9954,14 @@ body:has(.home-page) .site-footer__gap {
   /* Keep 2-up on phone — don’t collapse to a single column */
   grid-template-columns: 1fr 1fr;
   /* Same gap as vertical media-stack (row + column) */
-  gap: var(--shell-gutter);
+  gap: var(--case-media-gap);
 }
 
 .project-case-demo__row {
   display: grid;
   align-items: start;
   /* Keep N-up on phone — don’t stack */
-  gap: var(--shell-gutter);
+  gap: var(--case-media-gap);
 }
 
 .project-case-demo__row--equal-height {
@@ -10075,10 +10253,10 @@ body:has(.home-page) .site-footer__gap {
   margin: 0;
   padding: 0;
   text-align: left;
-  /* Same face + size as “Special thanks”; keep muted ink */
+  /* Same face as “Special thanks”; 3px smaller than the section label */
   font-family: var(--font-desc);
   color: rgba(10, 10, 10, 0.5);
-  font-size: var(--detail-related-label-size, 1rem);
+  font-size: calc(var(--detail-related-label-size, 1rem) - 3px);
   font-weight: 600;
   font-synthesis: none;
   line-height: 1.15;
@@ -10111,7 +10289,8 @@ body:has(.home-page) .site-footer__gap {
   padding: 0;
   font-family: var(--font-sans);
   color: #0a0a0a;
-  font-size: calc(var(--detail-related-label-size, 1rem) + 2px);
+  /* Names: prior +2px over label, then −3px (desktop + mobile) */
+  font-size: calc(var(--detail-related-label-size, 1rem) + 2px - 3px);
   font-weight: 400;
   line-height: 1.25;
   letter-spacing: -0.01em;
@@ -10228,6 +10407,8 @@ body:has(.home-page) .site-footer__gap {
 
   .project-case-demo__panel-title {
     color: #0a0a0a;
+    /* Chapter labels (Background / Challenge / …) — 6px smaller on phone */
+    font-size: calc(1.375rem - 3px - 6px);
   }
 
   .project-case-demo__panel-subhead {
@@ -11673,4 +11854,20 @@ body:has(.about-page) .site-end {
 .project-detail .project-case-demo__hero-media .hero-segment-video,
 .project-detail .project-case-demo__hero-media .project-case-demo__hero-video {
   border-radius: 0;
+}
+
+/* Phone case gallery — tighter radius + gaps (index cards stay 8px) */
+@media (max-width: 799px) {
+  .project-case-demo {
+    --case-media-gap: 8px;
+  }
+
+  .project-detail .project-case-demo__frame,
+  .project-detail .project-case-demo__full,
+  .project-detail .project-case-demo__youtube,
+  .project-detail .project-case-demo__pair,
+  .project-detail .project-case-demo__row,
+  .project-detail .project-fallback-video {
+    border-radius: 4px;
+  }
 }

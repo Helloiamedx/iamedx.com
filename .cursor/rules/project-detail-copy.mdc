@@ -43,6 +43,6 @@ When the user supplies project detail copy (Word or chat), map it into the exist
 
 Match Insights: Related is **same type-tag only** (`project.tags` / involvement chip), not a random pool.
 
-- Call `getRelatedProjects(exclude, limit, project.tags)`
-- No same-tag peers → hide the Related strip (empty array)
+- Call `getSameTagPeers` / `RelatedProjects` (same involvement-tag queue rotation)
+- No same-tag peers → hide the Related strip (empty peers; All projects CTA remains)
 - Do not fill with unrelated projects

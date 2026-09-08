@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { type CSSProperties } from "react";
 import { useReducedMotion } from "motion/react";
+import { ProjectCardLink } from "@/components/ProjectCardLink";
 import { ProjectCardTags } from "@/components/ProjectCardTags";
 import type { ProjectsFeaturedLead } from "@/content/projects";
 
@@ -39,10 +39,11 @@ export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
 
   return (
     <article className="project-featured">
-      <Link
+      <ProjectCardLink
         href={`/projects/${project.slug}`}
         className="project-featured__link"
         prefetch={false}
+        enableSwapFlash={useSwap}
       >
         <div className={mediaClass}>
           {useSwap ? (
@@ -110,7 +111,7 @@ export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
           )}
           <ProjectCardTags project={project} />
         </div>
-      </Link>
+      </ProjectCardLink>
     </article>
   );
 }

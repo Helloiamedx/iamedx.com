@@ -1,10 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { type CSSProperties } from "react";
 import { useReducedMotion } from "motion/react";
 import { CoverLoopVideo } from "@/components/CoverLoopVideo";
+import { ProjectCardLink } from "@/components/ProjectCardLink";
 import { ProjectCardTags } from "@/components/ProjectCardTags";
 import { type Project } from "@/content/projects";
 
@@ -35,9 +35,10 @@ export function ProjectShowcaseFullWidth({
 
   return (
     <article className="project-showcase-full">
-      <Link
+      <ProjectCardLink
         href={`/projects/${project.slug}`}
         className="project-showcase-full__link"
+        enableSwapFlash={useSwap}
       >
         <div className={mediaClass}>
           {useSwap ? (
@@ -115,7 +116,7 @@ export function ProjectShowcaseFullWidth({
           </div>
           <p className="project-window__tagline">{tagline}</p>
         </div>
-      </Link>
+      </ProjectCardLink>
     </article>
   );
 }
