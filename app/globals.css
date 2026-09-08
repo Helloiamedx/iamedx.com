@@ -1911,13 +1911,13 @@ body.is-mobile-menu-open .mobile-menu a {
   }
 }
 
-/* Header wordmark + primary nav + Menu/Close — shared GrtskTera-Regular chrome type */
+/* Header wordmark + primary nav + Menu/Close — shared Grtsk Light chrome type */
 .site-logo,
 .site-nav,
 .nav-menu-toggle {
-  font-family: "Grtsk Tera", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: var(--font-sans);
   font-size: var(--nav-type-size);
-  font-weight: 400;
+  font-weight: 300;
   font-synthesis: none;
   letter-spacing: var(--nav-type-tracking);
   text-transform: uppercase;
@@ -9775,14 +9775,15 @@ body:has(.home-page) .site-footer__gap {
   display: grid;
   /* Keep 2-up on phone — don’t collapse to a single column */
   grid-template-columns: 1fr 1fr;
-  gap: calc(var(--shell-gutter) * 0.35);
+  /* Same gap as vertical media-stack (row + column) */
+  gap: var(--shell-gutter);
 }
 
 .project-case-demo__row {
   display: grid;
   align-items: start;
   /* Keep N-up on phone — don’t stack */
-  gap: calc(var(--shell-gutter) * 0.35);
+  gap: var(--shell-gutter);
 }
 
 .project-case-demo__row--equal-height {

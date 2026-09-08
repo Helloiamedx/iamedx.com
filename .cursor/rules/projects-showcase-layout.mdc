@@ -24,7 +24,7 @@ This is the **only** case-detail pattern. Do not revive the old always-on Backgr
 - Shell width: `min(var(--shell-max), calc(100% - var(--shell-gutter) * 2))` — **do not invent local outer padding**.
 - Vertical stack of full-width frames + 2-up pairs.
 - Row gap between blocks = `--shell-gutter`.
-- Pair (side-by-side) gap tighter: `calc(var(--shell-gutter) * 0.35)` from `800px` up.
+- Pair / row (side-by-side) gap = same `--shell-gutter` (vertical and horizontal match).
 - Images are **display-only** (no lightbox) unless a project explicitly asks otherwise.
 
 ### 3. “Study The Project” control
