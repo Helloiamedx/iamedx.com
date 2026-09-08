@@ -284,7 +284,7 @@
   /* Bar + iOS status/notch when viewport-fit=cover */
   --header-offset: calc(var(--header-bar-h) + env(safe-area-inset-top, 0px));
   /* Shared with header chrome — intro pad clears glyph bottom, not bar floor */
-  --nav-type-size: clamp(0.6875rem, 0.67vw, 0.8125rem);
+  --nav-type-size: clamp(calc(0.6875rem + 2px), calc(0.67vw + 2px), calc(0.8125rem + 2px));
   /* Collection break + collection detail — shared headline size */
   --collection-headline-size: 80px;
 }
@@ -293,7 +293,7 @@
 @media (max-width: 899px) {
   :root {
     --header-bar-h: calc(2.925rem + 8px); /* 3.25rem × 0.9 + 8px */
-    --nav-type-size: calc(0.8125rem - 2px);
+    --nav-type-size: 0.8125rem; /* prior −2px size, then +2px */
     /* Hero mobile size × 1.15 — single OriginButton scale site-wide */
     --origin-button-mobile-scale: calc(2 / 3 * 1.15 * 1.05);
     /* Card head (title+type) ↔ description — a bit more air on phone */
@@ -934,8 +934,8 @@ main.section {
 .site-header-chrome {
   --nav-solid-black: #151515;
   --nav-solid-white: #ededed;
-  --nav-type-size: clamp(0.6875rem, 0.67vw, 0.8125rem);
-  --nav-type-tracking: 0.056em;
+  --nav-type-size: clamp(calc(0.6875rem + 2px), calc(0.67vw + 2px), calc(0.8125rem + 2px));
+  --nav-type-tracking: 0.03em;
   font-family: var(--font-sans);
 }
 
@@ -1911,13 +1911,13 @@ body.is-mobile-menu-open .mobile-menu a {
   }
 }
 
-/* Header wordmark + primary nav + Menu/Close — shared Grtsk Light chrome type */
+/* Header wordmark + primary nav + Menu/Close — shared Grtsk Regular chrome type */
 .site-logo,
 .site-nav,
 .nav-menu-toggle {
   font-family: var(--font-sans);
   font-size: var(--nav-type-size);
-  font-weight: 300;
+  font-weight: 400;
   font-synthesis: none;
   letter-spacing: var(--nav-type-tracking);
   text-transform: uppercase;
@@ -2306,8 +2306,8 @@ body.is-mobile-menu-open .project-case-demo__toggle-pin {
 
 @media (max-width: 899px) {
   .site-header-chrome {
-    /* Phone chrome: one size for logo + Menu/Close (−2px from 0.8125rem) */
-    --nav-type-size: calc(0.8125rem - 2px);
+    /* Phone chrome: one size for logo + Menu/Close (prior −2px, then +2px) */
+    --nav-type-size: 0.8125rem;
   }
 
   .site-header-chrome .site-logo,
@@ -10400,10 +10400,12 @@ body:has(.about-page) .site-end {
 
 .about-boua__label {
   margin: 0;
-  font-family: var(--font-title);
-  font-size: calc(var(--about-step--1) - 3px + 5px);
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  /* Same chrome type as header logo / nav (Grtsk Regular) */
+  font-family: var(--font-sans);
+  font-size: var(--nav-type-size);
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: var(--nav-type-tracking);
   text-transform: uppercase;
   color: var(--about-ink);
   /* Kill half-leading so caps align with the content band, not the line box */
@@ -11344,10 +11346,6 @@ body:has(.about-page) .site-end {
 
 /* About — mobile only (≤800px); desktop unchanged */
 @media (max-width: 800px) {
-  .about-boua__label {
-    font-size: calc(var(--about-step--1) + 5px);
-  }
-
   .about-boua__about-grid,
   .about-boua__work-grid,
   .about-boua__testimonials-grid,
