@@ -1,10 +1,20 @@
 "use client";
 
-import { useId, type CSSProperties } from "react";
+import {
+  useEffect,
+  useId,
+  useState,
+  type CSSProperties,
+} from "react";
 import {
   getRecognitionProductBoxSet,
+  type RecognitionProductBoxItem,
   type RecognitionProductBoxSetId,
 } from "@/content/recognitionProductBox";
+import {
+  STICKER_PAD,
+  bakeRecognitionSticker,
+} from "@/lib/recognitionStickerBake";
 
 type HomeRecognitionProductBoxProps = {
   /** Which pack to render — required so each card maps explicitly */
@@ -14,7 +24,8 @@ type HomeRecognitionProductBoxProps = {
 
 /**
  * Kraft open-box product stack for Recognition cards.
- * Layout / motion vars come from `content/recognitionProductBox.ts`.
+ * Cutout “sticker” outlines are baked once to a bitmap (Safari-friendly);
+ * hover / arrive only animate parent transform + opacity.
  */
 export function HomeRecognitionProductBox({
   setId,
@@ -26,9 +37,7 @@ export function HomeRecognitionProductBox({
   const frontId = `pb-front-${rawId}`;
   const innerId = `pb-inner-${rawId}`;
   const sideId = `pb-side-${rawId}`;
-  const stickerId = `pb-sticker-${rawId}`;
   const shadowId = `pb-shadow-${rawId}`;
-  const grainId = `pb-grain-${rawId}`;
   const frontMaskId = `pb-front-mask-${rawId}`;
 
   /** Front-panel handle cutout — punch through so products show */
@@ -49,8 +58,8 @@ export function HomeRecognitionProductBox({
       >
         <defs>
           <clipPath id={openingId}>
-            {/* Extra L/R + top headroom so hover scale isn’t sheared */}
-            <path d="M-120 -200H880V438H598L571 580H191L157 438H-120Z" />
+            {/* Wide + tall headroom — larger desktop hover must not shear */}
+            <path d="M-220 -520H980V438H598L571 580H191L157 438H-220Z" />
           </clipPath>
           <mask
             id={frontMaskId}
@@ -75,45 +84,10 @@ export function HomeRecognitionProductBox({
             <stop stopColor="#b78e5e" />
             <stop offset="1" stopColor="#987040" />
           </linearGradient>
-          <filter
-            id={stickerId}
-            x="-18%"
-            y="-18%"
-            width="136%"
-            height="140%"
-          >
-            <feMorphology
-              in="SourceAlpha"
-              operator="dilate"
-              radius="4"
-              result="edge"
-            />
-            <feFlood floodColor="white" />
-            <feComposite in2="edge" operator="in" result="outline" />
-            <feDropShadow
-              dx="0"
-              dy="2"
-              stdDeviation="1.6"
-              floodOpacity=".18"
-            />
-            <feComposite in="SourceGraphic" operator="over" />
-          </filter>
+          {/* Floor soft-shadow only — not applied to animated cutouts */}
           <filter id={shadowId}>
             <feGaussianBlur stdDeviation="9" />
           </filter>
-          <pattern
-            id={grainId}
-            width="6"
-            height="6"
-            patternUnits="userSpaceOnUse"
-          >
-            <path
-              d="M1 1h1 M4 4h1"
-              stroke="#4b321c"
-              strokeOpacity=".10"
-              strokeWidth=".7"
-            />
-          </pattern>
         </defs>
 
         <ellipse
@@ -136,51 +110,9 @@ export function HomeRecognitionProductBox({
         </g>
 
         <g clipPath={`url(#${openingId})`}>
-          {set.items.map((item) => {
-            const s = item.scale ?? 1;
-            const cx = item.x + item.width / 2;
-            const cy = item.y + item.height / 2;
-            const scaleXf =
-              s === 1
-                ? undefined
-                : `translate(${cx} ${cy}) scale(${s}) translate(${-cx} ${-cy})`;
-            return (
-              <g
-                key={item.id}
-                className="home-recognition-product-box__arrive"
-                style={{ ["--enter" as string]: item.enterDelay }}
-              >
-                <g
-                  className="home-recognition-product-box__piece"
-                  style={{ ["--delay" as string]: item.driftDelay }}
-                >
-                  <g
-                    className="home-recognition-product-box__react"
-                    style={
-                      {
-                        ["--lift"]: item.lift,
-                        ["--turn"]: item.turn,
-                        ["--hover-scale"]: item.hoverScale ?? 1.06,
-                      } as CSSProperties
-                    }
-                  >
-                    <g transform={scaleXf}>
-                      <image
-                        href={item.src}
-                        x={item.x}
-                        y={item.y}
-                        width={item.width}
-                        height={item.height}
-                        transform={`rotate(${item.rotate} ${item.rotateOriginX} ${item.rotateOriginY})`}
-                        filter={`url(#${stickerId})`}
-                        preserveAspectRatio="xMidYMid meet"
-                      />
-                    </g>
-                  </g>
-                </g>
-              </g>
-            );
-          })}
+          {set.items.map((item) => (
+            <ProductCutout key={item.id} item={item} />
+          ))}
         </g>
 
         <g mask={`url(#${frontMaskId})`} strokeLinejoin="round">
@@ -197,10 +129,6 @@ export function HomeRecognitionProductBox({
           <path
             d="M184 457 598 440 571 586 214 586Z"
             fill={`url(#${frontId})`}
-          />
-          <path
-            d="M184 457 598 440 571 586 214 586Z"
-            fill={`url(#${grainId})`}
           />
           <path d="M163 443 596 443" stroke="#e6c69d" strokeWidth="3" />
           <path
@@ -226,4 +154,77 @@ export function HomeRecognitionProductBox({
       </svg>
     </div>
   );
+}
+
+function ProductCutout({ item }: { item: RecognitionProductBoxItem }) {
+  const bakedHref = useBakedStickerHref(item.src, item.width, item.height);
+  const s = item.scale ?? 1;
+  const cx = item.x + item.width / 2;
+  const cy = item.y + item.height / 2;
+  const scaleXf =
+    s === 1
+      ? undefined
+      : `translate(${cx} ${cy}) scale(${s}) translate(${-cx} ${-cy})`;
+
+  const pad = STICKER_PAD;
+  const href = bakedHref ?? item.src;
+  const padded = Boolean(bakedHref);
+  const x = padded ? item.x - pad : item.x;
+  const y = padded ? item.y - pad : item.y;
+  const width = padded ? item.width + pad * 2 : item.width;
+  const height = padded ? item.height + pad * 2 : item.height;
+
+  return (
+    <g
+      className="home-recognition-product-box__arrive"
+      style={{ ["--enter" as string]: item.enterDelay }}
+    >
+      <g
+        className="home-recognition-product-box__react"
+        style={
+          {
+            ["--hover-scale"]: item.hoverScale ?? 1.06,
+          } as CSSProperties
+        }
+      >
+        <g transform={scaleXf}>
+          {/* Static bitmap (baked outline) — parents own all motion */}
+          <image
+            href={href}
+            x={x}
+            y={y}
+            width={width}
+            height={height}
+            transform={`rotate(${item.rotate} ${item.rotateOriginX} ${item.rotateOriginY})`}
+            preserveAspectRatio="xMidYMid meet"
+          />
+        </g>
+      </g>
+    </g>
+  );
+}
+
+function useBakedStickerHref(
+  src: string,
+  layoutW: number,
+  layoutH: number,
+): string | null {
+  const [href, setHref] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    bakeRecognitionSticker(src, layoutW, layoutH)
+      .then((url) => {
+        if (!cancelled) setHref(url);
+      })
+      .catch(() => {
+        /* CORS / bake failure — keep raw cutout (no live filter) */
+        if (!cancelled) setHref(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [src, layoutW, layoutH]);
+
+  return href;
 }

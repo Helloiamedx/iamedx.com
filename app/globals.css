@@ -3308,6 +3308,9 @@ body:has(.home-page) .site-footer__gap {
   position: relative;
   width: 100%;
   overflow: hidden;
+  /* Bleed above cards so pack hover scale isn’t clipped at the viewport top */
+  padding-block-start: clamp(2.75rem, 4.5vw, 4rem);
+  margin-block-start: calc(-1 * clamp(2.75rem, 4.5vw, 4rem));
   /* Card → controls: less than prior open step, still clear of the cards */
   padding-block-end: clamp(4.5rem, 6.5vw, 5.5rem);
   --home-recognition-card-gap: clamp(0.75rem, 1.4vw, 1.15rem);
@@ -3622,69 +3625,54 @@ body:has(.home-page) .site-footer__gap {
   pointer-events: none;
 }
 
-.home-recognition-product-box__piece {
-  transform-box: fill-box;
-  transform-origin: 50% 90%;
-  animation: home-recognition-product-drift 5.8s ease-in-out infinite;
-  animation-delay: var(--delay);
-}
-
 .home-recognition-product-box__arrive {
-  animation: home-recognition-product-arrive 1.3s cubic-bezier(0.22, 1, 0.36, 1)
+  animation: home-recognition-product-arrive 1.1s cubic-bezier(0.22, 1, 0.36, 1)
     both;
   animation-delay: var(--enter);
+  /* Arrive uses transform + opacity only (baked sticker stays static) */
+  will-change: transform, opacity;
 }
 
 .home-recognition-product-box__react {
+  transform: translate3d(0, 0, 0);
   transform-box: fill-box;
   transform-origin: 50% 90%;
-  transition: transform 0.65s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* Hover / mobile auto-hover scale — compositor layer */
+  will-change: transform;
 }
 
-/* Hover: scale only — no lift/turn/drift so pieces stay put */
-.home-recognition-product-box:hover .home-recognition-product-box__piece {
-  animation: none;
-  transform: none;
-}
-
+/* Hover: scale only — desktop explode +40% vs base --hover-scale delta */
 .home-recognition-product-box:hover .home-recognition-product-box__react {
-  transform: scale(var(--hover-scale, 1.06));
-}
-
-@keyframes home-recognition-product-drift {
-  0%,
-  100% {
-    transform: translateY(0) rotate(-0.5deg);
-  }
-  50% {
-    transform: translateY(-5px) rotate(0.5deg);
-  }
+  transform: translate3d(0, 0, 0)
+    scale(calc(1 + (var(--hover-scale, 1.06) - 1) * 1.4));
 }
 
 @keyframes home-recognition-product-arrive {
   from {
-    transform: translateY(95px);
+    transform: translate3d(0, 95px, 0);
     opacity: 0;
   }
   to {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
     opacity: 1;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .home-recognition-product-box__piece,
   .home-recognition-product-box__arrive {
     animation: none;
+    will-change: auto;
   }
 
   .home-recognition-product-box__react {
     transition: none;
     animation: none;
+    will-change: auto;
   }
 
   .home-recognition-product-box:hover .home-recognition-product-box__react {
-    transform: none;
+    transform: translate3d(0, 0, 0);
   }
 }
 
@@ -3756,55 +3744,41 @@ body:has(.home-page) .site-footer__gap {
    */
   .home-recognition__card--product-box.is-active
     .home-recognition-product-box:first-child
-    .home-recognition-product-box__piece {
-    animation: none;
-  }
-
-  .home-recognition__card--product-box.is-active
-    .home-recognition-product-box:first-child
     .home-recognition-product-box__react {
     transition: none;
     animation: home-recognition-pack-auto-hover 7.5s
       cubic-bezier(0.33, 1, 0.32, 1) infinite;
     animation-delay: 0s;
+    will-change: transform;
   }
 
   @keyframes home-recognition-pack-auto-hover {
-    /* Rest → hover scale (all) → hold → back (all) → gap */
+    /* Rest → explode (+10% vs base) → hold (half prior wait) → back → gap */
     0%,
     8% {
-      transform: scale(1);
+      transform: translate3d(0, 0, 0) scale(1);
     }
     18%,
-    32% {
-      transform: scale(var(--hover-scale, 1.12));
+    25% {
+      transform: translate3d(0, 0, 0)
+        scale(calc(1 + (var(--hover-scale, 1.12) - 1) * 1.1));
     }
-    42%,
-    52% {
-      transform: scale(1);
+    35%,
+    45% {
+      transform: translate3d(0, 0, 0) scale(1);
     }
     100% {
-      transform: scale(1);
-    }
-  }
-
-  @keyframes home-recognition-product-drift {
-    0%,
-    100% {
-      transform: translateY(0) rotate(-0.4deg);
-    }
-    50% {
-      transform: translateY(-3px) rotate(0.4deg);
+      transform: translate3d(0, 0, 0) scale(1);
     }
   }
 
   @keyframes home-recognition-product-arrive {
     from {
-      transform: translateY(64px);
+      transform: translate3d(0, 64px, 0);
       opacity: 0;
     }
     to {
-      transform: translateY(0);
+      transform: translate3d(0, 0, 0);
       opacity: 1;
     }
   }
@@ -3818,6 +3792,13 @@ body:has(.home-page) .site-footer__gap {
   .home-recognition__dot-progress {
     animation: none;
     width: 100%;
+  }
+
+  .home-recognition__card--product-box.is-active
+    .home-recognition-product-box:first-child
+    .home-recognition-product-box__react {
+    animation: none;
+    will-change: auto;
   }
 }
 

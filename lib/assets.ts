@@ -26,3 +26,25 @@ export function cdnAsset(path: string): string {
   const normalized = path.startsWith("/") ? path : `/${path}`;
   return `${ASSETS_BASE}${normalized}`;
 }
+
+/**
+ * Same-origin `/__assets/*` URL for canvas / fetch (CDN has no CORS).
+ * Display can still use the public CDN `asset()` URL.
+ */
+export function sameOriginAsset(src: string): string {
+  if (src.startsWith("/__assets/") || src.startsWith("/__assets?")) {
+    return src;
+  }
+  if (src.startsWith(ASSETS_BASE)) {
+    return `/__assets${src.slice(ASSETS_BASE.length)}`;
+  }
+  try {
+    const u = new URL(src, "https://assets.iamedx.com");
+    if (u.hostname === "assets.iamedx.com") {
+      return `/__assets${u.pathname}${u.search}`;
+    }
+  } catch {
+    /* ignore */
+  }
+  return src;
+}
