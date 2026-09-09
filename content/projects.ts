@@ -325,7 +325,7 @@ export type Project = {
   };
   /**
    * Optional closing YouTube embed — always last gallery row
-   * (after `endVideo` / pairs). Interactive review clips, not muted autoplay.
+   * (after `endVideo` / pairs). Muted autoplay + loop.
    */
   endYoutubeId?: string;
   /** Accessible title for the YouTube iframe */
@@ -2303,7 +2303,7 @@ const NINETEENTH_PROJECT_COLLABORATORS: CollaboratorCredits = {
   names: ["Alice", "Mr. Chen"],
 };
 
-/** 「第二十个项目」— Specialized Services; index card (detail media when supplied) */
+/** 「第二十个项目」— End-to-End; index card (detail media when supplied) */
 const TWENTIETH_PROJECT_NAME = "Dragon Age Grey Warden Joining Bundle";
 const TWENTIETH_PROJECT_CDN_FOLDER = TWENTIETH_PROJECT_NAME;
 const TWENTIETH_PROJECT_SLUG = projectSlugFromName(TWENTIETH_PROJECT_NAME);
@@ -2511,6 +2511,9 @@ const TWENTY_FIRST_PROJECT_END_VIDEO_PAIR = {
   },
   nativeAspect: true,
 } as const;
+
+/** Gallery last row — muted autoplay YouTube */
+const TWENTY_FIRST_PROJECT_END_YOUTUBE_ID = "5PxGkRQ0jho";
 
 const TWENTY_FIRST_PROJECT_TAGLINE =
   "A collectible series inspired by the romance stories of Dragon Age, bringing each character’s story to life through a custom wooden box, scroll, and matching necklace.";
@@ -4630,7 +4633,7 @@ export const projects: Project[] = [
     materials: ["metal"],
     country: "global",
     ips: ["dragon-age"],
-    tags: involvementTags("specialized"),
+    tags: involvementTags("end-to-end"),
     summary: TWENTIETH_PROJECT_TAGLINE,
     tagline: TWENTIETH_PROJECT_TAGLINE,
     role: [
@@ -4638,7 +4641,7 @@ export const projects: Project[] = [
       "sample-development",
       "production-management",
     ],
-    involvement: "specialized",
+    involvement: "end-to-end",
     coverImage: TWENTIETH_PROJECT_COVER,
     cardCoverImage: TWENTIETH_PROJECT_COVER,
     coverHoverStills: TWENTIETH_PROJECT_HOVER_STILLS,
@@ -4686,6 +4689,8 @@ export const projects: Project[] = [
     afterCoverExtraRows: TWENTY_FIRST_PROJECT_AFTER_COVER_EXTRA_ROWS,
     afterCoverVideos: [...TWENTY_FIRST_PROJECT_AFTER_COVER_VIDEOS],
     endVideoPair: TWENTY_FIRST_PROJECT_END_VIDEO_PAIR,
+    endYoutubeId: TWENTY_FIRST_PROJECT_END_YOUTUBE_ID,
+    endYoutubeTitle: "Dragon Age Bundle & Wooden Box Series",
     specialThanks: WOODEN_BOX_SPECIAL_THANKS,
     collaborators: WOODEN_BOX_COLLABORATORS,
     overview: TWENTY_FIRST_PROJECT_OVERVIEW,
@@ -5121,8 +5126,8 @@ const PROJECTS_FEATURED_LEAD_BY_INVOLVEMENT: Record<
   "end-to-end": SECOND_PROJECT_SLUG,
   /* Project Contribution — Horizon Zero Dawn Thunderjaw */
   contribution: THIRD_PROJECT_SLUG,
-  /* Specialized — Dragon Age Grey Warden Joining Bundle */
-  specialized: TWENTIETH_PROJECT_SLUG,
+  /* Specialized — ESO 10-Year Coin Shadowbox (interim) */
+  specialized: FOURTH_PROJECT_SLUG,
 };
 
 function projectToFeaturedLead(project: Project): ProjectsFeaturedLead {

@@ -27,7 +27,7 @@ import { shuffleArray } from "@/lib/utils";
 /** Fresh random picks on each request */
 export const dynamic = "force-dynamic";
 
-/** Home cards under featured lead — first slot fixed; second stays random */
+/** Home cards under featured lead — left fixed (wolf head); right from Project Contribution */
 const HOME_FIXED_PROJECT_CARD_SLUG = projectSlugFromName("The Witcher Banner");
 
 function getHomeProjectCards(): Project[] {
@@ -35,6 +35,7 @@ function getHomeProjectCards(): Project[] {
   const random = shuffleArray(
     projects.filter(
       (project) =>
+        project.involvement === "contribution" &&
         project.slug !== projectsFeaturedLead.slug &&
         project.slug !== HOME_FIXED_PROJECT_CARD_SLUG,
     ),

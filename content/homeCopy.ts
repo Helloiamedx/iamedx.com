@@ -183,6 +183,12 @@ export type HomeRecognitionSlide = {
   /** Card body — Grtsk Regular */
   body: string;
   image: string;
+  /** Optional mobile (≤700px) still — falls back to `image` */
+  imageMobile?: string;
+  /** Optional looping cover — preferred over `image` when set */
+  video?: string;
+  /** Optional mobile (≤700px) cover video — falls back to `video` */
+  videoMobile?: string;
 };
 
 export type HomeRecognitionCopy = {
@@ -213,7 +219,7 @@ export const homeRecognition: HomeRecognitionCopy = {
   slides: [
     {
       id: "client-rehire",
-      title: "Client rehire rate",
+      title: "Clients Come Back",
       body: "Clients rehire me when they need to develop complex or highly customized products without an existing solution.",
       image: asset(
         `/images/projects/${encodeURIComponent("Dragon Age Writing Bundle")}/${encodeURIComponent("VARRIC TETHRAS cover.jpg")}`,
@@ -226,13 +232,11 @@ export const homeRecognition: HomeRecognitionCopy = {
       image: asset(
         `/images/projects/${encodeURIComponent("Mass Effect Tali Companion Bundle")}/${encodeURIComponent("Mass Effect Tali Companion Bundle.jpg")}`,
       ),
-    },
-    {
-      id: "reordered",
-      title: "Products reordered rate",
-      body: "Strong sales often lead clients to place repeat orders soon after the first production run.",
-      image: asset(
-        `/images/projects/${encodeURIComponent("The Witcher White Wolf Messenger Bag")}/${encodeURIComponent("h1.jpg")}`,
+      video: asset(
+        `/images/home/${encodeURIComponent("Recognition comes first")}/${encodeURIComponent("Positive reviews")}/video.mp4`,
+      ),
+      videoMobile: asset(
+        `/images/home/${encodeURIComponent("Recognition comes first")}/${encodeURIComponent("Positive reviews")}/phone.mp4`,
       ),
     },
     {
@@ -240,7 +244,18 @@ export const homeRecognition: HomeRecognitionCopy = {
       title: "Products developed into a series",
       body: "When the first small-batch product sells well, clients continue developing more products based on the same proven design.",
       image: asset(
-        `/images/projects/${encodeURIComponent("The Elder Scrolls Online 10-Year Coin Shadowbox")}/${encodeURIComponent("cover.jpg")}`,
+        `/images/home/${encodeURIComponent("Recognition comes first")}/${encodeURIComponent("Products developed into a series")}/picture.jpg`,
+      ),
+      imageMobile: asset(
+        `/images/home/${encodeURIComponent("Recognition comes first")}/${encodeURIComponent("Products developed into a series")}/phone.jpg`,
+      ),
+    },
+    {
+      id: "reordered",
+      title: "Clients Reorder",
+      body: "Strong sales often lead clients to place repeat orders soon after the first production run.",
+      image: asset(
+        `/images/projects/${encodeURIComponent("The Witcher White Wolf Messenger Bag")}/${encodeURIComponent("h1.jpg")}`,
       ),
     },
     {

@@ -10,7 +10,10 @@ import {
   type CSSProperties,
 } from "react";
 import { useReducedMotion } from "motion/react";
+import { CoverLoopVideo } from "@/components/CoverLoopVideo";
+import { HomeRecognitionProductBox } from "@/components/HomeRecognitionProductBox";
 import { homeRecognition } from "@/content/homeCopy";
+import { getRecognitionProductBoxSetsForSlide } from "@/content/recognitionProductBox";
 import { useSwipeNav } from "@/lib/useSwipeNav";
 
 /**
@@ -24,6 +27,8 @@ export function HomeRecognitionBand() {
   const reduceMotionMq = useReducedMotion();
   /** Defer MQ to after mount so SSR + first client paint match */
   const [reduceMotion, setReduceMotion] = useState(false);
+  /** Match recognition mobile card breakpoint (3:4 / single pack) */
+  const [isMobileCard, setIsMobileCard] = useState(false);
   const [index, setIndex] = useState(0);
   /*
    * Always start locked — SSR has no `document`, but the boot script adds
@@ -49,7 +54,16 @@ export function HomeRecognitionBand() {
     setReduceMotion(Boolean(reduceMotionMq));
   }, [reduceMotionMq]);
 
-  /* Hold on slide 1 until SiteIntroLoader drops `edx-loading` */
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 700px)");
+    const sync = () => setIsMobileCard(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  /* Hold on slide 1 until SiteIntroLoader drops `edx-loading`.
+   * Autoplay stays off until the user hits play. */
   useEffect(() => {
     if (introReady) return;
     const root = document.documentElement;
@@ -58,7 +72,6 @@ export function HomeRecognitionBand() {
       setIndex(0);
       setProgressKey((key) => key + 1);
       setIntroReady(true);
-      setPlaying(true);
     };
     release();
     if (!root.classList.contains("edx-loading")) return;
@@ -183,6 +196,11 @@ export function HomeRecognitionBand() {
         >
           {slides.map((slide, slideIndex) => {
             const active = slideIndex === index;
+            const productBoxSetIds = getRecognitionProductBoxSetsForSlide(
+              slide.id,
+            );
+            const isProductBox = productBoxSetIds.length > 0;
+            const isDuo = productBoxSetIds.length > 1;
             return (
               <article
                 key={slide.id}
@@ -193,21 +211,47 @@ export function HomeRecognitionBand() {
                       }
                     : undefined
                 }
-                className={`home-recognition__card${active ? " is-active" : ""}`}
+                className={`home-recognition__card${active ? " is-active" : ""}${isProductBox ? " home-recognition__card--product-box" : ""}`}
                 aria-hidden={!active}
                 onClick={() => {
                   if (!active) goTo(slideIndex);
                 }}
               >
-                <div className="home-recognition__media">
-                  <Image
-                    src={slide.image}
-                    alt=""
-                    fill
-                    sizes="(max-width: 700px) 78vw, min(86vw, 1100px)"
-                    className="home-recognition__image"
-                    priority={slideIndex === 0}
-                  />
+                <div
+                  className={`home-recognition__media${isProductBox ? " home-recognition__media--product-box" : ""}${isDuo ? " home-recognition__media--product-box-multi" : ""}`}
+                >
+                  {isProductBox ? (
+                    productBoxSetIds.map((setId) => (
+                      <HomeRecognitionProductBox key={setId} setId={setId} />
+                    ))
+                  ) : slide.video || slide.videoMobile ? (
+                    <CoverLoopVideo
+                      key={
+                        isMobileCard && slide.videoMobile
+                          ? slide.videoMobile
+                          : (slide.video ?? slide.videoMobile)
+                      }
+                      src={
+                        isMobileCard && slide.videoMobile
+                          ? slide.videoMobile
+                          : (slide.video ?? slide.videoMobile!)
+                      }
+                      className="home-recognition__image"
+                    />
+                  ) : (
+                    <Image
+                      src={
+                        isMobileCard && slide.imageMobile
+                          ? slide.imageMobile
+                          : slide.image
+                      }
+                      alt=""
+                      fill
+                      sizes="(max-width: 700px) 78vw, min(86vw, 1100px)"
+                      className="home-recognition__image"
+                      priority={slideIndex === 0}
+                    />
+                  )}
                 </div>
                 <div className="home-recognition__copy">
                   <h3 className="home-recognition__card-title">{slide.title}</h3>

@@ -3372,15 +3372,19 @@ body:has(.home-page) .site-footer__gap {
   z-index: 2;
   top: clamp(1.35rem, 2.6vw, 2.15rem);
   left: clamp(1.35rem, 2.6vw, 2.15rem);
-  right: clamp(1.75rem, 11vw, 11rem);
+  /* Same copy column on every slide — title + body share this box (−20%) */
+  width: calc(
+    min(34rem, calc(100% - 2 * clamp(1.35rem, 2.6vw, 2.15rem))) * 0.8
+  );
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: clamp(0.45rem, 0.9vw, 0.7rem);
-  max-width: min(34rem, 92%);
 }
 
 .home-recognition__card-title {
   margin: 0;
+  width: 100%;
   font-family: var(--home-card-title-font);
   font-size: var(--home-card-title-size);
   font-weight: var(--home-card-title-weight);
@@ -3395,7 +3399,8 @@ body:has(.home-page) .site-footer__gap {
 
 .home-recognition__card-body {
   margin: 0;
-  max-width: 38ch;
+  width: 100%;
+  max-width: none;
   font-family: var(--home-band-body-font);
   font-size: var(--home-band-body-size);
   font-weight: var(--home-band-body-weight);
@@ -3525,6 +3530,164 @@ body:has(.home-page) .site-footer__gap {
   display: block;
 }
 
+/* —— Recognition card 1: one plate — copy + packs —— */
+.home-recognition__card--product-box {
+  background: #f5f5f7;
+  border: 1.5px solid #000;
+  /* Pack tops / sticker glow must not shear against the plate */
+  overflow: visible;
+}
+
+.home-page .home-recognition__card--product-box {
+  overflow: visible;
+}
+
+.home-recognition__card--product-box::after {
+  /* No top veil */
+  content: none;
+}
+
+.home-recognition__card--product-box .home-recognition__card-title,
+.home-recognition__card--product-box .home-recognition__card-body {
+  color: #000;
+}
+
+.home-recognition__media--product-box {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: transparent;
+  overflow: visible;
+  padding-inline: clamp(0.55rem, 1.6vw, 1.1rem);
+  /* Sit packs flush to the plate floor */
+  padding-block-end: 0;
+}
+
+.home-recognition__media--product-box-multi {
+  gap: clamp(0.35rem, 1.2vw, 0.85rem);
+}
+
+.home-recognition__media--product-box-multi .home-recognition-product-box {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 34%;
+  height: auto;
+  align-self: flex-end;
+  overflow: visible;
+}
+
+.home-recognition__media--product-box-multi:has(
+    > .home-recognition-product-box:nth-child(3)
+  )
+  .home-recognition-product-box {
+  max-width: 34%;
+}
+
+.home-recognition__media--product-box .home-recognition-product-box__scene {
+  /* Layout enlarge (avoid CSS scale blur) — was +15%, now +15%×1.1 ≈ +26.5% */
+  width: 126.5%;
+  max-width: none;
+  margin-inline: -13.25%;
+  /* Nudge packs a touch lower toward the card floor */
+  transform: translateY(3%);
+  transform-origin: 50% 100%;
+  overflow: visible;
+}
+
+.home-recognition-product-box {
+  width: 100%;
+  height: auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  /* Per-pack hover — hit only this pack, not the whole card */
+  pointer-events: auto;
+  overflow: visible;
+  position: relative;
+  z-index: 0;
+}
+
+.home-recognition-product-box:hover {
+  z-index: 2;
+}
+
+.home-recognition-product-box__scene {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  overflow: visible;
+  transform: none;
+  transform-origin: 50% 100%;
+  pointer-events: none;
+}
+
+.home-recognition-product-box__piece {
+  transform-box: fill-box;
+  transform-origin: 50% 90%;
+  animation: home-recognition-product-drift 5.8s ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+
+.home-recognition-product-box__arrive {
+  animation: home-recognition-product-arrive 1.3s cubic-bezier(0.22, 1, 0.36, 1)
+    both;
+  animation-delay: var(--enter);
+}
+
+.home-recognition-product-box__react {
+  transform-box: fill-box;
+  transform-origin: 50% 90%;
+  transition: transform 0.65s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Hover: scale only — no lift/turn/drift so pieces stay put */
+.home-recognition-product-box:hover .home-recognition-product-box__piece {
+  animation: none;
+  transform: none;
+}
+
+.home-recognition-product-box:hover .home-recognition-product-box__react {
+  transform: scale(var(--hover-scale, 1.06));
+}
+
+@keyframes home-recognition-product-drift {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-0.5deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(0.5deg);
+  }
+}
+
+@keyframes home-recognition-product-arrive {
+  from {
+    transform: translateY(95px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-recognition-product-box__piece,
+  .home-recognition-product-box__arrive {
+    animation: none;
+  }
+
+  .home-recognition-product-box__react {
+    transition: none;
+    animation: none;
+  }
+
+  .home-recognition-product-box:hover .home-recognition-product-box__react {
+    transform: none;
+  }
+}
+
 @media (max-width: 700px) {
   .home-page {
     --home-card-title-size: calc(clamp(1.15rem, 5.2vw, 1.45rem) - 4px);
@@ -3539,16 +3702,111 @@ body:has(.home-page) .site-footer__gap {
   }
 
   .home-recognition__copy {
+    left: clamp(1rem, 6vw, 2rem);
     right: clamp(1rem, 6vw, 2rem);
-    max-width: min(18rem, 90%);
-  }
-
-  .home-recognition__card-body {
-    max-width: none;
+    width: auto;
   }
 
   .home-recognition__viewport {
     padding-block-end: 5rem;
+  }
+
+  .home-recognition-product-box__scene {
+    transform: none;
+    transform-origin: 50% 100%;
+  }
+
+  .home-recognition__media--product-box {
+    padding-inline: 0.35rem;
+    padding-block-end: 0;
+  }
+
+  .home-recognition__media--product-box-multi {
+    gap: 0;
+  }
+
+  /* Mobile: one pack only, full card width */
+  .home-recognition__media--product-box-multi .home-recognition-product-box {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+
+  .home-recognition__media--product-box-multi
+    .home-recognition-product-box:not(:first-child) {
+    display: none;
+  }
+
+  .home-recognition__media--product-box-multi:has(
+      > .home-recognition-product-box:nth-child(3)
+    )
+    .home-recognition-product-box {
+    max-width: 100%;
+  }
+
+  .home-recognition__media--product-box .home-recognition-product-box__scene {
+    width: 108%;
+    margin-inline: -4%;
+    transform: translateY(2%);
+    transform-origin: 50% 100%;
+  }
+
+  /*
+   * Mobile pack 1: auto hover loop — all pieces scale together,
+   * hold, shrink together, then a rest gap before the next group.
+   */
+  .home-recognition__card--product-box.is-active
+    .home-recognition-product-box:first-child
+    .home-recognition-product-box__piece {
+    animation: none;
+  }
+
+  .home-recognition__card--product-box.is-active
+    .home-recognition-product-box:first-child
+    .home-recognition-product-box__react {
+    transition: none;
+    animation: home-recognition-pack-auto-hover 7.5s
+      cubic-bezier(0.33, 1, 0.32, 1) infinite;
+    animation-delay: 0s;
+  }
+
+  @keyframes home-recognition-pack-auto-hover {
+    /* Rest → hover scale (all) → hold → back (all) → gap */
+    0%,
+    8% {
+      transform: scale(1);
+    }
+    18%,
+    32% {
+      transform: scale(var(--hover-scale, 1.12));
+    }
+    42%,
+    52% {
+      transform: scale(1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes home-recognition-product-drift {
+    0%,
+    100% {
+      transform: translateY(0) rotate(-0.4deg);
+    }
+    50% {
+      transform: translateY(-3px) rotate(0.4deg);
+    }
+  }
+
+  @keyframes home-recognition-product-arrive {
+    from {
+      transform: translateY(64px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
   }
 }
 
@@ -11822,6 +12080,11 @@ body:has(.about-page) .site-end {
   overflow: hidden;
 }
 
+/* Product packs need visible overflow — hover scale/lift + tall cutouts */
+.home-page .home-recognition__card--product-box {
+  overflow: visible;
+}
+
 /*
  * Projects + Insights + Services + project detail gallery — one 8px radius.
  * Case hero stays square (full-bleed).
@@ -11843,7 +12106,7 @@ body:has(.about-page) .site-end {
 .project-detail .project-case-demo__frame,
 .project-detail .project-case-demo__full,
 .project-detail .project-case-demo__youtube,
-.project-detail .project-case-demo__pair,
+.project-detail .project-fallback-video,
 .project-detail .project-showcase__media {
   border-radius: var(--index-card-radius);
   overflow: hidden;
@@ -11865,8 +12128,6 @@ body:has(.about-page) .site-end {
   .project-detail .project-case-demo__frame,
   .project-detail .project-case-demo__full,
   .project-detail .project-case-demo__youtube,
-  .project-detail .project-case-demo__pair,
-  .project-detail .project-case-demo__row,
   .project-detail .project-fallback-video {
     border-radius: 4px;
   }
