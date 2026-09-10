@@ -4,15 +4,25 @@ import os from "node:os";
 /**
  * LAN phone/tablet preview: Next 16 blocks /_next from unknown hosts.
  * Auto-collect this Mac’s private IPv4s so Wi‑Fi DHCP changes don’t break media.
- * Also proxies CDN through same origin in `rewrites` so media works on LAN.
+ * Dev-only — never call os.networkInterfaces() during Vercel / CI builds.
  */
 function lanDevHosts(): string[] {
   const hosts = new Set<string>(["localhost", "127.0.0.1"]);
-  for (const infos of Object.values(os.networkInterfaces())) {
-    for (const info of infos ?? []) {
-      if (info.family !== "IPv4" || info.internal) continue;
-      hosts.add(info.address);
+  if (process.env.NODE_ENV === "production" || process.env.VERCEL) {
+    return [...hosts];
+  }
+  try {
+    for (const infos of Object.values(os.networkInterfaces())) {
+      for (const info of infos ?? []) {
+        if (String(info.family) !== "IPv4" && String(info.family) !== "4") {
+          continue;
+        }
+        if (info.internal) continue;
+        hosts.add(info.address);
+      }
     }
+  } catch {
+    /* Sandbox / locked-down hosts may deny interface enumeration */
   }
   return [...hosts];
 }

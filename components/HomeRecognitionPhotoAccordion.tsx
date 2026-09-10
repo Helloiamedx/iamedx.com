@@ -167,7 +167,7 @@ export function HomeRecognitionPhotoAccordion({
       ref={rootRef}
       className={`home-recognition-photo-accordion${isOpen ? " is-active" : ""}`}
       onPointerLeave={onPointerLeaveRoot}
-      onFocusOut={onFocusOutRoot}
+      onBlur={onFocusOutRoot}
       onKeyDown={onKeyDownRoot}
     >
       {images.map((src, index) => {
