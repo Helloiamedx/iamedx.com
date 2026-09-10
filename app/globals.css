@@ -4664,8 +4664,7 @@ body:has(.home-page) .site-footer__gap {
 }
 
 .support-know__panel--video,
-.support-know__panel--stack,
-.support-know__panel--price {
+.support-know__panel--stack {
   background: #000;
 }
 
@@ -4674,16 +4673,18 @@ body:has(.home-page) .site-footer__gap {
   align-items: center;
   justify-content: center;
   padding: clamp(1rem, 4vw, 2.5rem);
+  background: #fff;
 }
 
 .support-know__price {
   margin: 0;
   display: inline-flex;
-  align-items: baseline;
-  gap: 0.08em;
-  color: #fff;
-  font-family: var(--font-sans);
-  font-weight: 300;
+  align-items: center;
+  justify-content: center;
+  gap: 0.38em;
+  color: #0a0a0a;
+  font-family: "Grtsk-SemiBold", "Grtsk", var(--font-sans);
+  font-weight: 600;
   font-synthesis: none;
   font-size: clamp(2.6rem, 9.5vw, 5.75rem);
   letter-spacing: -0.03em;
@@ -4694,15 +4695,16 @@ body:has(.home-page) .site-footer__gap {
 
 .support-know__price-currency {
   flex: 0 0 auto;
-  font-size: 0.78em;
-  font-weight: 300;
+  font-size: 1.18em;
+  font-weight: 600;
   letter-spacing: 0;
-  transform: translateY(0.02em);
+  line-height: 1;
 }
 
 .support-know__price-amount {
   flex: 0 0 auto;
   font-variant-numeric: tabular-nums;
+  line-height: 1;
 }
 
 .support-know__panel-video {
