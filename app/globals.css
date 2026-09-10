@@ -1450,17 +1450,24 @@ body.is-mobile-menu-open .mobile-menu a {
 .site-footer__top {
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) max-content;
-  grid-template-areas:
-    "lead aside"
-    "cta  aside";
+  grid-template-areas: "primary aside";
   column-gap: clamp(2rem, 5vw, 4rem);
   row-gap: 1.35rem;
-  align-items: start;
+  /* Left (lead+CTA) and right (aside) as wholes — middle, not top */
+  align-items: center;
+}
+
+.site-footer__primary {
+  grid-area: primary;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.35rem;
+  min-width: 0;
 }
 
 .site-footer__lead {
   font-family: var(--font-title);
-  grid-area: lead;
   margin: 0;
   max-width: 34rem;
   /* Desktop: +12px vs base clamp */
@@ -1481,7 +1488,6 @@ body.is-mobile-menu-open .mobile-menu a {
 }
 
 .site-footer__cta-actions {
-  grid-area: cta;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -1510,7 +1516,8 @@ body.is-mobile-menu-open .mobile-menu a {
   column-gap: clamp(2.25rem, 4vw, 3.25rem);
   row-gap: var(--footer-aside-label-gap);
   justify-self: end;
-  align-self: start;
+  /* Follow .site-footer__top align-items — center with lead+CTA as one block */
+  align-self: center;
   width: max-content;
   max-width: 100%;
 }
@@ -1636,7 +1643,8 @@ body.is-mobile-menu-open .mobile-menu a {
 .site-footer__brand-block {
   box-sizing: border-box;
   width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
-  margin: auto auto 0;
+  /* Air between lead/aside block and wordmark */
+  margin: clamp(4.5rem, 9vw, 7rem) auto 0;
   padding: 0;
 }
 
@@ -1783,13 +1791,29 @@ body.is-mobile-menu-open .mobile-menu a {
 }
 
 @media (max-width: 899px) {
+  .site-footer {
+    /* Equal air between: (lead+CTA) · (aside labels) · (© + wordmark) */
+    --footer-mobile-stack-gap: 4.5rem;
+    /* Label → content — tighter than desktop */
+    --footer-aside-label-gap: 0.45rem;
+  }
+
+  .site-footer__shell {
+    /* Stack gap lives between groups — don’t double with shell bottom pad */
+    padding-bottom: 0;
+  }
+
   .site-footer__top {
     grid-template-columns: 1fr;
     grid-template-areas:
-      "lead"
-      "cta"
+      "primary"
       "aside";
-    row-gap: 0; /* per-block gaps below */
+    row-gap: var(--footer-mobile-stack-gap);
+    align-items: stretch;
+  }
+
+  .site-footer__primary {
+    gap: 0;
   }
 
   .site-footer__lead {
@@ -1799,8 +1823,8 @@ body.is-mobile-menu-open .mobile-menu a {
   }
 
   .site-footer__cta-actions {
-    margin-top: 0.85rem; /* closer to the lead title */
-    margin-bottom: 3.75rem; /* more air before Social / Support */
+    margin-top: 0.85rem; /* closer to the lead title (inside group 1) */
+    margin-bottom: 0;
   }
 
   .site-footer__aside-col {
@@ -1809,7 +1833,13 @@ body.is-mobile-menu-open .mobile-menu a {
     justify-self: stretch;
     width: 100%;
     max-width: none;
-    gap: 2rem; /* Social/Support · Menu · Headquarters */
+    /* Tighter than desktop — Social/Support · Menu · HQ rows */
+    gap: 1.45rem;
+  }
+
+  .site-footer__aside-label {
+    /* Match mobile menu HQ / Social eyebrows */
+    font-size: calc(0.68rem + 3px);
   }
 
   .site-footer__aside-pair {
@@ -1840,9 +1870,9 @@ body.is-mobile-menu-open .mobile-menu a {
     font-weight: 400;
   }
 
-  /* © line + wordmark as one unit — more air above */
+  /* Same stack gap as primary → aside */
   .site-footer__brand-block {
-    margin-top: 2.75rem;
+    margin-top: var(--footer-mobile-stack-gap);
   }
 }
 
@@ -2165,7 +2195,7 @@ body.is-mobile-menu-open .mobile-menu a {
 .mobile-menu__eyebrow {
   margin: 0;
   font-family: var(--font-label);
-  font-size: calc(0.68rem + 2px);
+  font-size: calc(0.68rem + 3px);
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -2205,14 +2235,24 @@ body.is-mobile-menu-open .mobile-menu a {
 
 .mobile-menu__social a {
   display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
+  align-items: flex-end;
+  gap: 0.22rem;
 }
 
 .mobile-menu__external-icon {
   display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
   line-height: 0;
-  opacity: 0.7;
+  opacity: 0.65;
+  /* Keep the glyph on the label’s bottom edge */
+  padding-bottom: 0.12em;
+}
+
+.mobile-menu__external-icon svg {
+  display: block;
+  width: 0.72em;
+  height: 0.72em;
 }
 
 /* Contact: 2×2 so WhatsApp / WeChat / Email / Phone all fit on one screen */
@@ -2236,7 +2276,7 @@ body.is-mobile-menu-open .mobile-menu a {
 .mobile-menu__channel-label {
   margin: 0;
   font-family: var(--font-label);
-  font-size: calc(0.65rem + 2px);
+  font-size: calc(0.65rem + 3px);
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -2669,14 +2709,14 @@ html[data-hero-copy-ready="1"] .hero__content {
   --home-card-title-leading: 1;
   --home-card-title-color: #fff;
   /*
-   * Shared body type — Recognition card / Support detail / Approach points.
-   * Change once → all three follow (desktop + mobile).
+   * Shared body type — Recognition / Support / Character / Approach.
+   * Always lock to project + insight card description size (all breakpoints).
    */
   --home-band-body-font: "Grtsk", var(--font-sans);
-  --home-band-body-size: calc(clamp(0.875rem, 1.05vw, 1.0625rem) - 3px);
+  --home-band-body-size: var(--card-meta-desc-size);
   --home-band-body-weight: 400;
   --home-band-body-tracking: -0.01em;
-  --home-band-body-leading: 1.45;
+  --home-band-body-leading: var(--card-meta-desc-lh);
   --home-band-body-color: rgba(255, 255, 255, 0.82);
   /*
    * Shared chip / approach keyword labels — Support chips + Approach points.
@@ -2763,6 +2803,7 @@ body:has(.home-page) .site-footer__gap {
 }
 
 @media (max-width: 900px) {
+  .site-main > main.home-page,
   .home-page {
     --home-point-body-size: calc(0.875rem + 2px);
     /* Character foot keywords — +2px vs prior mobile recipe */
@@ -2779,11 +2820,6 @@ body:has(.home-page) .site-footer__gap {
     );
     /* Recognition / Support / Approach band titles — 1px smaller on mobile */
     --home-band-title-size: calc(clamp(1.75rem, 3.6vw, 3.25rem) - 6px);
-    /*
-     * Mobile body / approach labels — use the same ≤900 breakpoint as the
-     * section layouts (not 700). Fixed rem sizes so +px isn’t lost in vw clamp.
-     */
-    --home-band-body-size: calc(0.875rem + 2px);
     /* Approach keywords — independent of chips; +2px vs desktop 0.9375rem */
     --home-approach-label-size: calc(0.9375rem + 3px);
   }
@@ -2811,6 +2847,18 @@ body:has(.home-page) .site-footer__gap {
   .support-know__shell {
     width: 80vw;
     max-width: 100%;
+  }
+}
+
+/*
+ * Phone body — same switch as project / insight card descriptions (≤800).
+ * Must match `.site-main > main.home-page` specificity.
+ */
+@media (max-width: 800px) {
+  .site-main > main.home-page,
+  .home-page {
+    --home-band-body-size: var(--card-meta-desc-size-mobile);
+    --home-band-body-leading: var(--card-meta-desc-lh-mobile);
   }
 }
 
@@ -3357,17 +3405,8 @@ body:has(.home-page) .site-footer__gap {
 }
 
 .home-recognition__card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0.55) 0%,
-    rgba(0, 0, 0, 0.18) 42%,
-    rgba(0, 0, 0, 0.08) 100%
-  );
+  /* No top veil — all recognition cards */
+  content: none;
 }
 
 .home-recognition__copy {
@@ -3383,6 +3422,18 @@ body:has(.home-page) .site-footer__gap {
   display: flex;
   flex-direction: column;
   gap: clamp(0.45rem, 0.9vw, 0.7rem);
+  /* Own compositor layer — don’t wait on video decode (iOS / iPad) */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+.home-recognition__image--video-still {
+  z-index: 0;
+}
+
+.home-recognition__media .cover-loop-video {
+  z-index: 1;
+  background: #111;
 }
 
 .home-recognition__card-title {
@@ -3459,6 +3510,11 @@ body:has(.home-page) .site-footer__gap {
   background: rgba(255, 255, 255, 0.28);
 }
 
+.home-recognition__dot.is-scrubbable {
+  cursor: ew-resize;
+  touch-action: none;
+}
+
 .home-recognition__dot.is-active.is-compress-start {
   transform-origin: left center;
   animation: home-recognition-dot-compress 320ms
@@ -3497,6 +3553,11 @@ body:has(.home-page) .site-footer__gap {
   animation-play-state: paused;
 }
 
+.home-recognition__dot-progress.is-scrub {
+  animation: none;
+  transition: none;
+}
+
 @keyframes home-recognition-progress {
   from {
     width: 0%;
@@ -3533,6 +3594,136 @@ body:has(.home-page) .site-footer__gap {
   display: block;
 }
 
+/* —— Recognition: Clients Reorder photo accordion —— */
+.home-recognition-photo-accordion {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.home-recognition-photo-accordion__panel {
+  position: relative;
+  display: block;
+  flex: 0 0 25%;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  overflow: hidden;
+  background: #111;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    flex-basis 720ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 500ms ease;
+}
+
+/*
+ * Right-over-left stack via z-index + left-cast shadow only.
+ * No negative margins — those shortened the row and broke the accordion tween.
+ */
+.home-recognition-photo-accordion__panel:nth-child(1) {
+  z-index: 1;
+  box-shadow: none;
+}
+.home-recognition-photo-accordion__panel:nth-child(2) {
+  z-index: 2;
+  box-shadow:
+    -16px 0 28px rgba(0, 0, 0, 0.55),
+    -4px 0 10px rgba(0, 0, 0, 0.35);
+}
+.home-recognition-photo-accordion__panel:nth-child(3) {
+  z-index: 3;
+  box-shadow:
+    -20px 0 34px rgba(0, 0, 0, 0.6),
+    -5px 0 12px rgba(0, 0, 0, 0.38);
+}
+.home-recognition-photo-accordion__panel:nth-child(4) {
+  z-index: 4;
+  box-shadow:
+    -24px 0 40px rgba(0, 0, 0, 0.68),
+    -6px 0 14px rgba(0, 0, 0, 0.42);
+}
+
+/* Expanded: other three share the remainder */
+.home-recognition-photo-accordion.is-active
+  .home-recognition-photo-accordion__panel {
+  flex-basis: 14.5833333333%;
+}
+
+/*
+ * 56.25% of 16:9 width = frame height → square crop window.
+ * Image height stays locked; only the window width tweens (true accordion).
+ */
+.home-recognition-photo-accordion.is-active
+  .home-recognition-photo-accordion__panel.is-active {
+  flex-basis: 56.25%;
+  z-index: 5;
+  box-shadow:
+    -48px 0 56px rgba(0, 0, 0, 0.72),
+    24px 0 40px rgba(0, 0, 0, 0.42),
+    0 18px 40px rgba(0, 0, 0, 0.4);
+}
+
+.home-recognition-photo-accordion__panel img {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: auto;
+  max-width: none;
+  height: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  transform: translateX(-50%);
+  pointer-events: none;
+  user-select: none;
+}
+
+.home-recognition-photo-accordion__panel:focus-visible {
+  outline: 3px solid #8dc5ff;
+  outline-offset: -3px;
+  z-index: 6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-recognition-photo-accordion__panel {
+    transition: none;
+  }
+}
+
+.home-recognition__card--photo-accordion .home-recognition__copy {
+  pointer-events: auto;
+  cursor: default;
+}
+
+/* Mobile Clients Reorder — full-bleed hard-cut slideshow */
+.home-recognition-photo-slideshow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #111;
+}
+
+.home-recognition-photo-slideshow__frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+.home-recognition-photo-slideshow__frame.is-active {
+  opacity: 1;
+}
+
 /* —— Recognition card 1: one plate — copy + packs —— */
 .home-recognition__card--product-box {
   background: #f5f5f7;
@@ -3543,11 +3734,6 @@ body:has(.home-page) .site-footer__gap {
 
 .home-page .home-recognition__card--product-box {
   overflow: visible;
-}
-
-.home-recognition__card--product-box::after {
-  /* No top veil */
-  content: none;
 }
 
 .home-recognition__card--product-box .home-recognition__card-title,
@@ -3677,6 +3863,7 @@ body:has(.home-page) .site-footer__gap {
 }
 
 @media (max-width: 700px) {
+  .site-main > main.home-page,
   .home-page {
     --home-card-title-size: calc(clamp(1.15rem, 5.2vw, 1.45rem) - 4px);
   }
@@ -4338,6 +4525,17 @@ body:has(.home-page) .site-footer__gap {
   display: block;
 }
 
+/* Desktop stepper is vertical — reuse ← → glyphs as ↑ ↓ */
+@media (min-width: 901px) {
+  .support-know__step--prev svg {
+    transform: rotate(90deg);
+  }
+
+  .support-know__step--next svg {
+    transform: rotate(90deg);
+  }
+}
+
 .support-know__chips {
   list-style: none;
   margin: 0;
@@ -4503,15 +4701,15 @@ body:has(.home-page) .site-footer__gap {
     inset: auto 0 0 0;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
-    /* Whole bar (← chip →) sits on the stage floor */
+    /* ← / text card / → — bottoms share one baseline */
     align-items: end;
-    column-gap: 0.3rem;
+    column-gap: 0.4rem;
     width: 100%;
     max-width: none;
     height: auto;
     min-height: 0;
-    /* Tighter bottom air — controls sit lower on the media */
-    padding: 0 0 clamp(0.2rem, 1.2vw, 0.4rem);
+    /* Flush to stage L/R — half-disk flat edges sit on the container sides */
+    padding: 0 0 clamp(0.35rem, 1.6vw, 0.55rem);
   }
 
   .support-know__stepper {
@@ -4522,28 +4720,53 @@ body:has(.home-page) .site-footer__gap {
     grid-column: 1;
     grid-row: 1;
     align-self: end;
+    /* Flat on the outer left; fully round toward the card */
+    border-radius: 0 9999px 9999px 0;
   }
 
   .support-know__step--next {
     grid-column: 3;
     grid-row: 1;
     align-self: end;
+    /* Flat on the outer right; fully round toward the card */
+    border-radius: 9999px 0 0 9999px;
   }
 
+  /*
+   * Mobile ← → — elongated toward stage L/R (flat outer edge);
+   * inner round = same radius as the middle text card.
+   */
   .support-know__step {
-    width: auto;
-    height: 2.85rem;
-    padding-block: 0;
-    padding-inline: 0.05rem;
+    width: 1.85rem;
+    height: 2.45rem;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 0;
+    background: var(--support-know-frost);
+    color: var(--support-know-frost-ink);
+    backdrop-filter: var(--support-know-frost-blur);
+    -webkit-backdrop-filter: var(--support-know-frost-blur);
   }
 
-  /* Reuse ↑↓ glyphs as ← → */
-  .support-know__step--prev svg {
-    transform: rotate(-90deg);
+  .support-know__step:hover:not(:disabled) {
+    background: var(--support-know-frost-hover);
   }
 
-  .support-know__step--next svg {
-    transform: rotate(-90deg);
+  .support-know__step:disabled {
+    background: rgba(29, 29, 31, 0.42);
+    color: rgba(255, 255, 255, 0.42);
+    opacity: 1;
+  }
+
+  .support-know__step svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    display: block;
+    flex-shrink: 0;
+    margin: 0;
   }
 
   .support-know__chips {
@@ -4568,6 +4791,8 @@ body:has(.home-page) .site-footer__gap {
   .support-know__tile.is-expanded {
     width: 100%;
     padding: clamp(1rem, 3.5vw, 1.25rem);
+    /* Same corner as Recognition / Character media plates on mobile */
+    border-radius: var(--home-preview-radius, 16px);
   }
 }
 
@@ -9028,10 +9253,10 @@ body:has(.home-page) .site-footer__gap {
     calc(3.25rem - 9px)
   );
   font-weight: 500;
-  letter-spacing: 0.02em;
+  letter-spacing: -0.02em;
   line-height: 1.12;
   text-wrap: balance;
-  text-transform: uppercase;
+  text-transform: none;
   color: #0a0a0a;
 }
 
@@ -9217,13 +9442,15 @@ body:has(.home-page) .site-footer__gap {
 
   .insight-detail__meta {
     gap: max(1.25rem, calc(var(--insight-meta-gap) * 0.85));
+    /* Date + type — +1px vs desktop detail meta */
+    font-size: calc(var(--insight-label-size) - 2px);
   }
 
   .insight-detail__title {
     font-size: clamp(
-      calc(1.75rem - 8px),
-      calc(1.2rem + 2.4vw - 8px),
-      calc(3.25rem - 8px)
+      calc(1.75rem - 8px + 1px),
+      calc(1.2rem + 2.4vw - 8px + 1px),
+      calc(3.25rem - 8px + 1px)
     );
   }
 

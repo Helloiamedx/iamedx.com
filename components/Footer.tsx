@@ -23,17 +23,19 @@ export function Footer() {
       <div className="site-footer__stage">
         <div className="site-footer__shell">
           <div className="site-footer__top">
-            <p className="site-footer__lead">{footerLeadLine}</p>
+            <div className="site-footer__primary">
+              <p className="site-footer__lead">{footerLeadLine}</p>
 
-            <div className="site-footer__cta-actions">
-              <div className="site-footer__whatsapp">
-                <OriginButton
-                  href={whatsAppCta.href}
-                  external
-                  className="site-footer__whatsapp-btn"
-                >
-                  {whatsAppCta.label}
-                </OriginButton>
+              <div className="site-footer__cta-actions">
+                <div className="site-footer__whatsapp">
+                  <OriginButton
+                    href={whatsAppCta.href}
+                    external
+                    className="site-footer__whatsapp-btn"
+                  >
+                    {whatsAppCta.label}
+                  </OriginButton>
+                </div>
               </div>
             </div>
 

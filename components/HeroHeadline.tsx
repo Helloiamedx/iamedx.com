@@ -5,7 +5,7 @@ import { HeroActions } from "@/components/HeroActions";
 import { HERO_COPY_ATTR, whenHeroFlag } from "@/lib/heroSequence";
 
 const HEADLINE =
-  "ESTABLISH A SUPPLY CHAIN FROM SCRATCH TAILORED TO YOUR BUSINESS";
+  "ESTABLISH A SUPPLY CHAIN FROM SCRATCH TAILORED TO YOUR BUSINESS NO MATTER HOW SMALL YOU START";
 
 /** Beat after headline is in — then CTAs */
 const ACTIONS_AFTER_COPY_MS = 380;

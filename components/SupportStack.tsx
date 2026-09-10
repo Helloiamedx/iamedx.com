@@ -18,15 +18,20 @@ const CARDS = supportKnowCards;
  * Stage clips bypass the global video load queue.
  * Queue concurrency (2) + slow moov-at-end files (e.g. Prototype) was
  * blocking the active switch and starving every clip after it.
+ *
+ * Play only while this card is active. Leaving resets to t=0 (paused) so
+ * returning always restarts from the start — never background-play.
  */
 function SupportPanelVideo({
   src,
   playbackRate = 1,
   fullscreen = true,
+  active,
 }: {
   src: string;
   playbackRate?: number;
   fullscreen?: boolean;
+  active: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -34,11 +39,22 @@ function SupportPanelVideo({
     const video = videoRef.current;
     if (!video) return;
     video.playbackRate = playbackRate;
-    video.preload = "auto";
-    void video.play().catch(() => {});
   }, [playbackRate, src]);
 
-  useDriveVideoPlayback(videoRef, true, () => {}, src);
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (!active) {
+      video.pause();
+      try {
+        video.currentTime = 0;
+      } catch {
+        /* ignore seek before metadata */
+      }
+    }
+  }, [active]);
+
+  useDriveVideoPlayback(videoRef, active, () => {}, src);
 
   return (
     <div
@@ -52,13 +68,20 @@ function SupportPanelVideo({
         muted
         loop
         playsInline
-        preload="auto"
+        autoPlay={active}
+        preload={active ? "auto" : "metadata"}
       />
     </div>
   );
 }
 
-function SupportPanel({ card }: { card: SupportKnowCard }) {
+function SupportPanel({
+  card,
+  active,
+}: {
+  card: SupportKnowCard;
+  active: boolean;
+}) {
   const fullscreen = card.panelFullscreen !== false;
 
   if (card.panelVideo) {
@@ -67,6 +90,7 @@ function SupportPanel({ card }: { card: SupportKnowCard }) {
         src={card.panelVideo}
         playbackRate={card.panelVideoPlaybackRate ?? 1}
         fullscreen={fullscreen}
+        active={active}
       />
     );
   }
@@ -122,28 +146,23 @@ function isLayerPaintReady(layer: HTMLElement | null | undefined): boolean {
   return !layer.querySelector(".support-know__panel--video");
 }
 
-/** Poll until incoming can paint, errors out, or timeout. */
+/** Poll until incoming can paint, errors out, or timeout — never play(). */
 async function waitForLayerMedia(
   layer: HTMLElement,
   timeoutMs: number,
 ): Promise<"ready" | "error" | "timeout"> {
   const deadline = performance.now() + timeoutMs;
+  const video = layer.querySelector("video");
+  if (video) {
+    video.preload = "auto";
+  }
 
   while (performance.now() < deadline) {
-    const video = layer.querySelector("video");
     if (video?.error) return "error";
-    if (isLayerPaintReady(layer)) {
-      if (video) void video.play().catch(() => {});
-      return "ready";
-    }
-    if (video) {
-      video.preload = "auto";
-      void video.play().catch(() => {});
-    }
+    if (isLayerPaintReady(layer)) return "ready";
     await sleep(32);
   }
 
-  const video = layer.querySelector("video");
   if (video?.error) return "error";
   return isLayerPaintReady(layer) ? "ready" : "timeout";
 }
@@ -171,6 +190,17 @@ function SupportMediaStage({
   const layerRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [current, setCurrent] = useState(activeIndex);
   const [target, setTarget] = useState<number | null>(null);
+  /** Keep visited clips mounted so pause preserves currentTime for resume. */
+  const [visited, setVisited] = useState(() => new Set<number>([activeIndex]));
+
+  useEffect(() => {
+    setVisited((prev) => {
+      if (prev.has(activeIndex)) return prev;
+      const next = new Set(prev);
+      next.add(activeIndex);
+      return next;
+    });
+  }, [activeIndex]);
 
   const resetLayers = (active: number) => {
     layerRefs.current.forEach((layer, index) => {
@@ -258,7 +288,10 @@ function SupportMediaStage({
       resetLayers(settledTo);
       const settled = layerRefs.current[settledTo];
       const video = settled?.querySelector("video");
-      if (video) void video.play().catch(() => {});
+      /* Active card’s own effect drives play — don’t force neighbors. */
+      if (video && settledTo === activeIndex) {
+        void video.play().catch(() => {});
+      }
       busyRef.current = false;
     };
 
@@ -310,7 +343,9 @@ function SupportMediaStage({
             if (later === "ready") {
               resetLayers(to);
               const video = incoming.querySelector("video");
-              if (video) void video.play().catch(() => {});
+              if (video && currentRef.current === to) {
+                void video.play().catch(() => {});
+              }
             }
           })();
         }
@@ -348,10 +383,11 @@ function SupportMediaStage({
     };
   }, [activeIndex, navDir, reduceMotion, compact]);
 
-  const mounted = new Set<number>([current, activeIndex]);
+  const mounted = new Set<number>(visited);
+  mounted.add(current);
+  mounted.add(activeIndex);
   if (target != null) mounted.add(target);
-  if (current > 0) mounted.add(current - 1);
-  if (current < cards.length - 1) mounted.add(current + 1);
+  /* Prefetch neighbors into the tree (paused) for instant next switch */
   if (activeIndex > 0) mounted.add(activeIndex - 1);
   if (activeIndex < cards.length - 1) mounted.add(activeIndex + 1);
 
@@ -367,7 +403,7 @@ function SupportMediaStage({
               layerRefs.current[index] = node;
             }}
           >
-            <SupportPanel card={card} />
+            <SupportPanel card={card} active={index === activeIndex} />
           </div>
         );
       })}
@@ -492,12 +528,12 @@ export function SupportStack() {
               >
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path
-                    d="M6 14.5 12 8.5l6 6"
+                    d="M14 5.5 8.5 12 14 18.5"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="2.35"
-                    strokeLinecap="square"
-                    strokeLinejoin="miter"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   />
                 </svg>
               </button>
@@ -510,12 +546,12 @@ export function SupportStack() {
               >
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path
-                    d="M6 9.5 12 15.5l6-6"
+                    d="M10 5.5 15.5 12 10 18.5"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="2.35"
-                    strokeLinecap="square"
-                    strokeLinejoin="miter"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   />
                 </svg>
               </button>

@@ -159,11 +159,6 @@ export const myApproach = {
       body: "I don't just give instructions and wait for things to happen. I get into the details, talk to factories, check samples, solve problems, and keep things moving until the job is done.",
     },
     {
-      id: "i-pursue-real",
-      title: "I pursue real",
-      body: "Ideas are easy. Making them real is the hard part. I care about what can actually be produced, shipped, sold, and loved — not just what looks good on a screen.",
-    },
-    {
       id: "i-care-you",
       title: "I care you",
       body: "Your feedback tells me whether I actually did a good job. I listen, I ask questions, and I make changes when something can be better. A successful project isn't just one that gets delivered — it's one you're happy to receive.",
@@ -189,6 +184,15 @@ export type HomeRecognitionSlide = {
   video?: string;
   /** Optional mobile (≤700px) cover video — falls back to `video` */
   videoMobile?: string;
+  /**
+   * Dwell for this slide’s pager (ms). Required for video slides so the
+   * progress bar matches the clip (default `slideDurationMs` is too short).
+   */
+  durationMs?: number;
+  /** Mobile cover duration when `videoMobile` differs from desktop */
+  durationMsMobile?: number;
+  /** Optional photo accordion panels (order = display order) */
+  photoAccordion?: string[];
 };
 
 export type HomeRecognitionCopy = {
@@ -238,6 +242,9 @@ export const homeRecognition: HomeRecognitionCopy = {
       videoMobile: asset(
         `/images/home/${encodeURIComponent("Recognition comes first")}/${encodeURIComponent("Positive reviews")}/phone.mp4`,
       ),
+      /* Match real clip length — pager must not cut the video short */
+      durationMs: 29500,
+      durationMsMobile: 36400,
     },
     {
       id: "series",
@@ -255,8 +262,15 @@ export const homeRecognition: HomeRecognitionCopy = {
       title: "Clients Reorder",
       body: "Strong sales often lead clients to place repeat orders soon after the first production run.",
       image: asset(
-        `/images/projects/${encodeURIComponent("The Witcher White Wolf Messenger Bag")}/${encodeURIComponent("h1.jpg")}`,
+        `/images/home/${encodeURIComponent("Recognition comes first")}/${encodeURIComponent("Clients Reorder")}/1.jpg`,
       ),
+      photoAccordion: [1, 2, 3, 4].map((n) =>
+        asset(
+          `/images/home/${encodeURIComponent("Recognition comes first")}/${encodeURIComponent("Clients Reorder")}/${n}.jpg`,
+        ),
+      ),
+      /* Mobile hard-cut: 4 frames × 2s — carousel waits for one full pass */
+      durationMsMobile: 8000,
     },
     {
       id: "supplier-retention",
@@ -265,6 +279,10 @@ export const homeRecognition: HomeRecognitionCopy = {
       image: asset(
         `/images/projects/${encodeURIComponent("Halo 5 Guardians Limited Edition Collectors Statue")}/${encodeURIComponent("1.jpg")}`,
       ),
+      video: asset(
+        `/images/home/${encodeURIComponent("Recognition comes first")}/${encodeURIComponent("95% long-term supplier retention")}/video.mp4`,
+      ),
+      durationMs: 12000,
     },
   ],
 };

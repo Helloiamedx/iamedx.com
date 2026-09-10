@@ -34,16 +34,16 @@ export const supportKnowCards: SupportKnowCard[] = [
     size: "xl",
     panelImages: [...supplierDiscoveryVerificationImages],
     description:
-      "Connect you with suitable suppliers based on your product category, technical requirements, production capabilities, and project goals. Through factory evaluations and direct communication, verify their experience, capabilities, and suitability before moving forward.",
+      "Connect you with suitable suppliers based on your product category, technical requirements, and production capabilities. Through factory evaluations and direct communication, verify their experience, capabilities, and suitability before moving forward.",
   },
   {
     id: "cost-evaluation-negotiation",
-    headline: "Cost Evaluation & Negotiation",
+    headline: "Cost Optimization",
     size: "md",
     panelVideo:
       "https://assets.iamedx.com/images/home/Cost%20Evaluation%20%26%20Negotiation.mp4",
     description:
-      "Analyze product structures, materials, processes, and production requirements to evaluate whether pricing is reasonable and competitive. By communicating directly with suppliers and understanding the real cost structure, help optimize costs while maintaining product quality and production feasibility.",
+      "Evaluate pricing through systematic cost breakdowns and years of sourcing experience. I identify where costs are actually generated, assess reasonable cost ranges, and negotiate from a well-informed position while maintaining quality and production feasibility.",
   },
   {
     id: "manufacturing-localization",
@@ -52,7 +52,7 @@ export const supportKnowCards: SupportKnowCard[] = [
     panelVideo:
       "https://assets.iamedx.com/images/home/Manufacturing%20Localization..mp4",
     description:
-      "Help you identify the right manufacturing solutions in China by understanding your product requirements, materials, production methods, and target positioning. Instead of simply finding a supplier, evaluate how your product can be produced efficiently, reliably, and at the right quality level within the local manufacturing environment.",
+      "Translate your designs and technical requirements into clear, production-ready instructions that Chinese manufacturers can understand and execute. I break down the design, fill in missing manufacturing details, recommend suitable processes, and prepare localized production documentation that turns your design intent into clear, actionable factory instructions.",
   },
   {
     id: "prototype-development",
@@ -70,16 +70,26 @@ export const supportKnowCards: SupportKnowCard[] = [
     panelVideo:
       "https://assets.iamedx.com/images/home/Production%20Management.mp4",
     description:
-      "Coordinate communication between you and suppliers throughout the production process, tracking progress, resolving issues, and ensuring every critical detail is properly managed. From initial production preparation to final completion, help keep projects moving smoothly and efficiently.",
+      "Keep production under close supervision from start to finish with professional tools. I track critical milestones, verify key production steps before moving forward, resolve issues as they arise, and keep each stage connected to prevent delays and costly mistakes.",
   },
   {
     id: "quality-control-compliance",
-    headline: "Quality Control & Compliance Assurance",
+    headline: "Quality Management",
     size: "md",
     panelVideo:
       "https://assets.iamedx.com/images/home/Quality%20Control%20%26amp%3B%20Compliance%20Assurance.mp4",
     description:
-      "Establish clear quality standards, monitor production processes, and identify potential risks before they become costly problems. Through inspections, testing coordination, and on-site follow-up, help ensure products meet your expectations and required market standards.",
+      "Set practical quality standards based on your product positioning, production realities, and cost expectations. When needed, I can establish a low-cost 100% inspection setup in China to check every unit before shipment, rather than relying solely on random sampling.",
+  },
+  {
+    id: "compliance-testing",
+    headline: "Compliance & Testing",
+    size: "md",
+    panelVideo: asset(
+      "images/service/Product%20Compliance%20%26amp%3B%20Testing%20Coordination.m4v",
+    ),
+    description:
+      "Engage testing labs before mass production, using the target market and a material-level product breakdown to define the required tests. I coordinate factories and labs, address testing issues and corrective actions, and follow through until the required compliance reports are completed.",
   },
   {
     id: "packaging-development",
@@ -88,7 +98,7 @@ export const supportKnowCards: SupportKnowCard[] = [
     panelVideo:
       "https://assets.iamedx.com/images/home/Packaging%20Development..mp4",
     description:
-      "Help develop packaging solutions that balance product protection, visual presentation, and cost efficiency. By considering materials, structure, user experience, and shipping requirements, ensure the packaging supports both the product and your brand positioning.",
+      "Develop packaging with product protection as the priority while keeping it cost-effective. I can also build a distinctive packaging language across your product line and create a more premium unboxing experience at a low cost.",
   },
   {
     id: "logistics-coordination",

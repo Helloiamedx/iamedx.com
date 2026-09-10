@@ -23,11 +23,11 @@ const MOBILE_META_DELAY_S = 0.22;
 function ExternalArrow() {
   return (
     <span className="mobile-menu__external-icon" aria-hidden="true">
-      <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+      <svg viewBox="0 0 14 14" fill="none">
         <path
-          d="M4 10.5L10.5 4M10.5 4H5.5M10.5 4V9"
+          d="M4 10.5 10.5 4M10.5 4H5.75M10.5 4V8.75"
           stroke="currentColor"
-          strokeWidth="1.5"
+          strokeWidth="1.35"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
