@@ -4664,8 +4664,45 @@ body:has(.home-page) .site-footer__gap {
 }
 
 .support-know__panel--video,
-.support-know__panel--stack {
+.support-know__panel--stack,
+.support-know__panel--price {
   background: #000;
+}
+
+.support-know__panel--price {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 2.5rem);
+}
+
+.support-know__price {
+  margin: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.08em;
+  color: #fff;
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-synthesis: none;
+  font-size: clamp(2.6rem, 9.5vw, 5.75rem);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.support-know__price-currency {
+  flex: 0 0 auto;
+  font-size: 0.78em;
+  font-weight: 300;
+  letter-spacing: 0;
+  transform: translateY(0.02em);
+}
+
+.support-know__price-amount {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
 }
 
 .support-know__panel-video {

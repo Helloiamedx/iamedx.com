@@ -75,19 +75,117 @@ function SupportPanelVideo({
   );
 }
 
+/**
+ * Cost Optimization stage — `$` left, amount eases from → to while active.
+ * Leave resets to `from`; return restarts. Loops with a short hold at the floor.
+ */
+function SupportCostCountdown({
+  from,
+  to,
+  durationMs = 5600,
+  active,
+}: {
+  from: number;
+  to: number;
+  durationMs?: number;
+  active: boolean;
+}) {
+  const reduceMotion = useReducedMotion();
+  const [value, setValue] = useState(from);
+  const rafRef = useRef(0);
+  const holdRef = useRef(0);
+
+  useEffect(() => {
+    cancelAnimationFrame(rafRef.current);
+    window.clearTimeout(holdRef.current);
+
+    if (!active) {
+      setValue(from);
+      return;
+    }
+
+    if (reduceMotion) {
+      setValue(to);
+      return;
+    }
+
+    let cancelled = false;
+    const holdMs = 1600;
+    const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
+
+    const runCycle = () => {
+      if (cancelled) return;
+      const started = performance.now();
+      setValue(from);
+
+      const tick = (now: number) => {
+        if (cancelled) return;
+        const t = Math.min(1, (now - started) / durationMs);
+        setValue(from + (to - from) * easeOutCubic(t));
+        if (t < 1) {
+          rafRef.current = requestAnimationFrame(tick);
+          return;
+        }
+        holdRef.current = window.setTimeout(runCycle, holdMs);
+      };
+
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    runCycle();
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(rafRef.current);
+      window.clearTimeout(holdRef.current);
+    };
+  }, [active, from, to, durationMs, reduceMotion]);
+
+  return (
+    <div
+      className="support-know__panel support-know__panel--price"
+      aria-hidden="true"
+    >
+      <p className="support-know__price">
+        <span className="support-know__price-currency">$</span>
+        <span className="support-know__price-amount">{value.toFixed(2)}</span>
+      </p>
+    </div>
+  );
+}
+
 function SupportPanel({
   card,
   active,
+  compact,
 }: {
   card: SupportKnowCard;
   active: boolean;
+  compact: boolean;
 }) {
   const fullscreen = card.panelFullscreen !== false;
 
-  if (card.panelVideo) {
+  if (card.panelPriceCountdown) {
+    return (
+      <SupportCostCountdown
+        from={card.panelPriceCountdown.from}
+        to={card.panelPriceCountdown.to}
+        durationMs={card.panelPriceCountdown.durationMs}
+        active={active}
+      />
+    );
+  }
+
+  const videoSrc =
+    compact && card.panelVideoMobile
+      ? card.panelVideoMobile
+      : card.panelVideo;
+
+  if (videoSrc) {
     return (
       <SupportPanelVideo
-        src={card.panelVideo}
+        key={videoSrc}
+        src={videoSrc}
         playbackRate={card.panelVideoPlaybackRate ?? 1}
         fullscreen={fullscreen}
         active={active}
@@ -403,7 +501,11 @@ function SupportMediaStage({
               layerRefs.current[index] = node;
             }}
           >
-            <SupportPanel card={card} active={index === activeIndex} />
+            <SupportPanel
+              card={card}
+              active={index === activeIndex}
+              compact={compact}
+            />
           </div>
         );
       })}

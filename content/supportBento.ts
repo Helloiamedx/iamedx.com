@@ -15,8 +15,20 @@ export type SupportKnowCard = {
   panelImageAlign?: "center" | "top" | "right";
   /** Looping panel video (optional) */
   panelVideo?: string;
+  /** Mobile (≤900px) panel video; falls back to panelVideo when omitted */
+  panelVideoMobile?: string;
   /** HTMLMediaElement.playbackRate when panelVideo is set */
   panelVideoPlaybackRate?: number;
+  /**
+   * Price ticker panel — `$` + amount easing from → to while the card is active.
+   * Mutually exclusive with panelVideo / panelImages when set.
+   */
+  panelPriceCountdown?: {
+    from: number;
+    to: number;
+    /** Descent duration in ms (default in component). */
+    durationMs?: number;
+  };
   /**
    * Right-panel media fit. Default `true` = cover the media pane edge-to-edge.
    * Set `false` only when the asset must stay letterboxed / not cropped.
@@ -40,8 +52,11 @@ export const supportKnowCards: SupportKnowCard[] = [
     id: "cost-evaluation-negotiation",
     headline: "Cost Optimization",
     size: "md",
-    panelVideo:
-      "https://assets.iamedx.com/images/home/Cost%20Evaluation%20%26%20Negotiation.mp4",
+    panelPriceCountdown: {
+      from: 10.58,
+      to: 10.31,
+      durationMs: 5600,
+    },
     description:
       "Evaluate pricing through systematic cost breakdowns and years of sourcing experience. I identify where costs are actually generated, assess reasonable cost ranges, and negotiate from a well-informed position while maintaining quality and production feasibility.",
   },
@@ -59,7 +74,9 @@ export const supportKnowCards: SupportKnowCard[] = [
     headline: "Prototype Development",
     size: "xl",
     panelVideo:
-      "https://assets.iamedx.com/images/home/Prototype%20Development.mp4",
+      "https://assets.iamedx.com/images/home/From%20concept%20to%20delivery/Prototype%20Development/desktop.mp4",
+    panelVideoMobile:
+      "https://assets.iamedx.com/images/home/From%20concept%20to%20delivery/Prototype%20Development/phone1.mp4",
     description:
       "Support the transition from concept to physical product by reviewing designs, identifying manufacturing challenges, coordinating prototypes, and refining details through multiple iterations. The goal is to ensure the final design is not only visually accurate but also practical for mass production.",
   },
