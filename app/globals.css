@@ -1491,9 +1491,27 @@ body.is-mobile-menu-open .mobile-menu a {
   letter-spacing: -0.04em;
   line-height: 1.15;
   color: var(--footer-ink);
-  text-wrap: balance;
+  text-wrap: wrap;
+  overflow: visible;
   text-box-trim: trim-start;
   text-box-edge: cap alphabetic;
+}
+
+.site-footer__lead .line-reveal {
+  max-width: 100%;
+  overflow: visible;
+}
+
+.site-footer__lead .line-reveal__line-mask {
+  display: block;
+  overflow: clip;
+  padding-block: 0.08em;
+  margin-block: -0.08em;
+}
+
+.site-footer__lead .line-reveal__line {
+  display: block;
+  padding-bottom: 0.04em;
 }
 
 @supports not (text-box-trim: trim-start) {

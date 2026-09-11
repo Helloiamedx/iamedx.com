@@ -10,6 +10,7 @@ import {
   whatsAppCta,
 } from "@/content/nav";
 import { OriginButton } from "@/components/ui/origin-button";
+import { LineRevealText } from "@/components/LineRevealText";
 import { RollLink } from "@/components/RollLink";
 import { asset } from "@/lib/assets";
 
@@ -24,7 +25,9 @@ export function Footer() {
         <div className="site-footer__shell">
           <div className="site-footer__top">
             <div className="site-footer__primary">
-              <p className="site-footer__lead">{footerLeadLine}</p>
+              <p className="site-footer__lead">
+                <LineRevealText text={footerLeadLine} />
+              </p>
 
               <div className="site-footer__cta-actions">
                 <div className="site-footer__whatsapp">

@@ -16,8 +16,8 @@ type LineRevealTextProps = {
 };
 
 /**
- * Section-title entrance — each line slides up inside an overflow mask
- * (no clipPath on the glyphs — that was cropping letter edges).
+ * Section-title entrance — each line slides up inside an overflow mask.
+ * Replays every time the parent section enters the viewport.
  */
 export function LineRevealText({ text, className }: LineRevealTextProps) {
   const textRef = useRef<HTMLDivElement>(null);
@@ -42,21 +42,43 @@ export function LineRevealText({ text, className }: LineRevealTextProps) {
         return () => split.revert();
       }
 
-      const tween = gsap.from(split.lines, {
-        yPercent: 110,
-        opacity: 0,
+      const fromVars = { yPercent: 110, opacity: 0 };
+      gsap.set(split.lines, fromVars);
+
+      const tween = gsap.fromTo(split.lines, fromVars, {
+        yPercent: 0,
+        opacity: 1,
         stagger: 0.15,
         duration: 0.8,
         ease: "power3.out",
-        scrollTrigger: {
-          trigger: el,
-          start: "top 82%",
-          once: true,
-        },
+        paused: true,
+      });
+
+      const reset = () => {
+        tween.pause(0);
+        gsap.set(split.lines, fromVars);
+      };
+
+      const play = () => {
+        reset();
+        tween.play(0);
+      };
+
+      /* Section or footer stage — re-enter from above/below replays */
+      const section =
+        el.closest("section, footer, .site-footer__stage") ?? el;
+      const trigger = ScrollTrigger.create({
+        trigger: section,
+        start: "top 78%",
+        end: "bottom 22%",
+        onEnter: play,
+        onEnterBack: play,
+        onLeave: reset,
+        onLeaveBack: reset,
       });
 
       return () => {
-        tween.scrollTrigger?.kill();
+        trigger.kill();
         tween.kill();
         split.revert();
       };
