@@ -28,7 +28,7 @@ const ACT2_END = SAVED_DONE + HOLD_MS;
 
 const ROW_START = ACT2_END;
 const ROW_STAGGER = 280;
-const ROW_COUNT = 5;
+const ROW_COUNT = 4;
 const ROW_DONE = ROW_START + (ROW_COUNT - 1) * ROW_STAGGER + 320;
 
 const TOTAL_MS = ROW_DONE + HOLD_MS;
@@ -120,8 +120,8 @@ export function SupportCostContinuous({
     let prevTime = timeRef.current;
     let gatherOrigins: { dx: number; dy: number }[] | null = null;
 
+    /** One shared meet point — middle of the lever list (stable on mobile). */
     const measureGatherOrigins = () => {
-      /* Park $0.27 at its act-2 seat (still invisible) so we aim at the real spot. */
       screen.classList.add("is-pre-save");
       leversRoot.classList.add("is-gathering");
       levers.forEach((element) => {
@@ -131,23 +131,12 @@ export function SupportCostContinuous({
       });
       void screen.offsetWidth;
 
-      const target = root.querySelector<HTMLElement>(
-        ".support-know-cost__saving .support-know-cost__number",
-      );
-      if (!target) {
-        gatherOrigins = levers.map(() => ({ dx: 0, dy: 0 }));
-        return;
-      }
-
-      const tr = target.getBoundingClientRect();
+      const tr = leversRoot.getBoundingClientRect();
       const tx = tr.left + tr.width / 2;
       const ty = tr.top + tr.height / 2;
 
       gatherOrigins = levers.map((element) => {
-        const cut = element.querySelector<HTMLElement>(
-          ".support-know-cost__lever-cut",
-        );
-        const box = (cut ?? element).getBoundingClientRect();
+        const box = element.getBoundingClientRect();
         return {
           dx: tx - (box.left + box.width / 2),
           dy: ty - (box.top + box.height / 2),
@@ -158,7 +147,6 @@ export function SupportCostContinuous({
         element.style.transition = "";
         element.style.transform = "";
       });
-      void leversRoot.offsetWidth;
     };
 
     const draw = () => {
@@ -185,8 +173,8 @@ export function SupportCostContinuous({
       }
 
       /*
-       * Keep levers collapsed after the merge. Removing is-gathering snaps
-       * names/grid back open (= “explode”) right as $0.27 appears.
+       * Keep levers collapsed after the gather. Removing is-gathering snaps
+       * layout back open (= “explode”) right as $0.27 appears.
        */
       const mergeActive = time >= GATHER_START && next <= 2;
       if (mergeActive) {
@@ -232,17 +220,14 @@ export function SupportCostContinuous({
           }
         }
 
+        /* All four converge on one point while shrinking to nothing. */
         if (mergeActive && gatherOrigins) {
           const origin = gatherOrigins[index] ?? { dx: 0, dy: 0 };
           const gatherP = clamp((time - GATHER_START) / GATHER_MS);
           const gatherE = 1 - (1 - gatherP) ** 3;
-          /* After meeting at center — keep shrinking away, never spring back. */
-          const shrinkP = clamp((time - GATHER_END) / 420);
-          const shrinkE = 1 - (1 - shrinkP) ** 2;
-          const scale = 1 + 0.1 * gatherE - 0.55 * shrinkE;
-          const opacity = (1 - 0.08 * gatherE) * (1 - shrinkE);
-          element.style.transform = `translate(${origin.dx * gatherE}px, ${origin.dy * gatherE}px) scale(${Math.max(scale, 0.35)})`;
-          element.style.opacity = String(Math.max(opacity, 0));
+          const scale = Math.max(1 - gatherE, 0);
+          element.style.transform = `translate(${origin.dx * gatherE}px, ${origin.dy * gatherE}px) scale(${scale})`;
+          element.style.opacity = String(scale);
         }
       });
 
@@ -343,7 +328,6 @@ export function SupportCostContinuous({
     { qty: "3,000", total: "810" },
     { qty: "5,000", total: "1,350" },
     { qty: "10,000", total: "2,700" },
-    { qty: "50,000", total: "13,500" },
   ] as const;
 
   return (

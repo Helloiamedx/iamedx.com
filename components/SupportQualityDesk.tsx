@@ -7,22 +7,20 @@ import { useAfterHeroGate } from "@/lib/videoLoadQueue";
 import { cn } from "@/lib/utils";
 
 const DEAL_GAP_MS = 320;
-const HOLD_FULL_MS = 2200;
-const CLEAR_MS = 420;
 
-/** Settled desk poses — portrait sheets spread to fill the panel. */
+/** Settled desk poses — deal bottom → top so the stack builds upward. */
 const DESK_POSES = [
-  { x: 12, y: 26, r: -11 },
-  { x: 36, y: 22, r: 8 },
-  { x: 60, y: 28, r: -6 },
-  { x: 86, y: 24, r: 11 },
-  { x: 18, y: 48, r: 5 },
-  { x: 46, y: 44, r: -9 },
-  { x: 74, y: 50, r: 7 },
   { x: 10, y: 72, r: -7 },
   { x: 34, y: 70, r: 10 },
   { x: 62, y: 74, r: -5 },
   { x: 88, y: 68, r: 8 },
+  { x: 18, y: 48, r: 5 },
+  { x: 46, y: 44, r: -9 },
+  { x: 74, y: 50, r: 7 },
+  { x: 12, y: 26, r: -11 },
+  { x: 36, y: 22, r: 8 },
+  { x: 60, y: 28, r: -6 },
+  { x: 86, y: 24, r: 11 },
 ] as const;
 
 type SupportQualityDeskProps = {
@@ -46,7 +44,7 @@ function preloadImage(src: string): Promise<void> {
 
 /**
  * Quality Management panel — inspection reports dealt onto a desk one by one.
- * Leave resets; pause freezes mid-deal; resume continues; full desk holds then loops.
+ * Plays once to a full desk (no loop). Leave resets; pause freezes; resume continues.
  */
 export function SupportQualityDesk({
   images,
@@ -62,7 +60,6 @@ export function SupportQualityDesk({
   const [ready, setReady] = useState(false);
   /** How many sheets have landed (0…n). */
   const [dealt, setDealt] = useState(0);
-  const [clearing, setClearing] = useState(false);
 
   const dealtRef = useRef(0);
   const timerRef = useRef(0);
@@ -73,7 +70,6 @@ export function SupportQualityDesk({
     let cancelled = false;
     setReady(false);
     setDealt(0);
-    setClearing(false);
     void Promise.all(images.map((src) => preloadImage(src))).then(() => {
       if (!cancelled) setReady(true);
     });
@@ -88,7 +84,6 @@ export function SupportQualityDesk({
 
     if (!active) {
       setDealt(0);
-      setClearing(false);
       return;
     }
 
@@ -96,11 +91,11 @@ export function SupportQualityDesk({
 
     if (reduceMotion) {
       setDealt(n);
-      setClearing(false);
       return;
     }
 
     if (!playing) return;
+    if (dealtRef.current >= n) return;
 
     let cancelled = false;
 
@@ -110,29 +105,15 @@ export function SupportQualityDesk({
       }, ms);
     };
 
-    const loop = () => {
+    const dealNext = () => {
       if (cancelled) return;
       const count = dealtRef.current;
-
-      if (count >= n) {
-        schedule(() => {
-          if (cancelled) return;
-          setClearing(true);
-          schedule(() => {
-            if (cancelled) return;
-            setClearing(false);
-            setDealt(0);
-            schedule(loop, DEAL_GAP_MS);
-          }, CLEAR_MS);
-        }, HOLD_FULL_MS);
-        return;
-      }
-
+      if (count >= n) return;
       setDealt(count + 1);
-      schedule(loop, DEAL_GAP_MS);
+      if (count + 1 < n) schedule(dealNext, DEAL_GAP_MS);
     };
 
-    schedule(loop, dealtRef.current === 0 ? DEAL_GAP_MS : DEAL_GAP_MS);
+    schedule(dealNext, DEAL_GAP_MS);
 
     return () => {
       cancelled = true;
@@ -147,7 +128,6 @@ export function SupportQualityDesk({
     <div
       className={cn(
         "support-know__panel support-know__panel--desk support-know-desk",
-        clearing && "is-clearing",
         className,
       )}
       aria-label="Quality inspection reports on a desk"

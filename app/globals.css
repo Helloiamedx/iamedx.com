@@ -4978,7 +4978,7 @@ body:has(.home-page) .site-footer__gap {
   opacity: 0;
   pointer-events: none;
   user-select: none;
-  transform: translate(-50%, -120%) rotate(calc(var(--desk-r, 0deg) - 18deg))
+  transform: translate(-50%, 40%) rotate(calc(var(--desk-r, 0deg) + 12deg))
     scale(0.92);
   transform-origin: center center;
   transition:
@@ -5151,6 +5151,7 @@ body:has(.home-page) .site-footer__gap {
 }
 
 .support-know-cost__operator {
+  --cost-op-ty: 0%;
   position: absolute;
   top: calc(14% + 3.15rem);
   left: 50%;
@@ -5158,15 +5159,37 @@ body:has(.home-page) .site-footer__gap {
   font-family: "Grtsk", var(--font-sans);
   font-size: clamp(1.25rem, 2.5vw, 1.85rem);
   opacity: 0;
-  transform: translateX(-50%);
+  transform: translate(-50%, var(--cost-op-ty));
   transition:
     opacity 1s ease,
     top 1.3s ease;
 }
 
-.support-know-cost__screen[data-step="1"] .support-know-cost__operator,
+/* Act 1 — keep nudging right (“look at the optimizing side”) until act 2 */
+@keyframes support-cost-arrow-nudge {
+  0%,
+  100% {
+    transform: translate(-50%, var(--cost-op-ty)) translateX(0);
+    opacity: 0.5;
+  }
+  42% {
+    transform: translate(-50%, var(--cost-op-ty)) translateX(8px);
+    opacity: 1;
+  }
+  58% {
+    transform: translate(-50%, var(--cost-op-ty)) translateX(8px);
+    opacity: 1;
+  }
+}
+
+.support-know-cost__screen[data-step="1"] .support-know-cost__operator {
+  opacity: 1;
+  animation: support-cost-arrow-nudge 1.35s cubic-bezier(0.45, 0, 0.35, 1) infinite;
+}
+
 .support-know-cost__screen[data-step="2"] .support-know-cost__operator {
   opacity: 1;
+  animation: none;
 }
 
 /* Row 2 — lower content (70% of big-number band) */
@@ -5259,29 +5282,17 @@ body:has(.home-page) .site-footer__gap {
   display: none;
 }
 
-/* After cuts settle — gather toward the $0.27 anchor (motion set in JS) */
-.support-know-cost__levers.is-gathering {
-  gap: clamp(0.4rem, 1vw, 0.65rem) clamp(0.85rem, 2vw, 1.35rem);
-}
-
+/* Gather — four levers fly to one point while shrinking (motion set in JS) */
 .support-know-cost__levers.is-gathering .support-know-cost__lever {
-  justify-content: center;
-  gap: 0;
   border-bottom-color: transparent;
-  /* transform driven by JS toward saving number */
-  transition:
-    color 0.45s ease,
-    border-color 0.45s ease,
-    gap 0.45s ease;
+  transform-origin: center center;
+  transition: border-color 0.35s ease;
 }
 
 .support-know-cost__levers.is-gathering .support-know-cost__lever-name {
   opacity: 0;
-  width: 0;
-  max-width: 0;
-  margin: 0;
-  overflow: hidden;
-  pointer-events: none;
+  transition: opacity 0.28s ease;
+  /* Keep width — collapsing layout mid-flight made mobile paths look random */
 }
 
 .support-know-cost__screen[data-step="2"] .support-know-cost__levers,
@@ -5341,37 +5352,59 @@ body:has(.home-page) .site-footer__gap {
   top: 12%;
 }
 
-.support-know-cost__screen[data-step="3"] .support-know-cost__price--original {
-  left: 16%;
-}
-
-.support-know-cost__screen[data-step="3"] .support-know-cost__price--current {
-  left: 50%;
-}
-
+/* Same figure size as acts 1–2 (was a smaller desktop-only override) */
 .support-know-cost__screen[data-step="3"] .support-know-cost__price .support-know-cost__number,
 .support-know-cost__screen[data-step="3"] .support-know-cost__saving .support-know-cost__number {
-  font-size: calc(clamp(1.35rem, 3.8vw, 2.5rem) + 10px);
+  font-size: clamp(2.4rem, 7.5vw, 5.75rem);
 }
 
-/* Same row as Original / Optimized — right third of the figures band */
-.support-know-cost__screen[data-step="3"] .support-know-cost__saving {
-  top: 12%;
-  left: 84%;
+/*
+ * Act 3 — three clusters centered with a tight even gap
+ * (not stretched across the full 85% band).
+ */
+.support-know-cost__screen[data-step="3"] .support-know-cost__figures {
   display: flex;
-  flex-direction: column-reverse;
+  justify-content: center;
+  align-items: flex-start;
+  gap: clamp(1.75rem, 3.2vw, 2.85rem);
+  inset: auto;
+  top: 12%;
+  left: 50%;
   width: max-content;
-  max-width: 32%;
-  z-index: 2;
+  max-width: var(--cost-row1-w);
+  height: auto;
+  transform: translate(-50%, 0);
 }
 
 .support-know-cost__screen[data-step="3"] .support-know-cost__operator {
-  top: calc(12% + 2.4rem);
-  opacity: 0;
+  display: none;
 }
 
+.support-know-cost__screen[data-step="3"] .support-know-cost__price,
+.support-know-cost__screen[data-step="3"] .support-know-cost__price--original,
+.support-know-cost__screen[data-step="3"] .support-know-cost__price--current,
+.support-know-cost__screen[data-step="3"] .support-know-cost__saving {
+  position: relative;
+  top: auto;
+  left: auto;
+  flex: 0 0 auto;
+  width: max-content;
+  max-width: none;
+  transform: none;
+  text-align: center;
+}
+
+.support-know-cost__screen[data-step="3"] .support-know-cost__saving {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  z-index: 2;
+}
+
+.support-know-cost__screen[data-step="3"] .support-know-cost__label,
 .support-know-cost__screen[data-step="3"] .support-know-cost__saving .support-know-cost__label {
   margin: 0 0 0.85rem;
+  white-space: nowrap;
 }
 
 .support-know-cost__totals {
@@ -5431,21 +5464,109 @@ body:has(.home-page) .site-footer__gap {
 }
 
 @media (max-width: 900px) {
+  /*
+   * Mobile: figures use full padded width (no 85% cap).
+   * Levers / totals stay a step narrower than the top band.
+   * Acts 1–3 share one figure size (−6px) and one label size (−2px).
+   */
+  .support-know-cost__screen {
+    --cost-row1-w: 100%;
+    --cost-row2-w: 78%;
+    --cost-figure-size: calc(clamp(2.4rem, 7.5vw, 5.75rem) - 9px);
+    --cost-label-size: calc(clamp(0.625rem, 0.58rem + 0.2vw, 0.75rem) - 2px);
+    /* Sit in the visible band above the bottom copy card */
+    --cost-price-top: 8%;
+    --cost-row2-top: 34%;
+    /* Closer under the act-3 figure band so 4 rows clear the frost card */
+    --cost-totals-top: 22%;
+  }
+
+  .support-know-cost__label {
+    font-family: var(--font-label, var(--font-sans));
+    font-size: var(--cost-label-size);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .support-know-cost__number,
+  .support-know-cost__saving .support-know-cost__number,
+  .support-know-cost__screen[data-step="3"] .support-know-cost__price .support-know-cost__number,
+  .support-know-cost__screen[data-step="3"] .support-know-cost__saving .support-know-cost__number {
+    font-family: "Grtsk-Medium", "Grtsk", var(--font-sans);
+    font-size: var(--cost-figure-size);
+    font-weight: 500;
+    letter-spacing: -0.06em;
+    line-height: 1.05;
+  }
+
+  .support-know-cost__price {
+    top: var(--cost-price-top);
+  }
+
+  .support-know-cost__screen[data-step="3"] .support-know-cost__price {
+    top: var(--cost-price-top);
+  }
+
   .support-know-cost__levers {
-    top: 48%;
-    gap: 0.35rem 0.85rem;
+    top: var(--cost-row2-top);
+    /* Narrower band → shorter gap between left title and right cut */
+    width: 52%;
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .support-know-cost__saving {
+    top: var(--cost-row2-top);
+  }
+
+  .support-know-cost__screen[data-step="3"] .support-know-cost__saving {
+    top: var(--cost-price-top);
+  }
+
+  .support-know-cost__totals {
+    top: var(--cost-totals-top);
+  }
+
+  /* Act 3 — same equal-gap flex as desktop; only retarget top on mobile */
+  .support-know-cost__screen[data-step="3"] .support-know-cost__figures {
+    top: var(--cost-price-top);
   }
 
   .support-know-cost__lever {
+    justify-content: flex-start;
+    gap: 0.55em;
     font-size: 0.72rem;
   }
 
+  .support-know-cost__lever-name {
+    flex: 1 1 auto;
+    text-align: left;
+  }
+
+  .support-know-cost__lever-cut {
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+
+  /*
+   * Center the act 1/2 arrow on the number line (label height + half figure),
+   * not the old desktop 3.15rem offset.
+   */
   .support-know-cost__operator {
+    --cost-op-ty: -50%;
+    top: calc(
+      var(--cost-price-top) + (var(--cost-label-size) * 1.2) + 0.85rem +
+        (var(--cost-figure-size) * 1.05 * 0.5)
+    );
     font-size: 1.15rem;
+    transform: translate(-50%, var(--cost-op-ty));
   }
 
   .support-know-cost__row {
     grid-template-columns: 1fr 16px 1fr 16px 1fr;
+    padding: 0.38rem 0;
   }
 
   .support-know-cost__row small {
@@ -5456,6 +5577,10 @@ body:has(.home-page) .site-footer__gap {
 @media (prefers-reduced-motion: reduce) {
   .support-know-cost * {
     transition: none !important;
+  }
+
+  .support-know-cost__operator {
+    animation: none !important;
   }
 }
 
