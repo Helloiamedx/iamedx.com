@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { HeroActions } from "@/components/HeroActions";
+import { LineRevealText } from "@/components/LineRevealText";
 import { HERO_COPY_ATTR, whenHeroFlag } from "@/lib/heroSequence";
 
 const HEADLINE =
@@ -51,7 +52,9 @@ export function HeroHeadline() {
   return (
     <>
       <div className={`hero__copy${copyGate ? " is-revealed" : ""}`}>
-        <h1 className="hero__title">{HEADLINE}</h1>
+        <h1 className="hero__title">
+          {copyGate ? <LineRevealText text={HEADLINE} /> : HEADLINE}
+        </h1>
         <p className="hero__subtitle">{SUBTITLE}</p>
       </div>
       <HeroActions revealed={actionsReady} />

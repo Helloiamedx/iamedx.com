@@ -1498,20 +1498,23 @@ body.is-mobile-menu-open .mobile-menu a {
 }
 
 .site-footer__lead .line-reveal {
+  display: block;
   max-width: 100%;
   overflow: visible;
+  line-height: inherit;
 }
 
 .site-footer__lead .line-reveal__line-mask {
   display: block;
   overflow: clip;
-  padding-block: 0.08em;
-  margin-block: -0.08em;
+  line-height: inherit;
+  padding-block: 0.12em;
+  margin-block: -0.12em;
 }
 
 .site-footer__lead .line-reveal__line {
   display: block;
-  padding-bottom: 0.04em;
+  line-height: inherit;
 }
 
 @supports not (text-box-trim: trim-start) {
@@ -2559,6 +2562,48 @@ html[data-hero-copy-ready="1"] .hero__content {
   text-transform: uppercase;
   text-align: left;
   color: #fff;
+  overflow: visible;
+  text-wrap: wrap;
+}
+
+/*
+ * iPad / tablet band — probe: title −1px on top of prior −3px
+ * (so you can confirm this query hits). Width 60%. Cap 1400px in case
+ * Pro landscape reports past 1366.
+ */
+@media (min-width: 900px) and (max-width: 1400px) {
+  .hero__title {
+    width: 60% !important;
+    max-width: 60% !important;
+    font-size: calc(
+      clamp(
+        calc((2.2rem - 2px) * 0.5 + 18px),
+        calc((6.2vw - 2px) * 0.5 + 18px),
+        calc((5.25rem - 2px) * 0.5 + 18px)
+      ) - 8px - 3px - 1px
+    );
+  }
+}
+
+.hero__title .line-reveal {
+  display: block;
+  max-width: 100%;
+  overflow: visible;
+  line-height: inherit;
+}
+
+.hero__title .line-reveal__line-mask {
+  display: block;
+  overflow: clip;
+  line-height: inherit;
+  /* Extra paint room inside the mask; −margin keeps leading unchanged */
+  padding-block: 0.12em;
+  margin-block: -0.12em;
+}
+
+.hero__title .line-reveal__line {
+  display: block;
+  line-height: inherit;
 }
 
 .hero__subtitle {
@@ -2587,23 +2632,26 @@ html[data-hero-copy-ready="1"] .hero__content {
 
 .home-section-intro__title .line-reveal,
 .home-someone__title .line-reveal {
+  display: block;
   max-width: 100%;
   overflow: visible;
+  line-height: inherit;
 }
 
-/* GSAP mask wraps (linesClass + "-mask") — room for ascenders/descenders */
+/* GSAP mask — pad inside clip, cancel with −margin so leading stays put */
 .home-section-intro__title .line-reveal__line-mask,
 .home-someone__title .line-reveal__line-mask {
   display: block;
   overflow: clip;
-  padding-block: 0.08em;
-  margin-block: -0.08em;
+  line-height: inherit;
+  padding-block: 0.12em;
+  margin-block: -0.12em;
 }
 
 .home-section-intro__title .line-reveal__line,
 .home-someone__title .line-reveal__line {
   display: block;
-  padding-bottom: 0.04em;
+  line-height: inherit;
 }
 
 .hero__actions {

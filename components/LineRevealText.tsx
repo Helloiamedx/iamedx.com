@@ -18,9 +18,10 @@ type LineRevealTextProps = {
 /**
  * Section-title entrance — each line slides up inside an overflow mask.
  * Replays every time the parent section enters the viewport.
+ * Root + split nodes are spans so it can live inside <p> / <h1> / <h2>.
  */
 export function LineRevealText({ text, className }: LineRevealTextProps) {
-  const textRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
 
   useGSAP(
     () => {
@@ -35,6 +36,7 @@ export function LineRevealText({ text, className }: LineRevealTextProps) {
         type: "lines",
         linesClass: "line-reveal__line",
         mask: "lines",
+        tag: "span",
       });
 
       if (reduceMotion) {
@@ -64,9 +66,9 @@ export function LineRevealText({ text, className }: LineRevealTextProps) {
         tween.play(0);
       };
 
-      /* Section or footer stage — re-enter from above/below replays */
+      /* Prefer the hero landmark when nested (LineReveal inside .hero) */
       const section =
-        el.closest("section, footer, .site-footer__stage") ?? el;
+        el.closest(".hero, section, footer, .site-footer__stage") ?? el;
       const trigger = ScrollTrigger.create({
         trigger: section,
         start: "top 78%",
@@ -75,6 +77,11 @@ export function LineRevealText({ text, className }: LineRevealTextProps) {
         onEnterBack: play,
         onLeave: reset,
         onLeaveBack: reset,
+      });
+
+      /* Late mount (e.g. hero after copy gate) while already in view */
+      queueMicrotask(() => {
+        if (trigger.isActive) play();
       });
 
       return () => {
@@ -87,8 +94,8 @@ export function LineRevealText({ text, className }: LineRevealTextProps) {
   );
 
   return (
-    <div ref={textRef} className={cn("line-reveal", className)}>
+    <span ref={textRef} className={cn("line-reveal", className)}>
       {text}
-    </div>
+    </span>
   );
 }
