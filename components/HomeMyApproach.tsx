@@ -1,3 +1,4 @@
+import { LineRevealText } from "@/components/LineRevealText";
 import { myApproach } from "@/content/homeCopy";
 
 const POINTS = myApproach.points;
@@ -16,7 +17,7 @@ export function HomeMyApproach() {
       <div className="home-someone__inner">
         <div className="home-someone__rail">
           <h2 id={`${myApproach.id}-title`} className="home-someone__title">
-            {myApproach.title}
+            <LineRevealText text={myApproach.title} />
           </h2>
         </div>
 

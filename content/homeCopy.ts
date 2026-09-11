@@ -131,7 +131,7 @@ export const someoneLikeThisLines: SomeoneLikeThisLine[] = [
   },
 ];
 
-/** My Approach — photo plate band (former someone layout). */
+/** My Approach — black plate band (former someone layout). */
 export type MyApproachPoint = {
   id: string;
   title: string;

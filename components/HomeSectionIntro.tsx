@@ -1,3 +1,5 @@
+import { LineRevealText } from "@/components/LineRevealText";
+
 type HomeSectionIntroProps = {
   /** `id` for the h2 — section `aria-labelledby` target */
   titleId: string;
@@ -8,7 +10,7 @@ type HomeSectionIntroProps = {
 
 /**
  * Shared home section intro — label + title in one 55% container.
- * Type recipe is owned by Character (`.home-page` tokens); change once → all bands follow.
+ * Title uses line-clip scroll reveal.
  */
 export function HomeSectionIntro({
   titleId,
@@ -19,7 +21,7 @@ export function HomeSectionIntro({
     <header className="home-section-intro">
       <p className="home-section-intro__label">{label}</p>
       <h2 id={titleId} className="home-section-intro__title">
-        {title}
+        <LineRevealText text={title} />
       </h2>
     </header>
   );

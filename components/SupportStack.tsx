@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { PanelImageStack } from "@/components/PanelImageStack";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
+import { SupportCostContinuous } from "@/components/SupportCostContinuous";
+import { SupportQualityDesk } from "@/components/SupportQualityDesk";
 import {
   supportBentoSection,
   supportKnowCards,
@@ -11,29 +14,52 @@ import {
 } from "@/content/supportBento";
 import { useDriveVideoPlayback } from "@/lib/videoPlayback";
 import { useSwipeNav } from "@/lib/useSwipeNav";
+import { LineRevealText } from "@/components/LineRevealText";
 
 const CARDS = supportKnowCards;
+
+function supportDetailBody(
+  description: string,
+  descriptionLink?: SupportKnowCard["descriptionLink"],
+): ReactNode {
+  if (!descriptionLink) return description;
+  const { label, href } = descriptionLink;
+  const at = description.indexOf(label);
+  if (at < 0) return description;
+  return (
+    <>
+      {description.slice(0, at)}
+      <Link href={href} className="support-know__detail-link">
+        {label}
+      </Link>
+      {description.slice(at + label.length)}
+    </>
+  );
+}
 
 /**
  * Stage clips bypass the global video load queue.
  * Queue concurrency (2) + slow moov-at-end files (e.g. Prototype) was
  * blocking the active switch and starving every clip after it.
  *
- * Play only while this card is active. Leaving resets to t=0 (paused) so
- * returning always restarts from the start — never background-play.
+ * Play only while this card is active + stage is playing. Leaving resets
+ * to t=0 (paused) so returning always restarts from the start.
  */
 function SupportPanelVideo({
   src,
   playbackRate = 1,
   fullscreen = true,
   active,
+  playing,
 }: {
   src: string;
   playbackRate?: number;
   fullscreen?: boolean;
   active: boolean;
+  playing: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const shouldPlay = active && playing;
 
   useEffect(() => {
     const video = videoRef.current;
@@ -54,7 +80,17 @@ function SupportPanelVideo({
     }
   }, [active]);
 
-  useDriveVideoPlayback(videoRef, active, () => {}, src);
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !active) return;
+    if (playing) {
+      void video.play().catch(() => {});
+    } else {
+      video.pause();
+    }
+  }, [active, playing]);
+
+  useDriveVideoPlayback(videoRef, shouldPlay, () => {}, src);
 
   return (
     <div
@@ -68,7 +104,7 @@ function SupportPanelVideo({
         muted
         loop
         playsInline
-        autoPlay={active}
+        autoPlay={shouldPlay}
         preload={active ? "auto" : "metadata"}
       />
     </div>
@@ -76,102 +112,42 @@ function SupportPanelVideo({
 }
 
 /**
- * Cost Optimization stage — `$` left, amount eases from → to while active.
- * Leave resets to `from`; return restarts. Loops with a short hold at the floor.
+ * Cost Optimization stage — continuous breakdown story while the card is active.
+ * Leave resets to the start; return restarts the timeline.
  */
 function SupportCostCountdown({
-  from,
-  to,
-  durationMs = 5600,
   active,
+  playing,
 }: {
-  from: number;
-  to: number;
-  durationMs?: number;
   active: boolean;
+  playing: boolean;
 }) {
-  const reduceMotion = useReducedMotion();
-  const [value, setValue] = useState(from);
-  const rafRef = useRef(0);
-  const holdRef = useRef(0);
-
-  useEffect(() => {
-    cancelAnimationFrame(rafRef.current);
-    window.clearTimeout(holdRef.current);
-
-    if (!active) {
-      setValue(from);
-      return;
-    }
-
-    if (reduceMotion) {
-      setValue(to);
-      return;
-    }
-
-    let cancelled = false;
-    const holdMs = 1600;
-    const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
-
-    const runCycle = () => {
-      if (cancelled) return;
-      const started = performance.now();
-      setValue(from);
-
-      const tick = (now: number) => {
-        if (cancelled) return;
-        const t = Math.min(1, (now - started) / durationMs);
-        setValue(from + (to - from) * easeOutCubic(t));
-        if (t < 1) {
-          rafRef.current = requestAnimationFrame(tick);
-          return;
-        }
-        holdRef.current = window.setTimeout(runCycle, holdMs);
-      };
-
-      rafRef.current = requestAnimationFrame(tick);
-    };
-
-    runCycle();
-
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(rafRef.current);
-      window.clearTimeout(holdRef.current);
-    };
-  }, [active, from, to, durationMs, reduceMotion]);
-
-  return (
-    <div
-      className="support-know__panel support-know__panel--price"
-      aria-hidden="true"
-    >
-      <p className="support-know__price">
-        <span className="support-know__price-currency">$</span>
-        <span className="support-know__price-amount">{value.toFixed(2)}</span>
-      </p>
-    </div>
-  );
+  return <SupportCostContinuous active={active} playing={playing} />;
 }
 
 function SupportPanel({
   card,
   active,
   compact,
+  playing,
 }: {
   card: SupportKnowCard;
   active: boolean;
   compact: boolean;
+  playing: boolean;
 }) {
   const fullscreen = card.panelFullscreen !== false;
 
   if (card.panelPriceCountdown) {
+    return <SupportCostCountdown active={active} playing={playing} />;
+  }
+
+  if (card.panelDesk && card.panelImages?.length) {
     return (
-      <SupportCostCountdown
-        from={card.panelPriceCountdown.from}
-        to={card.panelPriceCountdown.to}
-        durationMs={card.panelPriceCountdown.durationMs}
+      <SupportQualityDesk
+        images={card.panelImages}
         active={active}
+        playing={playing}
       />
     );
   }
@@ -189,6 +165,7 @@ function SupportPanel({
         playbackRate={card.panelVideoPlaybackRate ?? 1}
         fullscreen={fullscreen}
         active={active}
+        playing={playing}
       />
     );
   }
@@ -205,6 +182,8 @@ function SupportPanel({
       <PanelImageStack
         images={images}
         align={card.panelImageAlign}
+        active={active}
+        playing={playing}
         className="panel-image-stack"
       />
     </div>
@@ -212,9 +191,19 @@ function SupportPanel({
 }
 
 function navDirection(from: number, to: number, total: number) {
-  if (from === total - 1 && to === 0) return 1;
-  if (from === 0 && to === total - 1) return -1;
-  return to > from ? 1 : -1;
+  /* Shared by pill morph + media corner grow: -1 left-bottom, +1 right-bottom. */
+  if (from === total - 1 && to === 0) return -1;
+  if (from === 0 && to === total - 1) return 1;
+  return to > from ? -1 : 1;
+}
+
+/** Play/pause only when the active panel has motion (video, cost anim, desk, or multi-image). */
+function cardHasPlayback(card: SupportKnowCard, compact: boolean) {
+  if (card.panelPriceCountdown) return true;
+  if (card.panelDesk && (card.panelImages?.length ?? 0) > 0) return true;
+  if (compact && card.panelVideoMobile) return true;
+  if (card.panelVideo) return true;
+  return (card.panelImages?.length ?? 0) >= 2;
 }
 
 function sleep(ms: number) {
@@ -272,19 +261,21 @@ async function waitForLayerMedia(
 function SupportMediaStage({
   cards,
   activeIndex,
-  navDir,
   reduceMotion,
   compact,
+  playing,
 }: {
   cards: readonly SupportKnowCard[];
   activeIndex: number;
-  navDir: number;
   reduceMotion: boolean | null;
   compact: boolean;
+  playing: boolean;
 }) {
   const currentRef = useRef(activeIndex);
   const busyRef = useRef(false);
   const rafRef = useRef(0);
+  const playingRef = useRef(playing);
+  playingRef.current = playing;
   const layerRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [current, setCurrent] = useState(activeIndex);
   const [target, setTarget] = useState<number | null>(null);
@@ -315,7 +306,7 @@ function SupportMediaStage({
   const draw = (
     from: number,
     to: number,
-    direction: number,
+    fromLeft: boolean,
     p: number,
     preferReduced: boolean,
   ) => {
@@ -323,9 +314,6 @@ function SupportMediaStage({
     const incoming = layerRefs.current[to];
     if (!outgoing || !incoming) return;
 
-    // Mobile: gesture-aligned (right swipe from left-bottom).
-    // Desktop: original mapping (unchanged).
-    const fromLeft = compact ? direction < 0 : direction > 0;
     const sign = fromLeft ? 1 : -1;
 
     outgoing.style.visibility = "visible";
@@ -367,7 +355,8 @@ function SupportMediaStage({
 
     const from = currentRef.current;
     const to = activeIndex;
-    const direction = navDir;
+    /* Capsule untouched; mobile media flipped to this shared corner rule. */
+    const fromLeft = navDirection(from, to, cards.length) > 0;
     const preferReduced = Boolean(reduceMotion);
     let cancelled = false;
 
@@ -387,7 +376,7 @@ function SupportMediaStage({
       const settled = layerRefs.current[settledTo];
       const video = settled?.querySelector("video");
       /* Active card’s own effect drives play — don’t force neighbors. */
-      if (video && settledTo === activeIndex) {
+      if (video && settledTo === activeIndex && playingRef.current) {
         void video.play().catch(() => {});
       }
       busyRef.current = false;
@@ -441,7 +430,7 @@ function SupportMediaStage({
             if (later === "ready") {
               resetLayers(to);
               const video = incoming.querySelector("video");
-              if (video && currentRef.current === to) {
+              if (video && currentRef.current === to && playingRef.current) {
                 void video.play().catch(() => {});
               }
             }
@@ -450,7 +439,7 @@ function SupportMediaStage({
         return;
       }
 
-      draw(from, to, direction, 0, preferReduced);
+      draw(from, to, fromLeft, 0, preferReduced);
 
       const started = performance.now();
       const duration = preferReduced ? 100 : 480;
@@ -459,7 +448,7 @@ function SupportMediaStage({
         if (cancelled) return;
         const t = Math.min(1, (now - started) / duration);
         const eased = 1 - Math.pow(1 - t, 3);
-        draw(from, to, direction, eased, preferReduced);
+        draw(from, to, fromLeft, eased, preferReduced);
 
         if (t < 1) {
           rafRef.current = requestAnimationFrame(tick);
@@ -479,7 +468,7 @@ function SupportMediaStage({
       cancelAnimationFrame(rafRef.current);
       busyRef.current = false;
     };
-  }, [activeIndex, navDir, reduceMotion, compact]);
+  }, [activeIndex, reduceMotion, cards.length]);
 
   const mounted = new Set<number>(visited);
   mounted.add(current);
@@ -505,6 +494,7 @@ function SupportMediaStage({
               card={card}
               active={index === activeIndex}
               compact={compact}
+              playing={playing}
             />
           </div>
         );
@@ -514,17 +504,19 @@ function SupportMediaStage({
 }
 
 /**
- * Main service — media fills the whole stage; chips + ↑↓ overlay on the left.
- * One chip expands on scroll-in; stepper / chip click switches the active card.
+ * Main service — media fills the whole stage; chips overlay at the bottom.
+ * Active chip morphs open with copy; ← → steps + scrolls the track.
  */
 export function SupportStack() {
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
+  const chipsTrackRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
   const [activeIndex, setActiveIndex] = useState(0);
   const [entered, setEntered] = useState(false);
-  const [compact, setCompact] = useState(false);
   const [navDir, setNavDir] = useState(1);
+  const [stagePlaying, setStagePlaying] = useState(true);
+  const [compact, setCompact] = useState(false);
   const activeCard = CARDS[activeIndex] ?? CARDS[0];
 
   useEffect(() => {
@@ -559,7 +551,9 @@ export function SupportStack() {
     // Clamp at ends — no wrap; end buttons disable instead.
     const next = Math.max(0, Math.min(CARDS.length - 1, index));
     if (next === activeIndex) return;
-    setNavDir(navDirection(activeIndex, next, CARDS.length));
+    const dir = navDirection(activeIndex, next, CARDS.length);
+    /* Mobile capsule enter was mirrored vs ← → — invert only on compact. */
+    setNavDir(compact ? -dir : dir);
     setActiveIndex(next);
     setEntered(true);
   };
@@ -570,11 +564,31 @@ export function SupportStack() {
 
   const atStart = activeIndex <= 0;
   const atEnd = activeIndex >= CARDS.length - 1;
+  const showPlayback = Boolean(activeCard && cardHasPlayback(activeCard, compact));
 
-  const closeToFirst = () => {
-    if (compact || activeIndex === 0) return;
-    selectAt(0);
-  };
+  /* Keep the expanded chip in view when stepping with ← → */
+  useEffect(() => {
+    if (compact || !entered) return;
+    const track = chipsTrackRef.current;
+    const item = track?.querySelector<HTMLElement>(
+      ".support-know__item.is-expanded",
+    );
+    if (!track || !item) return;
+    const trackRect = track.getBoundingClientRect();
+    const itemRect = item.getBoundingClientRect();
+    const pad = 12;
+    if (itemRect.left < trackRect.left + pad) {
+      track.scrollBy({
+        left: itemRect.left - trackRect.left - pad,
+        behavior: reduceMotion ? "auto" : "smooth",
+      });
+    } else if (itemRect.right > trackRect.right - pad) {
+      track.scrollBy({
+        left: itemRect.right - trackRect.right + pad,
+        behavior: reduceMotion ? "auto" : "smooth",
+      });
+    }
+  }, [activeIndex, compact, entered, reduceMotion]);
 
   useSwipeNav(stageRef, (dir) => step(dir), CARDS.length > 1);
 
@@ -587,7 +601,7 @@ export function SupportStack() {
       <div className="support-know__shell">
         <header className="home-section-intro support-know__intro">
           <h2 id="support-know-title" className="home-section-intro__title">
-            {supportBentoSection.title}
+            <LineRevealText text={supportBentoSection.title} />
           </h2>
         </header>
 
@@ -595,300 +609,364 @@ export function SupportStack() {
           <SupportMediaStage
             cards={CARDS}
             activeIndex={activeIndex}
-            navDir={navDir}
             reduceMotion={reduceMotion}
             compact={compact}
+            playing={stagePlaying}
           />
 
-          {!compact && activeIndex > 0 ? (
+          {showPlayback ? (
             <button
               type="button"
-              className="support-know__close"
-              aria-label="Back to first service"
-              onClick={closeToFirst}
+              className="support-know__playback"
+              aria-label={stagePlaying ? "Pause" : "Play"}
+              aria-pressed={stagePlaying}
+              onClick={() => setStagePlaying((prev) => !prev)}
             >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  d="M7.5 7.5 16.5 16.5M16.5 7.5 7.5 16.5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.75"
-                  strokeLinecap="round"
-                />
-              </svg>
+              {stagePlaying ? (
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M8 6.5h2.75v11H8zm5.25 0H16v11h-2.75z"
+                    fill="currentColor"
+                  />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8.25 5.75v12.5L18 12z" fill="currentColor" />
+                </svg>
+              )}
             </button>
           ) : null}
 
           <div className="support-know__menu">
-            <div className="support-know__stepper" aria-label="Browse services">
-              <button
-                type="button"
-                className="support-know__step support-know__step--prev"
-                aria-label="Previous service"
-                disabled={atStart}
-                onClick={() => step(-1)}
-              >
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    d="M14 5.5 8.5 12 14 18.5"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-              <button
-                type="button"
-                className="support-know__step support-know__step--next"
-                aria-label="Next service"
-                disabled={atEnd}
-                onClick={() => step(1)}
-              >
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    d="M10 5.5 15.5 12 10 18.5"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-            </div>
-
             {compact ? (
-              <ul className="support-know__chips">
-                <AnimatePresence mode="popLayout" initial={false} custom={navDir}>
-                  {entered && activeCard ? (
-                    <motion.li
-                      key={activeCard.id}
-                      className="support-know__item is-expanded is-active"
-                      custom={navDir}
-                      initial={
-                        reduceMotion
-                          ? false
-                          : {
-                              opacity: 0,
-                              // Mobile only: right swipe from left-bottom.
-                              // (Desktop uses the list morph — this branch is compact.)
-                              x: navDir < 0 ? -22 : 22,
-                              y: 18,
-                              scale: 0.72,
-                              transformOrigin:
-                                navDir < 0 ? "left bottom" : "right bottom",
-                            }
-                      }
-                      animate={{
-                        opacity: 1,
-                        x: 0,
-                        y: 0,
-                        scale: 1,
-                        transformOrigin:
-                          navDir < 0 ? "left bottom" : "right bottom",
-                      }}
-                      exit={
-                        reduceMotion
-                          ? undefined
-                          : {
-                              opacity: 0,
-                              x: navDir < 0 ? 18 : -18,
-                              y: 14,
-                              scale: 0.72,
-                              transformOrigin:
-                                navDir < 0 ? "right bottom" : "left bottom",
-                            }
-                      }
-                      transition={
-                        reduceMotion
-                          ? { duration: 0 }
-                          : {
-                              type: "spring",
-                              stiffness: 420,
-                              damping: 34,
-                              mass: 0.8,
-                            }
-                      }
+              <>
+                <div className="support-know__stepper" aria-label="Browse services">
+                  {!atStart ? (
+                    <button
+                      type="button"
+                      className="support-know__step support-know__step--prev"
+                      aria-label="Previous service"
+                      onClick={() => step(-1)}
                     >
-                      <div className="support-know__tile is-expanded">
-                        <motion.div
-                          className="support-know__detail-inner"
-                          initial={
-                            reduceMotion
-                              ? false
-                              : {
-                                  opacity: 0,
-                                  // Same corner as chip: right swipe from left-bottom
-                                  x: navDir < 0 ? -16 : 16,
-                                  y: 12,
-                                  filter: "blur(5px)",
-                                }
-                          }
-                          animate={{
-                            opacity: 1,
-                            x: 0,
-                            y: 0,
-                            filter: "blur(0px)",
-                          }}
-                          transition={
-                            reduceMotion
-                              ? { duration: 0 }
-                              : {
-                                  opacity: { duration: 0.32, delay: 0.2 },
-                                  x: { duration: 0.36, delay: 0.2 },
-                                  y: { duration: 0.36, delay: 0.2 },
-                                  filter: { duration: 0.32, delay: 0.2 },
-                                }
-                          }
-                        >
-                          <p className="support-know__detail-copy">
-                            <strong className="support-know__detail-title">
-                              {activeCard.headline}.
-                            </strong>{" "}
-                            {activeCard.description}
-                          </p>
-                        </motion.div>
-                      </div>
-                    </motion.li>
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M14 5.5 8.5 12 14 18.5"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
                   ) : null}
-                </AnimatePresence>
-              </ul>
-            ) : (
-              <ul className="support-know__chips">
-                {CARDS.map((card, index) => {
-                  const expanded = entered && activeIndex === index;
-                  return (
-                    <motion.li
-                      key={card.id}
-                      layout={reduceMotion ? false : "position"}
-                      className={`support-know__item${expanded ? " is-expanded" : ""}`}
-                      transition={{ layout: layoutTransition }}
+                  {!atEnd ? (
+                    <button
+                      type="button"
+                      className="support-know__step support-know__step--next"
+                      aria-label="Next service"
+                      onClick={() => step(1)}
                     >
-                      <motion.div
-                        layout={!reduceMotion}
-                        className={`support-know__tile${expanded ? " is-expanded" : ""}`}
-                        // Finite radii interpolate immediately; 9999px stays clamped
-                        // to a pill for almost the entire transition.
-                        initial={false}
-                        animate={{ borderRadius: expanded ? 16 : 40 }}
-                        style={{ borderRadius: 40, position: "relative" }}
-                        transition={{
-                          layout: layoutTransition,
-                          borderRadius: layoutTransition,
-                        }}
-                        role={expanded ? undefined : "button"}
-                        tabIndex={expanded ? undefined : 0}
-                        aria-current={expanded ? "true" : undefined}
-                        onClick={
-                          expanded
-                            ? undefined
-                            : () => {
-                                selectAt(index);
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M10 5.5 15.5 12 10 18.5"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+                  ) : null}
+                </div>
+
+                <ul className="support-know__chips">
+                  <AnimatePresence mode="popLayout" initial={false} custom={navDir}>
+                    {entered && activeCard ? (
+                      <motion.li
+                        key={activeCard.id}
+                        className="support-know__item is-expanded is-active"
+                        custom={navDir}
+                        initial={
+                          reduceMotion
+                            ? false
+                            : {
+                                opacity: 0,
+                                x: navDir < 0 ? -22 : 22,
+                                y: 18,
+                                scale: 0.72,
+                                transformOrigin:
+                                  navDir < 0 ? "left bottom" : "right bottom",
                               }
                         }
-                        onKeyDown={
-                          expanded
+                        animate={{
+                          opacity: 1,
+                          x: 0,
+                          y: 0,
+                          scale: 1,
+                          transformOrigin:
+                            navDir < 0 ? "left bottom" : "right bottom",
+                        }}
+                        exit={
+                          reduceMotion
                             ? undefined
-                            : (event) => {
-                                if (
-                                  event.key === "Enter" ||
-                                  event.key === " "
-                                ) {
-                                  event.preventDefault();
-                                  selectAt(index);
-                                }
+                            : {
+                                opacity: 0,
+                                x: navDir < 0 ? 18 : -18,
+                                y: 14,
+                                scale: 0.72,
+                                transformOrigin:
+                                  navDir < 0 ? "right bottom" : "left bottom",
+                              }
+                        }
+                        transition={
+                          reduceMotion
+                            ? { duration: 0 }
+                            : {
+                                type: "spring",
+                                stiffness: 420,
+                                damping: 34,
+                                mass: 0.8,
                               }
                         }
                       >
-                        <AnimatePresence mode="popLayout" initial={false}>
-                          {expanded ? (
+                        <div className="support-know__tile is-expanded">
+                          <motion.div
+                            className="support-know__detail-inner"
+                            initial={
+                              reduceMotion
+                                ? false
+                                : {
+                                    opacity: 0,
+                                    x: navDir < 0 ? -16 : 16,
+                                    y: 12,
+                                    filter: "blur(5px)",
+                                  }
+                            }
+                            animate={{
+                              opacity: 1,
+                              x: 0,
+                              y: 0,
+                              filter: "blur(0px)",
+                            }}
+                            transition={
+                              reduceMotion
+                                ? { duration: 0 }
+                                : {
+                                    opacity: { duration: 0.32, delay: 0.2 },
+                                    x: { duration: 0.36, delay: 0.2 },
+                                    y: { duration: 0.36, delay: 0.2 },
+                                    filter: { duration: 0.32, delay: 0.2 },
+                                  }
+                            }
+                          >
+                            <p className="support-know__detail-copy">
+                              <strong className="support-know__detail-title">
+                                {activeCard.headline}.
+                              </strong>{" "}
+                              {supportDetailBody(
+                                activeCard.description,
+                                activeCard.descriptionLink,
+                              )}
+                            </p>
+                          </motion.div>
+                        </div>
+                      </motion.li>
+                    ) : null}
+                  </AnimatePresence>
+                </ul>
+              </>
+            ) : (
+              <div className="support-know__rail">
+                {!atStart ? (
+                  <button
+                    type="button"
+                    className="support-know__step support-know__step--prev"
+                    aria-label="Previous service"
+                    onClick={() => step(-1)}
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        d="M14 5.5 8.5 12 14 18.5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                ) : null}
+
+                <div className="support-know__track">
+                  <div
+                    ref={chipsTrackRef}
+                    className="support-know__track-scroll"
+                  >
+                    <ul className="support-know__chips">
+                      {CARDS.map((card, index) => {
+                        const expanded = entered && activeIndex === index;
+                        return (
+                          <motion.li
+                            key={card.id}
+                            layout={reduceMotion ? false : "position"}
+                            className={`support-know__item${expanded ? " is-expanded" : ""}`}
+                            transition={{ layout: layoutTransition }}
+                          >
                             <motion.div
-                              key="detail"
-                              layout={reduceMotion ? false : "position"}
-                              className="support-know__detail-inner"
-                              initial={
-                                reduceMotion
-                                  ? false
-                                  : {
-                                      opacity: 0,
-                                      y: 6,
-                                    }
-                              }
-                              animate={{
-                                opacity: 1,
-                                y: 0,
+                              layout={!reduceMotion}
+                              className={`support-know__tile${expanded ? " is-expanded" : ""}`}
+                              initial={false}
+                              animate={{ borderRadius: expanded ? 16 : 40 }}
+                              style={{ borderRadius: 40, position: "relative" }}
+                              transition={{
+                                layout: layoutTransition,
+                                borderRadius: layoutTransition,
                               }}
-                              exit={
-                                reduceMotion
+                              role={expanded ? undefined : "button"}
+                              tabIndex={expanded ? undefined : 0}
+                              aria-current={expanded ? "true" : undefined}
+                              onClick={
+                                expanded
                                   ? undefined
-                                  : {
-                                      opacity: 0,
-                                      y: 0,
-                                      transition: { duration: 0.1, delay: 0 },
+                                  : () => {
+                                      selectAt(index);
                                     }
                               }
-                              transition={
-                                reduceMotion
-                                  ? { duration: 0 }
-                                  : {
-                                      layout: layoutTransition,
-                                      opacity: { duration: 0.22, delay: 0.14 },
-                                      y: { duration: 0.3, delay: 0.14 },
+                              onKeyDown={
+                                expanded
+                                  ? undefined
+                                  : (event) => {
+                                      if (
+                                        event.key === "Enter" ||
+                                        event.key === " "
+                                      ) {
+                                        event.preventDefault();
+                                        selectAt(index);
+                                      }
                                     }
                               }
                             >
-                              <p className="support-know__detail-copy">
-                                <strong className="support-know__detail-title">
-                                  {card.headline}.
-                                </strong>{" "}
-                                {card.description}
-                              </p>
-                            </motion.div>
-                          ) : (
-                            <motion.div
-                              key="chip"
-                              layout={reduceMotion ? false : "position"}
-                              className="support-know__chip-inner"
-                              initial={
-                                reduceMotion ? false : { opacity: 0 }
-                              }
-                              animate={{ opacity: 1 }}
-                              exit={
-                                reduceMotion
-                                  ? undefined
-                                  : {
-                                      opacity: 0,
-                                      transition: { duration: 0.1 },
+                              <AnimatePresence mode="popLayout" initial={false}>
+                                {expanded ? (
+                                  <motion.div
+                                    key="detail"
+                                    layout={reduceMotion ? false : "position"}
+                                    className="support-know__detail-inner"
+                                    initial={
+                                      reduceMotion
+                                        ? false
+                                        : { opacity: 0, y: 6 }
                                     }
-                              }
-                              transition={
-                                reduceMotion
-                                  ? { duration: 0 }
-                                  : {
-                                      layout: layoutTransition,
-                                      opacity: { duration: 0.18, delay: 0.12 },
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={
+                                      reduceMotion
+                                        ? undefined
+                                        : {
+                                            opacity: 0,
+                                            y: 0,
+                                            transition: {
+                                              duration: 0.1,
+                                              delay: 0,
+                                            },
+                                          }
                                     }
-                              }
-                            >
-                              <span
-                                className="support-know__chip-icon"
-                                aria-hidden="true"
-                              >
-                                +
-                              </span>
-                              <span className="support-know__chip-label">
-                                {card.headline}
-                              </span>
+                                    transition={
+                                      reduceMotion
+                                        ? { duration: 0 }
+                                        : {
+                                            layout: layoutTransition,
+                                            opacity: {
+                                              duration: 0.22,
+                                              delay: 0.14,
+                                            },
+                                            y: {
+                                              duration: 0.3,
+                                              delay: 0.14,
+                                            },
+                                          }
+                                    }
+                                  >
+                                    <p className="support-know__detail-copy">
+                                      <strong className="support-know__detail-title">
+                                        {card.headline}.
+                                      </strong>{" "}
+                                      {supportDetailBody(
+                                        card.description,
+                                        card.descriptionLink,
+                                      )}
+                                    </p>
+                                  </motion.div>
+                                ) : (
+                                  <motion.div
+                                    key="chip"
+                                    layout={reduceMotion ? false : "position"}
+                                    className="support-know__chip-inner"
+                                    initial={
+                                      reduceMotion ? false : { opacity: 0 }
+                                    }
+                                    animate={{ opacity: 1 }}
+                                    exit={
+                                      reduceMotion
+                                        ? undefined
+                                        : {
+                                            opacity: 0,
+                                            transition: { duration: 0.1 },
+                                          }
+                                    }
+                                    transition={
+                                      reduceMotion
+                                        ? { duration: 0 }
+                                        : {
+                                            layout: layoutTransition,
+                                            opacity: {
+                                              duration: 0.18,
+                                              delay: 0.12,
+                                            },
+                                          }
+                                    }
+                                  >
+                                    <span
+                                      className="support-know__chip-icon"
+                                      aria-hidden="true"
+                                    >
+                                      {index + 1}
+                                    </span>
+                                    <span className="support-know__chip-label">
+                                      {card.headline}
+                                    </span>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
                             </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </motion.div>
-                    </motion.li>
-                  );
-                })}
-              </ul>
+                          </motion.li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                </div>
+
+                {!atEnd ? (
+                  <button
+                    type="button"
+                    className="support-know__step support-know__step--next"
+                    aria-label="Next service"
+                    onClick={() => step(1)}
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        d="M10 5.5 15.5 12 10 18.5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                ) : null}
+              </div>
             )}
           </div>
         </div>

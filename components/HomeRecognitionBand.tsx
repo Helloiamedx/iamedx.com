@@ -16,6 +16,7 @@ import { HomeRecognitionProductBox } from "@/components/HomeRecognitionProductBo
 import { homeRecognition } from "@/content/homeCopy";
 import { getRecognitionProductBoxSetsForSlide } from "@/content/recognitionProductBox";
 import { useSwipeNav } from "@/lib/useSwipeNav";
+import { LineRevealText } from "@/components/LineRevealText";
 
 /**
  * Home recognition — Apple-style highlights carousel demo.
@@ -93,6 +94,8 @@ export function HomeRecognitionBand() {
   );
   const autoplayArmed = Boolean(mediaPlaybackOk && count > 1);
   const canAutoplay = Boolean(autoplayArmed && !reduceMotion);
+  /** Icon follows real motion — scroll-gate off shows play, not a fake “still playing” pause. */
+  const playbackActive = mediaPlaybackOk;
   const canAutoplayRef = useRef(canAutoplay);
   canAutoplayRef.current = canAutoplay;
 
@@ -358,7 +361,7 @@ export function HomeRecognitionBand() {
       <div className="home-recognition__shell">
         <header className="home-section-intro home-recognition__intro">
           <h2 id={`${id}-title`} className="home-section-intro__title">
-            {headline}
+            <LineRevealText text={headline} />
           </h2>
         </header>
       </div>
@@ -608,10 +611,13 @@ export function HomeRecognitionBand() {
           <button
             type="button"
             className="home-recognition__playback"
-            aria-label={userPaused ? "Play autoplay" : "Pause autoplay"}
-            onClick={() => setUserPaused((value) => !value)}
+            aria-label={playbackActive ? "Pause autoplay" : "Play autoplay"}
+            onClick={() => {
+              if (playbackActive) setUserPaused(true);
+              else setUserPaused(false);
+            }}
           >
-            {!userPaused ? (
+            {playbackActive ? (
               <svg
                 viewBox="0 0 24 24"
                 aria-hidden="true"

@@ -5,7 +5,10 @@ import { HeroActions } from "@/components/HeroActions";
 import { HERO_COPY_ATTR, whenHeroFlag } from "@/lib/heroSequence";
 
 const HEADLINE =
-  "ESTABLISH A SUPPLY CHAIN FROM SCRATCH TAILORED TO YOUR BUSINESS NO MATTER HOW SMALL YOU START";
+  "ESTABLISH A SUPPLY CHAIN FROM SCRATCH TAILORED TO YOUR BUSINESS";
+
+const SUBTITLE =
+  "No matter how small you start, I help turn your product ideas into a reliable and scalable supply chain in China built around your actual needs, budget, and growth.";
 
 /** Beat after headline is in — then CTAs */
 const ACTIONS_AFTER_COPY_MS = 380;
@@ -47,9 +50,10 @@ export function HeroHeadline() {
 
   return (
     <>
-      <h1 className={`hero__title${copyGate ? " is-revealed" : ""}`}>
-        {HEADLINE}
-      </h1>
+      <div className={`hero__copy${copyGate ? " is-revealed" : ""}`}>
+        <h1 className="hero__title">{HEADLINE}</h1>
+        <p className="hero__subtitle">{SUBTITLE}</p>
+      </div>
       <HeroActions revealed={actionsReady} />
     </>
   );

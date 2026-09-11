@@ -13,6 +13,10 @@ type PanelImageStackProps = {
   images: readonly string[];
   align?: PanelImageAlign;
   className?: string;
+  /** When false, stay paused. When true again, restart from image 0. Default true. */
+  active?: boolean;
+  /** Stage play/pause — freezes without resetting. Default true. */
+  playing?: boolean;
 };
 
 type StackFrame = {
@@ -55,6 +59,8 @@ export function PanelImageStack({
   images,
   align,
   className,
+  active = true,
+  playing = true,
 }: PanelImageStackProps) {
   const n = images.length;
   const imagesKey = useMemo(() => images.join("\0"), [images]);
@@ -84,8 +90,14 @@ export function PanelImageStack({
     };
   }, [images, imagesKey, n, heroReady]);
 
+  /* Re-entering a card always starts at image 0; stay paused while inactive. */
   useEffect(() => {
-    if (!ready || n < 2) return;
+    if (!active) return;
+    setStack(initialStack(n));
+  }, [active, n]);
+
+  useEffect(() => {
+    if (!active || !playing || !ready || n < 2) return;
 
     let cancelled = false;
     let timeoutId = 0;
@@ -110,7 +122,7 @@ export function PanelImageStack({
       cancelled = true;
       window.clearTimeout(timeoutId);
     };
-  }, [ready, n]);
+  }, [active, playing, ready, n]);
 
   if (n === 0) return null;
 

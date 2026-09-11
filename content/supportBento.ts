@@ -1,4 +1,3 @@
-import { asset } from "@/lib/assets";
 import { supplierDiscoveryVerificationImages } from "@/content/serviceCoverMedia";
 
 export type SupportKnowCard = {
@@ -7,6 +6,14 @@ export type SupportKnowCard = {
   headline: string;
   /** Body under the title */
   description: string;
+  /**
+   * Optional inline link — `label` must appear verbatim in `description`
+   * (e.g. “How I Control Product Quality”).
+   */
+  descriptionLink?: {
+    label: string;
+    href: string;
+  };
   /** Width variant — `md` = 1 card, `lg` ≈ 1.5, `xl` ≈ 2 */
   size: "sm" | "md" | "lg" | "xl";
   /** Vertical stack frames for the panel (optional) */
@@ -29,6 +36,11 @@ export type SupportKnowCard = {
     /** Descent duration in ms (default in component). */
     durationMs?: number;
   };
+  /**
+   * Lay panelImages onto a desk one-by-one (Quality Management).
+   * Requires panelImages; ignores panelVideo.
+   */
+  panelDesk?: boolean;
   /**
    * Right-panel media fit. Default `true` = cover the media pane edge-to-edge.
    * Set `false` only when the asset must stay letterboxed / not cropped.
@@ -65,7 +77,7 @@ export const supportKnowCards: SupportKnowCard[] = [
     headline: "Manufacturing Localization",
     size: "xl",
     panelVideo:
-      "https://assets.iamedx.com/images/home/Manufacturing%20Localization..mp4",
+      "https://assets.iamedx.com/images/home/From%20concept%20to%20delivery/Manufacturing%20Localization/video.mp4",
     description:
       "Translate your designs and technical requirements into clear, production-ready instructions that Chinese manufacturers can understand and execute. I break down the design, fill in missing manufacturing details, recommend suitable processes, and prepare localized production documentation that turns your design intent into clear, actionable factory instructions.",
   },
@@ -85,7 +97,7 @@ export const supportKnowCards: SupportKnowCard[] = [
     headline: "Production Management",
     size: "xl",
     panelVideo:
-      "https://assets.iamedx.com/images/home/Production%20Management.mp4",
+      "https://assets.iamedx.com/images/home/From%20concept%20to%20delivery/Production%20Management/video.mp4",
     description:
       "Keep production under close supervision from start to finish with professional tools. I track critical milestones, verify key production steps before moving forward, resolve issues as they arise, and keep each stage connected to prevent delays and costly mistakes.",
   },
@@ -93,18 +105,33 @@ export const supportKnowCards: SupportKnowCard[] = [
     id: "quality-control-compliance",
     headline: "Quality Management",
     size: "md",
-    panelVideo:
-      "https://assets.iamedx.com/images/home/Quality%20Control%20%26amp%3B%20Compliance%20Assurance.mp4",
+    panelDesk: true,
+    panelImages: [
+      "https://assets.iamedx.com/images/home/From%20concept%20to%20delivery/Quality%20Management/File%201.jpg",
+      "https://assets.iamedx.com/images/home/From%20concept%20to%20delivery/Quality%20Management/File%202.jpg",
+      "https://assets.iamedx.com/images/home/From%20concept%20to%20delivery/Quality%20Management/File%203.jpg",
+      "https://assets.iamedx.com/images/home/From%20concept%20to%20delivery/Quality%20Management/File%204.jpg",
+      "https://assets.iamedx.com/images/home/From%20concept%20to%20delivery/Quality%20Management/File%205.jpg",
+      "https://assets.iamedx.com/images/home/From%20concept%20to%20delivery/Quality%20Management/File%206.jpg",
+      "https://assets.iamedx.com/images/home/From%20concept%20to%20delivery/Quality%20Management/File%207.jpg",
+      "https://assets.iamedx.com/images/home/From%20concept%20to%20delivery/Quality%20Management/File%208.jpg",
+      "https://assets.iamedx.com/images/home/From%20concept%20to%20delivery/Quality%20Management/File%209.jpg",
+      "https://assets.iamedx.com/images/home/From%20concept%20to%20delivery/Quality%20Management/File%2010.jpg",
+      "https://assets.iamedx.com/images/home/From%20concept%20to%20delivery/Quality%20Management/File%2011.jpg",
+    ],
     description:
-      "Set practical quality standards based on your product positioning, production realities, and cost expectations. When needed, I can establish a low-cost 100% inspection setup in China to check every unit before shipment, rather than relying solely on random sampling.",
+      "Set practical quality standards based on your product positioning, production realities, and cost expectations. When needed, I can establish a low-cost 100% inspection setup in China to check every unit before shipment, rather than relying solely on random sampling.\n\nRead How I Control Product Quality to see the approach I use in real projects.",
+    descriptionLink: {
+      label: "How I Control Product Quality",
+      href: "/thoughts/how-i-control-product-quality",
+    },
   },
   {
     id: "compliance-testing",
     headline: "Compliance & Testing",
     size: "md",
-    panelVideo: asset(
-      "images/service/Product%20Compliance%20%26amp%3B%20Testing%20Coordination.m4v",
-    ),
+    panelVideo:
+      "https://assets.iamedx.com/images/home/From%20concept%20to%20delivery/Compliance%20%26%20Testing/video.mp4?v=20260911b",
     description:
       "Engage testing labs before mass production, using the target market and a material-level product breakdown to define the required tests. I coordinate factories and labs, address testing issues and corrective actions, and follow through until the required compliance reports are completed.",
   },
@@ -113,7 +140,9 @@ export const supportKnowCards: SupportKnowCard[] = [
     headline: "Packaging Development",
     size: "md",
     panelVideo:
-      "https://assets.iamedx.com/images/home/Packaging%20Development..mp4",
+      "https://assets.iamedx.com/images/home/From%20concept%20to%20delivery/Packaging%20Development/video.mp4",
+    panelVideoMobile:
+      "https://assets.iamedx.com/images/home/From%20concept%20to%20delivery/Packaging%20Development/phone.mp4",
     description:
       "Develop packaging with product protection as the priority while keeping it cost-effective. I can also build a distinctive packaging language across your product line and create a more premium unboxing experience at a low cost.",
   },
