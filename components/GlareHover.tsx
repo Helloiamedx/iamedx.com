@@ -44,7 +44,7 @@ export function GlareHover({
   width = "auto",
   height = "auto",
   background = "#000",
-  borderRadius = "10px",
+  borderRadius = "0",
   borderColor = "#333",
   children,
   glareColor = "#ffffff",

@@ -30,7 +30,7 @@
   left: 0;
   margin: 0;
   padding: 0;
-  border-radius: 2px;
+  border-radius: 0;
   /* Clip filter fringe — blur/brightness on <img> otherwise paints a 1px magenta hairline */
   overflow: hidden;
   background: transparent;

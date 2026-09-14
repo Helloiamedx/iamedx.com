@@ -26,7 +26,7 @@
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   overflow: hidden;
-  border-radius: 999px;
+  border-radius: 0;
 }
 
 .glare-hover.hero-cta-glare::before {

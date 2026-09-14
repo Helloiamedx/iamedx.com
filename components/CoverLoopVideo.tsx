@@ -27,6 +27,10 @@ type CoverLoopVideoProps = {
   playbackEnabled?: boolean;
   /** Default true. Recognition cards set false so one playthrough matches the pager. */
   loop?: boolean;
+  /** Seek / restart point in seconds. */
+  startSeconds?: number;
+  /** Loop-back point in seconds. Omit to native-loop the whole file. */
+  endSeconds?: number;
   /** Fires with media duration in ms once metadata is known. */
   onDurationMs?: (ms: number) => void;
   /** Fires when a non-looping clip reaches the end. */
@@ -46,6 +50,8 @@ export function CoverLoopVideo({
   active = true,
   playbackEnabled = true,
   loop = true,
+  startSeconds = 0,
+  endSeconds,
   onDurationMs,
   onEnded,
   mediaRef,
@@ -60,6 +66,8 @@ export function CoverLoopVideo({
   const onEndedRef = useRef(onEnded);
   onDurationMsRef.current = onDurationMs;
   onEndedRef.current = onEnded;
+
+  const segmentLoop = endSeconds != null && endSeconds > startSeconds;
 
   const { allowed, releaseSlot } = useVideoLoadSlot(
     src,
@@ -111,7 +119,7 @@ export function CoverLoopVideo({
     /* Arriving on this slide → start a fresh playthrough for pager sync */
     if (active && !wasSlideActiveRef.current && !loop) {
       try {
-        el.currentTime = 0;
+        el.currentTime = startSeconds;
       } catch {
         /* ignore */
       }
@@ -121,11 +129,42 @@ export function CoverLoopVideo({
     if (!active || !playbackEnabled) {
       el.pause();
     }
-  }, [active, playbackEnabled, loop]);
+  }, [active, playbackEnabled, loop, startSeconds]);
 
   useEffect(() => {
     const el = videoRef.current;
     if (!el || !allowed) return;
+
+    const seekStart = () => {
+      if (Math.abs(el.currentTime - startSeconds) > 0.35) {
+        el.currentTime = startSeconds;
+      }
+    };
+
+    if (segmentLoop) {
+      if (el.readyState >= HTMLMediaElement.HAVE_METADATA) seekStart();
+      el.addEventListener("loadedmetadata", seekStart);
+
+      const onTimeUpdate = () => {
+        if (el.currentTime >= (endSeconds as number) - 0.05) {
+          el.currentTime = startSeconds;
+          void el.play().catch(() => {});
+        }
+      };
+      const onNativeEnded = () => {
+        seekStart();
+        void el.play().catch(() => {});
+        onEndedRef.current?.();
+      };
+
+      el.addEventListener("timeupdate", onTimeUpdate);
+      el.addEventListener("ended", onNativeEnded);
+      return () => {
+        el.removeEventListener("loadedmetadata", seekStart);
+        el.removeEventListener("timeupdate", onTimeUpdate);
+        el.removeEventListener("ended", onNativeEnded);
+      };
+    }
 
     const reportDuration = () => {
       if (!Number.isFinite(el.duration) || el.duration <= 0) return;
@@ -145,7 +184,7 @@ export function CoverLoopVideo({
       el.removeEventListener("durationchange", reportDuration);
       el.removeEventListener("ended", handleEnded);
     };
-  }, [allowed, src, active]);
+  }, [allowed, src, active, startSeconds, endSeconds, segmentLoop]);
 
   return (
     <div
@@ -160,7 +199,7 @@ export function CoverLoopVideo({
           src={src}
           preload="auto"
           autoPlay={false}
-          loop={loop}
+          loop={loop && !segmentLoop}
           aria-label={ariaLabel}
         />
       ) : null}

@@ -11,10 +11,8 @@ const EXIT_MS = 460;
 type ServiceWorkflowDialogProps = {
   open: boolean;
   onClose: () => void;
-  /** Service name — used for a11y */
+  /** Service name — a11y / sr-only */
   title: string;
-  /** Workflow steps — plain copy for now; layout later */
-  steps?: readonly { title: string; body: string }[];
 };
 
 function lockBodyScroll(scrollY: number) {
@@ -50,14 +48,13 @@ function unlockBodyScroll(scrollY: number) {
 }
 
 /**
- * Services — frosted full-screen overlay + white workflow panel (Apple-style shell).
- * Copy in; layout TBD.
+ * Services — frosted full-screen overlay + white workflow panel.
+ * All services share Coming Soon copy until real workflows ship.
  */
 export function ServiceWorkflowDialog({
   open,
   onClose,
   title,
-  steps,
 }: ServiceWorkflowDialogProps) {
   const titleId = useId();
   const [mounted, setMounted] = useState(false);
@@ -209,18 +206,14 @@ export function ServiceWorkflowDialog({
 
           <div className="svc-workflow__body" data-lenis-prevent>
             <p id={titleId} className="svc-workflow__sr-title">
-              {title}
+              {title} — Coming Soon
             </p>
-            {steps?.length ? (
-              <div className="svc-workflow__steps">
-                {steps.map((step) => (
-                  <div key={step.title} className="svc-workflow__step">
-                    <h3 className="svc-workflow__step-title">{step.title}</h3>
-                    <p className="svc-workflow__step-body">{step.body}</p>
-                  </div>
-                ))}
-              </div>
-            ) : null}
+            <div className="svc-workflow__coming-soon">
+              <h3 className="svc-workflow__coming-soon-title">Coming Soon</h3>
+              <p className="svc-workflow__coming-soon-body">
+                A detailed look at my workflow is currently being developed.
+              </p>
+            </div>
           </div>
         </div>
       </div>

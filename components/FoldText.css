@@ -106,7 +106,7 @@
   pointer-events: none;
   opacity: var(--fold-crease, 0);
   mix-blend-mode: multiply;
-  border-radius: 0.08em;
+  border-radius: 0;
 }
 
 .fold-text-piece[data-fold-hinge="top"]::after {

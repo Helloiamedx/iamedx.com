@@ -90,16 +90,16 @@ function PhaseSection({
 }
 
 function ServiceItemBlock({ item }: { item: ServicePackageItem }) {
-  const gridRef = useRef<HTMLDivElement>(null);
+  const articleRef = useRef<HTMLElement>(null);
   const [workflowOpen, setWorkflowOpen] = useState(false);
   const reduceMotion = useReducedMotion();
 
   useEffect(() => {
-    const grid = gridRef.current;
-    if (!grid || typeof IntersectionObserver === "undefined") return;
+    const root = articleRef.current;
+    if (!root || typeof IntersectionObserver === "undefined") return;
 
     const parts = Array.from(
-      grid.querySelectorAll<HTMLElement>("[data-svc-enter]"),
+      root.querySelectorAll<HTMLElement>("[data-svc-enter]"),
     );
     if (!parts.length) return;
 
@@ -108,22 +108,24 @@ function ServiceItemBlock({ item }: { item: ServicePackageItem }) {
       return;
     }
 
-    /* Once per label — no leave/reset (avoids threshold flicker) */
-    const seen = new WeakSet<Element>();
-
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
           const el = entry.target as HTMLElement;
-          if (seen.has(el)) continue;
-          seen.add(el);
-          requestAnimationFrame(() => {
-            el.classList.add("is-in");
-          });
+          if (entry.isIntersecting) {
+            /* Re-enter: clear then paint so the transition can replay */
+            el.classList.remove("is-in");
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                el.classList.add("is-in");
+              });
+            });
+          } else {
+            el.classList.remove("is-in");
+          }
         }
       },
-      { threshold: 0.35 },
+      { threshold: 0.2 },
     );
 
     parts.forEach((el) => observer.observe(el));
@@ -131,10 +133,14 @@ function ServiceItemBlock({ item }: { item: ServicePackageItem }) {
   }, [reduceMotion, item.id]);
 
   return (
-    <article className="svc-item" aria-label={item.title}>
+    <article
+      ref={articleRef}
+      className="svc-item"
+      aria-label={item.title}
+    >
       <div className="svc-item__intro">
-        <h4 className="svc-item__title">
-          <LineRevealText text={item.title} />
+        <h4 className="svc-item__title" data-svc-enter>
+          {item.title}
         </h4>
         <p className="svc-item__desc">{item.description}</p>
       </div>
@@ -148,7 +154,6 @@ function ServiceItemBlock({ item }: { item: ServicePackageItem }) {
         open={workflowOpen}
         onClose={() => setWorkflowOpen(false)}
         title={item.title}
-        steps={item.workflowSteps}
       />
 
       <div className="svc-item__media">
@@ -157,6 +162,8 @@ function ServiceItemBlock({ item }: { item: ServicePackageItem }) {
             src={item.coverVideo}
             className="svc-item__image"
             ariaLabel={item.title}
+            startSeconds={item.coverVideoStart ?? 0}
+            endSeconds={item.coverVideoEnd}
           />
         ) : item.coverImages?.length ? (
           <PanelImageStack
@@ -176,7 +183,6 @@ function ServiceItemBlock({ item }: { item: ServicePackageItem }) {
       </div>
 
       <div
-        ref={gridRef}
         className="svc-phase__grid"
         aria-label={`${item.code} details`}
       >

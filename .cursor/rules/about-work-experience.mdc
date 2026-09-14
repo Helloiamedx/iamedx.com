@@ -16,15 +16,20 @@ Scan highlights in bullets use `**phrase**` → rendered white (`.about-boua__wo
 
 ## Current UI
 
-About page **Experience** (`#experience`) keeps the career strip columns:
+About page **Experience** (`#experience`) keeps the career strip columns on desktop:
 
-1. Index (`01`…)
-2. Role (large)
-3. Company (logo slot later via `logo`)
-4. Country (`country` — Title Case in data; uppercase in UI)
-5. Period
+1. Role (large)
+2. Company (logo slot later via `logo`)
+3. Country (`country` — Title Case in data; uppercase in UI)
+4. Period (uppercase in UI)
 
-Click a row to expand that role’s `bullets`. No +/- icon button. No Location line.
+Click a row to expand that role’s `bullets`. No +/- icon button. No Location line. No row index numbers.
+
+### Mobile (≤900px)
+
+**Collapsed:** two columns — company full width on the right (`max-content`, nowrap); remaining width + gap goes to the role. Vertically center-aligned. Country and period stay hidden.
+
+**Expanded:** country left + period right (both black / `--about-ink`), then full-width bullets below.
 
 - Section label sticky on the left
 - Implementation: `components/AboutExperienceList.tsx`

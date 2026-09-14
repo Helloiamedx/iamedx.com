@@ -16,10 +16,16 @@ function syncWorkMetaColumnWidths(list: HTMLElement) {
     return;
   }
 
+  /* Clear prior locks so uppercase + tracking measure at natural width */
+  list.style.removeProperty("--work-company-col-w");
+  list.style.removeProperty("--work-country-col-w");
+  list.style.removeProperty("--work-period-col-w");
+  void list.offsetWidth;
+
   const measure = (selector: string) => {
     let max = 0;
     list.querySelectorAll<HTMLElement>(selector).forEach((el) => {
-      max = Math.max(max, Math.ceil(el.scrollWidth));
+      max = Math.max(max, Math.ceil(el.getBoundingClientRect().width));
     });
     return max;
   };
@@ -103,7 +109,7 @@ export function AboutExperienceList() {
       className="about-boua__work-list"
       ref={listRef}
     >
-      {experienceRoles.map((role, index) => (
+      {experienceRoles.map((role) => (
         <AccordionPrimitive.Item
           key={role.id}
           value={role.id}
@@ -132,12 +138,9 @@ export function AboutExperienceList() {
                 }
               }}
             >
-              <span className="about-boua__work-index">
-                {String(index + 1).padStart(2, "0")}
-              </span>
               <span className="about-boua__work-title">{role.role}</span>
               <div className="about-boua__work-meta">
-                <span className="about-boua__work-company about-boua__work-meta--desktop">
+                <span className="about-boua__work-company">
                   <span className="about-boua__work-company-name">
                     {role.company}
                   </span>
@@ -145,7 +148,9 @@ export function AboutExperienceList() {
                 <span className="about-boua__work-country about-boua__work-meta--desktop">
                   {role.country}
                 </span>
-                <span className="about-boua__work-period">{role.period}</span>
+                <span className="about-boua__work-period about-boua__work-meta--desktop">
+                  {role.period}
+                </span>
               </div>
             </div>
           </AccordionPrimitive.Header>
@@ -155,9 +160,10 @@ export function AboutExperienceList() {
               className="about-boua__work-detail-rule"
               aria-hidden="true"
             />
+            {/* Mobile expand: country | period (desktop keeps these on the row) */}
             <div className="about-boua__work-detail-intro">
-              <span className="about-boua__work-company-name">{role.company}</span>
               <span className="about-boua__work-country">{role.country}</span>
+              <span className="about-boua__work-period">{role.period}</span>
             </div>
             <ul className="about-boua__work-bullets">
               {role.bullets.map((bullet) => (

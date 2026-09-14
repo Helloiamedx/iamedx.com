@@ -1,5 +1,5 @@
 .specular-button {
-  --sb-radius: 999px;
+  --sb-radius: 0;
   --sb-tint: #ffffff;
   --sb-tint-opacity: 0;
   --sb-blur: 0px;
