@@ -9616,8 +9616,8 @@ body:has(.home-page) .site-footer__gap {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  width: 85vw;
-  max-width: 85vw;
+  width: 55vw;
+  max-width: 55vw;
   max-height: min(88svh, 52rem);
   min-height: min(58svh, 26rem);
   padding: 0;
