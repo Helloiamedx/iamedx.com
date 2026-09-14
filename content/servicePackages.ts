@@ -46,9 +46,6 @@ export type ServicePackageItem = {
   sampleLinks?: { label: string; href: string }[];
   /** Card media loop (services page) */
   coverVideo?: string;
-  /** Optional cover clip window in seconds (same recipe as case hero) */
-  coverVideoStart?: number;
-  coverVideoEnd?: number;
   /** Card image stack — same recipe as home Support panels */
   coverImages?: readonly string[];
   /** View workflow steps — copy only; layout TBD */

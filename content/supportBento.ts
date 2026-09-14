@@ -22,9 +22,6 @@ export type SupportKnowCard = {
   panelImageAlign?: "center" | "top" | "right";
   /** Looping panel video (optional) */
   panelVideo?: string;
-  /** Optional panel clip window in seconds */
-  panelVideoStart?: number;
-  panelVideoEnd?: number;
   /** Mobile (≤900px) panel video; falls back to panelVideo when omitted */
   panelVideoMobile?: string;
   /** HTMLMediaElement.playbackRate when panelVideo is set */
@@ -155,8 +152,6 @@ export const supportKnowCards: SupportKnowCard[] = [
     size: "md",
     panelVideo:
       "https://assets.iamedx.com/images/home/From%20concept%20to%20delivery/Logistics%20Coordination/video.mp4",
-    /* Clip is ~5s — loop only the first 3s */
-    panelVideoEnd: 3,
     description:
       "Support the final stage of your supply chain by coordinating shipment preparation, documentation, packaging requirements, and delivery arrangements. Ensure your products move from factory to destination smoothly with fewer unexpected issues.",
   },

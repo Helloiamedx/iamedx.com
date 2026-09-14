@@ -162,8 +162,6 @@ function ServiceItemBlock({ item }: { item: ServicePackageItem }) {
             src={item.coverVideo}
             className="svc-item__image"
             ariaLabel={item.title}
-            startSeconds={item.coverVideoStart ?? 0}
-            endSeconds={item.coverVideoEnd}
           />
         ) : item.coverImages?.length ? (
           <PanelImageStack

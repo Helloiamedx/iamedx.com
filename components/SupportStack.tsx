@@ -51,20 +51,15 @@ function SupportPanelVideo({
   fullscreen = true,
   active,
   playing,
-  startSeconds = 0,
-  endSeconds,
 }: {
   src: string;
   playbackRate?: number;
   fullscreen?: boolean;
   active: boolean;
   playing: boolean;
-  startSeconds?: number;
-  endSeconds?: number;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const shouldPlay = active && playing;
-  const segmentLoop = endSeconds != null && endSeconds > startSeconds;
 
   useEffect(() => {
     const video = videoRef.current;
@@ -78,12 +73,12 @@ function SupportPanelVideo({
     if (!active) {
       video.pause();
       try {
-        video.currentTime = startSeconds;
+        video.currentTime = 0;
       } catch {
         /* ignore seek before metadata */
       }
     }
-  }, [active, startSeconds]);
+  }, [active]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -94,33 +89,6 @@ function SupportPanelVideo({
       video.pause();
     }
   }, [active, playing]);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video || !segmentLoop) return;
-
-    const seekStart = () => {
-      if (Math.abs(video.currentTime - startSeconds) > 0.35) {
-        video.currentTime = startSeconds;
-      }
-    };
-
-    if (video.readyState >= HTMLMediaElement.HAVE_METADATA) seekStart();
-    video.addEventListener("loadedmetadata", seekStart);
-
-    const onTimeUpdate = () => {
-      if (video.currentTime >= (endSeconds as number) - 0.05) {
-        video.currentTime = startSeconds;
-        if (active && playing) void video.play().catch(() => {});
-      }
-    };
-
-    video.addEventListener("timeupdate", onTimeUpdate);
-    return () => {
-      video.removeEventListener("loadedmetadata", seekStart);
-      video.removeEventListener("timeupdate", onTimeUpdate);
-    };
-  }, [src, startSeconds, endSeconds, segmentLoop, active, playing]);
 
   useDriveVideoPlayback(videoRef, shouldPlay, () => {}, src);
 
@@ -134,7 +102,7 @@ function SupportPanelVideo({
         className="support-know__panel-video"
         src={src}
         muted
-        loop={!segmentLoop}
+        loop
         playsInline
         autoPlay={shouldPlay}
         preload={active ? "auto" : "metadata"}
@@ -195,8 +163,6 @@ function SupportPanel({
         key={videoSrc}
         src={videoSrc}
         playbackRate={card.panelVideoPlaybackRate ?? 1}
-        startSeconds={card.panelVideoStart ?? 0}
-        endSeconds={card.panelVideoEnd}
         fullscreen={fullscreen}
         active={active}
         playing={playing}
