@@ -150,10 +150,8 @@ export const supportKnowCards: SupportKnowCard[] = [
     id: "logistics-coordination",
     headline: "Logistics Coordination",
     size: "md",
-    panelImages: [
-      "https://assets.iamedx.com/images/home/Logistics%20Coordination.jpg",
-    ],
-    panelImageAlign: "right",
+    panelVideo:
+      "https://assets.iamedx.com/images/home/From%20concept%20to%20delivery/Logistics%20Coordination/Logistics%20Coordination.mp4",
     description:
       "Support the final stage of your supply chain by coordinating shipment preparation, documentation, packaging requirements, and delivery arrangements. Ensure your products move from factory to destination smoothly with fewer unexpected issues.",
   },

@@ -17,18 +17,26 @@ export function CollectionDetailBody({ collection }: CollectionDetailBodyProps) 
     <div className="collection-detail__body">
       <div className="collection-detail__entries">
         {groups.map(
-          ({ gameTitle, officialWebsite, companyName, ipVideo, projects }) => (
+          ({
+            id,
+            officialWebsite,
+            companyName,
+            ipVideo,
+            ipImage,
+            ipLogo,
+            projects,
+          }) => (
           <CollectionDetailEntry
-            key={gameTitle}
-            gameTitle={gameTitle}
+            key={id}
             officialWebsite={officialWebsite}
             companyName={companyName}
             ipVideo={ipVideo}
+            ipImage={ipImage}
+            ipLogo={ipLogo}
             projects={projects}
           />
         ),
         )}
-        <hr className="collection-detail__rule" aria-hidden="true" />
       </div>
     </div>
   );

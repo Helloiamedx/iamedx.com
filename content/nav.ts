@@ -270,8 +270,8 @@ export const phoneCta = {
 export const headerCtaLinks = [] as const;
 
 /** Footer — lead line above contact CTAs */
-export const footerLeadLine =
-  "Let's Make Something Iconic.";
+export const footerLeadLines = ["Let's Make", "Something Iconic."] as const;
+export const footerLeadLine = footerLeadLines.join(" ");
 
 /** Footer — Pentagram-style inquiry row (legacy title) */
 export const footerHelpTitle = "Let Me Help You";

@@ -105,12 +105,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Footer />
           </div>
         </SmoothScroll>
-        {/* Fixed viewport bottom — soft edge blur as content scrolls past */}
-        <div className="viewport-edge-blur" aria-hidden="true">
-          <span className="viewport-edge-blur__layer viewport-edge-blur__layer--1" />
-          <span className="viewport-edge-blur__layer viewport-edge-blur__layer--2" />
-          <span className="viewport-edge-blur__layer viewport-edge-blur__layer--3" />
-        </div>
         <Analytics />
       </body>
     </html>

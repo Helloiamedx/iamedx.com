@@ -23,8 +23,12 @@ export type CollectionEntry = {
   officialWebsite?: string;
   /** Studio / publisher — inserted in left CTA: Visit {companyName} official */
   companyName?: string;
-  /** Left-column IP card video (CDN). Falls back to lead project detail hero. */
+  /** Left-column IP card video (CDN). Falls back to ipLogo / ipImage, then lead hero. */
   ipVideo?: string;
+  /** Left-column IP card still (CDN). Used when ipVideo / ipLogo are unset. */
+  ipImage?: string;
+  /** Left-column studio logo on a black plate (CDN SVG/PNG). */
+  ipLogo?: string;
   testimonial?: CollectionTestimonial;
 };
 
@@ -83,11 +87,23 @@ const MASS_EFFECT_TALI_SLUG = projectSlugFromName("Mass Effect Tali Companion Bu
 const SKYRIM_MESSENGER_BAG_SLUG = projectSlugFromName(
   "Skyrim Dragon Hunter Messenger Bag",
 );
+const WITCHER_MESSENGER_BAG_SLUG = projectSlugFromName(
+  "The Witcher White Wolf Messenger Bag",
+);
+const TOMB_RAIDER_BAG_SLUG = projectSlugFromName(
+  "Tomb Raider Ancient Adventures Bag",
+);
 const DRAGON_AGE_KEEPSAKE_BOX_SLUG = projectSlugFromName(
   "Dragon Age Dreadwolf Keepsake Box",
 );
+const DRAGON_AGE_BUNDLE_WOODEN_BOX_SLUG = projectSlugFromName(
+  "Dragon Age Bundle & Wooden Box Series",
+);
 const DRAGON_AGE_MAGE_TEMPLAR_COIN_SLUG = projectSlugFromName(
   "Dragon Age Mage-Templar War Coin Set",
+);
+const DRAGON_AGE_VARRIC_PIN_SET_SLUG = projectSlugFromName(
+  "Dragon Age Varric Pin Set",
 );
 const FALLOUT_NCR_RANGER_COIN_SLUG = projectSlugFromName(
   "Fallout NCR Ranger Challenge Coin",
@@ -168,6 +184,8 @@ export const projectCollections: ProjectCollection[] = [
         gameTitle: "Cyberpunk 2077",
         gameInfo:
           "An open-world action RPG set in Night City, built around a distinct futuristic aesthetic that extends naturally into physical merchandise and display pieces.",
+        // Same studio as The Witcher — one left IP card, stacked right projects
+        companyName: "CD Projekt Red",
         testimonial: COLLECTION_TESTIMONIAL_PLACEHOLDER,
       },
       {
@@ -175,6 +193,9 @@ export const projectCollections: ProjectCollection[] = [
         gameTitle: "Dragon Age",
         gameInfo:
           "A dark fantasy action RPG series set in Thedas — a world of magic, political intrigue, and characters whose choices leave lasting marks on the story.",
+        officialWebsite: "https://www.bioware.com/",
+        companyName: "BioWare",
+        ipLogo: asset("images/projects/collection/BioWare_logo.svg"),
         testimonial: COLLECTION_TESTIMONIAL_PLACEHOLDER,
       },
     ],
@@ -200,6 +221,26 @@ export const projectCollections: ProjectCollection[] = [
           "https://cdnstatic.bethsoft.com/bethesdagamestudios.com/Starfield_TheEndlessPursuit_ForWeb.mp4",
         testimonial: COLLECTION_TESTIMONIAL_PLACEHOLDER,
       },
+      {
+        slug: WITCHER_MESSENGER_BAG_SLUG,
+        gameTitle: "The Witcher",
+        gameInfo:
+          "A dark fantasy action RPG series following Geralt of Rivia — monster hunting, political intrigue, and choices that shape the Continent.",
+        officialWebsite: "https://www.cdprojektred.com/en",
+        companyName: "CD Projekt Red",
+        ipVideo: asset("images/projects/collection/CDPR_Website.mp4"),
+        testimonial: COLLECTION_TESTIMONIAL_PLACEHOLDER,
+      },
+      {
+        slug: TOMB_RAIDER_BAG_SLUG,
+        gameTitle: "Tomb Raider",
+        gameInfo:
+          "An action-adventure series following Lara Croft — archaeologist, explorer, and survivor — across ancient ruins, lost civilizations, and high-stakes expeditions.",
+        officialWebsite: "https://www.crystaldynamics.com/",
+        companyName: "Crystal Dynamics",
+        ipImage: asset("images/projects/collection/CD_Brand_Studio-25_NEW.jpg"),
+        testimonial: COLLECTION_TESTIMONIAL_PLACEHOLDER,
+      },
     ],
   },
   {
@@ -217,6 +258,9 @@ export const projectCollections: ProjectCollection[] = [
         gameTitle: "Mass Effect",
         gameInfo:
           "A science-fiction action RPG series following Commander Shepard and their crew — including Tali'Zorah — across a galaxy of alliances, loyalty, and high-stakes decision-making.",
+        officialWebsite: "https://www.bioware.com/",
+        companyName: "BioWare",
+        ipLogo: asset("images/projects/collection/BioWare_logo.svg"),
         testimonial: COLLECTION_TESTIMONIAL_PLACEHOLDER,
       },
       {
@@ -224,16 +268,26 @@ export const projectCollections: ProjectCollection[] = [
         gameTitle: "Dragon Age",
         gameInfo:
           "A dark fantasy action RPG series set in Thedas — a world of magic, political intrigue, and characters whose choices leave lasting marks on the story.",
+        companyName: "BioWare",
         testimonial: {
           quote:
             "Really pretty! I loved the attention to detail on the hinges and metal on the corners, none of it is left plain. Feels quite sturdy as well!",
         },
       },
       {
+        slug: DRAGON_AGE_BUNDLE_WOODEN_BOX_SLUG,
+        gameTitle: "Dragon Age",
+        gameInfo:
+          "A dark fantasy action RPG series set in Thedas — a world of magic, political intrigue, and characters whose choices leave lasting marks on the story.",
+        companyName: "BioWare",
+        testimonial: COLLECTION_TESTIMONIAL_PLACEHOLDER,
+      },
+      {
         slug: DRAGON_AGE_MAGE_TEMPLAR_COIN_SLUG,
         gameTitle: "Dragon Age",
         gameInfo:
           "A dark fantasy action RPG series set in Thedas — a world of magic, political intrigue, and characters whose choices leave lasting marks on the story.",
+        companyName: "BioWare",
         testimonial: COLLECTION_TESTIMONIAL_PLACEHOLDER,
       },
     ],
@@ -249,15 +303,30 @@ export const projectCollections: ProjectCollection[] = [
     ],
     entries: [
       {
+        slug: DRAGON_AGE_VARRIC_PIN_SET_SLUG,
+        gameTitle: "Dragon Age",
+        gameInfo:
+          "A dark fantasy action RPG series set in Thedas — a world of magic, political intrigue, and characters whose choices leave lasting marks on the story.",
+        officialWebsite: "https://www.bioware.com/",
+        companyName: "BioWare",
+        ipLogo: asset("images/projects/collection/BioWare_logo.svg"),
+        testimonial: COLLECTION_TESTIMONIAL_PLACEHOLDER,
+      },
+      {
         slug: FALLOUT_TOPS_CASINO_CHIP_SLUG,
         gameTitle: "Fallout",
         gameInfo: FALLOUT_GAME_INFO,
+        officialWebsite: "https://fallout.bethesda.net/en-US",
+        companyName: "Bethesda",
+        ipVideo:
+          "https://cdnstatic.bethsoft.com/bethesdagamestudios.com/Starfield_TheEndlessPursuit_ForWeb.mp4",
         testimonial: COLLECTION_TESTIMONIAL_PLACEHOLDER,
       },
       {
         slug: FALLOUT_NCR_RANGER_COIN_SLUG,
         gameTitle: "Fallout",
         gameInfo: FALLOUT_GAME_INFO,
+        companyName: "Bethesda",
         testimonial: COLLECTION_TESTIMONIAL_PLACEHOLDER,
       },
     ],
@@ -282,19 +351,32 @@ export type CollectionProjectRow = {
   officialWebsite?: string;
   companyName?: string;
   ipVideo?: string;
+  ipImage?: string;
+  ipLogo?: string;
   testimonial: CollectionTestimonial;
+};
+
+/** One right-rail project inside an IP / studio group. */
+export type CollectionIpProject = {
+  project: Project;
+  gameTitle: string;
 };
 
 /** One IP block on collection detail — left media + right stacked projects. */
 export type CollectionIpGroup = {
-  gameTitle: string;
+  /** Stable key — company when set, else game title. */
+  id: string;
   gameInfo: string[];
   officialWebsite?: string;
   companyName?: string;
-  /** Dedicated IP card video when set; else lead project detail hero. */
+  /** Dedicated IP card video when set; else ipLogo / ipImage / lead hero. */
   ipVideo?: string;
-  /** Lead project supplies fallback left media + right stack. */
-  projects: Project[];
+  /** Dedicated IP card still when set (and no ipVideo / ipLogo). */
+  ipImage?: string;
+  /** Studio logo on black plate when set (and no ipVideo). */
+  ipLogo?: string;
+  /** Lead project supplies fallback left media; all items stack on the right. */
+  projects: CollectionIpProject[];
 };
 
 function asGameInfoParagraphs(value: string | string[]): string[] {
@@ -317,6 +399,8 @@ export function getCollectionProjects(
         officialWebsite: entry.officialWebsite?.trim() || undefined,
         companyName: entry.companyName?.trim() || undefined,
         ipVideo: entry.ipVideo?.trim() || undefined,
+        ipImage: entry.ipImage?.trim() || undefined,
+        ipLogo: entry.ipLogo?.trim() || undefined,
         testimonial: resolveCollectionTestimonial(
           entry.slug,
           entry.testimonial,
@@ -327,33 +411,37 @@ export function getCollectionProjects(
 }
 
 /**
- * Group resolved rows by gameTitle (shelf order of first appearance).
- * Same-IP products stack on the right; left media uses ipVideo or first project.
+ * Group resolved rows by studio when companyName is set, else by gameTitle
+ * (shelf order of first appearance). Same studio / IP products stack on the
+ * right; left media uses ipVideo, ipLogo, ipImage, or first project.
  */
 export function getCollectionIpGroups(
   collection: ProjectCollection,
 ): CollectionIpGroup[] {
   const rows = getCollectionProjects(collection);
   const groups: CollectionIpGroup[] = [];
-  const indexByTitle = new Map<string, number>();
+  const indexById = new Map<string, number>();
 
   for (const row of rows) {
-    const existing = indexByTitle.get(row.gameTitle);
+    const id = row.companyName || row.gameTitle;
+    const existing = indexById.get(id);
     if (existing === undefined) {
-      indexByTitle.set(row.gameTitle, groups.length);
+      indexById.set(id, groups.length);
       groups.push({
-        gameTitle: row.gameTitle,
+        id,
         gameInfo: row.gameInfo,
         officialWebsite: row.officialWebsite,
         companyName: row.companyName,
         ipVideo: row.ipVideo,
-        projects: [row.project],
+        ipImage: row.ipImage,
+        ipLogo: row.ipLogo,
+        projects: [{ project: row.project, gameTitle: row.gameTitle }],
       });
       continue;
     }
 
     const group = groups[existing]!;
-    group.projects.push(row.project);
+    group.projects.push({ project: row.project, gameTitle: row.gameTitle });
     if (!group.officialWebsite && row.officialWebsite) {
       group.officialWebsite = row.officialWebsite;
     }
@@ -362,6 +450,12 @@ export function getCollectionIpGroups(
     }
     if (!group.ipVideo && row.ipVideo) {
       group.ipVideo = row.ipVideo;
+    }
+    if (!group.ipImage && row.ipImage) {
+      group.ipImage = row.ipImage;
+    }
+    if (!group.ipLogo && row.ipLogo) {
+      group.ipLogo = row.ipLogo;
     }
     if (group.gameInfo.length === 0 && row.gameInfo.length > 0) {
       group.gameInfo = row.gameInfo;

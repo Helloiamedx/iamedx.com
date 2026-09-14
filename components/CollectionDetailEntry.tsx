@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment, useEffect } from "react";
 import { HeroSegmentVideo } from "@/components/HeroSegmentVideo";
 import { OriginButton } from "@/components/ui/origin-button";
 import { YouTubeBackground } from "@/components/YouTubeBackground";
@@ -7,6 +8,7 @@ import {
   getCaseCopySections,
   type CaseCopySection,
 } from "@/content/caseCopy";
+import type { CollectionIpProject } from "@/content/collections";
 import type { Project } from "@/content/projects";
 import { asset } from "@/lib/assets";
 import {
@@ -16,16 +18,18 @@ import {
 } from "@/lib/videoLoadQueue";
 
 type CollectionDetailEntryProps = {
-  /** Game / IP display name — between first project card and Read case study */
-  gameTitle: string;
   /** Official site — left Visit official CTA when set */
   officialWebsite?: string;
   /** Studio / publisher name in left CTA */
   companyName?: string;
   /** Dedicated left-column IP video when set */
   ipVideo?: string;
+  /** Dedicated left-column IP still when set (and no ipVideo / ipLogo) */
+  ipImage?: string;
+  /** Studio logo on black plate when set (and no ipVideo) */
+  ipLogo?: string;
   /** Lead project = left IP media fallback; all projects stack on the right */
-  projects: Project[];
+  projects: CollectionIpProject[];
 };
 
 /** Collection detail right rail — Outcome only. */
@@ -37,9 +41,15 @@ function getCollectionOutcomeSections(project: Project): CaseCopySection[] {
 
 function CollectionIpHero({
   ipVideo,
+  ipImage,
+  ipLogo,
+  companyName,
   fallbackProject,
 }: {
   ipVideo?: string;
+  ipImage?: string;
+  ipLogo?: string;
+  companyName?: string;
   fallbackProject: Project;
 }) {
   if (ipVideo) {
@@ -52,11 +62,49 @@ function CollectionIpHero({
     );
   }
 
+  if (ipLogo) {
+    return <CollectionIpLogoPlate src={ipLogo} companyName={companyName} />;
+  }
+
+  if (ipImage) {
+    return (
+      <CollectionStill
+        src={ipImage}
+        unlockHero
+      />
+    );
+  }
+
   return (
     <CollectionEntryHero
       project={fallbackProject}
       priority={VIDEO_LOAD_PRIORITY.caseHero}
     />
+  );
+}
+
+function CollectionIpLogoPlate({
+  src,
+  companyName,
+}: {
+  src: string;
+  companyName?: string;
+}) {
+  useEffect(() => {
+    unlockVideosAfterHero();
+  }, []);
+
+  return (
+    <div className="collection-detail__entry-logo">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        className="collection-detail__entry-logo-mark"
+        src={src}
+        alt={companyName ? `${companyName} logo` : ""}
+        draggable={false}
+        onLoad={() => unlockVideosAfterHero()}
+      />
+    </div>
   );
 }
 
@@ -142,23 +190,48 @@ function CollectionStill({
 
 function CollectionProjectBlock({
   project,
-  gameTitle,
 }: {
   project: Project;
-  /** Between the project card and Read case study */
-  gameTitle: string;
 }) {
   const outcomeSections = getCollectionOutcomeSections(project);
+  const hoverStills = project.coverHoverStills;
+  const hasHoverStills = Boolean(hoverStills && hoverStills.length === 3);
 
   return (
     <div className="collection-detail__project">
-      <div className="collection-detail__project-media-frame">
-        <CollectionEntryHero
-          project={project}
-          priority={VIDEO_LOAD_PRIORITY.gallery}
-        />
+      <div
+        className={
+          hasHoverStills
+            ? "collection-detail__project-media-frame collection-detail__project-media-frame--swap"
+            : "collection-detail__project-media-frame"
+        }
+      >
+        <div className="collection-detail__project-media-cover">
+          <CollectionEntryHero
+            project={project}
+            priority={VIDEO_LOAD_PRIORITY.gallery}
+          />
+        </div>
+        {hasHoverStills ? (
+          <div
+            className="collection-detail__project-media-cycle"
+            aria-hidden="true"
+          >
+            {hoverStills!.map((src, index) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={src}
+                className={`collection-detail__project-swap-frame collection-detail__project-swap-frame--${index + 1}`}
+                src={src}
+                alt=""
+                draggable={false}
+                loading="lazy"
+              />
+            ))}
+          </div>
+        ) : null}
       </div>
-      <h2 className="collection-detail__entry-ip">{gameTitle}</h2>
+      <h2 className="collection-detail__project-title">{project.title}</h2>
       <OriginButton href={`/projects/${project.slug}`}>
         Read case study
       </OriginButton>
@@ -190,13 +263,14 @@ function CollectionProjectBlock({
 }
 
 export function CollectionDetailEntry({
-  gameTitle,
   officialWebsite,
   companyName,
   ipVideo,
+  ipImage,
+  ipLogo,
   projects,
 }: CollectionDetailEntryProps) {
-  const leadProject = projects[0];
+  const leadProject = projects[0]?.project;
   if (!leadProject) return null;
 
   return (
@@ -208,6 +282,9 @@ export function CollectionDetailEntry({
             <div className="collection-detail__entry-media-frame">
               <CollectionIpHero
                 ipVideo={ipVideo}
+                ipImage={ipImage}
+                ipLogo={ipLogo}
+                companyName={companyName}
                 fallbackProject={leadProject}
               />
             </div>
@@ -231,12 +308,16 @@ export function CollectionDetailEntry({
 
           <div className="collection-detail__entry-copy">
             <div className="collection-detail__projects">
-              {projects.map((project) => (
-                <CollectionProjectBlock
-                  key={project.slug}
-                  project={project}
-                  gameTitle={gameTitle}
-                />
+              {projects.map(({ project }, index) => (
+                <Fragment key={project.slug}>
+                  {index > 0 ? (
+                    <hr
+                      className="collection-detail__project-rule"
+                      aria-hidden="true"
+                    />
+                  ) : null}
+                  <CollectionProjectBlock project={project} />
+                </Fragment>
               ))}
             </div>
           </div>

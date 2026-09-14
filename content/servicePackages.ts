@@ -48,6 +48,8 @@ export type ServicePackageItem = {
   coverVideo?: string;
   /** Card image stack — same recipe as home Support panels */
   coverImages?: readonly string[];
+  /** View workflow steps — copy only; layout TBD */
+  workflowSteps?: readonly { title: string; body: string }[];
 };
 
 export type ServicePackagePhase = {
@@ -111,6 +113,16 @@ export const servicePackagePhases: ServicePackagePhase[] = [
         timeline: "18H",
         fee: { label: "Free", amountUsd: 0 },
         coverVideo: asset("images/service/Initial%20Project%20Review.mov"),
+        workflowSteps: [
+          {
+            title: "Build a complete picture.",
+            body: "I start with your drawings, references, and specifications. I review how the product should look, be made, be packaged, and reach its destination, then clarify any missing details with you.",
+          },
+          {
+            title: "Define where I can add value.",
+            body: "I compare your requirements with my experience, supplier resources, and the development work involved to assess whether I can support the project responsibly.",
+          },
+        ],
       },
       {
         id: "supplier-identification",
@@ -186,8 +198,9 @@ export const servicePackagePhases: ServicePackagePhase[] = [
         ],
         timeline: "2–3 business days",
         fee: { label: "$250.00", amountUsd: 250 },
+        /* Same clip as home Support “Manufacturing Localization” */
         coverVideo: asset(
-          "images/service/Product%20Requirement%20Translation%20%26amp%3B%20Supplier%20Negotiation.mp4",
+          "images/home/From%20concept%20to%20delivery/Manufacturing%20Localization/video.mp4",
         ),
         sampleLinks: [
           {
@@ -255,7 +268,10 @@ export const servicePackagePhases: ServicePackagePhase[] = [
         ],
         timeline: "Based on production schedule and order complexity",
         fee: { label: "$750.00", amountUsd: 750 },
-        coverVideo: asset("images/home/Production%20Management.mov"),
+        /* Same clip as home Support “Production Management” */
+        coverVideo: asset(
+          "images/home/From%20concept%20to%20delivery/Production%20Management/video.mp4",
+        ),
       },
       {
         id: "compliance-testing",
@@ -275,8 +291,9 @@ export const servicePackagePhases: ServicePackagePhase[] = [
         ],
         timeline: "Based on project complexity",
         fee: { label: "$500.00", amountUsd: 500 },
+        /* Same clip as home Support “Compliance & Testing” */
         coverVideo: asset(
-          "images/service/Product%20Compliance%20%26amp%3B%20Testing%20Coordination.m4v",
+          "images/home/From%20concept%20to%20delivery/Compliance%20%26%20Testing/video.mp4?v=20260911b",
         ),
       },
     ],

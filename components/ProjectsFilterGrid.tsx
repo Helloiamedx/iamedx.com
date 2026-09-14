@@ -24,8 +24,11 @@ import {
   segmentProjectsForIndex,
 } from "@/lib/projectsIndexLayout";
 
-/** First screen / each “See more”: one group = 6 cards (+ collection while any remain). */
-const INITIAL_VISIBLE = 6;
+/**
+ * First screen: 6 cards → collection break → 4 more cards, then “See more”.
+ * Each “See more” still adds one full group of 6.
+ */
+const INITIAL_VISIBLE = 10;
 const LOAD_MORE_STEP = 6;
 
 const SINGLE_COLUMN_MQ = "(max-width: 700px)";

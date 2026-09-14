@@ -177,7 +177,11 @@ export type HomeRecognitionSlide = {
   title: string;
   /** Card body — Grtsk Regular */
   body: string;
-  image: string;
+  /**
+   * Still cover — only dedicated recognition media.
+   * Omit when the card is product-box / video-only (no project-cover placeholders).
+   */
+  image?: string;
   /** Optional mobile (≤700px) still — falls back to `image` */
   imageMobile?: string;
   /** Optional looping cover — preferred over `image` when set */
@@ -219,23 +223,18 @@ export const homeRecognition: HomeRecognitionCopy = {
   headlineAfter: "",
   portrait: asset(`/images/about/${encodeURIComponent("My Profile.jpg")}`),
   slideDurationMs: 6000,
-  /* Demo stills — swap for dedicated recognition media later */
   slides: [
     {
       id: "client-rehire",
       title: "Clients Come Back",
       body: "Clients rehire me when they need to develop complex or highly customized products without an existing solution.",
-      image: asset(
-        `/images/projects/${encodeURIComponent("Dragon Age Writing Bundle")}/${encodeURIComponent("VARRIC TETHRAS cover.jpg")}`,
-      ),
+      /* Media: product-box packs (recognitionProductBox) — no still cover */
     },
     {
       id: "positive-reviews",
       title: "Positive reviews",
       body: "Products receive positive feedback from clients and end consumers after delivery.",
-      image: asset(
-        `/images/projects/${encodeURIComponent("Mass Effect Tali Companion Bundle")}/${encodeURIComponent("Mass Effect Tali Companion Bundle.jpg")}`,
-      ),
+      /* Video only — no project-cover placeholder under the clip */
       video: asset(
         `/images/home/${encodeURIComponent("Recognition comes first")}/${encodeURIComponent("Positive reviews")}/video.mp4`,
       ),
@@ -261,9 +260,6 @@ export const homeRecognition: HomeRecognitionCopy = {
       id: "reordered",
       title: "Clients Reorder",
       body: "Strong sales often lead clients to place repeat orders soon after the first production run.",
-      image: asset(
-        `/images/home/${encodeURIComponent("Recognition comes first")}/${encodeURIComponent("Clients Reorder")}/1.jpg`,
-      ),
       photoAccordion: [1, 2, 3, 4].map((n) =>
         asset(
           `/images/home/${encodeURIComponent("Recognition comes first")}/${encodeURIComponent("Clients Reorder")}/${n}.jpg`,
@@ -276,9 +272,7 @@ export const homeRecognition: HomeRecognitionCopy = {
       id: "supplier-retention",
       title: "95% long-term supplier retention",
       body: "I maintain strong relationships with factories, small workshops, material suppliers, and key process specialists, allowing me to quickly access the manufacturing information I need.",
-      image: asset(
-        `/images/projects/${encodeURIComponent("Halo 5 Guardians Limited Edition Collectors Statue")}/${encodeURIComponent("1.jpg")}`,
-      ),
+      /* Video only — no project-cover placeholder under the clip */
       video: asset(
         `/images/home/${encodeURIComponent("Recognition comes first")}/${encodeURIComponent("95% long-term supplier retention")}/video.mp4`,
       ),

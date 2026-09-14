@@ -4,6 +4,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { useLenis } from "lenis/react";
+import { useReducedMotion } from "motion/react";
 import {
   buildCountryQueryValue,
   buildInvolvementQueryValue,
@@ -18,6 +19,8 @@ import {
 } from "@/content/projects";
 
 const DRAWER_EXIT_MS = 380;
+/** After page load — small control needs a beat so it’s noticed */
+const FILTER_ENTER_DELAY_MS = 720;
 
 type ProjectFilterProps = {
   activeInvolvement: InvolvementSelection;
@@ -103,6 +106,8 @@ export function ProjectFilter({
   const panelId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const exitTimerRef = useRef<number | null>(null);
+  const reduceMotion = useReducedMotion();
+  const barRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -119,16 +124,86 @@ export function ProjectFilter({
     lenisRef.current = lenis;
   }, [lenis]);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  /*
+   * Filter enter: wait for load + delay, then play when in view.
+   * Leave settles visible; each re-entry plays again.
+   */
+  useEffect(() => {
+    const bar = barRef.current;
+    if (!bar || typeof IntersectionObserver === "undefined") return;
+
+    if (reduceMotion) {
+      bar.classList.add("is-revealed");
+      return;
+    }
+
+    let delayTimer = 0;
+    let gateReady = false;
+    let inView = false;
+    let cancelled = false;
+
+    const play = () => {
+      bar.classList.remove("is-revealed");
+      bar.style.transition = "none";
+      void bar.offsetWidth;
+      bar.style.removeProperty("transition");
+      requestAnimationFrame(() => {
+        if (!cancelled) bar.classList.add("is-revealed");
+      });
+    };
+
+    const tryPlay = () => {
+      if (!gateReady || !inView || cancelled) return;
+      play();
+    };
+
+    const armGate = () => {
+      delayTimer = window.setTimeout(() => {
+        gateReady = true;
+        tryPlay();
+      }, FILTER_ENTER_DELAY_MS);
+    };
+
+    if (document.readyState === "complete") {
+      armGate();
+    } else {
+      window.addEventListener("load", armGate, { once: true });
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry) return;
+        if (!entry.isIntersecting) {
+          /* Leave settles visible — arm for the next enter */
+          inView = false;
+          return;
+        }
+        if (inView) return;
+        inView = true;
+        tryPlay();
+      },
+      { threshold: 0 },
+    );
+
+    observer.observe(bar);
+    return () => {
+      cancelled = true;
+      observer.disconnect();
+      window.removeEventListener("load", armGate);
+      if (delayTimer) window.clearTimeout(delayTimer);
+    };
+  }, [reduceMotion]);
+
   const activeCount = projectsFilterSelectionCount({
     involvement: activeInvolvement,
     material: activeMaterial,
     country: activeCountry,
   });
   const filtersActive = activeCount > 0 || Boolean(activeIp);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     if (open) {
@@ -436,7 +511,7 @@ export function ProjectFilter({
 
   return (
     <>
-      <div className="project-filter-bar">
+      <div ref={barRef} className="project-filter-bar">
         <button
           ref={triggerRef}
           type="button"

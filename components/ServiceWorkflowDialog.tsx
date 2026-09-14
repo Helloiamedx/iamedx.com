@@ -11,8 +11,10 @@ const EXIT_MS = 460;
 type ServiceWorkflowDialogProps = {
   open: boolean;
   onClose: () => void;
-  /** Service name — used for a11y until workflow copy is supplied */
+  /** Service name — used for a11y */
   title: string;
+  /** Workflow steps — plain copy for now; layout later */
+  steps?: readonly { title: string; body: string }[];
 };
 
 function lockBodyScroll(scrollY: number) {
@@ -49,12 +51,13 @@ function unlockBodyScroll(scrollY: number) {
 
 /**
  * Services — frosted full-screen overlay + white workflow panel (Apple-style shell).
- * Content TBD; layout and backdrop only for now.
+ * Copy in; layout TBD.
  */
 export function ServiceWorkflowDialog({
   open,
   onClose,
   title,
+  steps,
 }: ServiceWorkflowDialogProps) {
   const titleId = useId();
   const [mounted, setMounted] = useState(false);
@@ -208,7 +211,16 @@ export function ServiceWorkflowDialog({
             <p id={titleId} className="svc-workflow__sr-title">
               {title}
             </p>
-            {/* Workflow copy / media — supplied later */}
+            {steps?.length ? (
+              <div className="svc-workflow__steps">
+                {steps.map((step) => (
+                  <div key={step.title} className="svc-workflow__step">
+                    <h3 className="svc-workflow__step-title">{step.title}</h3>
+                    <p className="svc-workflow__step-body">{step.body}</p>
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

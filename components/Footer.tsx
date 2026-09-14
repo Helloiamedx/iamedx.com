@@ -3,14 +3,13 @@
 import Image from "next/image";
 import {
   contactInfo,
-  footerLeadLine,
   footerMenuLinks,
   linkedInHref,
   officeInfo,
   whatsAppCta,
 } from "@/content/nav";
 import { OriginButton } from "@/components/ui/origin-button";
-import { LineRevealText } from "@/components/LineRevealText";
+import { FooterLeadReveal } from "@/components/FooterLeadReveal";
 import { RollLink } from "@/components/RollLink";
 import { asset } from "@/lib/assets";
 
@@ -26,7 +25,7 @@ export function Footer() {
           <div className="site-footer__top">
             <div className="site-footer__primary">
               <p className="site-footer__lead">
-                <LineRevealText text={footerLeadLine} />
+                <FooterLeadReveal />
               </p>
 
               <div className="site-footer__cta-actions">

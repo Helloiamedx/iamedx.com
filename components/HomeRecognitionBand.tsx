@@ -386,6 +386,10 @@ export function HomeRecognitionBand() {
             const hasPhotoAccordion = Boolean(
               slide.photoAccordion && slide.photoAccordion.length > 0,
             );
+            const stillSrc =
+              isMobileCard && slide.imageMobile
+                ? slide.imageMobile
+                : slide.image;
             return (
               <article
                 key={slide.id}
@@ -420,18 +424,17 @@ export function HomeRecognitionBand() {
                     />
                   ) : slide.video || slide.videoMobile ? (
                     <>
-                      {/* Still under the clip so copy has contrast before frames paint */}
-                      <Image
-                        src={
-                          isMobileCard && slide.imageMobile
-                            ? slide.imageMobile
-                            : slide.image
-                        }
-                        alt=""
-                        fill
-                        sizes="(max-width: 700px) 78vw, min(86vw, 1100px)"
-                        className="home-recognition__image home-recognition__image--video-still"
-                      />
+                      {/* Dedicated still only — never project-cover placeholders */}
+                      {stillSrc ? (
+                        <Image
+                          src={stillSrc}
+                          alt=""
+                          fill
+                          sizes="(max-width: 700px) 78vw, min(86vw, 1100px)"
+                          className="home-recognition__image home-recognition__image--video-still"
+                          draggable={false}
+                        />
+                      ) : null}
                       <CoverLoopVideo
                         key={
                           isMobileCard && slide.videoMobile
@@ -452,20 +455,17 @@ export function HomeRecognitionBand() {
                         onEnded={active ? onVideoEnded : undefined}
                       />
                     </>
-                  ) : (
+                  ) : stillSrc ? (
                     <Image
-                      src={
-                        isMobileCard && slide.imageMobile
-                          ? slide.imageMobile
-                          : slide.image
-                      }
+                      src={stillSrc}
                       alt=""
                       fill
                       sizes="(max-width: 700px) 78vw, min(86vw, 1100px)"
                       className="home-recognition__image"
                       priority={slideIndex === 0}
+                      draggable={false}
                     />
-                  )}
+                  ) : null}
                 </div>
                 <div
                   className="home-recognition__copy"

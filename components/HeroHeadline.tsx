@@ -6,7 +6,7 @@ import { LineRevealText } from "@/components/LineRevealText";
 import { HERO_COPY_ATTR, whenHeroFlag } from "@/lib/heroSequence";
 
 const HEADLINE =
-  "ESTABLISH A SUPPLY CHAIN FROM SCRATCH TAILORED TO YOUR BUSINESS";
+  "Establish a Supply Chain From Scratch Tailored to Your Business";
 
 const SUBTITLE =
   "No matter how small you start, I help turn your product ideas into a reliable and scalable supply chain in China built around your actual needs, budget, and growth.";

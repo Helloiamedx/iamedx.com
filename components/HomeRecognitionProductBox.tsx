@@ -197,6 +197,7 @@ function ProductCutout({ item }: { item: RecognitionProductBoxItem }) {
             height={height}
             transform={`rotate(${item.rotate} ${item.rotateOriginX} ${item.rotateOriginY})`}
             preserveAspectRatio="xMidYMid meet"
+            style={{ pointerEvents: "none" }}
           />
         </g>
       </g>

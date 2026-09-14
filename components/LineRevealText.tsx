@@ -45,6 +45,7 @@ export function LineRevealText({ text, className }: LineRevealTextProps) {
       }
 
       const fromVars = { yPercent: 110, opacity: 0 };
+      const restVars = { yPercent: 0, opacity: 1 };
       gsap.set(split.lines, fromVars);
 
       const tween = gsap.fromTo(split.lines, fromVars, {
@@ -56,15 +57,45 @@ export function LineRevealText({ text, className }: LineRevealTextProps) {
         paused: true,
       });
 
-      const reset = () => {
-        tween.pause(0);
-        gsap.set(split.lines, fromVars);
+      /** Leave in the resting visible state — never hide while still on screen. */
+      const settle = () => {
+        tween.pause();
+        gsap.set(split.lines, restVars);
       };
 
       const play = () => {
-        reset();
+        gsap.set(split.lines, fromVars);
         tween.play(0);
       };
+
+      /*
+       * Services titles: observe the title itself so each one plays when it
+       * enters view (and sticky phase labels are not wiped mid-stage).
+       */
+      const selfTrigger = el.closest(".svc-phase__label, .svc-item__title");
+      if (selfTrigger && typeof IntersectionObserver !== "undefined") {
+        let visible = false;
+        const io = new IntersectionObserver(
+          ([entry]) => {
+            if (!entry) return;
+            if (!entry.isIntersecting) {
+              visible = false;
+              settle();
+              return;
+            }
+            if (visible) return;
+            visible = true;
+            play();
+          },
+          { threshold: 0 },
+        );
+        io.observe(selfTrigger);
+        return () => {
+          io.disconnect();
+          tween.kill();
+          split.revert();
+        };
+      }
 
       /* Prefer the hero landmark when nested (LineReveal inside .hero) */
       const section =
@@ -75,8 +106,8 @@ export function LineRevealText({ text, className }: LineRevealTextProps) {
         end: "bottom 22%",
         onEnter: play,
         onEnterBack: play,
-        onLeave: reset,
-        onLeaveBack: reset,
+        onLeave: settle,
+        onLeaveBack: settle,
       });
 
       /* Late mount (e.g. hero after copy gate) while already in view */
