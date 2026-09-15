@@ -41,7 +41,7 @@ type CoverLoopVideoProps = {
 
 /**
  * Card / services / insights cover loop.
- * Site-bg plate until playing — no site-mark load cover.
+ * Transparent until playing — page / band color shows through.
  */
 export function CoverLoopVideo({
   src,

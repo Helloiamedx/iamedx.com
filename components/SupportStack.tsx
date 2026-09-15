@@ -14,8 +14,6 @@ import {
 } from "@/content/supportBento";
 import { useDriveVideoPlayback } from "@/lib/videoPlayback";
 import { useSwipeNav } from "@/lib/useSwipeNav";
-import { LineRevealText } from "@/components/LineRevealText";
-
 const CARDS = supportKnowCards;
 
 function supportDetailBody(
@@ -601,7 +599,7 @@ export function SupportStack() {
       <div className="support-know__shell">
         <header className="home-section-intro support-know__intro">
           <h2 id="support-know-title" className="home-section-intro__title">
-            <LineRevealText text={supportBentoSection.title} />
+            {supportBentoSection.title}
           </h2>
         </header>
 

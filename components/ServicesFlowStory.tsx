@@ -1,10 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import { useReducedMotion } from "motion/react";
+import { useState } from "react";
 import { CoverLoopVideo } from "@/components/CoverLoopVideo";
-import { LineRevealText } from "@/components/LineRevealText";
 import { PageIndexTitle } from "@/components/PageIndexTitle";
 import { PanelImageStack } from "@/components/PanelImageStack";
 import { ServiceWorkflowDialog } from "@/components/ServiceWorkflowDialog";
@@ -70,9 +68,7 @@ function PhaseSection({
 
         <div className="svc-phase__cols">
           <aside className="svc-phase__aside">
-            <h2 className="svc-phase__label">
-              <LineRevealText text={phaseLabel(phase.title)} />
-            </h2>
+            <h2 className="svc-phase__label">{phaseLabel(phase.title)}</h2>
             <p className="svc-phase__aside-desc">{phase.description}</p>
           </aside>
 
@@ -90,58 +86,12 @@ function PhaseSection({
 }
 
 function ServiceItemBlock({ item }: { item: ServicePackageItem }) {
-  const articleRef = useRef<HTMLElement>(null);
   const [workflowOpen, setWorkflowOpen] = useState(false);
-  const reduceMotion = useReducedMotion();
-
-  useEffect(() => {
-    const root = articleRef.current;
-    if (!root || typeof IntersectionObserver === "undefined") return;
-
-    const parts = Array.from(
-      root.querySelectorAll<HTMLElement>("[data-svc-enter]"),
-    );
-    if (!parts.length) return;
-
-    if (reduceMotion) {
-      parts.forEach((el) => el.classList.add("is-in"));
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          const el = entry.target as HTMLElement;
-          if (entry.isIntersecting) {
-            /* Re-enter: clear then paint so the transition can replay */
-            el.classList.remove("is-in");
-            requestAnimationFrame(() => {
-              requestAnimationFrame(() => {
-                el.classList.add("is-in");
-              });
-            });
-          } else {
-            el.classList.remove("is-in");
-          }
-        }
-      },
-      { threshold: 0.2 },
-    );
-
-    parts.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, [reduceMotion, item.id]);
 
   return (
-    <article
-      ref={articleRef}
-      className="svc-item"
-      aria-label={item.title}
-    >
+    <article className="svc-item" aria-label={item.title}>
       <div className="svc-item__intro">
-        <h4 className="svc-item__title" data-svc-enter>
-          {item.title}
-        </h4>
+        <h4 className="svc-item__title">{item.title}</h4>
         <p className="svc-item__desc">{item.description}</p>
       </div>
       <div className="svc-item__cta">
@@ -154,6 +104,7 @@ function ServiceItemBlock({ item }: { item: ServicePackageItem }) {
         open={workflowOpen}
         onClose={() => setWorkflowOpen(false)}
         title={item.title}
+        steps={item.workflowSteps}
       />
 
       <div className="svc-item__media">
@@ -180,14 +131,9 @@ function ServiceItemBlock({ item }: { item: ServicePackageItem }) {
         )}
       </div>
 
-      <div
-        className="svc-phase__grid"
-        aria-label={`${item.code} details`}
-      >
+      <div className="svc-phase__grid" aria-label={`${item.code} details`}>
         <div className="svc-phase__cell">
-          <p className="svc-phase__cell-label" data-svc-enter>
-            Assistance
-          </p>
+          <p className="svc-phase__cell-label">Assistance</p>
           <ul className="svc-phase__cell-list">
             {item.assistance.map((entry) => (
               <li key={entry}>{entry}</li>
@@ -196,9 +142,7 @@ function ServiceItemBlock({ item }: { item: ServicePackageItem }) {
         </div>
 
         <div className="svc-phase__cell">
-          <p className="svc-phase__cell-label" data-svc-enter>
-            Deliverables
-          </p>
+          <p className="svc-phase__cell-label">Deliverables</p>
           <ul className="svc-phase__cell-list">
             {item.deliverables.map((entry) => (
               <li key={entry}>{entry}</li>
@@ -207,18 +151,14 @@ function ServiceItemBlock({ item }: { item: ServicePackageItem }) {
         </div>
 
         <div className="svc-phase__cell">
-          <p className="svc-phase__cell-label" data-svc-enter>
-            Timeline
-          </p>
+          <p className="svc-phase__cell-label">Timeline</p>
           <p className="svc-phase__cell-body">
             {item.timeline ?? "Based on project scope"}
           </p>
         </div>
 
         <div className="svc-phase__cell">
-          <p className="svc-phase__cell-label" data-svc-enter>
-            Fee
-          </p>
+          <p className="svc-phase__cell-label">Fee</p>
           <p className="svc-phase__cell-body">{item.fee.label}</p>
         </div>
       </div>

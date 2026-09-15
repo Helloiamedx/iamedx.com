@@ -1,0 +1,29 @@
+---
+description: Preserve ChatGPT-optimized WorkflowKeywordBurst (perspective scale field)
+globs: components/WorkflowKeywordBurst.tsx,app/globals.css,components/ServiceWorkflowDialog.tsx
+alwaysApply: false
+---
+
+# Workflow keyword burst — canonical version
+
+`components/WorkflowKeywordBurst.tsx` is the **ChatGPT-optimized** fly-through field for Supplier Identification step **01 — Break Down the Product**. Treat the current file as source of truth.
+
+## Keep
+
+- Perspective projection via scale: `720 / (720 - lerp(-420, 520, t))` (same depth feel as ServicesRoleBurst, no live `translateZ`)
+- Fixed `ORIGINS` + staggered `PHASES` (9 slots)
+- Single compositor transform: `translate3d(x,y,0) translate(-50%,-50%) scale(s)`
+- Continuous `filter: blur(...)` (no on/off raster switch at sharp phase)
+- Edge fade before large words clip the window
+- Shuffled pool; process + material labels mix at random (never walk the list in order)
+- Avoid simultaneous duplicate words on recycle
+- ResizeObserver + IntersectionObserver + visibility / reduced-motion pause
+- Font wait (`document.fonts`) before measure
+- CSS: `#f5f5f7` plate, **Grtsk-Medium**, `top/left: 0` (position driven in JS), `container-type: inline-size`, `isolation: isolate`
+
+## Do not
+
+- Revert to zone-sampling + DOM `translateZ` particle loop from the first draft
+- Mix CSS perspective / `translateZ` with this scale-based projection
+- Drop edge fade, blur continuity, or intersection/visibility pause without an explicit ask
+- Change keyword list / step wiring unless the user asks (list lives on `keywords` in `content/servicePackages.ts`)

@@ -48,8 +48,19 @@ export type ServicePackageItem = {
   coverVideo?: string;
   /** Card image stack — same recipe as home Support panels */
   coverImages?: readonly string[];
-  /** View workflow steps — copy only; layout TBD */
-  workflowSteps?: readonly { title: string; body: string }[];
+  /** View workflow steps — copy (+ optional media / checklist). */
+  workflowSteps?: readonly {
+    title: string;
+    body: string;
+    /** Judgment row — copy left, checklist right (same slot as media) */
+    judgment?: boolean;
+    /** Right-column media; omit → shared placeholder until replaced */
+    media?: string;
+    /** Checklist items for judgment rows (check animation later) */
+    checks?: readonly string[];
+    /** Right-column keyword field (Z burst) */
+    keywords?: readonly string[];
+  }[];
 };
 
 export type ServicePackagePhase = {
@@ -108,19 +119,34 @@ export const servicePackagePhases: ServicePackagePhase[] = [
         deliverables: [
           "Initial feedback on project suitability",
           "Recommended next steps",
-          "Confirmation of available support",
         ],
         timeline: "18H",
         fee: { label: "Free", amountUsd: 0 },
         coverVideo: asset("images/service/Initial%20Project%20Review.mov"),
         workflowSteps: [
           {
-            title: "Build a complete picture.",
+            title: "01 — Build a complete picture.",
             body: "I start with your drawings, references, and specifications. I review how the product should look, be made, be packaged, and reach its destination, then clarify any missing details with you.",
+            media: asset(
+              "images/service/Initial%20Project%20Review-workflow.mp4",
+            ),
           },
           {
-            title: "Define where I can add value.",
+            title: "02 — Define where I can add value.",
             body: "I compare your requirements with my experience, supplier resources, and the development work involved to assess whether I can support the project responsibly.",
+            judgment: true,
+            checks: [
+              "Highly Customized Hardware Development",
+              "Design and Verification of Assembly Engineering",
+              "Progress Following",
+              "Product Compliance Testing",
+              "Custom Packaging Development",
+              "Specialty Paper Process Research",
+              "Embossing Mold Testing and Optimization",
+              "Material Adaptation",
+              "Off-the-Shelf Hardware Adaptation",
+              "Quality Control",
+            ],
           },
         ],
       },
@@ -136,18 +162,59 @@ export const servicePackagePhases: ServicePackagePhase[] = [
           "Industry groups and manufacturing communities",
           "Domestic sourcing platforms (1688, Douyin, etc.)",
         ],
-        deliverables: [
-          "Shortlist of 3–5 recommended suppliers and report",
-          "Supplier company information",
-          "Product experience",
-          "Certifications (if applicable)",
-          "MOQ requirements",
-          "Estimated pricing range",
-          "Lead time",
-        ],
+        deliverables: ["3–5 Recommended Suppliers + Evaluation Report"],
         timeline: "3–5 business days",
         fee: { label: "$350.00", amountUsd: 350 },
         coverVideo: asset("images/service/Supplier%20Identification.m4v"),
+        workflowSteps: [
+          {
+            title: "01 — Break Down the Product",
+            body: "I first break down the product by materials, processes, structure, and key requirements. For unfamiliar processes, I cross-check with suppliers and manufacturing contacts I have worked with before to identify what needs further research.",
+            keywords: [
+              "Embossing",
+              "Debossing",
+              "Hot Stamping",
+              "Foil Stamping",
+              "Digital Printing",
+              "UV Printing",
+              "Laser Engraving",
+              "Laser Cutting",
+              "CNC Machining",
+              "Die Casting",
+              "Metal Stamping",
+              "Electroplating",
+              "Injection Molding",
+              "Resin Casting",
+              "Painting",
+              "Spray Coating",
+              "Hand Painting",
+              "Embroidery",
+              "Sewing",
+              "Heat Transfer",
+              "Die Cutting",
+              "Wood",
+              "Leather",
+              "Metal",
+              "Resin",
+              "Fabric",
+              "Paper",
+              "EVA Foam",
+              "Plastic",
+            ],
+          },
+          {
+            title: "02 — Research & Find Suppliers",
+            body: "Once I identify the correct industry terminology, I research how the process actually works, including its key parameters, limitations, and production requirements. With this understanding, I then search for targeted suppliers and verify whether their capabilities, experience, and technical answers align with what I have learned.",
+          },
+          {
+            title: "03 — Evaluate Capability & Manageability",
+            body: "For qualified suppliers, I further evaluate quality level, MOQ, pricing, lead time, payment terms, and other key conditions. I also assess whether the supplier is responsive, cooperative, and manageable throughout production.",
+          },
+          {
+            title: "04 — Build & Deliver the Supplier List",
+            body: "I organize the qualified suppliers into a structured supplier list, including company information, relevant experience, key commercial terms, and my evaluation for your review.",
+          },
+        ],
       },
       {
         id: "supplier-evaluation-audit",
@@ -170,7 +237,9 @@ export const servicePackagePhases: ServicePackagePhase[] = [
         sampleLinks: [
           {
             label: "Sample audit report",
-            href: "https://drive.google.com/file/d/1aDFl2AJGNpfcC_EVJSgUh1TYnm9Gn79L/view?usp=sharing",
+            href: asset(
+              "images/service/Supplier%20Identification%20%26%20Initial%20Supplier%20Screening/Factory%20Audit%20Report.pdf",
+            ),
           },
         ],
       },

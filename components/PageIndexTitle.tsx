@@ -28,14 +28,12 @@ export function PageIndexTitle({
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    if (reduceMotion) {
-      setRevealed(true);
-      return;
-    }
-
-    const timer = window.setTimeout(() => {
-      setRevealed(true);
-    }, PAGE_INDEX_TITLE_DELAY_MS);
+    const timer = window.setTimeout(
+      () => {
+        setRevealed(true);
+      },
+      reduceMotion ? 0 : PAGE_INDEX_TITLE_DELAY_MS,
+    );
 
     return () => window.clearTimeout(timer);
   }, []);

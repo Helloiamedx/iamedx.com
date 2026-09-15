@@ -16,8 +16,6 @@ import { HomeRecognitionProductBox } from "@/components/HomeRecognitionProductBo
 import { homeRecognition } from "@/content/homeCopy";
 import { getRecognitionProductBoxSetsForSlide } from "@/content/recognitionProductBox";
 import { useSwipeNav } from "@/lib/useSwipeNav";
-import { LineRevealText } from "@/components/LineRevealText";
-
 /**
  * Home recognition — Apple-style highlights carousel demo.
  * Square cards, autoplay + progress dots, portrait cards on mobile.
@@ -361,7 +359,7 @@ export function HomeRecognitionBand() {
       <div className="home-recognition__shell">
         <header className="home-section-intro home-recognition__intro">
           <h2 id={`${id}-title`} className="home-section-intro__title">
-            <LineRevealText text={headline} />
+            {headline}
           </h2>
         </header>
       </div>
