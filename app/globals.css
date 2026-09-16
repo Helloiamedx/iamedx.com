@@ -9638,14 +9638,15 @@ body:has(.home-page) .site-footer__gap {
   -webkit-backdrop-filter: blur(48px) saturate(165%);
   pointer-events: none;
   touch-action: none;
-}
-
-.svc-workflow:not(.is-exiting) .svc-workflow__backdrop {
-  animation: svc-workflow-fade-in 320ms ease;
+  /*
+   * Do not animate opacity on this node — browsers drop backdrop-filter
+   * while an ancestor/self has opacity < 1 (looked like “no blur” on prod).
+   */
 }
 
 .svc-workflow.is-exiting .svc-workflow__backdrop {
-  animation: svc-workflow-fade-out 320ms ease forwards;
+  /* Instant hide with the exit shell; keep blur intact while open */
+  visibility: hidden;
 }
 
 .svc-workflow__panel {
@@ -9870,6 +9871,367 @@ body:has(.home-page) .site-footer__gap {
   overflow: hidden;
 }
 
+.svc-workflow__step-media--wall {
+  background: #0a0a0a;
+  overflow: hidden;
+}
+
+/* Evaluation demo — taller than 16:9 so checklist + air fit the 35% column */
+.svc-workflow__step-media--eval {
+  aspect-ratio: auto;
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+  background: transparent;
+}
+
+.svc-workflow__eval {
+  --se-bg: #f5f5f7;
+  --se-text: #0a0a0a;
+  --se-muted: rgba(10, 10, 10, 0.48);
+  --se-line: rgba(10, 10, 10, 0.12);
+  --se-green: #0f5c34;
+  --se-green-bg: #d8f0e0;
+  --se-amber: #996414;
+  --se-amber-bg: #fff6e7;
+  --se-pad: clamp(0.55rem, 1.6vw, 0.8rem);
+  --se-gap: clamp(0.55rem, 1.6vw, 0.85rem);
+  box-sizing: border-box;
+  width: 100%;
+  color: var(--se-text);
+}
+
+.svc-workflow__eval-surface {
+  box-sizing: border-box;
+  width: 100%;
+  padding: var(--se-pad);
+  background: var(--se-bg);
+  border: 0;
+  border-radius: 0;
+}
+
+.svc-workflow__eval-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.65rem;
+  margin-bottom: clamp(0.7rem, 1.8vw, 1rem);
+}
+
+.svc-workflow__eval-title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: clamp(0.8rem, 0.72rem + 0.35vw, 1rem);
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--se-text);
+}
+
+.svc-workflow__eval-count {
+  flex-shrink: 0;
+  font-family: var(--font-label);
+  font-size: clamp(0.5rem, 0.45rem + 0.18vw, 0.625rem);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: var(--se-muted);
+  line-height: 1.2;
+}
+
+.svc-workflow__eval-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--se-gap) clamp(1.15rem, 3.2vw, 1.85rem);
+}
+
+.svc-workflow__eval-col-title {
+  margin: 0 0 0.45rem;
+  font-family: var(--font-label);
+  font-size: clamp(0.5rem, 0.45rem + 0.18vw, 0.625rem);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--se-muted);
+  line-height: 1.3;
+}
+
+.svc-workflow__eval-row {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  min-height: 1.85rem;
+  margin: 0.22rem -0.3rem;
+  padding: 0.38rem 0.3rem;
+  border-radius: 0;
+  color: var(--se-muted);
+  transition:
+    background 280ms ease,
+    color 280ms ease;
+}
+
+.svc-workflow__eval-label {
+  min-width: 0;
+  font-family: var(--font-sans);
+  font-size: clamp(0.625rem, 0.55rem + 0.28vw, 0.75rem);
+  font-weight: 400;
+  line-height: 1.25;
+}
+
+.svc-workflow__eval-status {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+}
+
+.svc-workflow__eval-note {
+  display: none;
+  font-family: var(--font-label);
+  font-size: 0.5rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: var(--se-amber);
+}
+
+.svc-workflow__eval-symbol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.05rem;
+  height: 1.05rem;
+  border: 1.5px solid var(--se-line);
+  border-radius: 50%;
+  line-height: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  color: transparent;
+}
+
+.svc-workflow__eval-icon {
+  display: block;
+  width: 0.62rem;
+  height: 0.62rem;
+  flex-shrink: 0;
+}
+
+.svc-workflow__eval-row[data-state="active"] {
+  background: rgba(10, 10, 10, 0.04);
+  color: var(--se-text);
+}
+
+.svc-workflow__eval-row[data-state="active"] .svc-workflow__eval-symbol {
+  border-color: var(--se-line);
+  border-top-color: var(--se-green);
+  animation: svc-eval-spin 0.75s linear infinite;
+}
+
+.svc-workflow__eval-row[data-state="passed"] {
+  color: var(--se-text);
+}
+
+.svc-workflow__eval-row[data-state="passed"] .svc-workflow__eval-symbol {
+  background: var(--se-green-bg);
+  border: 1.5px solid var(--se-green);
+  color: var(--se-green);
+  animation: svc-eval-pop 0.3s ease-out;
+}
+
+.svc-workflow__eval-row[data-state="discussion"] {
+  background: var(--se-amber-bg);
+  color: var(--se-text);
+}
+
+.svc-workflow__eval-row[data-state="discussion"] .svc-workflow__eval-symbol {
+  color: var(--se-amber);
+  border-color: var(--se-amber);
+}
+
+.svc-workflow__eval-row[data-state="discussion"] .svc-workflow__eval-note {
+  display: block;
+}
+
+.svc-workflow__eval-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+  min-height: 2rem;
+  margin-top: clamp(0.65rem, 1.6vw, 0.95rem);
+  padding-top: clamp(0.55rem, 1.4vw, 0.8rem);
+  border-top: 1px solid var(--se-line);
+}
+
+.svc-workflow__eval-result {
+  min-width: 0;
+  margin-inline-start: auto;
+  text-align: right;
+  font-family: var(--font-sans);
+  font-size: clamp(0.625rem, 0.55rem + 0.25vw, 0.75rem);
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--se-muted);
+  transition: color 280ms ease;
+}
+
+.svc-workflow__eval-result.is-done {
+  color: var(--se-green);
+}
+
+@keyframes svc-eval-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes svc-eval-pop {
+  from {
+    transform: scale(0.7);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 800px) {
+  .svc-workflow__eval-columns {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .svc-workflow__eval-symbol {
+    width: 1.15rem;
+    height: 1.15rem;
+  }
+
+  .svc-workflow__eval-icon {
+    width: 0.7rem;
+    height: 0.7rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .svc-workflow__eval-row,
+  .svc-workflow__eval-result,
+  .svc-workflow__eval-row[data-state="active"] .svc-workflow__eval-symbol,
+  .svc-workflow__eval-row[data-state="passed"] .svc-workflow__eval-symbol {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Projects-hero style — tiles drift up inside the media window */
+.svc-workflow__media-roll {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #0a0a0a;
+  pointer-events: none;
+}
+
+.svc-workflow__media-roll-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  padding: 0.35rem;
+  box-sizing: border-box;
+  /* Soft dissolve at top + bottom like projects hero */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 12%,
+    #000 88%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 12%,
+    #000 88%,
+    transparent 100%
+  );
+}
+
+.svc-workflow__media-roll-col {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.svc-workflow__media-roll-col.is-offset .svc-workflow__media-roll-track {
+  /* Stagger so columns don’t line up as a single band */
+  margin-top: -18%;
+}
+
+.svc-workflow__media-roll-track {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+  will-change: transform;
+  animation-name: svc-workflow-media-roll-up;
+  animation-duration: var(--svc-roll-duration, 30s);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.svc-workflow__media-roll-track.is-static {
+  animation: none;
+  will-change: auto;
+}
+
+.svc-workflow__media-roll-tile {
+  position: relative;
+  flex: 0 0 auto;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #141414;
+  border-radius: 0;
+}
+
+.svc-workflow__media-roll-tile > .cover-loop-video,
+.svc-workflow__media-roll-media {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+@keyframes svc-workflow-media-roll-up {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    /* Track is duplicated — half height = one seamless loop */
+    transform: translate3d(0, -50%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .svc-workflow__media-roll-track {
+    animation: none;
+    will-change: auto;
+  }
+
+  .svc-workflow__media-roll-col.is-offset .svc-workflow__media-roll-track {
+    margin-top: 0;
+  }
+}
+
 .svc-workflow__step-media--placeholder {
   /* Same as media-loading shells — hold the ratio, no fill plate */
   background: transparent;
@@ -10050,8 +10412,21 @@ body:has(.home-page) .site-footer__gap {
     display: none;
   }
 
-  .svc-workflow__step-media {
+  /* Keep 16:9 for walls / stills — not the tall evaluation checklist */
+  .svc-workflow__step-media:not(.svc-workflow__step-media--eval):not(
+      .svc-workflow__step-media--placeholder
+    ) {
     aspect-ratio: 16 / 9;
+  }
+
+  .svc-workflow__step-media--eval {
+    aspect-ratio: auto;
+    height: auto;
+    overflow: visible;
+  }
+
+  .svc-workflow__step-media--placeholder {
+    display: none;
   }
 
   .svc-workflow__step-checks {
@@ -10112,9 +10487,7 @@ body:has(.home-page) .site-footer__gap {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .svc-workflow:not(.is-exiting) .svc-workflow__backdrop,
   .svc-workflow:not(.is-exiting) .svc-workflow__panel,
-  .svc-workflow.is-exiting .svc-workflow__backdrop,
   .svc-workflow.is-exiting .svc-workflow__panel {
     animation: none;
   }
@@ -12403,12 +12776,12 @@ body:has(.about-page) .site-end {
 
 .about-boua__label {
   margin: 0;
-  /* Same chrome type as header logo / nav (Grtsk Regular) */
-  font-family: var(--font-sans);
-  font-size: var(--nav-type-size);
-  font-weight: 400;
+  /* Same as project / article type labels (FK Grotesk Mono Medium) */
+  font-family: var(--font-label);
+  font-size: var(--nav-type-size); /* keep existing size */
+  font-weight: 500;
   font-synthesis: none;
-  letter-spacing: var(--nav-type-tracking);
+  letter-spacing: -0.015em;
   text-transform: uppercase;
   color: var(--about-ink);
   /* Kill half-leading so caps align with the content band, not the line box */
@@ -12620,6 +12993,7 @@ body:has(.about-page) .site-end {
 }
 
 .about-boua__work-company-name {
+  font-family: var(--font-label); /* FK Grotesk Mono Medium — same as type labels */
   font-size: var(--about-step--1);
   font-weight: 500;
   letter-spacing: 0.06em;
@@ -12630,6 +13004,7 @@ body:has(.about-page) .site-end {
 }
 
 .about-boua__work-country {
+  font-family: var(--font-label);
   font-size: var(--about-step--1);
   font-weight: 500;
   letter-spacing: 0.06em;
@@ -12641,6 +13016,7 @@ body:has(.about-page) .site-end {
 }
 
 .about-boua__work-period {
+  font-family: var(--font-label);
   font-size: var(--about-step--1);
   font-weight: 500;
   /* Slightly tighter than labels — uppercase dates run long */
@@ -13067,6 +13443,100 @@ body:has(.about-page) .site-end {
 
 .about-boua__expertise-list li {
   white-space: nowrap;
+}
+
+/* Process — hover demo (16:9, 90% of prior ~340px) */
+.about-boua__process-item {
+  position: relative;
+  width: max-content;
+  max-width: 100%;
+}
+
+.about-boua__process-item--has-media {
+  z-index: 0;
+}
+
+.about-boua__process-item--has-media.is-open {
+  z-index: 8;
+}
+
+.about-boua__process-trigger {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: default;
+  text-decoration: none;
+  transition: color 120ms ease;
+}
+
+.about-boua__process-item--has-media .about-boua__process-trigger {
+  cursor: pointer;
+}
+
+.about-boua__process-item--has-media:hover .about-boua__process-trigger,
+.about-boua__process-item--has-media.is-open .about-boua__process-trigger,
+.about-boua__process-trigger:focus-visible {
+  color: var(--about-ink);
+  outline: none;
+}
+
+.about-boua__process-preview {
+  position: absolute;
+  left: calc(100% + 0.85rem);
+  top: 50%;
+  z-index: 12;
+  width: var(--process-preview-w, min(19.125rem, 64.8vw));
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-50%) translateX(6px);
+  transition:
+    opacity 160ms ease,
+    visibility 160ms ease,
+    transform 160ms ease;
+}
+
+.about-boua__process-preview.is-open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(0);
+}
+
+.about-boua__process-preview-media {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+@media (max-width: 900px) {
+  .about-boua__process-preview {
+    left: 0;
+    right: auto;
+    top: calc(100% + 0.55rem);
+    width: min(19.125rem, calc(100vw - 2.5rem));
+    transform: translateY(4px);
+  }
+
+  .about-boua__process-preview.is-open {
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 900px) {

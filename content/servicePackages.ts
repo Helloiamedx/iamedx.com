@@ -15,6 +15,7 @@
  */
 
 import { asset } from "@/lib/assets";
+import { processCraftMediaWall } from "@/content/processCraftMedia";
 import { supplierDiscoveryVerificationImages } from "@/content/serviceCoverMedia";
 
 export type ServicePackageFee = {
@@ -60,6 +61,10 @@ export type ServicePackageItem = {
     checks?: readonly string[];
     /** Right-column keyword field (Z burst) */
     keywords?: readonly string[];
+    /** Right-column media wall — stills + loops, cover-up stack */
+    mediaWall?: readonly string[];
+    /** Right-column Supplier Evaluation checklist animation */
+    evaluationDemo?: boolean;
   }[];
 };
 
@@ -172,47 +177,44 @@ export const servicePackagePhases: ServicePackagePhase[] = [
             body: "I first break down the product by materials, processes, structure, and key requirements. For unfamiliar processes, I cross-check with suppliers and manufacturing contacts I have worked with before to identify what needs further research.",
             keywords: [
               "Embossing",
-              "Debossing",
-              "Hot Stamping",
+              "Creasing",
               "Foil Stamping",
               "Digital Printing",
-              "UV Printing",
               "Laser Engraving",
               "Laser Cutting",
               "CNC Machining",
-              "Die Casting",
-              "Metal Stamping",
               "Electroplating",
               "Injection Molding",
-              "Resin Casting",
-              "Painting",
               "Spray Coating",
-              "Hand Painting",
               "Embroidery",
-              "Sewing",
-              "Heat Transfer",
-              "Die Cutting",
               "Wood",
               "Leather",
               "Metal",
               "Resin",
               "Fabric",
               "Paper",
-              "EVA Foam",
+              "EVA",
+              "Foam",
+              "ABS",
               "Plastic",
             ],
           },
           {
             title: "02 — Research & Find Suppliers",
             body: "Once I identify the correct industry terminology, I research how the process actually works, including its key parameters, limitations, and production requirements. With this understanding, I then search for targeted suppliers and verify whether their capabilities, experience, and technical answers align with what I have learned.",
+            mediaWall: processCraftMediaWall,
           },
           {
             title: "03 — Evaluate Capability & Manageability",
             body: "For qualified suppliers, I further evaluate quality level, MOQ, pricing, lead time, payment terms, and other key conditions. I also assess whether the supplier is responsive, cooperative, and manageable throughout production.",
+            evaluationDemo: true,
           },
           {
-            title: "04 — Build & Deliver the Supplier List",
+            title: "04 — Compile & Deliver the Supplier List",
             body: "I organize the qualified suppliers into a structured supplier list, including company information, relevant experience, key commercial terms, and my evaluation for your review.",
+            media: asset(
+              "images/service/Supplier%20Identification%20%26%20Initial%20Supplier%20Screening/Compile%20%26%20Deliver%20the%20Supplier%20List.mp4",
+            ),
           },
         ],
       },

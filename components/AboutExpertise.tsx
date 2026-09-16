@@ -1,3 +1,5 @@
+import { AboutProcessList } from "@/components/AboutProcessList";
+
 const expertiseColumns = [
   {
     id: "competence",
@@ -30,39 +32,31 @@ const expertiseColumns = [
     title: "Process",
     items: [
       "Embossing",
-      "Debossing",
-      "Hot Stamping",
+      "Creasing",
       "Foil Stamping",
       "Digital Printing",
-      "UV Printing",
       "Laser Engraving",
       "Laser Cutting",
       "CNC Machining",
-      "Die Casting",
-      "Metal Stamping",
       "Electroplating",
       "Injection Molding",
-      "Resin Casting",
-      "Painting",
       "Spray Coating",
-      "Hand Painting",
       "Embroidery",
-      "Sewing",
-      "Heat Transfer",
-      "Die Cutting",
     ],
   },
   {
     id: "material",
     title: "Material",
     items: [
-      "Wood / MDF",
-      "Leather / PU Leather",
-      "Metal / Alloy",
+      "Wood",
+      "Leather",
+      "Metal",
       "Resin",
-      "Fabric / Textile",
-      "Paper / Cardboard",
-      "EVA Foam",
+      "Fabric",
+      "Paper",
+      "EVA",
+      "Foam",
+      "ABS",
       "Plastic",
     ],
   },
@@ -88,11 +82,15 @@ export function AboutExpertise() {
           {expertiseColumns.map((column) => (
             <div key={column.id} className="about-boua__expertise-col">
               <h3 className="about-boua__expertise-col-title">{column.title}</h3>
-              <ul className="about-boua__expertise-list">
-                {column.items.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
+              {column.id === "process" ? (
+                <AboutProcessList items={column.items} />
+              ) : (
+                <ul className="about-boua__expertise-list">
+                  {column.items.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           ))}
         </div>

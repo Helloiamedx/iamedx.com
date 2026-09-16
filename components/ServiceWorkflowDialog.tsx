@@ -5,7 +5,9 @@ import { Fragment, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { CoverLoopVideo } from "@/components/CoverLoopVideo";
+import { SupplierEvaluationDemo } from "@/components/SupplierEvaluationDemo";
 import { WorkflowKeywordBurst } from "@/components/WorkflowKeywordBurst";
+import { WorkflowMediaWall } from "@/components/WorkflowMediaWall";
 import { cn } from "@/lib/utils";
 
 const EXIT_MS = 460;
@@ -17,6 +19,8 @@ type WorkflowStep = {
   media?: string;
   checks?: readonly string[];
   keywords?: readonly string[];
+  mediaWall?: readonly string[];
+  evaluationDemo?: boolean;
 };
 
 type ServiceWorkflowDialogProps = {
@@ -309,6 +313,14 @@ export function ServiceWorkflowDialog({
                       />
                       {step.judgment ? (
                         <WorkflowCheckList items={step.checks ?? []} />
+                      ) : step.evaluationDemo ? (
+                        <div className="svc-workflow__step-media svc-workflow__step-media--eval">
+                          <SupplierEvaluationDemo />
+                        </div>
+                      ) : step.mediaWall?.length ? (
+                        <div className="svc-workflow__step-media svc-workflow__step-media--wall">
+                          <WorkflowMediaWall items={step.mediaWall} />
+                        </div>
                       ) : step.keywords?.length ? (
                         <div className="svc-workflow__step-media svc-workflow__step-media--burst">
                           <WorkflowKeywordBurst labels={step.keywords} />
@@ -331,12 +343,7 @@ export function ServiceWorkflowDialog({
                             />
                           )}
                         </div>
-                      ) : (
-                        <div
-                          className="svc-workflow__step-media svc-workflow__step-media--placeholder"
-                          aria-hidden="true"
-                        />
-                      )}
+                      ) : null}
                     </div>
                   </Fragment>
                 ))}
