@@ -5,9 +5,12 @@ import { Fragment, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { CoverLoopVideo } from "@/components/CoverLoopVideo";
+import { FactoryRiskCompareDemo } from "@/components/FactoryRiskCompareDemo";
+import { FactoryVisitPrepDemo } from "@/components/FactoryVisitPrepDemo";
 import { SupplierEvaluationDemo } from "@/components/SupplierEvaluationDemo";
 import { WorkflowKeywordBurst } from "@/components/WorkflowKeywordBurst";
 import { WorkflowMediaWall } from "@/components/WorkflowMediaWall";
+import { WorkflowPhotoCut } from "@/components/WorkflowPhotoCut";
 import { cn } from "@/lib/utils";
 
 const EXIT_MS = 460;
@@ -15,13 +18,39 @@ const EXIT_MS = 460;
 type WorkflowStep = {
   title: string;
   body: string;
+  bodyHighlights?: readonly string[];
   judgment?: boolean;
   media?: string;
   checks?: readonly string[];
   keywords?: readonly string[];
   mediaWall?: readonly string[];
+  mediaCut?: readonly string[];
   evaluationDemo?: boolean;
+  factoryVisitPrepDemo?: boolean;
+  factoryRiskCompareDemo?: boolean;
 };
+
+function renderStepBody(body: string, highlights?: readonly string[]) {
+  if (!highlights?.length) return body;
+
+  const escaped = highlights.map((h) =>
+    h.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+  );
+  const re = new RegExp(`(${escaped.join("|")})`, "gi");
+  const parts = body.split(re);
+
+  return parts.map((part, i) => {
+    const isHit = highlights.some(
+      (h) => h.toLowerCase() === part.toLowerCase(),
+    );
+    if (!isHit) return <Fragment key={i}>{part}</Fragment>;
+    return (
+      <strong key={i} className="svc-workflow__step-body-em">
+        {part}
+      </strong>
+    );
+  });
+}
 
 type ServiceWorkflowDialogProps = {
   open: boolean;
@@ -305,7 +334,9 @@ export function ServiceWorkflowDialog({
                         <h3 className="svc-workflow__step-title">
                           {step.title}
                         </h3>
-                        <p className="svc-workflow__step-body">{step.body}</p>
+                        <p className="svc-workflow__step-body">
+                          {renderStepBody(step.body, step.bodyHighlights)}
+                        </p>
                       </div>
                       <div
                         className="svc-workflow__step-gap"
@@ -313,9 +344,21 @@ export function ServiceWorkflowDialog({
                       />
                       {step.judgment ? (
                         <WorkflowCheckList items={step.checks ?? []} />
+                      ) : step.factoryVisitPrepDemo ? (
+                        <div className="svc-workflow__step-media svc-workflow__step-media--eval">
+                          <FactoryVisitPrepDemo />
+                        </div>
+                      ) : step.factoryRiskCompareDemo ? (
+                        <div className="svc-workflow__step-media svc-workflow__step-media--eval">
+                          <FactoryRiskCompareDemo />
+                        </div>
                       ) : step.evaluationDemo ? (
                         <div className="svc-workflow__step-media svc-workflow__step-media--eval">
                           <SupplierEvaluationDemo />
+                        </div>
+                      ) : step.mediaCut?.length ? (
+                        <div className="svc-workflow__step-media svc-workflow__step-media--cut">
+                          <WorkflowPhotoCut images={step.mediaCut} />
                         </div>
                       ) : step.mediaWall?.length ? (
                         <div className="svc-workflow__step-media svc-workflow__step-media--wall">

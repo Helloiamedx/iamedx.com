@@ -9510,6 +9510,7 @@ body:has(.home-page) .site-footer__gap {
 
 .svc-phase__cell-label {
   margin: 0 0 0.55rem;
+  font-family: var(--font-label); /* FK Grotesk Mono Medium */
   /* Desktop +1px; mobile keeps prior size below */
   font-size: calc(0.7rem + 2px);
   font-weight: 500;
@@ -9657,8 +9658,8 @@ body:has(.home-page) .site-footer__gap {
   flex-direction: column;
   align-items: center;
   gap: var(--svc-workflow-close-gap);
-  width: 85vw;
-  max-width: 85vw;
+  width: 93.5vw;
+  max-width: 93.5vw;
   max-height: min(88svh, 52rem);
   min-height: min(58svh, 26rem);
   padding: 0;
@@ -9668,10 +9669,10 @@ body:has(.home-page) .site-footer__gap {
   box-shadow: none;
 }
 
-@media (min-width: 801px) {
+@media (min-width: 1101px) {
   .svc-workflow__panel {
-    width: 55vw;
-    max-width: 55vw;
+    width: 60.5vw;
+    max-width: 60.5vw;
   }
 }
 
@@ -9754,7 +9755,7 @@ body:has(.home-page) .site-footer__gap {
   height: 0.95rem;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 1100px) {
   .svc-workflow {
     --svc-workflow-pad: clamp(1.35rem, 5vw, 1.75rem);
     --svc-workflow-close-size: 1.55rem;
@@ -9778,7 +9779,7 @@ body:has(.home-page) .site-footer__gap {
 
 .svc-workflow__coming-soon-title {
   margin: 0;
-  font-family: var(--font-sans);
+  font-family: "Grtsk-SemiBold", "Grtsk", var(--font-sans);
   font-size: clamp(1.35rem, 2.5vw, 1.75rem);
   font-weight: 600;
   line-height: 1.2;
@@ -9876,12 +9877,44 @@ body:has(.home-page) .site-footer__gap {
   overflow: hidden;
 }
 
-/* Evaluation demo — taller than 16:9 so checklist + air fit the 35% column */
+.svc-workflow__step-media--cut {
+  background: #0a0a0a;
+  overflow: hidden;
+}
+
+.svc-workflow__photo-cut {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #0a0a0a;
+}
+
+.svc-workflow__photo-cut-frame {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.svc-workflow__photo-cut-frame.is-active {
+  opacity: 1;
+}
+
+/* Evaluation demo — height follows content; never crop siblings below. */
 .svc-workflow__step-media--eval {
   aspect-ratio: auto;
   height: auto;
   min-height: 0;
-  overflow: visible;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
   background: transparent;
 }
 
@@ -9896,18 +9929,27 @@ body:has(.home-page) .site-footer__gap {
   --se-amber-bg: #fff6e7;
   --se-pad: clamp(0.55rem, 1.6vw, 0.8rem);
   --se-gap: clamp(0.55rem, 1.6vw, 0.85rem);
+  --se-note-lh: 1.2;
+  --se-note-size: 0.5rem;
   box-sizing: border-box;
   width: 100%;
+  min-width: 0;
   color: var(--se-text);
+  /* Card is only ~35% of the workflow panel — break on card width, not viewport. */
+  container-type: inline-size;
+  container-name: svc-eval;
 }
 
 .svc-workflow__eval-surface {
   box-sizing: border-box;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   padding: var(--se-pad);
   background: var(--se-bg);
   border: 0;
   border-radius: 0;
+  overflow: hidden;
 }
 
 .svc-workflow__eval-top {
@@ -9916,13 +9958,15 @@ body:has(.home-page) .site-footer__gap {
   align-items: flex-start;
   gap: 0.65rem;
   margin-bottom: clamp(0.7rem, 1.8vw, 1rem);
+  min-width: 0;
 }
 
 .svc-workflow__eval-title {
   margin: 0;
-  font-family: var(--font-sans);
+  min-width: 0;
+  font-family: "Grtsk-SemiBold", "Grtsk", var(--font-sans);
   font-size: clamp(0.8rem, 0.72rem + 0.35vw, 1rem);
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.2;
   color: var(--se-text);
 }
@@ -9939,17 +9983,30 @@ body:has(.home-page) .site-footer__gap {
   line-height: 1.2;
 }
 
+/* Default: single column — 35% media slot is too narrow for two stable cols. */
 .svc-workflow__eval-columns {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--se-gap) clamp(1.15rem, 3.2vw, 1.85rem);
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--se-gap);
+  min-width: 0;
+}
+
+@container svc-eval (min-width: 360px) {
+  .svc-workflow__eval-columns {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--se-gap) clamp(0.85rem, 2.4vw, 1.35rem);
+  }
+}
+
+.svc-workflow__eval-col {
+  min-width: 0;
 }
 
 .svc-workflow__eval-col-title {
   margin: 0 0 0.45rem;
-  font-family: var(--font-label);
+  font-family: "Grtsk-SemiBold", "Grtsk", var(--font-sans);
   font-size: clamp(0.5rem, 0.45rem + 0.18vw, 0.625rem);
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--se-muted);
@@ -9959,12 +10016,12 @@ body:has(.home-page) .site-footer__gap {
 .svc-workflow__eval-row {
   box-sizing: border-box;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 0.35rem;
-  min-height: 1.85rem;
-  margin: 0.22rem -0.3rem;
-  padding: 0.38rem 0.3rem;
+  gap: 0.45rem;
+  min-width: 0;
+  margin: 0.18rem -0.3rem;
+  padding: 0.34rem 0.3rem;
   border-radius: 0;
   color: var(--se-muted);
   transition:
@@ -9972,29 +10029,58 @@ body:has(.home-page) .site-footer__gap {
     color 280ms ease;
 }
 
+/* MOQ / Price — reserve note line so discussion never expands the card. */
+.svc-workflow__eval-row--noted {
+  min-height: calc(1.25em + var(--se-note-size) * var(--se-note-lh) + 0.55rem);
+}
+
+.svc-workflow__eval-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.12rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
 .svc-workflow__eval-label {
   min-width: 0;
+  max-width: 100%;
   font-family: var(--font-sans);
   font-size: clamp(0.625rem, 0.55rem + 0.28vw, 0.75rem);
   font-weight: 400;
   line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .svc-workflow__eval-status {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
   flex-shrink: 0;
+  padding-top: 0.1rem;
 }
 
 .svc-workflow__eval-note {
-  display: none;
+  display: block;
+  max-width: 100%;
   font-family: var(--font-label);
-  font-size: 0.5rem;
+  font-size: var(--se-note-size);
   font-weight: 500;
   letter-spacing: 0.02em;
-  white-space: nowrap;
+  line-height: var(--se-note-lh);
   color: var(--se-amber);
+  opacity: 0;
+  visibility: hidden;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.svc-workflow__eval-note.is-visible {
+  opacity: 1;
+  visibility: visible;
 }
 
 .svc-workflow__eval-symbol {
@@ -10051,31 +10137,53 @@ body:has(.home-page) .site-footer__gap {
   border-color: var(--se-amber);
 }
 
-.svc-workflow__eval-row[data-state="discussion"] .svc-workflow__eval-note {
-  display: block;
-}
-
 .svc-workflow__eval-bottom {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.55rem;
-  min-height: 2rem;
+  justify-content: flex-start;
+  gap: 0.35rem;
+  min-width: 0;
+  min-height: 0;
   margin-top: clamp(0.65rem, 1.6vw, 0.95rem);
   padding-top: clamp(0.55rem, 1.4vw, 0.8rem);
   border-top: 1px solid var(--se-line);
+  text-align: center;
+}
+
+@container svc-eval (min-width: 360px) {
+  .svc-workflow__eval-bottom {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.55rem;
+    min-height: 2rem;
+    text-align: start;
+  }
 }
 
 .svc-workflow__eval-result {
   min-width: 0;
-  margin-inline-start: auto;
-  text-align: right;
+  flex: 0 1 auto;
+  margin-inline-start: 0;
+  text-align: center;
   font-family: var(--font-sans);
   font-size: clamp(0.625rem, 0.55rem + 0.25vw, 0.75rem);
   font-weight: 400;
   line-height: 1.3;
   color: var(--se-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   transition: color 280ms ease;
+}
+
+@container svc-eval (min-width: 360px) {
+  .svc-workflow__eval-result {
+    flex: 1 1 auto;
+    margin-inline-start: auto;
+    text-align: right;
+  }
 }
 
 .svc-workflow__eval-result.is-done {
@@ -10097,12 +10205,7 @@ body:has(.home-page) .site-footer__gap {
   }
 }
 
-@media (max-width: 800px) {
-  .svc-workflow__eval-columns {
-    grid-template-columns: 1fr;
-    gap: 0.85rem;
-  }
-
+@media (max-width: 1100px) {
   .svc-workflow__eval-symbol {
     width: 1.15rem;
     height: 1.15rem;
@@ -10121,6 +10224,445 @@ body:has(.home-page) .site-footer__gap {
   .svc-workflow__eval-row[data-state="passed"] .svc-workflow__eval-symbol {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* Factory visit prep demo — Define What Needs to Be Verified */
+.svc-workflow__fvp {
+  --fvp-bg: #f5f5f7;
+  --fvp-text: #0a0a0a;
+  --fvp-muted: rgba(10, 10, 10, 0.48);
+  --fvp-line: rgba(10, 10, 10, 0.12);
+  --fvp-side: #e4e4e7;
+  --fvp-plan: #d0d0d4;
+  --fvp-pad: clamp(0.55rem, 1.5vw, 0.8rem);
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  color: var(--fvp-text);
+  container-type: inline-size;
+  container-name: fvp;
+}
+
+.svc-workflow__fvp-surface {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 0;
+  padding: var(--fvp-pad);
+  background: var(--fvp-bg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.svc-workflow__fvp-formula {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.65rem;
+  min-width: 0;
+  width: 100%;
+}
+
+/* Default: stacked — same idea as Supplier Evaluation (card width, not viewport). */
+.svc-workflow__fvp-equation {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  row-gap: 0.45rem;
+  min-width: 0;
+}
+
+.svc-workflow__fvp-op:not(.svc-workflow__fvp-op--eq) {
+  justify-self: center;
+  padding: 0.1rem 0;
+}
+
+.svc-workflow__fvp-panel {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0.55rem 0.6rem;
+  border: 0;
+  overflow: hidden;
+  text-align: left;
+}
+
+.svc-workflow__fvp-panel--side {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  background: var(--fvp-side);
+}
+
+.svc-workflow__fvp-panel-title {
+  margin: 0;
+  font-family: "Grtsk-SemiBold", "Grtsk", var(--font-sans);
+  font-size: clamp(0.5rem, 0.45rem + 0.16vw, 0.5625rem);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fvp-text);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.svc-workflow__fvp-panel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.svc-workflow__fvp-panel-item {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  max-width: 100%;
+  background: transparent;
+  font-family: "Grtsk-Regular", var(--font-sans);
+  font-size: clamp(0.5rem, 0.45rem + 0.18vw, 0.625rem);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  line-height: 1.35;
+  color: var(--fvp-muted);
+  text-align: left;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.svc-workflow__fvp-plan-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.35rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.svc-workflow__fvp-plan-cell {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0.55rem 0.6rem;
+  background: var(--fvp-plan);
+  overflow: hidden;
+  font-family: "Grtsk-Regular", var(--font-sans);
+  font-size: clamp(0.5rem, 0.45rem + 0.18vw, 0.625rem);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+  color: #0a0a0a;
+  text-align: center;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.svc-workflow__fvp-op {
+  flex: none;
+  align-self: center;
+  margin: 0;
+  padding: 0 0.1rem;
+  font-family: "Grtsk-Regular", var(--font-sans);
+  font-size: clamp(1rem, 0.9rem + 0.4vw, 1.25rem);
+  font-weight: 400;
+  line-height: 1;
+  color: var(--fvp-text);
+  text-align: center;
+}
+
+.svc-workflow__fvp-op--eq {
+  display: block;
+  width: 100%;
+  align-self: center;
+  margin: 0.1rem 0 0;
+  text-align: center;
+}
+
+.svc-workflow__fvp-maps {
+  margin: 0;
+  font-family: "Grtsk-Regular", var(--font-sans);
+  font-size: clamp(0.5rem, 0.45rem + 0.16vw, 0.5625rem);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fvp-text);
+  line-height: 1.3;
+  text-align: center;
+}
+
+/* Wide enough card (incl. full-width mobile dialog) — side-by-side like eval */
+@container fvp (min-width: 360px) {
+  .svc-workflow__fvp-equation {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    column-gap: 0.45rem;
+    row-gap: 0;
+  }
+
+  .svc-workflow__fvp-op:not(.svc-workflow__fvp-op--eq) {
+    justify-self: stretch;
+    align-self: center;
+    padding: 0 0.1rem;
+  }
+
+  .svc-workflow__fvp-plan-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .svc-workflow__fvp-plan-cell {
+    padding: 0.55rem 0.5rem;
+  }
+}
+
+
+/* Factory risk compare — Identify Risks Before Production */
+.svc-workflow__frc {
+  --frc-bg: #f5f5f7;
+  --frc-text: #0a0a0a;
+  --frc-muted: rgba(10, 10, 10, 0.48);
+  --frc-line: rgba(10, 10, 10, 0.12);
+  --frc-side: #e4e4e7;
+  --frc-plan: #d0d0d4;
+  --frc-amber: #996414;
+  --frc-green: #0f5c34;
+  --frc-pad: clamp(0.55rem, 1.5vw, 0.8rem);
+  --frc-panel-title-gap: 0.85rem;
+  --frc-item-gap: 0.42rem;
+  --frc-label-value-gap: 0.12rem;
+  --frc-label-size: clamp(0.4375rem, 0.4rem + 0.12vw, 0.5rem);
+  --frc-value-size: clamp(0.5rem, 0.45rem + 0.18vw, 0.625rem);
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  color: var(--frc-text);
+  container-type: inline-size;
+  container-name: frc;
+}
+
+.svc-workflow__frc-surface {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: var(--frc-pad);
+  background: var(--frc-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  overflow: hidden;
+}
+
+/* Project Requires | → | Factory Verified */
+.svc-workflow__frc-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.45rem;
+  min-width: 0;
+  align-items: stretch;
+}
+
+.svc-workflow__frc-panel {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0.5rem 0.55rem;
+  background: var(--frc-side);
+  overflow: hidden;
+}
+
+.svc-workflow__frc-panel-title {
+  margin: 0 0 var(--frc-panel-title-gap);
+  font-family: "Grtsk-SemiBold", "Grtsk", var(--font-sans);
+  font-size: clamp(0.5rem, 0.45rem + 0.16vw, 0.5625rem);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--frc-text);
+  line-height: 1.3;
+}
+
+.svc-workflow__frc-panel-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--frc-item-gap);
+  margin: 0;
+  padding: 0.45rem 0.5rem;
+  list-style: none;
+  min-width: 0;
+  background: var(--frc-plan);
+}
+
+.svc-workflow__frc-panel-item {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--frc-label-value-gap);
+}
+
+.svc-workflow__frc-panel-label {
+  font-family: "Grtsk-Regular", var(--font-sans);
+  font-size: var(--frc-label-size);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--frc-muted);
+  line-height: 1.25;
+  transition: color 0.25s ease;
+}
+
+.svc-workflow__frc-panel-label.is-checking {
+  color: var(--frc-text);
+}
+
+.svc-workflow__frc-panel-label.is-done {
+  color: var(--frc-muted);
+}
+
+.svc-workflow__frc-panel-value {
+  font-family: "Grtsk-Regular", var(--font-sans);
+  font-size: var(--frc-value-size);
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--frc-text);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.svc-workflow__frc-panel-value--result.is-match {
+  color: var(--frc-green);
+}
+
+.svc-workflow__frc-panel-value--result.is-mismatch {
+  color: var(--frc-amber);
+}
+
+.svc-workflow__frc-arrows {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  min-height: 0;
+  font-family: "Grtsk-Regular", var(--font-sans);
+  font-size: clamp(0.875rem, 0.8rem + 0.3vw, 1.0625rem);
+  line-height: 0.7;
+  color: var(--frc-text);
+  user-select: none;
+}
+
+.svc-workflow__frc-arrow {
+  display: block;
+  line-height: 0.7;
+  margin-block: -0.12em;
+  will-change: transform, opacity;
+}
+
+.svc-workflow__frc-risks,
+.svc-workflow__frc-attention {
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 0.5rem 0.55rem;
+  background: var(--frc-side);
+  overflow: hidden;
+}
+
+.svc-workflow__frc-section-title {
+  margin: 0 0 var(--frc-panel-title-gap);
+  font-family: "Grtsk-SemiBold", "Grtsk", var(--font-sans);
+  font-size: clamp(0.5rem, 0.45rem + 0.16vw, 0.5625rem);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--frc-text);
+  line-height: 1.3;
+}
+
+.svc-workflow__frc-risk-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--frc-item-gap);
+  margin: 0;
+  padding: 0.45rem 0.5rem;
+  list-style: none;
+  min-width: 0;
+  background: var(--frc-plan);
+}
+
+.svc-workflow__frc-risk-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  min-width: 0;
+  font-family: "Grtsk-Regular", var(--font-sans);
+  font-size: var(--frc-value-size);
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--frc-text);
+  overflow-wrap: anywhere;
+}
+
+.svc-workflow__frc-risk-index,
+.svc-workflow__frc-risk-sep {
+  flex: 0 0 auto;
+  color: var(--frc-muted);
+}
+
+.svc-workflow__frc-risk-text {
+  min-width: 0;
+}
+
+.svc-workflow__frc-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.svc-workflow__frc-control {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 0.45rem 0.5rem;
+  background: var(--frc-plan);
+  font-family: "Grtsk-Regular", var(--font-sans);
+  font-size: var(--frc-value-size);
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--frc-text);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+@container frc (min-width: 360px) {
+  .svc-workflow__frc-columns {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 0.35rem;
+  }
+
+  .svc-workflow__frc-arrows {
+    min-width: 1.25rem;
+    padding: 0 0.1rem;
+  }
+
+  .svc-workflow__frc-controls {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -10274,18 +10816,17 @@ body:has(.home-page) .site-footer__gap {
   }
 }
 
-/* Judgment checklist — 2×5 invisible grid; each option is its own cell */
+/* Judgment checklist — same 35% column as media above; flat #F5F5F7; single column. */
 .svc-workflow__step-checks {
   position: relative;
   box-sizing: border-box;
   min-width: 0;
   width: 100%;
-  aspect-ratio: auto;
   align-self: start;
-  overflow: visible;
-  display: flex;
-  flex-direction: column;
   background: #f5f5f7;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
   padding: var(--svc-workflow-checks-inset);
 }
 
@@ -10294,47 +10835,48 @@ body:has(.home-page) .site-footer__gap {
   padding: 0;
   list-style: none;
   display: grid;
-  /* 10 cells: fill left column (5) then right (5); no visible grid lines */
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: repeat(5, minmax(0, auto));
-  grid-auto-flow: column;
-  column-gap: clamp(1.5rem, 3.5vw, 2.5rem);
-  row-gap: clamp(0.55rem, 1.2vw, 0.85rem);
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-flow: row;
+  row-gap: 0;
   width: 100%;
 }
 
 .svc-workflow__check-cell {
   box-sizing: border-box;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 0.45rem;
+  gap: 0.5rem;
   min-width: 0;
-  min-height: 0;
   margin: 0;
-  padding: 0;
-  border: 0;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid rgba(10, 10, 10, 0.075);
   background: transparent;
+}
+
+.svc-workflow__check-cell:last-child {
+  border-bottom: 0;
 }
 
 .svc-workflow__check-label {
   flex: 1 1 auto;
   min-width: 0;
   font-family: var(--font-sans);
-  font-size: clamp(0.5625rem, 0.5rem + 0.28vw, 0.75rem);
+  font-size: 0.75rem;
   font-weight: 400;
-  line-height: 1.15;
-  color: #0a0a0a;
+  line-height: 1.45;
+  color: #383836;
 }
 
 .svc-workflow__check-mark {
-  flex: 0 0 auto;
+  flex: 0 0 1rem;
   box-sizing: border-box;
-  width: 0.95em;
-  height: 0.95em;
-  border: 1.5px solid rgba(10, 10, 10, 0.35);
-  border-radius: 0;
-  color: #0a0a0a;
+  width: 1rem;
+  height: 1rem;
+  border: 1px solid rgba(10, 10, 10, 0.25);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.8);
+  color: #252523;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -10380,8 +10922,8 @@ body:has(.home-page) .site-footer__gap {
 }
 
 .svc-workflow__step-title {
-  margin: 0 0 0.5rem;
-  font-family: var(--font-sans);
+  margin: 0 0 0.9rem;
+  font-family: "Grtsk-SemiBold", "Grtsk", var(--font-sans);
   font-size: 1.05rem;
   font-weight: 600;
   /* lh 1 — media top lines up with visible type, not half-leading */
@@ -10401,7 +10943,13 @@ body:has(.home-page) .site-footer__gap {
   white-space: pre-line;
 }
 
-@media (max-width: 800px) {
+.svc-workflow__step-body-em {
+  font-family: "Grtsk-Medium", "Grtsk", var(--font-sans);
+  font-weight: 500;
+  color: #0a0a0a;
+}
+
+@media (max-width: 1100px) {
   .svc-workflow__step--media {
     grid-template-columns: 1fr;
     gap: 1rem;
@@ -10422,7 +10970,9 @@ body:has(.home-page) .site-footer__gap {
   .svc-workflow__step-media--eval {
     aspect-ratio: auto;
     height: auto;
-    overflow: visible;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
   }
 
   .svc-workflow__step-media--placeholder {

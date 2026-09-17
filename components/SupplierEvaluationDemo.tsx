@@ -260,12 +260,27 @@ function EvalRowView({
   showNote?: boolean;
 }) {
   return (
-    <div className="svc-workflow__eval-row" data-state={state}>
-      <span className="svc-workflow__eval-label">{label}</span>
-      <span className="svc-workflow__eval-status">
+    <div
+      className={cn(
+        "svc-workflow__eval-row",
+        showNote && "svc-workflow__eval-row--noted",
+      )}
+      data-state={state}
+    >
+      <div className="svc-workflow__eval-copy">
+        <span className="svc-workflow__eval-label">{label}</span>
         {showNote ? (
-          <span className="svc-workflow__eval-note">Needs Discussion</span>
+          <span
+            className={cn(
+              "svc-workflow__eval-note",
+              state === "discussion" && "is-visible",
+            )}
+          >
+            Needs Discussion
+          </span>
         ) : null}
+      </div>
+      <span className="svc-workflow__eval-status">
         <span
           className="svc-workflow__eval-symbol"
           aria-label={ariaFor(state)}

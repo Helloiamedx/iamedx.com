@@ -17,6 +17,7 @@
 import { asset } from "@/lib/assets";
 import { processCraftMediaWall } from "@/content/processCraftMedia";
 import { supplierDiscoveryVerificationImages } from "@/content/serviceCoverMedia";
+import { verifyOnSiteMediaCut } from "@/content/verifyOnSiteMedia";
 
 export type ServicePackageFee = {
   /** Display label, e.g. "$350.00" or "Free" */
@@ -53,6 +54,8 @@ export type ServicePackageItem = {
   workflowSteps?: readonly {
     title: string;
     body: string;
+    /** Phrases in `body` rendered black / emphasized */
+    bodyHighlights?: readonly string[];
     /** Judgment row — copy left, checklist right (same slot as media) */
     judgment?: boolean;
     /** Right-column media; omit → shared placeholder until replaced */
@@ -63,8 +66,14 @@ export type ServicePackageItem = {
     keywords?: readonly string[];
     /** Right-column media wall — stills + loops, cover-up stack */
     mediaWall?: readonly string[];
+    /** Right-column rapid hard-cut stills */
+    mediaCut?: readonly string[];
     /** Right-column Supplier Evaluation checklist animation */
     evaluationDemo?: boolean;
+    /** Right-column Expected vs Verified risk comparison */
+    factoryRiskCompareDemo?: boolean;
+    /** Right-column factory-visit prep animation */
+    factoryVisitPrepDemo?: boolean;
   }[];
 };
 
@@ -122,22 +131,23 @@ export const servicePackagePhases: ServicePackagePhase[] = [
           "Adobe Acrobat",
         ],
         deliverables: [
-          "Initial feedback on project suitability",
-          "Recommended next steps",
+          "Project Requirement Summary",
+          "Feasibility Assessment",
+          "Recommended Next Steps",
         ],
         timeline: "18H",
         fee: { label: "Free", amountUsd: 0 },
         coverVideo: asset("images/service/Initial%20Project%20Review.mov"),
         workflowSteps: [
           {
-            title: "01 — Build a complete picture.",
+            title: "01_ Build a complete picture.",
             body: "I start with your drawings, references, and specifications. I review how the product should look, be made, be packaged, and reach its destination, then clarify any missing details with you.",
             media: asset(
               "images/service/Initial%20Project%20Review-workflow.mp4",
             ),
           },
           {
-            title: "02 — Define where I can add value.",
+            title: "02_ Define where I can add value.",
             body: "I compare your requirements with my experience, supplier resources, and the development work involved to assess whether I can support the project responsibly.",
             judgment: true,
             checks: [
@@ -167,13 +177,17 @@ export const servicePackagePhases: ServicePackagePhase[] = [
           "Industry groups and manufacturing communities",
           "Domestic sourcing platforms (1688, Douyin, etc.)",
         ],
-        deliverables: ["3–5 Recommended Suppliers + Evaluation Report"],
+        deliverables: [
+          "3–5 Recommended Suppliers",
+          "Supplier Comparison & Evaluation",
+          "Key Terms & Quotations",
+        ],
         timeline: "3–5 business days",
         fee: { label: "$350.00", amountUsd: 350 },
         coverVideo: asset("images/service/Supplier%20Identification.m4v"),
         workflowSteps: [
           {
-            title: "01 — Break Down the Product",
+            title: "01_ Break Down the Product",
             body: "I first break down the product by materials, processes, structure, and key requirements. For unfamiliar processes, I cross-check with suppliers and manufacturing contacts I have worked with before to identify what needs further research.",
             keywords: [
               "Embossing",
@@ -200,21 +214,21 @@ export const servicePackagePhases: ServicePackagePhase[] = [
             ],
           },
           {
-            title: "02 — Research & Find Suppliers",
+            title: "02_ Research & Find Suppliers",
             body: "Once I identify the correct industry terminology, I research how the process actually works, including its key parameters, limitations, and production requirements. With this understanding, I then search for targeted suppliers and verify whether their capabilities, experience, and technical answers align with what I have learned.",
             mediaWall: processCraftMediaWall,
           },
           {
-            title: "03 — Evaluate Capability & Manageability",
+            title: "03_ Evaluate Capability & Manageability",
             body: "For qualified suppliers, I further evaluate quality level, MOQ, pricing, lead time, payment terms, and other key conditions. I also assess whether the supplier is responsive, cooperative, and manageable throughout production.",
             evaluationDemo: true,
           },
           {
-            title: "04 — Compile & Deliver the Supplier List",
+            title: "04_ Compile & Deliver the Supplier List",
             body: "I organize the qualified suppliers into a structured supplier list, including company information, relevant experience, key commercial terms, and my evaluation for your review.",
-            media: asset(
+            media: `${asset(
               "images/service/Supplier%20Identification%20%26%20Initial%20Supplier%20Screening/Compile%20%26%20Deliver%20the%20Supplier%20List.mp4",
-            ),
+            )}?v=20260917`,
           },
         ],
       },
@@ -231,7 +245,12 @@ export const servicePackagePhases: ServicePackagePhase[] = [
           "Manufacturing process knowledge",
           "Quality control experience",
         ],
-        deliverables: ["Factory Visit & Audit Report"],
+        deliverables: [
+          "Factory Visit & Audit Report",
+          "On-site Photos & Videos",
+          "Risk & Control Point Summary",
+          "Professional Supplier Assessment",
+        ],
         timeline: "1–2 business days",
         fee: { label: "$250.00", amountUsd: 250 },
         coverImages: supplierDiscoveryVerificationImages,
@@ -242,6 +261,45 @@ export const servicePackagePhases: ServicePackagePhase[] = [
             href: asset(
               "images/service/Supplier%20Identification%20%26%20Initial%20Supplier%20Screening/Factory%20Audit%20Report.pdf",
             ),
+          },
+        ],
+        workflowSteps: [
+          {
+            title: "01_ Define What Needs to Be Verified",
+            body: "Before visiting the factory, I review your product requirements to determine exactly what needs to be verified for your project, including the materials, manufacturing processes, equipment, and key production stages involved.\n\nI also include anything you specifically want me to look into, such as whether the factory can maintain the same quality during mass production or how they actually respond when production problems occur.\n\nTogether, your product requirements and specific concerns define what I need to verify for you during the factory visit.",
+            bodyHighlights: [
+              "review your product requirements",
+              "anything you specifically want me to look into",
+              "define what I need to verify",
+            ],
+            factoryVisitPrepDemo: true,
+          },
+          {
+            title: "02_ Verify Everything On Site",
+            body: "At the factory, I verify each of these points against the actual production environment.\n\nFor every key production stage, I check whether the supplier actually has the required equipment, people, process experience, and quality control capabilities, using real production conditions and previous products as evidence rather than relying only on what the supplier tells you.\n\nI also verify which key processes are handled in-house and which are outsourced, including how well those outsourced operations are controlled.\n\nKey findings and evidence are documented with photos and videos so you can clearly see what was verified on site.",
+            mediaCut: verifyOnSiteMediaCut,
+            bodyHighlights: [
+              "I check whether the supplier actually has the required equipment, people, process experience, and quality control capabilities",
+              "I also verify which key processes are handled in-house and which are outsourced",
+            ],
+          },
+          {
+            title: "03_ Identify Risks Before Production",
+            body: "I compare what your project requires with what I actually verified at the factory to identify potential risks before you move forward.\n\nThese may include outsourced key processes, limited experience with a specific technique, weak quality control points, or differences between expected and actual production capacity.\n\nThis helps identify which parts of your project will require more attention, follow-up, and quality control during future production.",
+            factoryRiskCompareDemo: true,
+            bodyHighlights: [
+              "helps identify which parts of your project will require more attention",
+            ],
+          },
+          {
+            title: "04_ Report & Professional Assessment",
+            body: "All verified findings, photos and videos, actual manufacturing capabilities, and identified risks are consolidated into a Factory Visit & Audit Report.\n\nMore importantly, I interpret these findings for you based on my experience in product development, manufacturing, and quality control, rather than leaving you with factory information to evaluate on your own.\n\nYou receive a clear professional assessment of whether the supplier is suitable for your project, where the key risks are, and what needs closer attention if you decide to move forward.",
+            media: asset(
+              "images/service/Report%20%26%20Professional%20Assessment/video.mp4",
+            ),
+            bodyHighlights: [
+              "I interpret these findings for you based on my experience in product development",
+            ],
           },
         ],
       },
