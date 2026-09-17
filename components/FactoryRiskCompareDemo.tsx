@@ -129,14 +129,19 @@ export function FactoryRiskCompareDemo() {
       tl.to(el, { opacity: 1, y: 0, duration: 0.32 }, 0.15 + i * 0.1);
     });
 
-    /* ← / → short pulse, then settle back to rest */
+    /* Arrows: ←→ when side-by-side, ↑↓ when stacked — pulse then settle */
+    const stacked = root.clientWidth < 360;
+    const pulse = stacked ? "y" : "x";
+    const inDelta = stacked ? -3.5 : -3.5;
+    const outDelta = stacked ? 3.5 : 3.5;
+
     tl.to(arrowIn, { opacity: 1, duration: 0.28 }, 0.7);
     tl.to(arrowOut, { opacity: 1, duration: 0.28 }, 0.78);
     tl.fromTo(
       arrowIn,
-      { x: 0, opacity: 0.55 },
+      { [pulse]: 0, opacity: 0.55 },
       {
-        x: -3.5,
+        [pulse]: inDelta,
         opacity: 1,
         duration: 0.65,
         ease: "sine.inOut",
@@ -147,9 +152,9 @@ export function FactoryRiskCompareDemo() {
     );
     tl.fromTo(
       arrowOut,
-      { x: 0, opacity: 0.55 },
+      { [pulse]: 0, opacity: 0.55 },
       {
-        x: 3.5,
+        [pulse]: outDelta,
         opacity: 1,
         duration: 0.65,
         ease: "sine.inOut",
@@ -160,7 +165,7 @@ export function FactoryRiskCompareDemo() {
     );
     tl.to(
       [arrowIn, arrowOut],
-      { x: 0, opacity: 1, duration: 0.25, ease: "power2.out" },
+      { x: 0, y: 0, opacity: 1, duration: 0.25, ease: "power2.out" },
       1.0 + 0.65 * 6,
     );
 
@@ -234,10 +239,12 @@ export function FactoryRiskCompareDemo() {
 
           <div className="svc-workflow__frc-arrows" aria-hidden="true">
             <span className="svc-workflow__frc-arrow" data-frc="arrow-in">
-              ←
+              <span className="svc-workflow__frc-arrow-h">←</span>
+              <span className="svc-workflow__frc-arrow-v">↑</span>
             </span>
             <span className="svc-workflow__frc-arrow" data-frc="arrow-out">
-              →
+              <span className="svc-workflow__frc-arrow-h">→</span>
+              <span className="svc-workflow__frc-arrow-v">↓</span>
             </span>
           </div>
 

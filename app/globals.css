@@ -10553,10 +10553,10 @@ body:has(.home-page) .site-footer__gap {
 
 .svc-workflow__frc-arrows {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 0;
+  gap: 0.45rem;
   min-height: 0;
   font-family: "Grtsk-Regular", var(--font-sans);
   font-size: clamp(0.875rem, 0.8rem + 0.3vw, 1.0625rem);
@@ -10568,8 +10568,16 @@ body:has(.home-page) .site-footer__gap {
 .svc-workflow__frc-arrow {
   display: block;
   line-height: 0.7;
-  margin-block: -0.12em;
+  margin-block: 0;
   will-change: transform, opacity;
+}
+
+.svc-workflow__frc-arrow-h {
+  display: none;
+}
+
+.svc-workflow__frc-arrow-v {
+  display: block;
 }
 
 .svc-workflow__frc-risks,
@@ -10657,8 +10665,22 @@ body:has(.home-page) .site-footer__gap {
   }
 
   .svc-workflow__frc-arrows {
+    flex-direction: column;
+    gap: 0;
     min-width: 1.25rem;
     padding: 0 0.1rem;
+  }
+
+  .svc-workflow__frc-arrow {
+    margin-block: -0.12em;
+  }
+
+  .svc-workflow__frc-arrow-h {
+    display: block;
+  }
+
+  .svc-workflow__frc-arrow-v {
+    display: none;
   }
 
   .svc-workflow__frc-controls {
