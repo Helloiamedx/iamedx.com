@@ -308,7 +308,7 @@ export const servicePackagePhases: ServicePackagePhase[] = [
         code: "P1.4",
         title: "Product Requirement Translation & Supplier Negotiation",
         description:
-          "Break down the client's design concept and requirements, translate them into clear manufacturing instructions, and communicate with suppliers to align product expectations, production requirements, and pricing.",
+          "Break down the client's design concept and requirements, translate them into clear manufacturing instructions, and communicate with suppliers to align product expectations and production requirements.",
         assistance: [
           "Product development experience",
           "Manufacturing knowledge",
@@ -337,6 +337,39 @@ export const servicePackagePhases: ServicePackagePhase[] = [
             href: "https://drive.google.com/file/d/1PhvQ4bgZYg2pUHVfhfMID7cinyzstMAV/view?usp=sharing",
           },
         ],
+        workflowSteps: [
+          {
+            title: "01_ Break Down the Design",
+            body: "Clients usually provide a complete design, rendering, or reference image, but a complete visual design is not the same as a manufacturing-ready document.\n\nI first break the design down into individual components, such as the hanging rod, hardware, main body, straps, and other parts, so the complete product structure is clearly defined.",
+            bodyHighlights: [
+              "I first break the design down into individual components",
+            ],
+            media: asset(
+              "images/service/Product%20Requirement%20Translation%20%26%20Supplier%20Negotiation/Break%20Down%20the%20Design.mp4",
+            ),
+          },
+          {
+            title: "02_ Define the Manufacturing Specifications",
+            body: "For each component, I clearly specify the material, dimensions, required manufacturing process, and the corresponding visual reference for the expected finish.\n\nIf the original design is missing technical specifications, I scale the artwork to actual size to extract the required dimensions and data. When necessary, I also conduct my own engineering verification to confirm key parameters and improve the accuracy of the first prototype.",
+            bodyHighlights: [
+              "I clearly specify the material, dimensions, required manufacturing process",
+              "I also conduct my own engineering verification to confirm key parameters and improve the accuracy of the first prototype",
+            ],
+            media: asset(
+              "images/service/Product%20Requirement%20Translation%20%26%20Supplier%20Negotiation/Define%20the%20Manufacturing%20Specifications.mp4",
+            ),
+          },
+          {
+            title: "03_ Review Everything with the Factory",
+            body: "Once the manufacturing information is prepared, I go through it with the factory face to face or explain it step by step through a recorded walkthrough.\n\nI clarify which files belong to each component, what the key parameters are, and what result needs to be achieved. Any questions about the structure, process, or specifications should be raised and resolved at this stage before prototyping begins.",
+            bodyHighlights: [
+              "Any questions about the structure, process, or specifications should be raised and resolved at this stage before prototyping begins",
+            ],
+            media: asset(
+              "images/service/Product%20Requirement%20Translation%20%26%20Supplier%20Negotiation/Review%20Everything%20with%20the%20Factory.mp4",
+            ),
+          },
+        ],
       },
       {
         id: "sample-development",
@@ -360,6 +393,38 @@ export const servicePackagePhases: ServicePackagePhase[] = [
         coverVideo: asset(
           "images/service/Sample%20Development%20%26%20Production%20Validation.mov",
         ),
+        workflowSteps: [
+          {
+            title: "01_ First Sample & Validation",
+            body: "Based on the manufacturing files prepared in the previous stage, I work with the supplier to produce the first sample.\n\nOnce the sample is ready, I check the process results, dimensions and assembly, product structure, function, and safety.\n\nThe goal of the first sample is not to achieve the final result immediately, but to use a physical sample to verify whether the design and manufacturing plan actually work.",
+            bodyHighlights: [
+              "Once the sample is ready, I check the process results, dimensions and assembly, product structure, function, and safety.",
+            ],
+            media: asset(
+              "images/service/Sample%20Development%20%26%20Production%20Validation/1.mp4",
+            ),
+          },
+          {
+            title: "02_ Compare, Improve & Resample",
+            body: "I compare the actual sample with the original design and expected result to identify the differences and determine whether they come from the dimensions, structure, materials, manufacturing process, or production parameters.\n\nBased on the findings, I make the necessary changes to the manufacturing files, dimensions, process settings, or tooling, and then move to the next sample. If there are still issues, I continue to improve and test until the sample reaches the expected result.",
+            bodyHighlights: [
+              "I continue to improve and test until the sample reaches the expected result",
+            ],
+            media: asset(
+              "images/service/Sample%20Development%20%26%20Production%20Validation/2.mp4",
+            ),
+          },
+          {
+            title: "03_ Final Sample & Mass Production Standards",
+            body: "Once the appearance, dimensions, structure, manufacturing process, and function meet the expected result, I confirm the final sample as the reference for mass production.\n\nI then finalize the manufacturing files, dimensions, materials, process requirements, and key quality standards so the factory has clear requirements to follow during mass production.",
+            bodyHighlights: [
+              "I then finalize the manufacturing files",
+            ],
+            media: asset(
+              "images/service/Sample%20Development%20%26%20Production%20Validation/3.mp4",
+            ),
+          },
+        ],
       },
     ],
   },
@@ -401,6 +466,48 @@ export const servicePackagePhases: ServicePackagePhase[] = [
         coverVideo: asset(
           "images/home/From%20concept%20to%20delivery/Production%20Management/video.mp4",
         ),
+        workflowSteps: [
+          {
+            title: "01_ Confirm Critical Production Stages On-Site",
+            body: "Before mass production starts, I identify the critical production stages that need on-site confirmation and check the first production result at each stage.\n\nFor example, for a wooden box project, I may confirm the first laser engraving, the first painted color, the first assembled box, and the first finished packaging.\n\nEach critical stage is confirmed against the approved sample and production requirements before full production continues.",
+            bodyHighlights: [
+              "I identify the critical production stages that need on-site confirmation and check the first production result at each stage",
+            ],
+            media: asset(
+              "images/service/End-to-End%20Production%20Management/Confirm%20Critical%20Production%20Stages%20On-Site.mp4",
+            ),
+          },
+          {
+            title: "02_ Identify Problems During Production",
+            body: "Being on-site also allows me to speak directly with the workers and understand what is difficult to control during actual production.\n\nI look for the key reasons that may cause defects, inconsistent results, or lower production efficiency. Many of these problems only become clear when the product enters real mass production.",
+            bodyHighlights: [
+              "Being on-site also allows me to speak directly with the workers and understand what is difficult to control during actual production.",
+            ],
+            media: asset(
+              "images/service/End-to-End%20Production%20Management/Identify%20Problems%20During%20Production.mp4",
+            ),
+          },
+          {
+            title: "03_ Coordinate Solutions On-Site",
+            body: "When a problem is found, I coordinate with the factory, workers, and other production resources to solve it before it affects more units.\n\nWhen needed, I can also help develop simple jigs, positioning tools, or other working aids to make the operation easier and more consistent, helping improve both efficiency and the pass rate.",
+            bodyHighlights: [
+              "I can also help develop simple jigs, positioning tools, or other working aids to make the operation easier and more consistent",
+            ],
+            media: asset(
+              "images/service/End-to-End%20Production%20Management/Coordinate%20Solutions%20On-Site.mp4",
+            ),
+          },
+          {
+            title: "04_ Follow Production Progress",
+            body: "Throughout production, I follow the actual output, key production stages, and any issues that may affect the delivery schedule.\n\nIf delays or unexpected problems occur, I coordinate the necessary support and resources to keep production moving and ensure the order progresses toward completion as planned.",
+            bodyHighlights: [
+              "I follow the actual output, key production stages, and any issues that may affect the delivery schedule",
+            ],
+            media: asset(
+              "images/home/From%20concept%20to%20delivery/Production%20Management/video.mp4",
+            ),
+          },
+        ],
       },
       {
         id: "compliance-testing",
@@ -415,8 +522,7 @@ export const servicePackagePhases: ServicePackagePhase[] = [
           "Supplier and laboratory communication",
         ],
         deliverables: [
-          "Required product compliance testing reports",
-          "Applicable certification documents",
+          "Product legally ready for sale and distribution in the target market",
         ],
         timeline: "Based on project complexity",
         fee: { label: "$500.00", amountUsd: 500 },
@@ -424,6 +530,23 @@ export const servicePackagePhases: ServicePackagePhase[] = [
         coverVideo: asset(
           "images/home/From%20concept%20to%20delivery/Compliance%20%26%20Testing/video.mp4?v=20260911b",
         ),
+        workflowSteps: [
+          {
+            title: "01_ Prepare the BOM & Confirm Testing Requirements",
+            body: "Starting during sample development, I prepare the product BOM and submit it to a testing laboratory such as SGS, together with the target export market and intended consumer group.\n\nBased on this information, the laboratory confirms the applicable testing requirements, including what needs to be tested, what samples are required, how many need to be prepared, and any specific requirements for sample storage, packaging, and transportation.",
+            bodyHighlights: [
+              "I prepare the product BOM and submit it",
+              "the laboratory confirms the applicable testing requirements, including what needs to be tested, what samples are required, how many need to be prepared, and any specific requirements for sample storage, packaging, and transportation",
+            ],
+          },
+          {
+            title: "02_ Prepare Samples & Coordinate Testing",
+            body: "Based on the testing requirements, I coordinate with suppliers to prepare the correct samples in the required quantities and conditions, then arrange their submission to the laboratory.\n\nThroughout the testing process, I coordinate between the factory and the laboratory. I help the factory understand how samples should be prepared and why certain testing requirements are necessary, while providing the laboratory with detailed product information such as materials, manufacturing processes, and material usage when requested.\n\nIf a test does not pass, I review the test report to identify the specific failed item, work with the factory to determine what needs to be adjusted, and coordinate the next steps accordingly. I use my previous product development and manufacturing experience throughout this process to improve the chance of passing the required tests on the first attempt and reduce the cost and delays caused by repeated testing.\n\nI continue following the process until all required testing is completed and the final test reports are obtained, helping ensure the product meets the applicable requirements for legal sale and distribution in its target market.",
+            bodyHighlights: [
+              "I use my previous product development and manufacturing experience throughout this process to improve the chance of passing the required tests on the first attempt and reduce the cost and delays caused by repeated testing.",
+            ],
+          },
+        ],
       },
     ],
   },
@@ -478,6 +601,7 @@ export const servicePackagePhases: ServicePackagePhase[] = [
           "Factory coordination experience",
         ],
         deliverables: [
+          "Container loading plan",
           "Loading photos and videos",
           "Container information",
           "Quantity confirmation",
