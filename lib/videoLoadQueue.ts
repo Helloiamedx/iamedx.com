@@ -1,8 +1,6 @@
 /**
  * Video load gate — hero absolute first, then visibility-ranked concurrency.
  *
- * Home fullscreen intro (`edx-loading`): only hero may attach.
- *
  * After hero unlocks (playing / still painted / YouTube ready / hard fail):
  *   - Up to MAX_POST_HERO concurrent non-hero clips
  *   - Prefer in-view, then near-view; far clips stay pending (no src)
@@ -30,11 +28,10 @@ export const VIS_FAR = 2;
 const MAX_POST_HERO = 2;
 /**
  * Unlock if no page hero ever claims the gate.
- * Home intro keeps a long failsafe; other routes (services / thoughts) have no
- * hero — open almost immediately so covers aren’t stuck on a black plate.
+ * Routes without a page hero (services / thoughts) open almost immediately
+ * so covers aren’t stuck on a black plate.
  */
-const HERO_FAILSAFE_HOME_MS = 16000;
-const HERO_FAILSAFE_PAGE_MS = 48;
+const HERO_FAILSAFE_MS = 48;
 const NEAR_ROOT_MARGIN = "280px 0px";
 
 type Waiter = {
@@ -54,20 +51,12 @@ const waiters: Waiter[] = [];
 const activeIds = new Set<string>();
 const heroListeners = new Set<() => void>();
 let heroWatchdogId = 0;
-let introObserver: MutationObserver | null = null;
 
 function clearHeroWatchdog() {
   if (heroWatchdogId) {
     window.clearTimeout(heroWatchdogId);
     heroWatchdogId = 0;
   }
-}
-
-export function isHomeIntroLoading() {
-  return (
-    typeof document !== "undefined" &&
-    document.documentElement.classList.contains("edx-loading")
-  );
 }
 
 function isHeroPriority(band: number) {
@@ -80,22 +69,6 @@ function emitHeroUnlocked() {
   heroListeners.forEach((listener) => listener());
 }
 
-function ensureIntroObserver() {
-  if (typeof document === "undefined" || introObserver) return;
-  introObserver = new MutationObserver(() => {
-    if (!isHomeIntroLoading()) {
-      introObserver?.disconnect();
-      introObserver = null;
-      pump();
-      if (heroDone) emitHeroUnlocked();
-    }
-  });
-  introObserver.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ["class"],
-  });
-}
-
 function sortWaiters() {
   waiters.sort((a, b) => {
     if (a.isHero !== b.isHero) return a.isHero ? -1 : 1;
@@ -106,13 +79,11 @@ function sortWaiters() {
 }
 
 function maxSlots(): number {
-  if (isHomeIntroLoading()) return 1;
   if (!heroDone) return 1;
   return MAX_POST_HERO;
 }
 
 function canStart(waiter: Waiter): boolean {
-  if (isHomeIntroLoading()) return waiter.isHero;
   if (!heroDone) return waiter.isHero;
   /* After hero: only in-view / near-view */
   return waiter.visibility <= VIS_NEAR;
@@ -121,8 +92,6 @@ function canStart(waiter: Waiter): boolean {
 function pump() {
   const limit = maxSlots();
   if (activeIds.size >= limit) return;
-
-  if (isHomeIntroLoading()) ensureIntroObserver();
 
   if (!heroDone && !waiters.some((w) => w.isHero) && !activeIds.size) {
     ensureHeroWatchdog();
@@ -143,13 +112,10 @@ function pump() {
 
 function ensureHeroWatchdog() {
   if (heroDone || heroWatchdogId || typeof window === "undefined") return;
-  const delay = isHomeIntroLoading()
-    ? HERO_FAILSAFE_HOME_MS
-    : HERO_FAILSAFE_PAGE_MS;
   heroWatchdogId = window.setTimeout(() => {
     heroWatchdogId = 0;
     unlockVideosAfterHero();
-  }, delay);
+  }, HERO_FAILSAFE_MS);
 }
 
 function acquire(
@@ -214,13 +180,12 @@ function release(id: string) {
  * Opens post-hero concurrency for near-viewport media.
  */
 export function unlockVideosAfterHero() {
-  const wasDone = heroDone;
   if (!heroDone) {
     heroDone = true;
     clearHeroWatchdog();
   }
   pump();
-  if (!wasDone || !isHomeIntroLoading()) emitHeroUnlocked();
+  emitHeroUnlocked();
 }
 
 /** Soft reset on client navigations. */
@@ -230,13 +195,11 @@ export function resetVideoLoadGate() {
   waiters.length = 0;
   activeIds.clear();
   clearHeroWatchdog();
-  introObserver?.disconnect();
-  introObserver = null;
   emitHeroUnlocked();
 }
 
 /**
- * True once the page hero has unlocked and home intro veil is gone.
+ * True once the page hero has unlocked.
  * Pair with near-viewport for gallery stills.
  */
 export function useAfterHeroGate() {
@@ -244,12 +207,11 @@ export function useAfterHeroGate() {
 
   useEffect(() => {
     const sync = () => {
-      setOpen(heroDone && !isHomeIntroLoading());
+      setOpen(heroDone);
     };
     sync();
     heroListeners.add(sync);
     if (!heroDone) ensureHeroWatchdog();
-    if (isHomeIntroLoading()) ensureIntroObserver();
     return () => {
       heroListeners.delete(sync);
     };
@@ -301,10 +263,17 @@ function readVisibility(
   if (!el || typeof window === "undefined") return VIS_FAR;
   const rect = el.getBoundingClientRect();
   const vh = window.innerHeight || 0;
-  if (rect.bottom > 0 && rect.top < vh) return VIS_IN;
-  if (rect.bottom > -rootMarginPx && rect.top < vh + rootMarginPx) {
-    return VIS_NEAR;
-  }
+  const vw = window.innerWidth || 0;
+  /* Both axes — horizontal carousels (Approach) must not look “in view”
+   * while the card is clipped off to the side. */
+  const vertIn = rect.bottom > 0 && rect.top < vh;
+  const horizIn = rect.right > 0 && rect.left < vw;
+  if (vertIn && horizIn) return VIS_IN;
+  const vertNear =
+    rect.bottom > -rootMarginPx && rect.top < vh + rootMarginPx;
+  const horizNear =
+    rect.right > -rootMarginPx && rect.left < vw + rootMarginPx;
+  if (vertNear && horizNear) return VIS_NEAR;
   return VIS_FAR;
 }
 
@@ -369,8 +338,13 @@ export function useVideoLoadSlot(
           threshold: [0, 0.01],
         });
         io.observe(root);
-      } else if (typeof window !== "undefined") {
-        window.addEventListener("scroll", syncFromDom, { passive: true });
+      }
+      /* Capture scroll on overflow carousels (Approach rail), not only window */
+      if (typeof window !== "undefined") {
+        window.addEventListener("scroll", syncFromDom, {
+          passive: true,
+          capture: true,
+        });
         window.addEventListener("resize", syncFromDom, { passive: true });
       }
     }
@@ -379,7 +353,9 @@ export function useVideoLoadSlot(
       cancelled = true;
       io?.disconnect();
       if (!isHero && typeof window !== "undefined") {
-        window.removeEventListener("scroll", syncFromDom);
+        window.removeEventListener("scroll", syncFromDom, {
+          capture: true,
+        } as EventListenerOptions);
         window.removeEventListener("resize", syncFromDom);
       }
       if (acquired) release(id);

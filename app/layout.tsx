@@ -9,13 +9,6 @@ import "./globals.css";
 
 const favicon = asset("/brand/favicon.svg");
 
-/**
- * Home `/` only. Paints `edx-loading` before React so the veil covers first paint.
- * Inline in <head> (not next/script) — avoids React 19 / hydration script warnings.
- * Runs on every homepage load (local or remote) — speed follows how fast hero is ready.
- */
-const EDX_LOADING_BOOT = `(function(){var p=location.pathname;if(p!=="/"&&p!=="")return;document.documentElement.classList.add("edx-loading");})();`;
-
 export const metadata: Metadata = {
   title: {
     default:
@@ -42,11 +35,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className="h-full antialiased" suppressHydrationWarning>
       <head>
-        {/* Must run before paint — raw head script, not next/script */}
-        <script
-          dangerouslySetInnerHTML={{ __html: EDX_LOADING_BOOT }}
-          suppressHydrationWarning
-        />
         {/* Chrome first — logo + menu weight before hero video competes for bandwidth */}
         <link
           rel="preload"

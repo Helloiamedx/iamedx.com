@@ -253,13 +253,13 @@ async function waitForLayerMedia(
 }
 
 /**
- * Media switch — progress-driven corner grow (ChatGPT diagonal draw).
- * Outgoing stays covering until incoming can paint — no black reveal.
+ * Media switch — instant cut once the next layer can paint.
+ * Chip / button morph animations stay on the menu (unchanged).
  */
 function SupportMediaStage({
   cards,
   activeIndex,
-  reduceMotion,
+  reduceMotion: _reduceMotion,
   compact,
   playing,
 }: {
@@ -271,7 +271,6 @@ function SupportMediaStage({
 }) {
   const currentRef = useRef(activeIndex);
   const busyRef = useRef(false);
-  const rafRef = useRef(0);
   const playingRef = useRef(playing);
   playingRef.current = playing;
   const layerRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -301,49 +300,6 @@ function SupportMediaStage({
     });
   };
 
-  const draw = (
-    from: number,
-    to: number,
-    fromLeft: boolean,
-    p: number,
-    preferReduced: boolean,
-  ) => {
-    const outgoing = layerRefs.current[from];
-    const incoming = layerRefs.current[to];
-    if (!outgoing || !incoming) return;
-
-    const sign = fromLeft ? 1 : -1;
-
-    outgoing.style.visibility = "visible";
-    incoming.style.visibility = "visible";
-    outgoing.style.zIndex = p < 0.72 ? "2" : "1";
-    incoming.style.zIndex = p < 0.72 ? "1" : "2";
-
-    if (preferReduced) {
-      outgoing.style.transform = "none";
-      incoming.style.transform = "none";
-      outgoing.style.transformOrigin = "center";
-      incoming.style.transformOrigin = "center";
-      outgoing.style.opacity = String(1 - p);
-      incoming.style.opacity = String(p);
-      return;
-    }
-
-    outgoing.style.transformOrigin = fromLeft ? "100% 100%" : "0% 100%";
-    outgoing.style.transform = `
-      translate3d(${10 * sign * p}%, ${5 * p}%, 0)
-      scale(${1 - 0.96 * p})
-    `;
-    outgoing.style.opacity = String(1 - p);
-
-    incoming.style.transformOrigin = fromLeft ? "0% 100%" : "100% 100%";
-    incoming.style.transform = `
-      translate3d(${-8 * sign * (1 - p)}%, ${4 * (1 - p)}%, 0)
-      scale(${0.04 + 0.96 * p})
-    `;
-    incoming.style.opacity = String(p);
-  };
-
   useEffect(() => {
     resetLayers(currentRef.current);
   }, []);
@@ -353,14 +309,7 @@ function SupportMediaStage({
 
     const from = currentRef.current;
     const to = activeIndex;
-    /* Capsule untouched; mobile media flipped to this shared corner rule. */
-    const fromLeft = navDirection(from, to, cards.length) > 0;
-    const preferReduced = Boolean(reduceMotion);
     let cancelled = false;
-
-    if (busyRef.current) {
-      cancelAnimationFrame(rafRef.current);
-    }
 
     busyRef.current = true;
     setTarget(to);
@@ -373,7 +322,6 @@ function SupportMediaStage({
       resetLayers(settledTo);
       const settled = layerRefs.current[settledTo];
       const video = settled?.querySelector("video");
-      /* Active card’s own effect drives play — don’t force neighbors. */
       if (video && settledTo === activeIndex && playingRef.current) {
         void video.play().catch(() => {});
       }
@@ -388,6 +336,7 @@ function SupportMediaStage({
 
       const outgoing = layerRefs.current[from];
       const incoming = layerRefs.current[to];
+      /* Hold current frame until the next layer can paint — then hard cut. */
       if (outgoing) {
         outgoing.style.visibility = "visible";
         outgoing.style.opacity = "1";
@@ -398,24 +347,15 @@ function SupportMediaStage({
         incoming.style.visibility = "visible";
         incoming.style.opacity = "0";
         incoming.style.zIndex = "1";
+        incoming.style.transform = "none";
       }
 
-      /*
-       * Hold the current frame until the next clip can paint, then draw.
-       * Hard cap so a slow / broken file (Prototype moov-at-end) cannot
-       * freeze the stepper and poison later switches.
-       */
       const status = incoming
         ? await waitForLayerMedia(incoming, 6000)
         : "ready";
       if (cancelled) return;
 
       if (status !== "ready") {
-        /*
-         * Do not reveal an empty layer. Advance the stage index so later
-         * chips/arrows still work, keep the outgoing frame up, and cut over
-         * once the clip finally paints.
-         */
         currentRef.current = to;
         setCurrent(to);
         setTarget(null);
@@ -437,36 +377,16 @@ function SupportMediaStage({
         return;
       }
 
-      draw(from, to, fromLeft, 0, preferReduced);
-
-      const started = performance.now();
-      const duration = preferReduced ? 100 : 480;
-
-      const tick = (now: number) => {
-        if (cancelled) return;
-        const t = Math.min(1, (now - started) / duration);
-        const eased = 1 - Math.pow(1 - t, 3);
-        draw(from, to, fromLeft, eased, preferReduced);
-
-        if (t < 1) {
-          rafRef.current = requestAnimationFrame(tick);
-          return;
-        }
-
-        finish(to);
-      };
-
-      rafRef.current = requestAnimationFrame(tick);
+      finish(to);
     };
 
     void run();
 
     return () => {
       cancelled = true;
-      cancelAnimationFrame(rafRef.current);
       busyRef.current = false;
     };
-  }, [activeIndex, reduceMotion, cards.length]);
+  }, [activeIndex, cards.length]);
 
   const mounted = new Set<number>(visited);
   mounted.add(current);

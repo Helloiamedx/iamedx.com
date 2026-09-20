@@ -11,7 +11,6 @@ import { InsightMasonry } from "@/components/InsightMasonry";
 import { InsightsLead } from "@/components/InsightsLead";
 import { ProjectFeaturedLead } from "@/components/ProjectFeaturedLead";
 import { ProjectMasonry } from "@/components/ProjectMasonry";
-import { SiteIntroLoader } from "@/components/SiteIntroLoader";
 import { SupportBento } from "@/components/SupportBento";
 import {
   getProjectBySlug,
@@ -52,8 +51,6 @@ export default function HomePage() {
 
   return (
     <>
-      {/* Intro gates on home hero playable (+ fonts) — not below-fold clips */}
-      <SiteIntroLoader />
       <main className="home-page">
         {/* Kick hero bytes as early as the document head allows */}
         <link

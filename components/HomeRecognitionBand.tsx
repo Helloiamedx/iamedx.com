@@ -30,12 +30,6 @@ export function HomeRecognitionBand() {
   /** Match recognition mobile card breakpoint (3:4 / single pack) */
   const [isMobileCard, setIsMobileCard] = useState(false);
   const [index, setIndex] = useState(0);
-  /*
-   * Always start locked — SSR has no `document`, but the boot script adds
-   * `edx-loading` before hydrate. Reading the class in useState caused
-   * pause/play SVG + progress-dot mismatches.
-   */
-  const [introReady, setIntroReady] = useState(false);
   /** ≥2/3 of section visible (or ≥2/3 viewport covered if section is taller). */
   const [inViewTwoThirds, setInViewTwoThirds] = useState(false);
   /** Manual pause stays latched until play click or page refresh. */
@@ -87,9 +81,7 @@ export function HomeRecognitionBand() {
     activeIsVideo && durationOverrideMs != null
       ? durationOverrideMs
       : baseDwellMs;
-  const mediaPlaybackOk = Boolean(
-    introReady && !userPaused && inViewTwoThirds,
-  );
+  const mediaPlaybackOk = Boolean(!userPaused && inViewTwoThirds);
   const autoplayArmed = Boolean(mediaPlaybackOk && count > 1);
   const canAutoplay = Boolean(autoplayArmed && !reduceMotion);
   /** Icon follows real motion — scroll-gate off shows play, not a fake “still playing” pause. */
@@ -108,24 +100,6 @@ export function HomeRecognitionBand() {
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
   }, []);
-
-  /* Hold on slide 1 until SiteIntroLoader drops `edx-loading`.
-   * Autoplay starts when the section hits the 2/3 visibility gate. */
-  useEffect(() => {
-    if (introReady) return;
-    const root = document.documentElement;
-    const release = () => {
-      if (root.classList.contains("edx-loading")) return;
-      setIndex(0);
-      setProgressKey((key) => key + 1);
-      setIntroReady(true);
-    };
-    release();
-    if (!root.classList.contains("edx-loading")) return;
-    const mo = new MutationObserver(release);
-    mo.observe(root, { attributes: true, attributeFilter: ["class"] });
-    return () => mo.disconnect();
-  }, [introReady]);
 
   /*
    * Scroll gate (desktop + mobile): play when ≥2/3 of the section is visible;

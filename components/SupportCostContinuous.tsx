@@ -31,7 +31,9 @@ const ROW_STAGGER = 280;
 const ROW_COUNT = 4;
 const ROW_DONE = ROW_START + (ROW_COUNT - 1) * ROW_STAGGER + 320;
 
-const TOTAL_MS = ROW_DONE + HOLD_MS;
+/** Hold on the final settled frame before looping. */
+const END_HOLD_MS = 5000;
+const TOTAL_MS = ROW_DONE + END_HOLD_MS;
 
 type SupportCostContinuousProps = {
   active: boolean;

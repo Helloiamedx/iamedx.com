@@ -104,6 +104,54 @@ export function CoverLoopVideo({
     wasSlideActiveRef.current = false;
   }, [src]);
 
+  /*
+   * Free the concurrency slot once bytes can paint — not only when playing.
+   * Inactive / paused covers (Recognition) used to hold slots forever and
+   * starve later clips (e.g. Approach “I work hard”).
+   */
+  useEffect(() => {
+    if (!allowed) return;
+    let cancelled = false;
+    let el: HTMLVideoElement | null = null;
+
+    const free = () => {
+      if (cancelled) return;
+      onSettled();
+    };
+
+    const bind = (node: HTMLVideoElement) => {
+      el = node;
+      if (node.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+        free();
+        return;
+      }
+      node.addEventListener("loadeddata", free);
+      node.addEventListener("canplay", free);
+      node.addEventListener("error", free);
+    };
+
+    const node = videoRef.current;
+    if (node) bind(node);
+    else {
+      /* ProtectedVideo mounts with `allowed` — ref ready next frame */
+      const id = requestAnimationFrame(() => {
+        if (!cancelled && videoRef.current) bind(videoRef.current);
+      });
+      return () => {
+        cancelled = true;
+        cancelAnimationFrame(id);
+      };
+    }
+
+    return () => {
+      cancelled = true;
+      if (!el) return;
+      el.removeEventListener("loadeddata", free);
+      el.removeEventListener("canplay", free);
+      el.removeEventListener("error", free);
+    };
+  }, [allowed, src]);
+
   useEffect(() => {
     return () => {
       if (mediaRef && mediaRef.current === videoRef.current) {

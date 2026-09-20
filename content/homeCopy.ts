@@ -41,18 +41,18 @@ export const whatSetsMeApart: HomeCopySection = {
       id: "loyalty",
       heading: "Always aligned with your interests",
       title: "Loyalty",
-      body: "I believe my responsibility is to represent your interests in China. I remain fully aligned with your goals, make decisions from your perspective, and never allow supplier relationships or personal incentives to influence my judgment.",
+      body: "I don't treat anyone like a fool. Staying loyal to my clients is what allows me to stand firm, no matter what happens. If protecting my client's interests isn't at the heart of what I do, then I don't see the point of doing this job at all.",
       bodyHighlight:
-        "I remain fully aligned with your goals, make decisions from your perspective",
+        "Staying loyal to my clients is what allows me to stand firm, no matter what happens.",
       image: asset("images/home/difference/1.png"),
     },
     {
       id: "focus",
       heading: "Continuously sharpening the craft",
       title: "Focus",
-      body: "Manufacturing is constantly evolving, and I continuously improve my knowledge of materials, processes, product development, and supply chain management to provide better solutions for every project.",
+      body: "I've spent most of my career developing custom products for IPs. I understand how this field works and what affects every part of the process. That understanding helps me analyze problems and know where to focus my work.",
       bodyHighlight:
-        "I continuously improve my knowledge of materials, processes, product development, and supply chain management",
+        "I understand how this field works and what affects every part of the process",
       image: asset("images/home/difference/2.png"),
     },
     {
@@ -60,14 +60,14 @@ export const whatSetsMeApart: HomeCopySection = {
       heading: "Risks caught before they grow",
       title: "Proactive",
       body: "My role is not only to react when issues appear. I actively look ahead, identify potential risks early, and take action before small problems become costly or difficult to solve.",
-      bodyHighlight: "I actively look ahead, identify potential risks early",
+      bodyHighlight: "take action before small problems become costly",
       image: asset("images/home/difference/4.png"),
     },
     {
       id: "reliable",
       heading: "Every thread driven to a result",
       title: "Reliable",
-      body: "Nothing is left unanswered, and everything is driven to a result — this is the minimum standard I uphold in every project.",
+      body: "Nothing is left unanswered, and everything is driven to a result because this is the minimum standard I uphold in every project.",
       bodyHighlight:
         "Nothing is left unanswered, and everything is driven to a result",
       image: asset("images/home/difference/3.png"),
@@ -76,9 +76,9 @@ export const whatSetsMeApart: HomeCopySection = {
       id: "practical-experience",
       heading: "Decisions rooted in the factory floor",
       title: "Hands-on",
-      body: "I understand how products move from ideas to reality. Years of working directly with factories and production teams allow me to solve problems based on real manufacturing conditions.",
+      body: "I'm deeply involved in every project I take on, working on-site with the people in charge of each key process. I talk directly with workers, sit down with engineers, and negotiate with factory owners to get the support and resources each project needs.",
       bodyHighlight:
-        "Years of working directly with factories and production teams",
+        "working on-site with the people in charge of each key process",
       image: asset("images/home/difference/5.png"),
     },
   ],
@@ -131,42 +131,64 @@ export const someoneLikeThisLines: SomeoneLikeThisLine[] = [
   },
 ];
 
-/** My Approach — black plate band (former someone layout). */
+/** My Approach — horizontal media cards (Apple-style rail). */
 export type MyApproachPoint = {
   id: string;
   title: string;
   body: string;
+  /** Phrase inside `body` rendered black; rest stays muted */
+  bodyHighlight?: string;
+  /** Card media — dedicated approach assets later; placeholders OK for now */
+  image?: string;
+  video?: string;
 };
 
 export const myApproach = {
   id: "my-approach",
-  /** Left-column section title */
+  /** Section title above the card rail */
   title: "My approach.",
   points: [
     {
-      id: "i-dont-lie",
-      title: "I don't lie",
-      body: "I tell you what is actually happening — even when the answer isn't good. No hiding problems, no making promises I can't keep. I'd rather tell you the truth early than make you regret trusting me later.",
-    },
-    {
-      id: "i-think-different",
-      title: "I think different",
-      body: "I don't always follow the obvious way. When the usual solution doesn't work, I look for another one — whether it's a different material, process, supplier, or way to solve the problem.",
+      id: "i-care-about-your-business",
+      title: "I care about your business",
+      body: "I keep your business in mind throughout my work, always asking whether there is a better way to do something that could help you more. I care about whether my work can make a real difference to your business and help it grow further.",
+      bodyHighlight:
+        "I care about whether my work can make a real difference to your business and help it grow further",
+      image: asset("images/home/difference/3.png"),
     },
     {
       id: "i-work-hard",
       title: "I work hard",
-      body: "I don't just give instructions and wait for things to happen. I get into the details, talk to factories, check samples, solve problems, and keep things moving until the job is done.",
+      body: "I'm always on the way to making things better, and I don't mind the extra work it takes to get there. I'll test, adjust, and iterate as many times as needed. I don't stop at “good enough.” I want the result to be as good as I know it can be.",
+      bodyHighlight: "I don't stop at “good enough.”",
+      video: asset(
+        `/images/home/${encodeURIComponent("My approach")}/${encodeURIComponent("I work hard.mp4")}`,
+      ),
     },
     {
-      id: "i-care-you",
-      title: "I care you",
-      body: "Your feedback tells me whether I actually did a good job. I listen, I ask questions, and I make changes when something can be better. A successful project isn't just one that gets delivered — it's one you're happy to receive.",
+      id: "i-dont-lie",
+      title: "I don't lie",
+      body: "I tell you what is actually happening, even when the answer isn't good. No hiding problems, no making promises I can't keep. I know hiding the truth only creates bigger problems later. The only way forward is to face problems honestly, deal with them directly, and get them solved.",
+      bodyHighlight:
+        "I know hiding the truth only creates bigger problems later",
+      /* Placeholder — swap when approach media is ready */
+      image: asset("images/home/difference/1.png"),
     },
     {
-      id: "i-own-it",
-      title: "I own it",
-      body: "Once I take on a project, I take responsibility for it. If something goes wrong, I don't look for someone to blame. I figure out what happened, find a solution, and stay with it until it's fixed.",
+      id: "i-think-different",
+      title: "I think different",
+      body: "What matters to me is getting the problem solved. I don't limit myself to how things are normally done. I'm willing to try, adjust, and find what works. I'm always thinking about how I can do things better than I did before.",
+      bodyHighlight:
+        "I'm always thinking about how I can do things better than I did before",
+      image: asset("images/home/difference/2.png"),
+    },
+    {
+      id: "i-love-what-i-do",
+      title: "I love what I do",
+      body: "I care deeply about the result of every project. When it goes well, I'm proud of it. When it doesn't, I'm frustrated by it. I want every project I take on to be something I'm proud to have worked on.",
+      bodyHighlight:
+        "I want every project I take on to be something I'm proud to have worked on",
+      image: asset("images/home/difference/5.png"),
     },
   ] satisfies MyApproachPoint[],
 };
