@@ -343,6 +343,8 @@ export function HomeRecognitionBand() {
         className="home-recognition__viewport"
         aria-roledescription="carousel"
         aria-label="Recognition highlights"
+        /* Trackpad swipe drives this rail — keep Lenis off horizontal gestures */
+        data-lenis-prevent-horizontal
       >
         <div
           className="home-recognition__track"

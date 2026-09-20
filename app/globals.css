@@ -3049,6 +3049,15 @@ body:has(.home-page) .site-footer__gap {
   -webkit-overflow-scrolling: touch;
 }
 
+/*
+ * Trackpad: the rail scrolls freely while fingers are down (HomeMyApproach owns
+ * the gesture), then eases onto the nearest card. `mandatory` would re-snap on
+ * every programmatic scrollLeft nudge and fight the momentum.
+ */
+.home-someone__scroller.is-free-scroll {
+  scroll-snap-type: none;
+}
+
 .home-someone__scroller::-webkit-scrollbar {
   display: none;
 }
@@ -3073,8 +3082,12 @@ body:has(.home-page) .site-footer__gap {
   grid-template-rows: var(--home-someone-media-h) minmax(150px, auto);
   width: var(--home-someone-card-w);
   min-width: 0;
+  /*
+   * `scroll-snap-align` only. No `scroll-snap-stop: always` — that forced the
+   * scroller to halt at every card, which capped a gesture at one step and read
+   * as a fixed scroll speed.
+   */
   scroll-snap-align: start;
-  scroll-snap-stop: always;
 }
 
 .home-someone__media {
@@ -3386,7 +3399,8 @@ body:has(.home-page) .site-footer__gap {
   cursor: pointer;
   color: #fff;
   isolation: isolate;
-  background: #1d1d1f;
+  /* No base plate — media / page tone shows through until frames paint */
+  background: transparent;
   opacity: 0.55;
   transition: opacity 420ms ease;
 }
@@ -3718,7 +3732,8 @@ body:has(.home-page) .site-footer__gap {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: #1d1d1f;
+  /* No base plate — page tone until a frame paints */
+  background: transparent;
 }
 
 .home-recognition-photo-slideshow__frame {

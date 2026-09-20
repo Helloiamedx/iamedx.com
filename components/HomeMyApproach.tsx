@@ -8,6 +8,12 @@ import { SnapCarousel } from "@/lib/snapCarousel";
 
 const POINTS = myApproach.points;
 
+/** Wheel delta modes → px (trackpads report pixels) */
+const LINE_DELTA_PX = 16;
+const PAGE_DELTA_PX = 100;
+/** Fingers are done once the wheel stream has been quiet this long */
+const WHEEL_SETTLE_MS = 200;
+
 function ApproachCaption({
   title,
   body,
@@ -92,6 +98,72 @@ export function HomeMyApproach() {
     };
   }, []);
 
+  /*
+   * Trackpad: free continuous scroll, then ease onto the nearest card.
+   *
+   * Two things go wrong if we leave the gesture to the browser:
+   *  1. the gesture carries a small `deltaY`, which the page claims — a
+   *     horizontal swipe drifts the whole viewport up/down (Lenis does the same
+   *     with the vertical component);
+   *  2. CSS snap re-aligns mid-scroll, so the rail gets yanked while moving.
+   *
+   * So we own it: block the default, add `deltaX` to `scrollLeft` ourselves (no
+   * step — distance and speed follow the trackpad), and suspend snap until the
+   * stream goes quiet. Mobile keeps the native touch scroller untouched — its
+   * axis locking and snap feel are already right.
+   */
+  useEffect(() => {
+    const gallery = galleryRef.current;
+    const scroller =
+      gallery?.querySelector<HTMLElement>("[data-scroller]") ?? null;
+    if (!scroller) return;
+
+    let settleTimer = 0;
+
+    const endGesture = () => {
+      scroller.classList.remove("is-free-scroll");
+      const carousel = carouselRef.current;
+      if (!carousel) return;
+      /* Sync from where the free scroll landed, then ease onto that card */
+      carousel.sync();
+      carousel.go(carousel.index);
+    };
+
+    const onWheel = (event: WheelEvent) => {
+      /* Pinch-zoom arrives as a wheel + ctrlKey */
+      if (event.ctrlKey) return;
+
+      let dx = event.deltaX;
+      let dy = event.deltaY;
+      if (event.deltaMode === 1) {
+        dx *= LINE_DELTA_PX;
+        dy *= LINE_DELTA_PX;
+      } else if (event.deltaMode === 2) {
+        dx *= PAGE_DELTA_PX;
+        dy *= PAGE_DELTA_PX;
+      }
+
+      /* Mostly-vertical (or noise) → belongs to the page, not this rail */
+      const ax = Math.abs(dx);
+      if (ax < 1 || ax <= Math.abs(dy)) return;
+
+      if (event.cancelable) event.preventDefault();
+
+      scroller.classList.add("is-free-scroll");
+      scroller.scrollLeft += dx;
+
+      window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(endGesture, WHEEL_SETTLE_MS);
+    };
+
+    scroller.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      scroller.removeEventListener("wheel", onWheel);
+      window.clearTimeout(settleTimer);
+      scroller.classList.remove("is-free-scroll");
+    };
+  }, []);
+
   return (
     <section
       className="home-someone"
@@ -109,6 +181,8 @@ export function HomeMyApproach() {
         className="home-someone__gallery"
         aria-label="Approach cards"
         data-carousel
+        /* Trackpad swipe drives this rail — keep Lenis off horizontal gestures */
+        data-lenis-prevent-horizontal
       >
         <div className="home-someone__scroller" tabIndex={0} data-scroller>
           <div className="home-someone__track-pad">

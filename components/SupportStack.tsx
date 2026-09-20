@@ -523,7 +523,12 @@ export function SupportStack() {
           </h2>
         </header>
 
-        <div ref={stageRef} className="support-know__stage">
+        <div
+          ref={stageRef}
+          className="support-know__stage"
+          /* Trackpad swipe drives this stage — keep Lenis off horizontal gestures */
+          data-lenis-prevent-horizontal
+        >
           <SupportMediaStage
             cards={CARDS}
             activeIndex={activeIndex}
