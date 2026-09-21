@@ -1,0 +1,99 @@
+---
+description: 六种卡片出场动效及调用规则
+globs: components/**/*.tsx,app/globals.css
+alwaysApply: true
+---
+
+# 卡片出场动效调用协议
+
+六种卡片出场动效的**原始实现**收录在 `backups/card-motion/card-entrance.js`（逐字保留，
+**尚未接入站点**），说明见 `backups/card-motion/README.md`。
+
+用户说编号或名称时，调用对应效果；**不要**更改编号、映射或参数。
+
+| 编号 | 名称 | 参数 |
+| --- | --- | --- |
+| C01 | 整组轻升 | 同时上移 28px · 1000ms（不错开） |
+| C02 | 错峰上浮 | 依次上移 36px · 1000ms · 间隔 120ms（默认） |
+| C03 | 缩放落定 | `scale(.94) translateY(12px)` → 归位 · 1150ms · 间隔 100ms |
+| C04 | 横向滑入 | 从右 `translateX(56px)` → 0 · 1050ms · 间隔 130ms |
+| C05 | 微倾归位 | `translateY(30px) rotateX(7deg) scale(.98)` → 归零 · 1200ms · 间隔 120ms |
+| C06 | 卡片先行 | 卡片 24px/900ms；内容延后 +220ms（14px/800ms）；插画延后 +300ms（blur 7→0/1000ms） |
+
+公共参数：基础延迟 `140ms`；缓动 `cubic-bezier(.22,1,.36,1)`；`fill: 'both'`；
+`speed` 0.5×–1.5× 同时作用于 `duration` 与 `delay`；尊重 `prefers-reduced-motion`。
+
+## 已接线的卡片（当前）
+
+| 位置 | 选择器 | 效果 | 备注 |
+| --- | --- | --- | --- |
+| 首页 `Recognition comes first.` | `.home-recognition__card` | **C02 错峰上浮** | `fade: false` · `stagger: 260` · `duration: 1650` |
+| 首页 `What makes me stand out.` | `.home-different__feature` | **C02 错峰上浮** | `stagger: 260` · `duration: 1650` |
+| 首页 `My approach.` | `.home-someone__slide` | **C02 错峰上浮** | `stagger: 260` · `duration: 1650` · 只做纵向位移，不干扰轮播横向测量 |
+
+三处相对 C02 原生值（`1000ms` / 错峰 `120ms`）都放慢了：
+错峰 `120 → 260ms`（原值下五张卡几乎重叠，整段约 1.6s 就结束），
+单卡时长 `1000 → 1650ms`。现在整段约 **2.8s**（`140 + 4×260 + 1650`）。
+
+**Recognition 用 `fade: false` 的原因**：轮播会把非当前卡片压到 `opacity: .55`，
+如果统一淡入到 1，动画结束释放控制权的瞬间会回弹。所以这批卡片的透明度交给 CSS，
+只做位移。
+
+## 触发时机（重要）
+
+`trigger: "view"` 观察的是**卡片本身**，不是它们所在的 section，默认要求单张卡片
+有 **30%（`amount`）** 进入视口才播。
+
+原因：首页 hero 占满首屏，整段 band 的上边缘在页面一加载就贴住视口底部。
+若按 section 级别 `threshold: 0` 判断，动画会在后台提前播完，用户滚到时已经结束。
+
+`amount` 可按需调整（0–1）；调大 = 更晚触发。
+
+## 怎么调用
+
+```ts
+import { applyCardMotion, useCardMotion } from "@/lib/cardMotion";
+
+// React：在已有 ref 的容器里选中卡片
+const motionRef = useCardMotion(sectionRef, ".my-card", "C02", { speed: 1 });
+motionRef.current?.replay();
+motionRef.current?.setEffect("C04");
+
+// 命令式
+const controller = applyCardMotion(cardElements, "C02", { trigger: "view" });
+controller.destroy();
+```
+
+| 参数 | 默认 | 说明 |
+| --- | --- | --- |
+| `effect` | `"C02"` | `C01`–`C06` / 中文名 / 英文 ID |
+| `trigger` | `"view"` | `view` 进视口播一次；`immediate` 立即；`manual` 手动 |
+| `speed` | `1` | 0.5×–1.5×，同时作用于 `duration` 与 `delay` |
+| `stagger` | 效果自带 | 卡片间隔毫秒数，覆盖该效果的原生错峰；调大 = 更慢更从容 |
+| `duration` | 效果自带 | 单卡动作时长毫秒数；只改动作快慢，**不影响**错峰间隔 |
+| `amount` | `0.3` | `trigger: "view"` 时，单张卡片需进入视口的比例（0–1） |
+| `fade` | `true` | `false` 表示透明度交给 CSS（卡片自带 opacity 系统时必须关掉） |
+| `textSelector` / `artSelector` | `.cm-text` / `.cm-art` | 仅 C06 用；站点要传自己的类名 |
+
+## 移植要点
+
+原始脚本依赖 ChatGPT 小组件环境，接入站点时必须处理：
+
+1. 删掉 `window.openai.setWidgetState` / `widgetState` / `openai:set_globals`
+   （ChatGPT Apps SDK 状态持久化）——换成 React state 或 sessionStorage。
+2. 删掉 `globalThis.Tweak` 分支（ChatGPT 调试面板滑杆）。
+3. `#card-motion` / `.cm-card` / `.cm-text` / `.cm-art` / `.cm-choice` 等类名
+   换成目标组件自己的结构。
+4. React 场景：在 effect 里创建、卸载时 `cancel()` 全部动画；不要在父级额外加 key。
+
+## 不要
+
+- 把 C 编号和标题动效的 `01`–`07` 混用（两套独立协议）
+- 改参数、改缓动、改编号映射
+- 在未确认目标组件结构前直接照抄类名
+
+## 相关
+
+- 标题出场（`01`–`07`）：`lib/headlineMotion.ts` + `components/HeadlineMotion.tsx`，
+  见 `.cursor/rules/headline-motion.mdc`
+- 卡片出场（`C01`–`C06`）：`backups/card-motion/`（待移植）

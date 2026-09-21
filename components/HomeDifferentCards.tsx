@@ -1,5 +1,9 @@
+"use client";
+
+import { useRef } from "react";
 import { HomeSectionIntro } from "@/components/HomeSectionIntro";
 import { whatSetsMeApart, type HomeCopyPoint } from "@/content/homeCopy";
+import { useCardMotion } from "@/lib/cardMotion";
 
 const POINTS = whatSetsMeApart.points;
 
@@ -29,8 +33,21 @@ function FeatureBody({
  * Intro type recipe is the home-wide source of truth (`HomeSectionIntro`).
  */
 export function HomeDifferentCards() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  /*
+   * C02 错峰上浮 — character cards rise in staggered as the band arrives.
+   * `stagger` raised from the authored 120ms and `duration` stretched from
+   * 1000ms so each card reads on its own and the rise is unhurried.
+   */
+  useCardMotion(sectionRef, ".home-different__feature", "C02", {
+    stagger: 260,
+    duration: 1650,
+  });
+
   return (
     <section
+      ref={sectionRef}
       className="home-different"
       id={whatSetsMeApart.id}
       aria-labelledby={`${whatSetsMeApart.id}-title`}

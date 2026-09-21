@@ -10,6 +10,7 @@ import {
   whatsAppCta,
 } from "@/content/nav";
 import { OriginButton } from "@/components/ui/origin-button";
+import { HeadlineMotion } from "@/components/HeadlineMotion";
 import { RollLink } from "@/components/RollLink";
 import { asset } from "@/lib/assets";
 
@@ -24,7 +25,14 @@ export function Footer() {
         <div className="site-footer__shell">
           <div className="site-footer__top">
             <div className="site-footer__primary">
-              <p className="site-footer__lead">{footerLeadLine}</p>
+              {/* Effect 01 (轻移渐显) — same entrance as the hero + home sections */}
+              <HeadlineMotion
+                as="p"
+                effect="01"
+                className="site-footer__lead"
+              >
+                {footerLeadLine}
+              </HeadlineMotion>
 
               <div className="site-footer__cta-actions">
                 <div className="site-footer__whatsapp">

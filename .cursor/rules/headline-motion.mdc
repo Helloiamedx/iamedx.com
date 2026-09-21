@@ -1,0 +1,101 @@
+---
+description: 固定的七种标题出场动效及调用规则
+globs: components/HeadlineMotion.tsx,lib/headlineMotion.ts,app/**/*.tsx
+alwaysApply: true
+---
+
+# 标题动效调用协议
+
+七种标题出场动效的**唯一实现**在 `lib/headlineMotion.ts`（引擎）+ `components/HeadlineMotion.tsx`（React 封装）。
+
+当用户指定动效编号、中文名或英文 ID 时，调用对应效果；**不要**临时重新实现、不要更改映射、不要改动参数。
+
+| 编号 | 中文名 | 英文 ID |
+| --- | --- | --- |
+| 01 | 轻移渐显 | fade-up |
+| 02 | 逐行揭幕 | line-reveal |
+| 03 | 模糊聚焦 | blur-focus |
+| 04 | 缩放落定 | scale-in |
+| 05 | 逐字浮现 | char-reveal |
+| 06 | 光感扫入 | light-sweep |
+| 07 | 逐行轻移渐显 | line-fade-up |
+
+用户说「这个标题用 03」= 对该标题使用模糊聚焦。若已有控制器，调用 `controller.setEffect('03')`。
+
+## 怎么调用
+
+**首选：React 组件**（本站为 Next.js App Router，标题文案都是硬编码）
+
+```tsx
+import { HeadlineMotion } from "@/components/HeadlineMotion";
+
+<HeadlineMotion as="h2" effect="03" lineHeight={1.08}>
+  What makes me stand out.
+</HeadlineMotion>
+```
+
+`effect` 接受编号 `"03"`、中文名 `"模糊聚焦"` 或英文 ID `"blur-focus"`，三者等价。
+
+显式换行传数组（每项一行），不要用 `<br>` 字符串：
+
+```tsx
+<HeadlineMotion as="h2" effect="02">{[ "Tailored to", "Your Business" ]}</HeadlineMotion>
+```
+
+**备选：命令式**（已有 DOM、非 React 场景）
+
+```ts
+import { applyHeadlineMotion, initHeadlineMotion } from "@/lib/headlineMotion";
+
+const controller = applyHeadlineMotion(el, "03", { speed: 1, trigger: "view" });
+controller.replay();        // 重播
+controller.setEffect("07"); // 切换并播放
+controller.destroy();       // 卸载清理
+
+// 或批量：给元素加 data-headline-motion="03" 后
+const controllers = initHeadlineMotion();
+```
+
+## 已接线的标题（当前）
+
+以下标题已接入 **01 轻移渐显**，改动时保持不动（要换效果直接说编号）：
+
+| 位置 | 组件 | 说明 |
+| --- | --- | --- |
+| 首页 hero `Establish a Supply Chain From Scratch Tailored to Your Business` | `HeroHeadline.tsx` | `trigger="manual"` + `play={copyGate}`，等 hero 视频就绪后再播 |
+| 首页各 section 标题（Recognition / Support / Character / Approach / Products / Thoughts） | `HomeSectionIntro.tsx`、`SupportStack.tsx`、`HomeRecognitionBand.tsx`、`HomeMyApproach.tsx` | `trigger="view"` |
+| 页脚 `Let's Make Something Iconic.` | `Footer.tsx` | `trigger="view"` |
+
+**Hero 用 `manual` 的原因**：它原本已有「视频就绪 → 文案出现」的时序，必须让 hero 自己控制播放时机，不能由引擎自行触发视口播放。
+
+## props / options
+
+| 名称 | 默认 | 说明 |
+| --- | --- | --- |
+| `effect` | `"07"` | 编号 / 中文名 / 英文 ID |
+| `trigger` | `"view"` | `view` 进入视口播放一次；`immediate` 挂载即播；`manual` 等 `replay()` |
+| `speed` | `1` | `1.2` 更快，`0.8` 更慢 |
+| `as` | `"h2"` | `h1`–`h6` / `p` / `div` / `span` |
+| `lineHeight` | 继承 | 长标题推荐 `1.08` |
+| `id` / `className` / `style` | — | 透传到标题元素，便于 `aria-labelledby` |
+
+## 硬性约束
+
+- **文案只支持纯文本和 `<br>`。** 引擎会拒绝含链接、`<em>`、`<span>` 等标签的标题（`children` 类型只接受 `string | string[]`，不要塞 JSX）。原因：需要按真实行宽切行。
+- **按浏览器真实宽度自动分行**，不按字符数硬编码断行；resize 与字体加载后会重算（只重新分行，不重播）。
+- **不在每行加任何上下 padding**（`.hm-line` / `.hm-inner` 都是 `padding: 0`），行距只由标题自身 `line-height` 控制。
+- **保持标题自身的字体、颜色、大小和布局**；动效模块只管理内部文本呈现。色值沿用已统一的 `#0a0a0a`。
+- **06 是裁切显现 + 透明度渐变**，不加发光、渐变或装饰光带。
+- 默认进入视口播放一次，尊重 `prefers-reduced-motion`（开启时直接显示、不动画）。
+- **不要让 React 和引擎同时改标题内部节点。** 组件已按 `children` 加 key，改文案会重挂载元素；不要在父级再给它加 key 去覆盖。
+- 组件卸载 / 路由离开时 `destroy()` 恢复原始节点；文案变更前先 destroy（组件已自动处理）。
+
+## 选型
+
+- 多行长标题推荐 **07**（位移小、错开短）；更明显的出场感选 **02**；柔和朦胧选 **03**。
+- **05 逐字浮现适合短标题**：长标题会产生几十个带 `blur` 的动画，移动端开销明显。
+
+## 验证
+
+`/dev/headline-motion` 是开发预览页（未接入任何真实站点标题，`noindex`、未进 sitemap）：
+可切换 01–07、重播、测 `speed 1.6`、文本替换、卸载恢复，并实时显示每行标题的 `.hm-line` 行数。

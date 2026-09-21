@@ -138,12 +138,37 @@ export type MyApproachPoint = {
   body: string;
   /** Phrase inside `body` rendered black; rest stays muted */
   bodyHighlight?: string;
-  /** Card media — dedicated approach assets later; placeholders OK for now */
+  /**
+   * Card media — a full-bleed photo URL (not a cutout PNG). Rendered with
+   * `object-fit: cover`, so the image must be a normal rectangular photo.
+   * Cards with neither `image` nor `video` show the pending-media plate.
+   */
   image?: string;
+  /** Full-bleed looping clip. Takes precedence over `image`. */
   video?: string;
 };
 
-export const myApproach = {
+/**
+ * My Approach cards.
+ *
+ * ⚠️ Media slots awaiting real assets — supply a URL per card and drop it in
+ * `image` below. Until then each card shows the neutral pending plate.
+ *
+ * | # | card                     | slot        |
+ * |---|--------------------------|-------------|
+ * | 1 | I care about your business | `image` — pending |
+ * | 2 | I work hard                | `video` — wired    |
+ * | 3 | I don't lie                | `image` — pending |
+ * | 4 | I think different          | `image` — pending |
+ * | 5 | I love what I do           | `image` — pending |
+ */
+export const myApproach: {
+  id: string;
+  title: string;
+  /** Typed explicitly: `satisfies` narrows to the literal union, which would
+   *  drop `image` entirely while every card is still awaiting its asset. */
+  points: MyApproachPoint[];
+} = {
   id: "my-approach",
   /** Section title above the card rail */
   title: "My approach.",
@@ -154,7 +179,6 @@ export const myApproach = {
       body: "I keep your business in mind throughout my work, always asking whether there is a better way to do something that could help you more. I care about whether my work can make a real difference to your business and help it grow further.",
       bodyHighlight:
         "I care about whether my work can make a real difference to your business and help it grow further",
-      image: asset("images/home/difference/3.png"),
     },
     {
       id: "i-work-hard",
@@ -171,8 +195,6 @@ export const myApproach = {
       body: "I tell you what is actually happening, even when the answer isn't good. No hiding problems, no making promises I can't keep. I know hiding the truth only creates bigger problems later. The only way forward is to face problems honestly, deal with them directly, and get them solved.",
       bodyHighlight:
         "I know hiding the truth only creates bigger problems later",
-      /* Placeholder — swap when approach media is ready */
-      image: asset("images/home/difference/1.png"),
     },
     {
       id: "i-think-different",
@@ -180,7 +202,6 @@ export const myApproach = {
       body: "What matters to me is getting the problem solved. I don't limit myself to how things are normally done. I'm willing to try, adjust, and find what works. I'm always thinking about how I can do things better than I did before.",
       bodyHighlight:
         "I'm always thinking about how I can do things better than I did before",
-      image: asset("images/home/difference/2.png"),
     },
     {
       id: "i-love-what-i-do",
@@ -188,9 +209,8 @@ export const myApproach = {
       body: "I care deeply about the result of every project. When it goes well, I'm proud of it. When it doesn't, I'm frustrated by it. I want every project I take on to be something I'm proud to have worked on.",
       bodyHighlight:
         "I want every project I take on to be something I'm proud to have worked on",
-      image: asset("images/home/difference/5.png"),
     },
-  ] satisfies MyApproachPoint[],
+  ],
 };
 /** Home recognition — Apple-style highlights carousel (demo; refine media later). */
 export type HomeRecognitionSlide = {

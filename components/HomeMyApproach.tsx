@@ -3,7 +3,9 @@
 import Image from "next/image";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CoverLoopVideo } from "@/components/CoverLoopVideo";
+import { HeadlineMotion } from "@/components/HeadlineMotion";
 import { myApproach } from "@/content/homeCopy";
+import { useCardMotion } from "@/lib/cardMotion";
 import { SnapCarousel } from "@/lib/snapCarousel";
 
 const POINTS = myApproach.points;
@@ -11,8 +13,23 @@ const POINTS = myApproach.points;
 /** Wheel delta modes → px (trackpads report pixels) */
 const LINE_DELTA_PX = 16;
 const PAGE_DELTA_PX = 100;
-/** Fingers are done once the wheel stream has been quiet this long */
-const WHEEL_SETTLE_MS = 200;
+/**
+ * Fingers are done once the wheel stream has been quiet this long. Long enough
+ * that a slow, deliberate two-finger drag (move, pause, move) stays one
+ * gesture — a short window ended it mid-drag and re-snapped the rail.
+ */
+const WHEEL_SETTLE_MS = 450;
+/**
+ * Below this per-event `|deltaX|` the rail is only hearing noise, not a
+ * gesture — the page gets the wheel back.
+ */
+const MIN_CLAIM_PX = 0.5;
+/**
+ * A vertical push this big, and this much more vertical than horizontal, is a
+ * real page scroll: hand the wheel back to it instead of holding the lock.
+ */
+const AXIS_ESCAPE_PX = 12;
+const AXIS_ESCAPE_RATIO = 2;
 
 function ApproachCaption({
   title,
@@ -99,7 +116,7 @@ export function HomeMyApproach() {
   }, []);
 
   /*
-   * Trackpad: free continuous scroll, then ease onto the nearest card.
+   * Trackpad: free continuous scroll — no snap, no detent.
    *
    * Two things go wrong if we leave the gesture to the browser:
    *  1. the gesture carries a small `deltaY`, which the page claims — a
@@ -107,26 +124,33 @@ export function HomeMyApproach() {
    *     with the vertical component);
    *  2. CSS snap re-aligns mid-scroll, so the rail gets yanked while moving.
    *
-   * So we own it: block the default, add `deltaX` to `scrollLeft` ourselves (no
-   * step — distance and speed follow the trackpad), and suspend snap until the
-   * stream goes quiet. Mobile keeps the native touch scroller untouched — its
-   * axis locking and snap feel are already right.
+   * So we own it: block the default and add `deltaX` to `scrollLeft` ourselves
+   * (no step — distance and speed follow the trackpad). The rail does **not**
+   * snap on release: the gesture rests exactly where the fingers stopped, and
+   * only the *current* card is re-read from that resting position so the
+   * paddles continue from there. Mobile keeps the native touch scroller
+   * untouched — its axis locking and snap feel are already right.
    */
   useEffect(() => {
     const gallery = galleryRef.current;
     const scroller =
       gallery?.querySelector<HTMLElement>("[data-scroller]") ?? null;
-    if (!scroller) return;
+    if (!gallery || !scroller) return;
 
     let settleTimer = 0;
+    /** `"x"` while a horizontal gesture — and its inertia tail — owns the rail. */
+    let axis: "x" | null = null;
 
     const endGesture = () => {
-      scroller.classList.remove("is-free-scroll");
-      const carousel = carouselRef.current;
-      if (!carousel) return;
-      /* Sync from where the free scroll landed, then ease onto that card */
-      carousel.sync();
-      carousel.go(carousel.index);
+      axis = null;
+      /* Stop shielding the rail from Lenis now that we no longer drive it. */
+      gallery.removeAttribute("data-lenis-prevent");
+      /*
+       * Deliberately no `go()`: snapping onto the nearest card on release is
+       * what made the rail feel detented. Keep the resting offset, just refresh
+       * which card is current.
+       */
+      carouselRef.current?.sync();
     };
 
     const onWheel = (event: WheelEvent) => {
@@ -143,13 +167,34 @@ export function HomeMyApproach() {
         dy *= PAGE_DELTA_PX;
       }
 
-      /* Mostly-vertical (or noise) → belongs to the page, not this rail */
       const ax = Math.abs(dx);
-      if (ax < 1 || ax <= Math.abs(dy)) return;
+      const ay = Math.abs(dy);
+
+      if (axis === "x") {
+        /*
+         * The inertia tail of a two-finger swipe goes noisy: `|dx|` decays and
+         * the vertical component can overtake it. Dropping the claim there
+         * ended the gesture mid-momentum and stopped the rail dead — so the
+         * rail holds the lock until the stream quiets, unless the reader
+         * clearly starts scrolling the page instead.
+         */
+        if (ax < MIN_CLAIM_PX || (ay > AXIS_ESCAPE_PX && ay > ax * AXIS_ESCAPE_RATIO)) {
+          endGesture();
+          return;
+        }
+      } else {
+        /* Mostly-vertical (or noise) → belongs to the page, not this rail */
+        if (ax < 1 || ax <= ay) return;
+        axis = "x";
+        /*
+         * Keep Lenis off the rail for the whole gesture. Its own orientation
+         * test is per-event, so a noisy `deltaY` in the tail would otherwise
+         * drift the page while the horizontal motion is still ours.
+         */
+        gallery.setAttribute("data-lenis-prevent", "");
+      }
 
       if (event.cancelable) event.preventDefault();
-
-      scroller.classList.add("is-free-scroll");
       scroller.scrollLeft += dx;
 
       window.clearTimeout(settleTimer);
@@ -160,9 +205,23 @@ export function HomeMyApproach() {
     return () => {
       scroller.removeEventListener("wheel", onWheel);
       window.clearTimeout(settleTimer);
-      scroller.classList.remove("is-free-scroll");
+      gallery.removeAttribute("data-lenis-prevent");
     };
   }, []);
+
+  /*
+   * C02 错峰上浮 — approach cards rise in staggered as the rail arrives.
+   * The translate is vertical only, so it never disturbs the carousel's
+   * horizontal stop measurements (`offsetLeft`).
+   *
+   * `stagger` raised from the authored 120ms and `duration` stretched from
+   * 1000ms so all five cards are read in sequence rather than arriving as one
+   * block.
+   */
+  useCardMotion(galleryRef, ".home-someone__slide", "C02", {
+    stagger: 260,
+    duration: 1650,
+  });
 
   return (
     <section
@@ -171,9 +230,14 @@ export function HomeMyApproach() {
       aria-labelledby={`${myApproach.id}-title`}
     >
       <header className="home-someone__head">
-        <h2 id={`${myApproach.id}-title`} className="home-someone__title">
+        <HeadlineMotion
+          as="h2"
+          effect="01"
+          id={`${myApproach.id}-title`}
+          className="home-someone__title"
+        >
           {myApproach.title}
-        </h2>
+        </HeadlineMotion>
       </header>
 
       <div

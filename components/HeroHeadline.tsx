@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { HeadlineMotion } from "@/components/HeadlineMotion";
 import { HeroActions } from "@/components/HeroActions";
 import { HERO_COPY_ATTR, whenHeroFlag } from "@/lib/heroSequence";
 
@@ -49,7 +50,19 @@ export function HeroHeadline() {
   return (
     <>
       <div className={`hero__copy${copyGate ? " is-revealed" : ""}`}>
-        <h1 className="hero__title">{HEADLINE}</h1>
+        {/*
+         * Effect 01 fires only once the video is playable (`copyGate`) — the
+         * hero already owns that timing, so the engine must not self-trigger.
+         */}
+        <HeadlineMotion
+          as="h1"
+          effect="01"
+          trigger="manual"
+          play={copyGate}
+          className="hero__title"
+        >
+          {HEADLINE}
+        </HeadlineMotion>
         <p className="hero__subtitle">{SUBTITLE}</p>
       </div>
       <HeroActions revealed={actionsReady} />

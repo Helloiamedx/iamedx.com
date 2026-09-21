@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { HeadlineMotion } from "@/components/HeadlineMotion";
 import { PanelImageStack } from "@/components/PanelImageStack";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
 import { SupportCostContinuous } from "@/components/SupportCostContinuous";
@@ -518,9 +519,14 @@ export function SupportStack() {
     >
       <div className="support-know__shell">
         <header className="home-section-intro support-know__intro">
-          <h2 id="support-know-title" className="home-section-intro__title">
+          <HeadlineMotion
+            as="h2"
+            effect="01"
+            id="support-know-title"
+            className="home-section-intro__title"
+          >
             {supportBentoSection.title}
-          </h2>
+          </HeadlineMotion>
         </header>
 
         <div

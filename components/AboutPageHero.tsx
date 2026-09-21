@@ -1,7 +1,7 @@
 import { PageIndexTitle } from "@/components/PageIndexTitle";
 
 const HERO_DESC =
-  "An experienced specialist who excels at leveraging physical mediums to connect IP value with fans through radical collaboration";
+  "An experienced specialist who excels at leveraging physical mediums to connect IP value with your communities through radical collaboration.";
 
 /**
  * About index hero — shared page-index-intro stack (eyebrow + title + desc).

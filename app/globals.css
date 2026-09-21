@@ -199,25 +199,32 @@
 }
 
 :root {
+  /*
+   * THE black. Sitewide ink, rules, icons and dark plates all resolve to this
+   * one value — do not introduce another near-black (#000 / #111 / #1d1d1f …).
+   * Alpha inks are `rgba(10, 10, 10, x)`; box-shadows and mask gradients keep
+   * pure black (a mask's black *is* its alpha channel).
+   */
+  --ink-black: #0a0a0a;
   --site-bg: #eaeae1;
   --background: var(--site-bg);
-  --foreground: #111111;
+  --foreground: var(--ink-black);
   --muted: #5c5c5c;
   --muted-foreground: #5c5c5c;
-  --ink: #0b0b0b;
+  --ink: var(--ink-black);
   --paper: var(--site-bg);
   --accent: #0076dd;
   --accent-foreground: #ffffff;
   --primary: #0076dd;
   --primary-foreground: #ffffff;
   --secondary: #e4e4e1;
-  --secondary-foreground: #111111;
+  --secondary-foreground: var(--ink-black);
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --border: rgba(11, 11, 11, 0.14);
-  --input: rgba(11, 11, 11, 0.14);
+  --border: rgba(10, 10, 10, 0.14);
+  --input: rgba(10, 10, 10, 0.14);
   --ring: #0076dd;
-  --line: rgba(11, 11, 11, 0.12);
+  --line: rgba(10, 10, 10, 0.12);
   /* Sitewide control corners — square (no soft radius) */
   --button-radius: 0;
   --index-card-radius: 0;
@@ -730,7 +737,7 @@ main.section {
 
 .site-header,
 .site-header-chrome {
-  --nav-solid-black: #151515;
+  --nav-solid-black: #0a0a0a;
   --nav-solid-white: #ededed;
   --nav-type-size: clamp(calc(0.6875rem + 2px), calc(0.67vw + 2px), calc(0.8125rem + 2px));
   --nav-type-tracking: 0.03em;
@@ -1299,7 +1306,7 @@ body.is-mobile-menu-open .mobile-menu a {
 .site-footer__whatsapp {
   --background: transparent;
   --primary: #ffffff;
-  --primary-foreground: #000000;
+  --primary-foreground: #0a0a0a;
   flex: 0 0 auto;
 }
 
@@ -1522,7 +1529,7 @@ body.is-mobile-menu-open .mobile-menu a {
   margin: 0;
   padding: 0;
   border: 0;
-  background: rgba(0, 0, 0, 0.72);
+  background: rgba(10, 10, 10, 0.72);
   cursor: pointer;
   animation: wechat-qr-fade 280ms ease;
 }
@@ -1534,7 +1541,7 @@ body.is-mobile-menu-open .mobile-menu a {
   padding: 1.15rem 1.15rem 1.25rem;
   border-radius: 0;
   background: #f5f5f7;
-  color: #151515;
+  color: #0a0a0a;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
   animation: wechat-qr-pop 420ms cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -2305,15 +2312,15 @@ html[data-hero-copy-ready="1"] .hero__content {
   width: 50%;
   max-width: 50%;
   /*
-   * Desktop: base half-size recipe (+18px), then −8px total
-   * (four −2px steps from the prior desktop size).
+   * Desktop: base half-size recipe (+18px), then −13px total
+   * (five −2px steps + three −1px from the prior desktop size).
    */
   font-size: calc(
     clamp(
       calc((2.2rem - 2px) * 0.5 + 18px),
       calc((6.2vw - 2px) * 0.5 + 18px),
       calc((5.25rem - 2px) * 0.5 + 18px)
-    ) - 8px
+    ) - 13px
   );
   font-weight: 600;
   letter-spacing: -0.03em;
@@ -2349,7 +2356,7 @@ html[data-hero-copy-ready="1"] .hero__content {
         calc((2.2rem - 2px) * 0.5 + 18px),
         calc((6.2vw - 2px) * 0.5 + 18px),
         calc((5.25rem - 2px) * 0.5 + 18px)
-      ) - 8px - 3px - 1px
+      ) - 13px - 3px - 1px
     );
   }
 }
@@ -2424,11 +2431,13 @@ html[data-hero-copy-ready="1"] .hero__content {
   }
 
   .hero__title {
-    /* Mobile keeps its own size recipe (not the desktop −8px) */
-    font-size: clamp(
-      calc((2.2rem - 2px) * 0.5 + 16px),
-      calc((6.2vw - 2px) * 0.5 + 16px),
-      calc((5.25rem - 2px) * 0.5 + 16px)
+    /* Mobile keeps its own size recipe (not the desktop −11px); −2px this step */
+    font-size: calc(
+      clamp(
+        calc((2.2rem - 2px) * 0.5 + 16px),
+        calc((6.2vw - 2px) * 0.5 + 16px),
+        calc((5.25rem - 2px) * 0.5 + 16px)
+      ) - 2px
     );
     width: 100%;
     max-width: 100%;
@@ -2517,7 +2526,7 @@ html[data-hero-copy-ready="1"] .hero__content {
 
 .button--light {
   background: #fff;
-  color: #1d1d1f;
+  color: #0a0a0a;
   border-color: #fff;
 }
 
@@ -2822,8 +2831,8 @@ body:has(.home-page) .site-footer__gap {
 .home-page .project-showcase__media,
 .home-page .insight-showcase__media,
 .home-page .home-someone__media,
-.home-page .home-someone__media-placeholder,
 .home-page .home-someone__media .cover-loop-video {
+  /* Clip paints itself — the shell must stay clear behind it. */
   background: transparent;
 }
 
@@ -3007,7 +3016,7 @@ body:has(.home-page) .site-footer__gap {
   width: 100%;
   overflow: hidden;
   background: #f5f5f7;
-  color: #1d1d1f;
+  color: #0a0a0a;
   padding-block: var(--home-section-pad);
 }
 
@@ -3044,18 +3053,21 @@ body:has(.home-page) .site-footer__gap {
   overflow-y: hidden;
   scrollbar-width: none;
   overscroll-behavior-x: contain;
-  scroll-snap-type: x mandatory;
+  /*
+   * Desktop owns the gesture in JS (`HomeMyApproach`) and must rest wherever
+   * the fingers stopped. `mandatory` put a detent on every card, and toggling
+   * it back on re-snapped the rail behind the gesture's back. Touch keeps
+   * native snap below — its axis locking and snap feel are already right.
+   */
+  scroll-snap-type: none;
   scroll-padding-inline: var(--home-someone-inset);
   -webkit-overflow-scrolling: touch;
 }
 
-/*
- * Trackpad: the rail scrolls freely while fingers are down (HomeMyApproach owns
- * the gesture), then eases onto the nearest card. `mandatory` would re-snap on
- * every programmatic scrollLeft nudge and fight the momentum.
- */
-.home-someone__scroller.is-free-scroll {
-  scroll-snap-type: none;
+@media (hover: none) {
+  .home-someone__scroller {
+    scroll-snap-type: x mandatory;
+  }
 }
 
 .home-someone__scroller::-webkit-scrollbar {
@@ -3115,7 +3127,12 @@ body:has(.home-page) .site-footer__gap {
 .home-someone__media-placeholder {
   position: absolute;
   inset: 0;
-  background: transparent;
+  /*
+   * Pending-media plate — shown while a card has neither `image` nor `video`
+   * (see `myApproach` in content/homeCopy.ts). Same soft plate the Recognition
+   * and Support bands use, so an unfilled slot reads as waiting, not broken.
+   */
+  background: #f5f5f7;
 }
 
 .home-someone__caption {
@@ -3171,7 +3188,7 @@ body:has(.home-page) .site-footer__gap {
   border: 0;
   border-radius: 0;
   overflow: visible;
-  color: rgba(0, 0, 0, 0.56);
+  color: rgba(10, 10, 10, 0.56);
   background: rgba(210, 210, 215, 0.64);
   cursor: pointer;
   pointer-events: auto;
@@ -3199,7 +3216,7 @@ body:has(.home-page) .site-footer__gap {
 
 .home-someone__paddle:hover:not(:disabled) {
   background: rgba(223, 223, 227, 0.72);
-  color: rgba(0, 0, 0, 0.72);
+  color: rgba(10, 10, 10, 0.72);
 }
 
 .home-someone__paddle:active:not(:disabled) {
@@ -3207,12 +3224,12 @@ body:has(.home-page) .site-footer__gap {
 }
 
 .home-someone__paddle:focus-visible {
-  outline: 2px solid #1d1d1f;
+  outline: 2px solid #0a0a0a;
   outline-offset: 3px;
 }
 
 .home-someone__paddle:disabled {
-  color: rgba(0, 0, 0, 0.2);
+  color: rgba(10, 10, 10, 0.2);
   background: rgba(210, 210, 215, 0.28);
   cursor: default;
 }
@@ -3571,7 +3588,7 @@ body:has(.home-page) .site-footer__gap {
   inset: 0 auto 0 0;
   width: 0%;
   border-radius: inherit;
-  background: #1c1c1e;
+  background: #0a0a0a;
   animation: home-recognition-progress var(--home-recognition-autoplay-ms)
     linear forwards;
 }
@@ -3605,7 +3622,7 @@ body:has(.home-page) .site-footer__gap {
   border: 0;
   border-radius: 0;
   background: #f5f5f7;
-  color: #1c1c1e;
+  color: #0a0a0a;
   cursor: pointer;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -3641,7 +3658,7 @@ body:has(.home-page) .site-footer__gap {
   border: 0;
   border-radius: 0;
   overflow: hidden;
-  background: #111;
+  background: #0a0a0a;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition:
@@ -3766,7 +3783,7 @@ body:has(.home-page) .site-footer__gap {
 
 .home-recognition__card--product-box .home-recognition__card-title,
 .home-recognition__card--product-box .home-recognition__card-body {
-  color: #000;
+  color: #0a0a0a;
 }
 
 .home-recognition__media--product-box {
@@ -3894,10 +3911,6 @@ body:has(.home-page) .site-footer__gap {
   .site-main > main.home-page,
   .home-page {
     --home-card-title-size: calc(clamp(1.15rem, 5.2vw, 1.45rem) - 4px);
-  }
-
-  .home-page {
-    --home-recognition-card-w: min(78vw, 22rem);
   }
 
   .home-recognition__card {
@@ -4038,8 +4051,12 @@ body:has(.home-page) .site-footer__gap {
    * Card inset — equal on all sides. Body/keyword use cap-edge trim so
    * half-leading does not make top feel tighter than the sides.
    * Image stays anchored to the card corner (ignores this pad).
+   *
+   * The minimum is what applies on phones (1.45vw only overtakes it past
+   * ~940px), and at ~145px of copy measure every few px counts — lowered from
+   * 1.05rem to give the five narrow columns a little more room per line.
    */
-  --home-different-col-pad: clamp(1.05rem, 1.45vw, 1.4rem);
+  --home-different-col-pad: clamp(0.85rem, 1.45vw, 1.4rem);
   /* Frosted card plate — slightly darker than Recognition metrics */
   --home-different-frost-bg: rgba(8, 8, 10, 0.44);
   --home-different-frost-border: rgba(255, 255, 255, 0.07);
@@ -4162,7 +4179,15 @@ body:has(.home-page) .site-footer__gap {
   font-synthesis: none;
   letter-spacing: var(--home-band-body-tracking);
   line-height: var(--home-band-body-leading);
-  text-wrap: pretty;
+  /*
+   * The card copy runs in a narrow measure — roughly 145px on phones, ~195px
+   * on desktop, where the five columns are equally tight. `pretty` shortens
+   * lines to avoid orphans, which reads as a ragged, half-empty right edge.
+   * Plain wrapping lets each line reach the edge. No hyphenation: the soft
+   * hyphens it inserts read as noise at this size.
+   */
+  text-wrap: wrap;
+  hyphens: none;
   /* Cards: dim body ink; highlight phrase stays full black on light plate */
   color: var(--home-different-dim);
   /* Cap trim — optical top matches left/right pad (not half-leading) */
@@ -4270,6 +4295,15 @@ body:has(.home-page) .site-footer__gap {
 
   .home-different__feature {
     min-height: clamp(18rem, 48vh, 26rem);
+  }
+
+  /*
+   * Character card foot keywords (Loyalty / Focus / Hands-on …) — 3px below the
+   * shared `--home-point-keyword-size` step. Scoped to this section so the rest
+   * of the site keeps the shared value.
+   */
+  .home-different .home-different__feature-keyword {
+    font-size: calc(var(--home-point-keyword-size) - 3px);
   }
 }
 
@@ -4472,7 +4506,7 @@ body:has(.home-page) .site-footer__gap {
   height: auto;
   min-height: 0;
   padding: 0;
-  background: #1d1d1f;
+  background: #0a0a0a;
   border-radius: 0;
   overflow: hidden;
 }
@@ -4484,7 +4518,7 @@ body:has(.home-page) .site-footer__gap {
   z-index: 0;
   min-width: 0;
   min-height: 0;
-  background: #1d1d1f;
+  background: #0a0a0a;
   border-radius: 0;
   overflow: hidden;
   pointer-events: none;
@@ -4562,13 +4596,13 @@ body:has(.home-page) .site-footer__gap {
   padding: 0;
   border: 0;
   border-radius: 0;
-  background: rgba(0, 0, 0, 0.72);
+  background: rgba(10, 10, 10, 0.72);
   color: #fff;
   cursor: pointer;
 }
 
 .support-know__playback:hover {
-  background: rgba(0, 0, 0, 0.88);
+  background: rgba(10, 10, 10, 0.88);
 }
 
 .support-know__playback svg {
@@ -4768,13 +4802,13 @@ body:has(.home-page) .site-footer__gap {
   width: 100%;
   height: 100%;
   border-radius: 0;
-  background: #1d1d1f;
+  background: #0a0a0a;
   overflow: hidden;
 }
 
 .support-know__panel--video,
 .support-know__panel--stack {
-  background: #1d1d1f;
+  background: #0a0a0a;
 }
 
 .support-know__panel--price {
@@ -5529,7 +5563,7 @@ body:has(.home-page) .site-footer__gap {
   inset: 0;
   width: 100%;
   height: 100%;
-  background: #000;
+  background: #0a0a0a;
 }
 
 @media (max-width: 900px) {
@@ -5670,7 +5704,7 @@ body:has(.home-page) .site-footer__gap {
   margin-top: calc(-1 * var(--header-offset));
   display: flex;
   align-items: flex-end;
-  color: #1d1d1f;
+  color: #0a0a0a;
   overflow: hidden;
   background: #fff;
 }
@@ -5716,7 +5750,7 @@ body:has(.home-page) .site-footer__gap {
   font-weight: 700;
   letter-spacing: -0.035em;
   line-height: 1;
-  color: #1d1d1f;
+  color: #0a0a0a;
   text-transform: none;
 }
 
@@ -7118,7 +7152,7 @@ body:has(.home-page) .site-footer__gap {
   z-index: 0;
   height: calc(100% - 0.56rem);
   border-radius: var(--button-radius);
-  background: #1d1d1f;
+  background: #0a0a0a;
   pointer-events: none;
   opacity: 0;
   transition:
@@ -7146,7 +7180,7 @@ body:has(.home-page) .site-footer__gap {
   font-weight: 500;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #1d1d1f;
+  color: #0a0a0a;
   text-decoration: none;
   white-space: nowrap;
   background: transparent;
@@ -7158,7 +7192,7 @@ body:has(.home-page) .site-footer__gap {
 }
 
 .project-involvement__pill:hover {
-  color: #000;
+  color: #0a0a0a;
 }
 
 .project-involvement__pill.is-active {
@@ -7216,7 +7250,7 @@ body:has(.home-page) .site-footer__gap {
     padding: calc(0.4rem * 0.97) calc(0.75rem * 0.97);
     border-radius: var(--button-radius);
     background: #fff;
-    color: #1d1d1f;
+    color: #0a0a0a;
     font-family: var(--font-label);
     font-size: calc(0.75rem * 0.97 - 2px);
     font-weight: 500;
@@ -7230,16 +7264,16 @@ body:has(.home-page) .site-footer__gap {
 
   .project-involvement__pill:hover {
     background: #f0f0f0;
-    color: #000;
+    color: #0a0a0a;
   }
 
   .project-involvement__pill.is-active {
-    background: #1d1d1f;
+    background: #0a0a0a;
     color: #fff;
   }
 
   .project-involvement__pill.is-active:hover {
-    background: #1d1d1f;
+    background: #0a0a0a;
     color: #fff;
   }
 }
@@ -7299,7 +7333,7 @@ body:has(.home-page) .site-footer__gap {
   height: var(--collection-frame-height);
   min-height: var(--collection-frame-height);
   max-height: var(--collection-frame-height);
-  background: #000;
+  background: #0a0a0a;
   color: #fff;
   overflow: hidden;
   border-radius: var(--index-card-radius, var(--portfolio-card-radius, 0));
@@ -7404,7 +7438,7 @@ body:has(.home-page) .site-footer__gap {
   width: var(--collection-panel-width);
   height: var(--collection-panel-height);
   overflow: hidden;
-  background: #141414;
+  background: #0a0a0a;
   border-radius: var(--index-card-radius, var(--portfolio-card-radius, 0));
 }
 
@@ -7838,7 +7872,7 @@ body:has(.home-page) .site-footer__gap {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #000;
+  background: #0a0a0a;
   padding: clamp(1.25rem, 4vw, 2.25rem);
 }
 
@@ -8626,7 +8660,7 @@ body:has(.home-page) .site-footer__gap {
   color: #fff;
   background:
     linear-gradient(180deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.7)),
-    linear-gradient(120deg, #222, #3b2d22 50%, #111);
+    linear-gradient(120deg, #0a0a0a, #3b2d22 50%, #0a0a0a);
 }
 
 .page-cover__content {
@@ -8749,7 +8783,7 @@ body:has(.home-page) .site-footer__gap {
 /* —— Case statement (title left · copy block right, text LTR left-aligned) —— */
 .project-case-statement {
   background: #fff;
-  color: #1d1d1f;
+  color: #0a0a0a;
   padding: clamp(2.5rem, 6vw, 4.5rem) 0;
 }
 
@@ -8772,7 +8806,7 @@ body:has(.home-page) .site-footer__gap {
   line-height: 1.2;
   text-transform: uppercase;
   text-align: left;
-  color: #1d1d1f;
+  color: #0a0a0a;
 }
 
 .project-case-statement__copy {
@@ -8790,7 +8824,7 @@ body:has(.home-page) .site-footer__gap {
   letter-spacing: 0.06em;
   line-height: 1.25;
   text-transform: uppercase;
-  color: #1d1d1f;
+  color: #0a0a0a;
   text-wrap: pretty;
 }
 
@@ -8801,7 +8835,7 @@ body:has(.home-page) .site-footer__gap {
   font-weight: 500;
   letter-spacing: -0.01em;
   line-height: 1.4;
-  color: #1d1d1f;
+  color: #0a0a0a;
   text-wrap: pretty;
 }
 
@@ -9033,7 +9067,7 @@ body:has(.home-page) .site-footer__gap {
 .case-cover__cta:hover {
   background: #fff;
   border-color: #fff;
-  color: #1d1d1f;
+  color: #0a0a0a;
 }
 
 .case-study-placeholder {
@@ -9282,7 +9316,7 @@ body:has(.home-page) .site-footer__gap {
 .svc-phase__rule {
   width: 100%;
   height: 1px;
-  background: #000;
+  background: #0a0a0a;
   flex: 0 0 auto;
 }
 
@@ -9394,7 +9428,7 @@ body:has(.home-page) .site-footer__gap {
 .svc-item + .svc-item {
   margin-top: clamp(2rem, 4vw, 3rem);
   padding-top: clamp(2rem, 4vw, 3rem);
-  border-top: 1px solid #000;
+  border-top: 1px solid #0a0a0a;
 }
 
 .svc-item__intro {
@@ -9765,7 +9799,7 @@ body:has(.home-page) .site-footer__gap {
   padding: 0;
   border: 0;
   border-radius: 0;
-  background: #1d1d1f;
+  background: #0a0a0a;
   color: #fff;
   cursor: pointer;
 }
@@ -10778,7 +10812,7 @@ body:has(.home-page) .site-footer__gap {
   width: 100%;
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  background: #141414;
+  background: #0a0a0a;
   border-radius: 0;
 }
 
@@ -10843,7 +10877,7 @@ body:has(.home-page) .site-footer__gap {
   letter-spacing: 0.025em;
   text-transform: uppercase;
   line-height: 1.15;
-  color: #1d1d1f;
+  color: #0a0a0a;
   white-space: nowrap;
   transform-origin: center center;
   -webkit-backface-visibility: hidden;
@@ -10919,7 +10953,7 @@ body:has(.home-page) .site-footer__gap {
   border: 1px solid rgba(10, 10, 10, 0.25);
   border-radius: 3px;
   background: rgba(255, 255, 255, 0.8);
-  color: #252523;
+  color: #0a0a0a;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -11449,7 +11483,7 @@ body:has(.home-page) .site-footer__gap {
   top: 5rem;
   border: 1px solid rgba(255, 255, 255, 0.14);
   padding: 1.25rem;
-  background: #1a1a1a;
+  background: #0a0a0a;
 }
 
 .service-summary ul {
@@ -11581,7 +11615,7 @@ body:has(.home-page) .site-footer__gap {
   margin: 0 0 clamp(2.5rem, 5vw, 4rem);
   overflow: hidden;
   border-radius: var(--index-card-radius);
-  background: #1a1a1a;
+  background: #0a0a0a;
   aspect-ratio: 3000 / 1687;
 }
 
@@ -12276,7 +12310,7 @@ body:has(.home-page) .site-footer__gap {
 .project-detail .youtube-background__veil,
 .project-case-demo .youtube-background__veil {
   /* Same as dark case page — hide YT chrome without a beige flash */
-  background: #000;
+  background: #0a0a0a;
 }
 
 /* Meta bar — TITLE 35% | 8% | DESC (rest) | 8% | TAGS (full intrinsic, right) */
@@ -12666,7 +12700,7 @@ body:has(.home-page) .site-footer__gap {
   border: 0;
   border-radius: inherit;
   background: transparent;
-  color: #1d1d1f;
+  color: #0a0a0a;
   font-family: var(--font-sans);
   font-size: 0.9375rem;
   font-weight: 500;
@@ -12687,7 +12721,7 @@ body:has(.home-page) .site-footer__gap {
   border: 0;
   border-radius: inherit;
   background: transparent;
-  color: #1d1d1f;
+  color: #0a0a0a;
   font-family: var(--font-sans);
   font-size: 0.9375rem;
   font-weight: 500; /* Medium — one step above Regular */
@@ -14082,8 +14116,12 @@ body:has(.about-page) .site-end {
 
 .about-boua__process-preview {
   position: absolute;
-  left: calc(100% + 0.85rem);
-  top: 50%;
+  /*
+   * Placement is computed in JS (AboutProcessList) so the card can flip side
+   * and clamp to the viewport. These are only the pre-measure fallbacks.
+   */
+  left: var(--preview-left, calc(100% + 0.85rem));
+  top: var(--preview-top, 50%);
   z-index: 12;
   width: var(--process-preview-w, min(19.125rem, 64.8vw));
   aspect-ratio: 16 / 9;
@@ -14094,17 +14132,22 @@ body:has(.about-page) .site-end {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: translateY(-50%) translateX(6px);
+  transform: translateX(6px);
   transition:
     opacity 160ms ease,
     visibility 160ms ease,
     transform 160ms ease;
 }
 
+/* Slide in from whichever side it opened on */
+.about-boua__process-preview[data-side="left"] {
+  transform: translateX(-6px);
+}
+
 .about-boua__process-preview.is-open {
   opacity: 1;
   visibility: visible;
-  transform: translateY(-50%) translateX(0);
+  transform: translateX(0);
 }
 
 .about-boua__process-preview-media {
@@ -14116,20 +14159,6 @@ body:has(.about-page) .site-end {
   pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;
-}
-
-@media (max-width: 900px) {
-  .about-boua__process-preview {
-    left: 0;
-    right: auto;
-    top: calc(100% + 0.55rem);
-    width: min(19.125rem, calc(100vw - 2.5rem));
-    transform: translateY(4px);
-  }
-
-  .about-boua__process-preview.is-open {
-    transform: translateY(0);
-  }
 }
 
 @media (max-width: 900px) {
@@ -14709,6 +14738,34 @@ body:has(.about-page) .site-end {
   --index-card-radius: 0;
   /* Clients Come Back / recognition card width */
   --home-recognition-card-w: min(86vw, 1100px);
+}
+
+/*
+ * Phones — cards span the shell gutter.
+ *
+ * `--home-someone-inset` (My Approach's rail inset) is
+ * `(100% - var(--home-recognition-card-w)) / 2`, i.e. derived from the
+ * Recognition card, so both bands share one left edge. On desktop that is what
+ * centres a wide card and lines the two sections up. On phones the card is
+ * already nearly viewport-wide, so the same formula only produced an edge wider
+ * than every other section uses — 27px against the 12px `--shell-gutter`.
+ *
+ * Deriving both widths from the gutter keeps the left and right edges equal.
+ *
+ * Must sit after the declaration above: the ≤700px block further up the file
+ * sets the same token on `.home-page`, but media queries add no specificity,
+ * so that earlier override lost to this base rule and never applied.
+ */
+@media (max-width: 700px) {
+  .site-main > main.home-page,
+  .home-page {
+    --home-recognition-card-w: calc(100vw - var(--shell-gutter) * 2);
+  }
+
+  .home-someone {
+    /* Match the width the inset above is derived from, for even edges */
+    --home-someone-card-w: calc(100vw - var(--shell-gutter) * 2);
+  }
 }
 
 .home-page .home-recognition__card,
