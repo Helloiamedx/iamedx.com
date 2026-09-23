@@ -87,6 +87,14 @@ export function HomeDifferentCards() {
                     src={point.image}
                     alt=""
                     className="home-different__feature-img"
+                    /*
+                     * These cutouts are multi-megabyte PNGs (~6.2 MB across the
+                     * five cards) and the band sits three viewports below the
+                     * hero. A bare <img> defaults to eager, so without this the
+                     * whole set competes with the hero video on first paint.
+                     */
+                    loading="lazy"
+                    decoding="async"
                   />
                 ) : null}
               </li>

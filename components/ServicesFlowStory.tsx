@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { CoverLoopVideo } from "@/components/CoverLoopVideo";
+import { HeadlineMotion } from "@/components/HeadlineMotion";
 import { PageIndexTitle } from "@/components/PageIndexTitle";
 import { PanelImageStack } from "@/components/PanelImageStack";
 import { ServiceWorkflowDialog } from "@/components/ServiceWorkflowDialog";
@@ -68,7 +69,9 @@ function PhaseSection({
 
         <div className="svc-phase__cols">
           <aside className="svc-phase__aside">
-            <h2 className="svc-phase__label">{phaseLabel(phase.title)}</h2>
+            <HeadlineMotion as="h2" effect="01" className="svc-phase__label">
+              {phaseLabel(phase.title)}
+            </HeadlineMotion>
             <p className="svc-phase__aside-desc">{phase.description}</p>
           </aside>
 
@@ -91,7 +94,9 @@ function ServiceItemBlock({ item }: { item: ServicePackageItem }) {
   return (
     <article className="svc-item" aria-label={item.title}>
       <div className="svc-item__intro">
-        <h4 className="svc-item__title">{item.title}</h4>
+        <HeadlineMotion as="h4" effect="01" className="svc-item__title">
+          {item.title}
+        </HeadlineMotion>
         <p className="svc-item__desc">{item.description}</p>
       </div>
       <div className="svc-item__cta">

@@ -9,6 +9,13 @@ import type { ProjectsFeaturedLead } from "@/content/projects";
 
 type ProjectFeaturedLeadProps = {
   project: ProjectsFeaturedLead;
+  /**
+   * Emit the `priority` preload hint. Default `true` — on the index pages this
+   * lead is the first media under a short text intro, so it belongs in the
+   * first paint. The home page renders it five-plus viewports down and opts out
+   * so it does not contend with the hero at the highest priority.
+   */
+  priority?: boolean;
 };
 
 /** Same placeholder cycle as filter cards when hover stills are not set yet */
@@ -23,7 +30,10 @@ function featuredCoverSrc(project: ProjectsFeaturedLead): string {
  * Full-width featured lead on /projects (below the involvement filter).
  * Meta: TITLE (remaining) | gap | DESC | gap | TAGS — mobile stacks tags like cards.
  */
-export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
+export function ProjectFeaturedLead({
+  project,
+  priority = true,
+}: ProjectFeaturedLeadProps) {
   const reduceMotion = useReducedMotion();
   const hoverStills = project.coverHoverStills;
   const hasHoverStills = Boolean(hoverStills && hoverStills.length === 3);
@@ -55,7 +65,7 @@ export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
                   width={project.coverWidth}
                   height={project.coverHeight}
                   sizes={mediaSizes}
-                  priority
+                  priority={priority}
                   className="project-featured__image"
                 />
               </div>
@@ -97,7 +107,7 @@ export function ProjectFeaturedLead({ project }: ProjectFeaturedLeadProps) {
               width={project.coverWidth}
               height={project.coverHeight}
               sizes={mediaSizes}
-              priority
+              priority={priority}
               className="project-featured__image"
             />
           )}

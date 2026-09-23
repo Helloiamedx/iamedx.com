@@ -431,7 +431,7 @@ export const servicePackagePhases: ServicePackagePhase[] = [
   {
     id: "mass-production",
     code: "P2",
-    title: "Mass Production Management Phase",
+    title: "Production Management Phase",
     description:
       "Manage the production process to ensure the order is manufactured according to the agreed requirements, timeline, and quality expectations.",
     fee: { label: "$1,250.00", amountUsd: 1250 },
@@ -538,13 +538,21 @@ export const servicePackagePhases: ServicePackagePhase[] = [
               "I prepare the product BOM and submit it",
               "the laboratory confirms the applicable testing requirements, including what needs to be tested, what samples are required, how many need to be prepared, and any specific requirements for sample storage, packaging, and transportation",
             ],
+            /* Re-uploaded in place — ?v= busts CDN + browser cache */
+            media: asset(
+              "images/service/Product%20Compliance%20%26%20Testing%20Coordination/Prepare%20the%20BOM.mp4?v=20260923",
+            ),
           },
           {
             title: "02_ Prepare Samples & Coordinate Testing",
-            body: "Based on the testing requirements, I coordinate with suppliers to prepare the correct samples in the required quantities and conditions, then arrange their submission to the laboratory.\n\nThroughout the testing process, I coordinate between the factory and the laboratory. I help the factory understand how samples should be prepared and why certain testing requirements are necessary, while providing the laboratory with detailed product information such as materials, manufacturing processes, and material usage when requested.\n\nIf a test does not pass, I review the test report to identify the specific failed item, work with the factory to determine what needs to be adjusted, and coordinate the next steps accordingly. I use my previous product development and manufacturing experience throughout this process to improve the chance of passing the required tests on the first attempt and reduce the cost and delays caused by repeated testing.\n\nI continue following the process until all required testing is completed and the final test reports are obtained, helping ensure the product meets the applicable requirements for legal sale and distribution in its target market.",
+            body: "Based on the testing requirements, I coordinate with suppliers to prepare the correct samples in the required quantities and conditions, then arrange their submission to the laboratory.\n\nThroughout the testing process, I coordinate between the factory and the laboratory. I help the factory understand how samples should be prepared and why certain testing requirements are necessary, while providing the laboratory with detailed product information such as materials, manufacturing processes, and material usage when requested.\n\nIf a test does not pass, I review the test report to identify the specific failed item, work with the factory to determine what needs to be adjusted, and coordinate the next steps accordingly. I use my previous product development and manufacturing experience throughout this process to improve the chance of passing the required tests on the first attempt and reduce the cost and delays caused by repeated testing.",
             bodyHighlights: [
               "I use my previous product development and manufacturing experience throughout this process to improve the chance of passing the required tests on the first attempt and reduce the cost and delays caused by repeated testing.",
             ],
+            /* CDN object name literally contains “&amp;” (upload artifact) */
+            media: asset(
+              "images/service/Product%20Compliance%20%26%20Testing%20Coordination/Prepare%20Samples%20%26amp%3B%20Coordinate%20Testing.mp4?v=20260923",
+            ),
           },
         ],
       },
@@ -553,7 +561,7 @@ export const servicePackagePhases: ServicePackagePhase[] = [
   {
     id: "qc-delivery",
     code: "P3",
-    title: "Quality Control & Delivery Phase",
+    title: "Quality & Delivery Phase",
     description:
       "Ensure the final products meet the approved requirements before shipment and provide on-site support during the loading process to reduce delivery risks.",
     fee: { label: "$250.00", amountUsd: 250 },
@@ -587,6 +595,39 @@ export const servicePackagePhases: ServicePackagePhase[] = [
             href: "https://drive.google.com/file/d/1H29_kR_gmTmHgmCVYtdTgELvoYo9q8jD/view?usp=sharing",
           },
         ],
+        workflowSteps: [
+          {
+            title: "01_ Define the Inspection Standard",
+            body: "Before the inspection, I confirm the approved sample and final product requirements that the production will be checked against. I also define the inspection scope, whether it will be a sampling inspection or a 100% full inspection, and whether this is the first inspection or a re-inspection after rework.\n\nFor sampling inspections, I follow the agreed AQL criteria to determine the sample size and acceptance limits. For re-inspections, I pay closer attention to previously identified defects and increase the inspection level when repeated quality issues indicate higher risk. For products that have gone through multiple rounds of rework, a 100% inspection may be required.",
+            bodyHighlights: [
+              "I follow the agreed AQL criteria to determine the sample size and acceptance limits",
+            ],
+            media: asset(
+              "images/service/Pre-Shipment%20Inspection%20%26%20Final%20Quality%20Check/Define%20the%20Inspection.mp4",
+            ),
+          },
+          {
+            title: "02_ Inspect Based on Product Risk",
+            body: "I don't use the same inspection checklist for every product. I first understand what your product is, how it will be used, and what matters most for that specific product.\n\nI always start with the most fundamental requirements. For children's products, safety comes first. Before looking closely at appearance or minor workmanship details, I first make sure there are no major issues that could affect the product's safety, function, or intended use.\n\nOnce these key areas are confirmed, I move into a more detailed inspection, comparing the actual production against the approved sample and requirements and checking workmanship, appearance, dimensions, packaging, quantity, and other agreed details.",
+            bodyHighlights: [
+              "For children's products, safety comes first.",
+            ],
+            media: asset(
+              "images/service/Pre-Shipment%20Inspection%20%26%20Final%20Quality%20Check/Inspect%20Based%20on%20Product%20Risk.jpg",
+            ),
+          },
+          {
+            title: "03_ Report & Professional Assessment",
+            body: "After the inspection, I consolidate the findings, defect classifications, quantities, packaging checks, photos, videos, and inspection results into a Final Inspection Report.\n\nMore importantly, I don't just give you a Pass or Fail result. Based on my experience in product development, manufacturing, and quality control, I help you understand what the findings actually mean, where the problems may come from, whether they could affect more products in the batch, and what should be addressed before shipment.\n\nThis gives you more practical information to decide whether to ship, rework, or take further action.",
+            bodyHighlights: [
+              "I don't just give you a Pass or Fail result",
+            ],
+            /* Re-uploaded in place — ?v= busts CDN + browser cache */
+            media: asset(
+              "images/service/Pre-Shipment%20Inspection%20%26%20Final%20Quality%20Check/Report%20%26%20Professional%20Assessment.mp4?v=20260923",
+            ),
+          },
+        ],
       },
       {
         id: "container-loading",
@@ -617,6 +658,46 @@ export const servicePackagePhases: ServicePackagePhase[] = [
           {
             label: "Sample loading report",
             href: "https://drive.google.com/file/d/1XK2vRPEayrr6-ThxuXQfabrVt5l9d7k8/view?usp=sharing",
+          },
+        ],
+        workflowSteps: [
+          {
+            title: "01_ Confirm the Loading Plan & Goods",
+            body: "Before loading, I confirm the container size, planned quantity, loading date and time, and packing list. Once on-site, I check the actual goods against this information.\n\nI verify the carton quantity and shipping marks. If the goods are palletized, I also check the number of pallets, cartons per pallet, stacking arrangement, and pallet condition to make sure everything is properly prepared for loading.",
+            bodyHighlights: [
+              "container size, planned quantity, loading date and time, and packing list",
+              "carton quantity and shipping marks",
+              "number of pallets, cartons per pallet, stacking arrangement, and pallet condition",
+            ],
+            media: asset(
+              "images/service/Container%20Loading%20Supervision/Confirm%20the%20Loading%20Plan%20%26%20Goods.mp4",
+            ),
+          },
+          {
+            title: "02_ Inspect the Container & Supervise Loading",
+            body: "When the container arrives, I first confirm that the weather and on-site conditions are suitable for safe loading. I also check the container arrival time, estimate the time required for loading, and coordinate with the factory to keep the loading work moving and complete the planned loading task.\n\nI then verify and record the container number, seal number, container size, truck information, and arrival time, and inspect the empty container to make sure it is clean, dry, and free from visible damage, holes, or potential water leakage.\n\nBefore loading starts, I work with the factory to confirm the loading arrangement, including how many cartons go in each row, how they should be positioned, and how the available space should be distributed. This helps avoid excessive empty space at the end and reduces the risk of goods shifting or falling during transportation.\n\nDuring loading, I supervise the process and take photos at 1/4, 2/4, 3/4, and full loading. After loading is complete, I record the left door closed, right door closed, seal applied, full container, and full truck, and verify the final loaded quantity.",
+            bodyHighlights: [
+              "weather and on-site conditions are suitable for safe loading",
+              "container number, seal number, container size, truck information, and arrival time",
+              "clean, dry, and free from visible damage, holes, or potential water leakage",
+              "loading arrangement",
+              "1/4, 2/4, 3/4, and full loading",
+              "left door closed, right door closed, seal applied, full container, and full truck",
+            ],
+            media: asset(
+              "images/service/Container%20Loading%20Supervision/Inspect%20the%20Container%20%26%20Supervise%20Loading.mp4",
+            ),
+          },
+          {
+            title: "03_ Prepare the Container Loading Report",
+            body: "After loading is completed, I organize the quantity verification, shipping marks and palletization details, container and truck information, container condition, loading arrangement, final loaded quantity, seal information, and on-site photos and videos into a Container Loading Report.\n\nThis provides a clear and traceable record showing how the shipment was loaded and confirming that the goods were loaded according to plan.",
+            bodyHighlights: [
+              "quantity verification, shipping marks and palletization details, container and truck information, container condition, loading arrangement, final loaded quantity, seal information, and on-site photos and videos",
+              "Container Loading Report",
+            ],
+            media: asset(
+              "images/service/Container%20Loading%20Supervision/Prepare%20the%20Container%20Loading%20Report.mp4",
+            ),
           },
         ],
       },

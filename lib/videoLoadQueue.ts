@@ -91,11 +91,26 @@ function canStart(waiter: Waiter): boolean {
 
 function pump() {
   const limit = maxSlots();
-  if (activeIds.size >= limit) return;
 
-  if (!heroDone && !waiters.some((w) => w.isHero) && !activeIds.size) {
+  /*
+   * A hero has claimed the gate — waiting for its slot, or already loading one
+   * (pre-unlock, only heroes can start, so any active id is a hero). Disarm the
+   * failsafe: it exists only for routes that never produce a hero, and left
+   * armed it still fires 48ms in, opening post-hero concurrency while the hero
+   * video is still buffering. `HeroBackgroundVideo` registers a frame late (its
+   * `src` is set in a rAF), which is long enough for an earlier near-viewport
+   * cover to arm the timer first.
+   */
+  const heroClaimed =
+    waiters.some((w) => w.isHero) || (!heroDone && activeIds.size > 0);
+
+  if (heroClaimed) {
+    clearHeroWatchdog();
+  } else if (!heroDone && !activeIds.size) {
     ensureHeroWatchdog();
   }
+
+  if (activeIds.size >= limit) return;
 
   sortWaiters();
 

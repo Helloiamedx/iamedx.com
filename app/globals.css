@@ -2194,6 +2194,17 @@ body.is-mobile-menu-open .project-case-demo__toggle-pin {
   background: transparent;
 }
 
+/*
+ * Fail-open stage. Only set when `HeroHeadline` gave up waiting on the hero
+ * video and revealed the copy anyway. The copy is #f7f7f7, so over the beige
+ * site plate it would be unreadable — this darkens the band instead. Never
+ * applied on the normal path, so there is still no plate flash before the
+ * video paints.
+ */
+html[data-hero-copy-fallback="1"] .hero {
+  background: #0a0a0a;
+}
+
 .hero__media {
   position: absolute;
   inset: 0;
@@ -2767,7 +2778,7 @@ body:has(.home-page) .site-footer__gap {
 }
 
 .home-page > .home-someone {
-  background: #f5f5f7;
+  background: var(--home-band-gray);
   color: #0a0a0a;
 }
 
@@ -3015,7 +3026,11 @@ body:has(.home-page) .site-footer__gap {
   isolation: isolate;
   width: 100%;
   overflow: hidden;
-  background: #f5f5f7;
+  /*
+   * Shared home band plate — the same token the Character card plates use
+   * (`--home-different__feature`), so those two surfaces can never drift apart.
+   */
+  background: var(--home-band-gray);
   color: #0a0a0a;
   padding-block: var(--home-section-pad);
 }
@@ -4160,8 +4175,13 @@ body:has(.home-page) .site-footer__gap {
   padding: var(--home-different-col-pad);
   overflow: hidden;
   min-height: clamp(30rem, 68vh, 44rem);
-  /* #F5F5F7 plate on white band so cards still read */
-  background: #f5f5f7;
+  /*
+   * Shared home band plate — the same token the My Approach band uses
+   * (`.home-someone`), so all five plates are one colour by construction and
+   * match that container. `--home-band-gray` resolves to `--home-band-plate-a`
+   * (#f5f5f7) on `.home-page`; this component only ever renders there.
+   */
+  background: var(--home-band-gray);
   border: 0;
   border-radius: 0;
   box-shadow: none;
@@ -9342,13 +9362,20 @@ body:has(.home-page) .site-footer__gap {
 .svc-phase__label {
   margin: 0 0 0.8rem;
   padding: 0;
-  width: 58%;
-  max-width: 58%;
+  /*
+   * Full aside width — deliberately NOT the 58% measure the description uses.
+   * A paragraph wants a narrow column; a two-word phase name does not. At 58%
+   * the box is ~214px at 801px viewport, while "Production Management" needs
+   * ~251px there and ~395px at 1440px, so it wrapped across the whole
+   * 801–1900px range. Full width leaves the wrap point to the actual text.
+   */
+  width: 100%;
+  max-width: 100%;
   font-family: "Grtsk-SemiBold", "Grtsk", var(--font-sans);
   font-size: clamp(
-    calc(1rem - 12px + 16px),
-    calc(2.5vw - 12px + 16px),
-    calc(2rem - 12px + 16px)
+    calc(1rem - 12px + 16px - 3px),
+    calc(2.5vw - 12px + 16px - 3px),
+    calc(2rem - 12px + 16px - 3px)
   );
   font-weight: 600;
   font-synthesis: none;
@@ -9627,10 +9654,19 @@ body:has(.home-page) .site-footer__gap {
     width: 100%;
     max-width: 100%;
     margin-bottom: 0.65rem;
+    /*
+     * Mobile recipe — four −3px steps plus a −2px trim (27.6px cap).
+     *
+     * This cap is set by the longest phase name, `Production Management`:
+     * at 22.25px it already measures 265.9px, so the font scales linearly to
+     * ~11.95px of width per 1px of size. The label box is `vw − 24px`, which
+     * makes 28px the largest size that keeps one line on a 360px phone. Bigger
+     * values do not "have room" — the word is genuinely wider than the screen.
+     */
     font-size: clamp(
-      calc(1.35rem - 4px + 16px),
-      calc(7.5vw - 4px + 16px),
-      calc(1.85rem - 4px + 16px)
+      calc(1.35rem - 4px + 16px - 3px - 3px - 3px - 3px - 2px),
+      calc(7.5vw - 4px + 16px - 3px - 3px - 3px - 3px - 2px),
+      calc(1.85rem - 4px + 16px - 3px - 3px - 3px - 3px - 2px)
     );
     line-height: 1.05;
   }
@@ -9683,6 +9719,27 @@ body:has(.home-page) .site-footer__gap {
   box-sizing: border-box;
   overflow: hidden;
   overscroll-behavior: none;
+  /*
+   * Panel width is a viewport ratio with an absolute ceiling. The ratio keeps
+   * the panel edge-proportional on small screens; the ceiling is what stops it
+   * sprawling on large ones. It first binds at 1388px viewport (85vw = 1180),
+   * so every tier below that is unchanged by it.
+   */
+  --svc-workflow-panel-w: 85vw;
+  --svc-workflow-panel-max: 1180px;
+  /*
+   * Two-column tier (≥1101px): a fixed gutter and a capped media column.
+   * These replaced percentages — see `.svc-workflow__step--media`.
+   *
+   * The gutter is the deliberate lever for the copy measure. The media column
+   * has its own cap and the copy column is `1fr`, so widening this takes the
+   * space entirely out of the copy — the artwork keeps the size and ratio it
+   * has — while visibly opening up the space between the two.
+   */
+  --svc-workflow-col-gap: clamp(3.5rem, 14vw, 13rem);
+  --svc-workflow-col-media: clamp(17rem, 32vw, 30rem);
+  /* Stacked tier (≤1100px) copy measure — keeps lines near 74 characters */
+  --svc-workflow-stack-measure: 35rem;
   --svc-workflow-pad: clamp(1.5rem, 2.75vw, 2rem);
   --svc-workflow-checks-inset: clamp(0.75rem, 1.6vw, 1.1rem);
   --svc-workflow-close-size: 1.65rem;
@@ -9719,10 +9776,16 @@ body:has(.home-page) .site-footer__gap {
   flex-direction: column;
   align-items: center;
   gap: var(--svc-workflow-close-gap);
-  /* Fixed 85vw — iPad Pro portrait/landscape and desktop */
-  width: 85vw;
-  max-width: 85vw;
-  max-height: min(88svh, 52rem);
+  /* Viewport ratio with an absolute ceiling — see `.svc-workflow` */
+  width: var(--svc-workflow-panel-w);
+  max-width: var(--svc-workflow-panel-max);
+  /*
+   * 60rem (960px), up from 52rem. Once the panel is capped at 1180px, an 832px
+   * box reads as a ~3.9:1 letterbox on a large display; 960px brings it to
+   * about 1.23:1 and fits another paragraph before scrolling. `svh` still
+   * binds on short viewports, so laptops and phones are unaffected.
+   */
+  max-height: min(88svh, 60rem);
   min-height: min(58svh, 26rem);
   padding: 0;
   overflow: visible;
@@ -9812,6 +9875,7 @@ body:has(.home-page) .site-footer__gap {
 
 @media (max-width: 1100px) {
   .svc-workflow {
+    --svc-workflow-panel-w: 88vw;
     --svc-workflow-pad: clamp(1.35rem, 5vw, 1.75rem);
     --svc-workflow-close-size: 1.55rem;
     padding: clamp(0.65rem, 3vw, 1rem);
@@ -9820,6 +9884,30 @@ body:has(.home-page) .site-footer__gap {
   .svc-workflow__close-icon {
     width: 0.9rem;
     height: 0.9rem;
+  }
+
+  /*
+   * Stacked tier — the step grid is one full-width column here, so the copy
+   * had no measure at all (~115 characters per line at 1100px). Cap it at the
+   * same target the two-column layout lands on.
+   */
+  .svc-workflow__step-copy {
+    max-width: var(--svc-workflow-stack-measure);
+  }
+}
+
+/* Narrower panel ratios + tighter overlay padding on handheld widths */
+@media (max-width: 700px) {
+  .svc-workflow {
+    --svc-workflow-panel-w: 92vw;
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .svc-workflow {
+    --svc-workflow-panel-w: 94vw;
+    padding: 0.5rem;
   }
 }
 
@@ -9878,10 +9966,21 @@ body:has(.home-page) .site-footer__gap {
   border-top: 1px solid rgba(10, 10, 10, 0.14);
 }
 
-/* Media rows — copy 45% | gap 20% | media 35% */
+/*
+ * Media rows — copy | fixed gutter | capped media.
+ *
+ * These used to be percentages (45% / 20% / 35%), which made the *gutter* grow
+ * with the panel: 20% of a 4K panel is 640px of empty space between the copy
+ * and the media, and the copy column reached ~189 characters per line. A fixed
+ * gutter plus a capped media column keeps the two in a constant relationship
+ * and lets the copy column take whatever is left.
+ */
 .svc-workflow__step--media {
   display: grid;
-  grid-template-columns: 45% 20% 35%;
+  grid-template-columns:
+    minmax(0, 1fr)
+    var(--svc-workflow-col-gap)
+    minmax(0, var(--svc-workflow-col-media));
   /* Cap-top of title ↔ media top (not half-leading line-box) */
   align-items: start;
   width: 100%;

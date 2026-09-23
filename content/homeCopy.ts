@@ -60,7 +60,8 @@ export const whatSetsMeApart: HomeCopySection = {
       heading: "Risks caught before they grow",
       title: "Proactive",
       body: "My role is not only to react when issues appear. I actively look ahead, identify potential risks early, and take action before small problems become costly or difficult to solve.",
-      bodyHighlight: "take action before small problems become costly",
+      bodyHighlight:
+        "identify potential risks early, and take action before small problems become costly",
       image: asset("images/home/difference/4.png"),
     },
     {

@@ -31,8 +31,12 @@ import { useEffect, useRef, type RefObject } from "react";
  *    `fade: false` to leave opacity entirely to CSS.
  * 2. **Hide until first play.** Without it a below-the-fold section shows the
  *    cards at rest, then jumps them down and replays the rise. Cards stay
- *    `visibility: hidden` until the entrance fires; reduced motion and
- *    `trigger: "manual"` skip that so nothing can get stuck hidden.
+ *    `visibility: hidden` from attach until the entrance actually starts — not
+ *    just until the trigger fires, and not just until the animations are
+ *    created. The reveal waits on the animations' `ready`, because a
+ *    play-pending animation has not applied its keyframes yet and revealing
+ *    earlier paints one frame of the finished cards. Reduced motion and
+ *    `trigger: "manual"` skip the hiding so nothing can get stuck hidden.
  */
 
 export const CARD_EFFECTS = Object.freeze({
@@ -298,11 +302,13 @@ export function applyCardMotion(
     observer = undefined;
     cancelAnimations();
 
-    /* Reveal before animating — reduced motion just shows the resting state. */
-    elements.forEach((card) => {
-      card.style.visibility = "";
-    });
-    if (reduced.matches) return;
+    /* Reduced motion only ever shows the resting state — nothing to stage. */
+    if (reduced.matches) {
+      elements.forEach((card) => {
+        card.style.visibility = "";
+      });
+      return;
+    }
 
     const token = ++runToken;
     void Promise.race([primeImages(), waitMs(PRIME_WAIT_MS)]).then(() => {
@@ -317,14 +323,6 @@ export function applyCardMotion(
     elements.forEach((card) => {
       card.style.willChange = "transform, opacity";
     });
-    if (animations.length) {
-      void Promise.allSettled(animations.map((a) => a.finished)).then(() => {
-        if (destroyed) return;
-        elements.forEach((card) => {
-          card.style.willChange = "";
-        });
-      });
-    }
 
     elements.forEach((card, index) => {
       const spec = EFFECT_SPECS[currentEffect];
@@ -370,6 +368,48 @@ export function applyCardMotion(
         );
       }
     });
+
+    /*
+     * Reveal only once the animations are live.
+     *
+     * A freshly created Web Animation is *play-pending*: until its start time
+     * resolves on the next frame, its keyframes are not applied at all. So
+     * clearing `visibility` alongside `animate()` still painted one frame of
+     * every card at rest — opacity 1, y 0 — right before the rise snapped them
+     * back to the opening pose. That single frame is the white flash on the
+     * Approach rail: the cards are revealed against the near-white band while
+     * their artwork is still hidden behind an `opacity: 0` that hasn't taken
+     * effect yet.
+     *
+     * Waiting on `ready` means the first frame anyone sees is already the
+     * opening keyframe. It resolves in the same frame the entrance starts, and
+     * for every card at once, so the stagger is unaffected.
+     */
+    const started = animations;
+    const token = runToken;
+    /*
+     * `allSettled`, not `all`: a single cancelled animation must not strand the
+     * whole set in its hidden state. The token guard hands the reveal to the
+     * newer run when a replay supersedes this one.
+     */
+    void Promise.allSettled(started.map((animation) => animation.ready)).then(
+      () => {
+        if (destroyed || token !== runToken) return;
+        elements.forEach((card) => {
+          card.style.visibility = "";
+        });
+      },
+    );
+
+    /* Hand the compositor layers back once the entrance has settled. */
+    void Promise.allSettled(started.map((animation) => animation.finished)).then(
+      () => {
+        if (destroyed || token !== runToken) return;
+        elements.forEach((card) => {
+          card.style.willChange = "";
+        });
+      },
+    );
   }
 
   /*

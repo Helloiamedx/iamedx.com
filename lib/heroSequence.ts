@@ -11,6 +11,13 @@ export const HERO_CHROME_ATTR = "chromeReady";
 export const HERO_VIDEO_PLAYABLE_ATTR = "heroVideoPlayable";
 export const HERO_VIDEO_ATTR = "heroVideoReady";
 export const HERO_COPY_ATTR = "heroCopyReady";
+/**
+ * Set only when the hero copy had to be revealed on the fallback clock instead
+ * of by the video (`HeroHeadline`). The hero copy is white and the page behind
+ * it is the beige site plate, so this flag swaps in a dark stage — otherwise
+ * the fail-open would show near-invisible type. Normal playback never sets it.
+ */
+export const HERO_COPY_FALLBACK_ATTR = "heroCopyFallback";
 
 export function getHeroRoot(): HTMLElement {
   return document.documentElement;

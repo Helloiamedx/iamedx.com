@@ -13,13 +13,20 @@ import {
 
 type InsightsLeadProps = {
   insight: InsightMeta;
+  /**
+   * Emit the `priority` preload hint. Default `true` — on /thoughts the lead
+   * sits directly under a short text intro, so it belongs in the first paint.
+   * The home page renders it seven-plus viewports down and opts out so it does
+   * not contend with the hero at the highest priority.
+   */
+  priority?: boolean;
 };
 
 /**
  * Insights featured lead — cover only in media.
  * Meta: TITLE 40% | 10% | DESC (rest) | 10% | TAG — same as projects featured / case hero.
  */
-export function InsightsLead({ insight }: InsightsLeadProps) {
+export function InsightsLead({ insight, priority = true }: InsightsLeadProps) {
   const tagLabel = getInsightTagLabels(insight.tags).at(0) ?? null;
   const videoCover = isInsightVideoCover(insight.coverImage);
 
@@ -44,7 +51,7 @@ export function InsightsLead({ insight }: InsightsLeadProps) {
               width={INSIGHT_COVER_W}
               height={INSIGHT_COVER_H}
               sizes="(max-width: 1400px) calc(100vw - 2 * var(--shell-gutter)), 1400px"
-              priority
+              priority={priority}
               className="insights-lead__image"
             />
           )}

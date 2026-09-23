@@ -217,8 +217,17 @@ export function HomeMyApproach() {
    * `stagger` raised from the authored 120ms and `duration` stretched from
    * 1000ms so all five cards are read in sequence rather than arriving as one
    * block.
+   *
+   * `fade: false` — position only, no opacity ramp. These cards are revealed
+   * already in their opening pose, so a fade on top of the rise read as a
+   * separate transparency beat (on the near-white `#f5f5f7` band the card
+   * artwork sits behind an opacity ramp for most of the entrance, which looks
+   * like a flash rather than a rise). Nothing else on `.home-someone__slide`
+   * owns opacity, so there is no resting value to preserve — unlike
+   * Recognition, where the dimmed off-focus cards required it.
    */
   useCardMotion(galleryRef, ".home-someone__slide", "C02", {
+    fade: false,
     stagger: 260,
     duration: 1650,
   });

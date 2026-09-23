@@ -7,6 +7,7 @@ import { createPortal } from "react-dom";
 import { CoverLoopVideo } from "@/components/CoverLoopVideo";
 import { FactoryRiskCompareDemo } from "@/components/FactoryRiskCompareDemo";
 import { FactoryVisitPrepDemo } from "@/components/FactoryVisitPrepDemo";
+import { HeadlineMotion } from "@/components/HeadlineMotion";
 import { SupplierEvaluationDemo } from "@/components/SupplierEvaluationDemo";
 import { WorkflowKeywordBurst } from "@/components/WorkflowKeywordBurst";
 import { WorkflowMediaWall } from "@/components/WorkflowMediaWall";
@@ -331,9 +332,19 @@ export function ServiceWorkflowDialog({
                       )}
                     >
                       <div className="svc-workflow__step-copy">
-                        <h3 className="svc-workflow__step-title">
+                        {/*
+                         * Effect 01 — same entrance as the Services phase names
+                         * and item titles. `trigger="view"` so each step title
+                         * plays as it scrolls into the dialog's own scroll
+                         * container, not all at once when the panel opens.
+                         */}
+                        <HeadlineMotion
+                          as="h3"
+                          effect="01"
+                          className="svc-workflow__step-title"
+                        >
                           {step.title}
-                        </h3>
+                        </HeadlineMotion>
                         <p className="svc-workflow__step-body">
                           {renderStepBody(step.body, step.bodyHighlights)}
                         </p>
@@ -393,7 +404,13 @@ export function ServiceWorkflowDialog({
               </div>
             ) : (
               <div className="svc-workflow__coming-soon">
-                <h3 className="svc-workflow__coming-soon-title">Coming Soon</h3>
+                <HeadlineMotion
+                  as="h3"
+                  effect="01"
+                  className="svc-workflow__coming-soon-title"
+                >
+                  Coming Soon
+                </HeadlineMotion>
                 <p className="svc-workflow__coming-soon-body">
                   A detailed look at my workflow is currently being developed.
                 </p>

@@ -63,10 +63,13 @@ const controllers = initHeadlineMotion();
 | 位置 | 组件 | 说明 |
 | --- | --- | --- |
 | 首页 hero `Establish a Supply Chain From Scratch Tailored to Your Business` | `HeroHeadline.tsx` | `trigger="manual"` + `play={copyGate}`，等 hero 视频就绪后再播 |
+| 首页 hero 副标题 `No matter how small you start…` | `HeroHeadline.tsx` | `trigger="manual"` + `play={subtitleGate}`，比 hero 大标题晚 `TITLE_TO_SUBTITLE_MS`（300ms） |
 | 首页各 section 标题（Recognition / Support / Character / Approach / Products / Thoughts） | `HomeSectionIntro.tsx`、`SupportStack.tsx`、`HomeRecognitionBand.tsx`、`HomeMyApproach.tsx` | `trigger="view"` |
+| 服务页阶段名 + 事项标题 | `ServicesFlowStory.tsx` | `trigger="view"` |
+| 服务页 workflow 弹窗的步骤标题 + `Coming Soon` | `ServiceWorkflowDialog.tsx` | `trigger="view"`，随弹窗内滚动逐条出场 |
 | 页脚 `Let's Make Something Iconic.` | `Footer.tsx` | `trigger="view"` |
 
-**Hero 用 `manual` 的原因**：它原本已有「视频就绪 → 文案出现」的时序，必须让 hero 自己控制播放时机，不能由引擎自行触发视口播放。
+**Hero 用 `manual` 的原因**：它原本已有「视频就绪 → 文案出现」的时序，必须让 hero 自己控制播放时机，不能由引擎自行触发视口播放。副标题同理 —— 它的 `subtitleGate` 由 hero 大标题的闸门再延后一个拍子得到，所以两者不会同帧触发。
 
 ## props / options
 

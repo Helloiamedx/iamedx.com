@@ -82,9 +82,9 @@ export default function HomePage() {
           <HomeSectionIntro
             titleId="home-products-title"
             label="portfolio"
-            title="Products I have helped bring to life."
+            title="Products Brought to Life."
           />
-          <ProjectFeaturedLead project={projectsFeaturedLead} />
+          <ProjectFeaturedLead project={projectsFeaturedLead} priority={false} />
           <ProjectMasonry
             projects={selectedProjects}
             layout="related"
@@ -100,9 +100,11 @@ export default function HomePage() {
           <HomeSectionIntro
             titleId="home-thoughts-title"
             label="thoughts"
-            title="How I think about my work."
+            title="How I Think."
           />
-          {featuredInsight ? <InsightsLead insight={featuredInsight} /> : null}
+          {featuredInsight ? (
+            <InsightsLead insight={featuredInsight} priority={false} />
+          ) : null}
           <InsightMasonry insights={selectedInsights} layout="related" />
           <FrostIndexLink href="/thoughts">All thoughts</FrostIndexLink>
         </section>
