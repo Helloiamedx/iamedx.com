@@ -9752,9 +9752,28 @@ body:has(.home-page) .site-footer__gap {
   margin: 0;
   padding: 0;
   border: 0;
-  background: rgba(234, 234, 225, 0.42);
-  backdrop-filter: blur(48px) saturate(165%);
+  /*
+   * Near-opaque plate. The blur below is the frost; this plate is what
+   * actually hides the page. `backdrop-filter` is not dependable enough to
+   * stand between the reader and the page on its own — browsers without it
+   * drop the effect silently, and it cannot sample content painted in a
+   * separate composited layer (video, notably the Services page covers).
+   * 0.42 alpha left the page readable the moment the blur failed.
+   */
+  background: rgba(234, 234, 225, 0.86);
+  /*
+   * Prefix order matters here — do not swap these two lines.
+   *
+   * The production CSS pipeline collapses a `backdrop-filter` /
+   * `-webkit-backdrop-filter` pair of identical values into one declaration
+   * and keeps the last one. Written standard-first (as this used to be), it
+   * shipped *only* `-webkit-backdrop-filter`, so the standard property never
+   * reached production — the blur worked in dev and vanished on deploy.
+   * `-webkit-` first, standard last is the order Tailwind's own
+   * `backdrop-filter` utility uses, and that pair survives the build intact.
+   */
   -webkit-backdrop-filter: blur(48px) saturate(165%);
+  backdrop-filter: blur(48px) saturate(165%);
   pointer-events: none;
   touch-action: none;
   /*
