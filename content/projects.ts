@@ -5383,34 +5383,6 @@ export function filterProjectsByMaterial(material?: Material | "all" | null) {
 /** Full-bleed projects hero (legacy static cover) */
 export const projectsCoverImage = asset("/images/projects/project-hero.png");
 
-/** Projects hero roll pool on CDN — projectsroll1…22 (mostly .jpg; a few .jpeg) */
-const PROJECTS_ROLL_COUNT = 22;
-/** These four were uploaded as `.jpeg`, not `.jpg` — requesting .jpg 404s */
-const PROJECTS_ROLL_JPEG = new Set([7, 8, 10, 11]);
-
-export type ProjectsHeroRollItem = {
-  id: string;
-  src: string;
-  href: string;
-  alt: string;
-};
-
-/** Placeholder hrefs — swap when real project URLs land */
-export const projectsHeroRoll: ProjectsHeroRollItem[] = Array.from(
-  { length: PROJECTS_ROLL_COUNT },
-  (_, index) => {
-    const imageNumber = index + 1;
-    const slug = projects[index % projects.length]?.slug ?? FIRST_PROJECT_SLUG;
-    const ext = PROJECTS_ROLL_JPEG.has(imageNumber) ? "jpeg" : "jpg";
-    return {
-      id: `projectsroll-${imageNumber}`,
-      src: asset(`/images/projects/projectsroll${imageNumber}.${ext}`),
-      href: `/projects/${slug}`,
-      alt: `Project highlight ${imageNumber}`,
-    };
-  },
-);
-
 /** Cycling hero lines over the roll — each entry is one or more display rows */
 export const projectsHeroLines = [
   ["Making Stories Tangible"],
