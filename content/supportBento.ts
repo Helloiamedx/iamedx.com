@@ -158,7 +158,13 @@ export const supportKnowCards: SupportKnowCard[] = [
 ];
 
 export const supportBentoSection = {
-  title: "From concept to delivery.",
+  /** Small mono label above the headline */
+  label: "All in one place",
+  /** Band headline */
+  title: "I take care of what happens in between.",
+  /** Intro paragraph under the headline */
+  description:
+    "From turning your idea into something manufacturable to managing production, quality, and final delivery, I stay involved throughout the process to make sure every step connects.",
 } as const;
 
 /** @deprecated Prefer supportKnowCards */

@@ -1,15 +1,54 @@
 ---
-description: 六种卡片出场动效及调用规则
-globs: components/**/*.tsx,app/globals.css
+description: 卡片出场动效调用规则（Apple 出场；C01–C06 仅存档）
+globs: components/**/*.tsx,app/globals.css,lib/appleCardReveal.ts
 alwaysApply: true
 ---
 
 # 卡片出场动效调用协议
 
-六种卡片出场动效的**原始实现**收录在 `backups/card-motion/card-entrance.js`（逐字保留，
-**尚未接入站点**），说明见 `backups/card-motion/README.md`。
+站点当前只有**一套**卡片出场系统：**Apple 出场**（`lib/appleCardReveal.ts`）。
 
-用户说编号或名称时，调用对应效果；**不要**更改编号、映射或参数。
+另有 C01–C06 六种效果的**原始脚本存档**在 `backups/card-motion/`，**未接入站点**。
+早期有过一份移植实现（`lib/cardMotion.ts`），在首页三个 band 改用 Apple 出场后
+已被用户要求删除 —— **不要再 import 它**；若以后要恢复 C 系列，按下面 C 系列一节
+的参数表重新移植，不要改参数。
+
+## Apple 出场（当前唯一接线中的系统）
+
+来源：用户提供的 Apple 页面脚本（`lib/appleCardReveal.ts` 逐字移植机制）。
+参数为原作者值，**不要**改：错峰 `150ms` · 上移 `30px` · 位移 `700ms` ·
+淡入 `900ms` · 触发「组顶到达视口高度 `85%`」· 缓动 `easeInOutQuad`。
+
+```tsx
+import { useAppleCardReveal } from "@/lib/appleCardReveal";
+
+useAppleCardReveal(sectionRef, ".my-card");                      // 位移 + 淡入
+useAppleCardReveal(sectionRef, ".home-recognition__card", { fade: false });
+```
+
+- 逐帧 `requestAnimationFrame` 写内联 `opacity` / `transform` / `will-change`；
+  挂载时记录原始内联值，settle / destroy 时**原样归还**。
+- 挂载期间给根节点加 `data-apple-reveal`、给卡片加 `data-reveal-item`；
+  `app/globals.css` 里 `.is-revealing [data-reveal-item] { transition: none !important }`
+  负责屏蔽卡片自带的过渡（否则每帧都会被过渡插值，位移会变黏）。
+- 触发按**整组**判断（组顶过 `85%` 视口高），不是逐卡 `amount`。
+- `fade: false` 用于透明度归 CSS 管的卡片。
+
+## 已接线的卡片（当前）
+
+| 位置 | 选择器 | 效果 |
+| --- | --- | --- |
+| 首页 `Recognition comes first.` | `.home-recognition__card` | Apple 出场 · `fade: false` |
+| 首页 `What makes me stand out.` | `.home-different__feature` | Apple 出场 |
+| 首页 `My approach.` | `.home-someone__slide` | Apple 出场（只做纵向位移，不干扰轮播横向测量） |
+
+**Recognition 用 `fade: false` 的原因**：轮播把非当前卡片压到 `opacity: .55`；
+若统一淡入到 1，结束释放控制权时会回弹。这批卡片透明度交给 CSS，只做位移。
+
+## C 系列（存档，未接线）
+
+六种效果的原始实现逐字保留在 `backups/card-motion/card-entrance.js`，
+说明见 `backups/card-motion/README.md`。**站点当前没有它的实现。**
 
 | 编号 | 名称 | 参数 |
 | --- | --- | --- |
@@ -23,59 +62,14 @@ alwaysApply: true
 公共参数：基础延迟 `140ms`；缓动 `cubic-bezier(.22,1,.36,1)`；`fill: 'both'`；
 `speed` 0.5×–1.5× 同时作用于 `duration` 与 `delay`；尊重 `prefers-reduced-motion`。
 
-## 已接线的卡片（当前）
+## 触发时机（C 系列移植时的注意点）
 
-| 位置 | 选择器 | 效果 | 备注 |
-| --- | --- | --- | --- |
-| 首页 `Recognition comes first.` | `.home-recognition__card` | **C02 错峰上浮** | `fade: false` · `stagger: 260` · `duration: 1650` |
-| 首页 `What makes me stand out.` | `.home-different__feature` | **C02 错峰上浮** | `stagger: 260` · `duration: 1650` |
-| 首页 `My approach.` | `.home-someone__slide` | **C02 错峰上浮** | `stagger: 260` · `duration: 1650` · 只做纵向位移，不干扰轮播横向测量 |
+C 系列按**卡片本身**判断视口（默认 `amount: 0.3`），不是 section 级 threshold。
+原因：首页 hero 占满首屏，整段 band 的上边缘在页面一加载就贴住视口底部；
+若按 section 级别判断，动画会在后台提前播完，用户滚到时已经结束。
+Apple 出场不用这套（整组判断，见上）。
 
-三处相对 C02 原生值（`1000ms` / 错峰 `120ms`）都放慢了：
-错峰 `120 → 260ms`（原值下五张卡几乎重叠，整段约 1.6s 就结束），
-单卡时长 `1000 → 1650ms`。现在整段约 **2.8s**（`140 + 4×260 + 1650`）。
-
-**Recognition 用 `fade: false` 的原因**：轮播会把非当前卡片压到 `opacity: .55`，
-如果统一淡入到 1，动画结束释放控制权的瞬间会回弹。所以这批卡片的透明度交给 CSS，
-只做位移。
-
-## 触发时机（重要）
-
-`trigger: "view"` 观察的是**卡片本身**，不是它们所在的 section，默认要求单张卡片
-有 **30%（`amount`）** 进入视口才播。
-
-原因：首页 hero 占满首屏，整段 band 的上边缘在页面一加载就贴住视口底部。
-若按 section 级别 `threshold: 0` 判断，动画会在后台提前播完，用户滚到时已经结束。
-
-`amount` 可按需调整（0–1）；调大 = 更晚触发。
-
-## 怎么调用
-
-```ts
-import { applyCardMotion, useCardMotion } from "@/lib/cardMotion";
-
-// React：在已有 ref 的容器里选中卡片
-const motionRef = useCardMotion(sectionRef, ".my-card", "C02", { speed: 1 });
-motionRef.current?.replay();
-motionRef.current?.setEffect("C04");
-
-// 命令式
-const controller = applyCardMotion(cardElements, "C02", { trigger: "view" });
-controller.destroy();
-```
-
-| 参数 | 默认 | 说明 |
-| --- | --- | --- |
-| `effect` | `"C02"` | `C01`–`C06` / 中文名 / 英文 ID |
-| `trigger` | `"view"` | `view` 进视口播一次；`immediate` 立即；`manual` 手动 |
-| `speed` | `1` | 0.5×–1.5×，同时作用于 `duration` 与 `delay` |
-| `stagger` | 效果自带 | 卡片间隔毫秒数，覆盖该效果的原生错峰；调大 = 更慢更从容 |
-| `duration` | 效果自带 | 单卡动作时长毫秒数；只改动作快慢，**不影响**错峰间隔 |
-| `amount` | `0.3` | `trigger: "view"` 时，单张卡片需进入视口的比例（0–1） |
-| `fade` | `true` | `false` 表示透明度交给 CSS（卡片自带 opacity 系统时必须关掉） |
-| `textSelector` / `artSelector` | `.cm-text` / `.cm-art` | 仅 C06 用；站点要传自己的类名 |
-
-## 移植要点
+## 移植要点（C 系列）
 
 原始脚本依赖 ChatGPT 小组件环境，接入站点时必须处理：
 
@@ -89,6 +83,8 @@ controller.destroy();
 ## 不要
 
 - 把 C 编号和标题动效的 `01`–`07` 混用（两套独立协议）
+- 把 Apple 出场和 C 系列混用（两套独立协议，各自参数不得互改）
+- import 已删除的 `lib/cardMotion.ts`（要 C 系列就按本文档重新移植）
 - 改参数、改缓动、改编号映射
 - 在未确认目标组件结构前直接照抄类名
 
@@ -96,4 +92,5 @@ controller.destroy();
 
 - 标题出场（`01`–`07`）：`lib/headlineMotion.ts` + `components/HeadlineMotion.tsx`，
   见 `.cursor/rules/headline-motion.mdc`
-- 卡片出场（`C01`–`C06`）：`backups/card-motion/`（待移植）
+- Apple 出场：`lib/appleCardReveal.ts` + `app/globals.css` 里的 `.is-revealing` 过渡屏蔽
+- C 系列（存档）：`backups/card-motion/`

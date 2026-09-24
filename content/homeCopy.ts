@@ -33,7 +33,9 @@ export const whatSetsMeApart: HomeCopySection = {
   id: "what-sets-me-apart",
   eyebrow: "Character",
   title: "What makes me stand out.",
-  subtitle: "",
+  /* Intro paragraph under the headline (rendered centred, above the cards) */
+  subtitle:
+    "The way I work is shaped by a few simple principles. They guide how I approach every project, solve problems, and work with the people who trust me with their business.",
   /* Solid gray plate — photo underlay retired */
   backgroundImage: undefined,
   points: [

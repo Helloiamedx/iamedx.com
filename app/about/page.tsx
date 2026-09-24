@@ -3,6 +3,7 @@ import Image from "next/image";
 import { AboutExperienceList } from "@/components/AboutExperienceList";
 import { AboutExpertise } from "@/components/AboutExpertise";
 import { AboutPageHero } from "@/components/AboutPageHero";
+import { HeadlineMotion } from "@/components/HeadlineMotion";
 import { asset } from "@/lib/assets";
 
 export const metadata: Metadata = {
@@ -162,7 +163,19 @@ export default function AboutPage() {
                   />
                 </div>
                 <div className="about-boua__intro-copy">
-                  <p className="about-boua__lede">{aboutLede}</p>
+                  {/*
+                   * Effect 01 — the page's opening statement, same entrance as
+                   * the hero and every section label. The engine measures the
+                   * real row breaks at the current width, so the quote wraps
+                   * naturally instead of on hardcoded line breaks.
+                   */}
+                  <HeadlineMotion
+                    as="p"
+                    effect="01"
+                    className="about-boua__lede"
+                  >
+                    {aboutLede}
+                  </HeadlineMotion>
                   <p className="about-boua__body">
                     My clients focus on building their brands and connecting with
                     their customers, while I provide the product development,
@@ -250,7 +263,18 @@ export default function AboutPage() {
                     : "about-boua__stat"
                 }
               >
-                <p className="about-boua__stat-label">{stat.label}</p>
+                {/*
+                 * Effect 01 — matches the section labels elsewhere. Each stat
+                 * label is observed on its own, so the 2×3 block reveals as it
+                 * is scrolled through rather than all eight firing at once.
+                 */}
+                <HeadlineMotion
+                  as="p"
+                  effect="01"
+                  className="about-boua__stat-label"
+                >
+                  {stat.label}
+                </HeadlineMotion>
                 <p className="about-boua__stat-value">
                   <span className="about-boua__stat-num">{stat.value}</span>
                   {stat.unit ? (

@@ -138,7 +138,9 @@ function ServiceItemBlock({ item }: { item: ServicePackageItem }) {
 
       <div className="svc-phase__grid" aria-label={`${item.code} details`}>
         <div className="svc-phase__cell">
-          <p className="svc-phase__cell-label">Assistance</p>
+          <HeadlineMotion as="p" effect="01" className="svc-phase__cell-label">
+            Assistance
+          </HeadlineMotion>
           <ul className="svc-phase__cell-list">
             {item.assistance.map((entry) => (
               <li key={entry}>{entry}</li>
@@ -147,7 +149,9 @@ function ServiceItemBlock({ item }: { item: ServicePackageItem }) {
         </div>
 
         <div className="svc-phase__cell">
-          <p className="svc-phase__cell-label">Deliverables</p>
+          <HeadlineMotion as="p" effect="01" className="svc-phase__cell-label">
+            Deliverables
+          </HeadlineMotion>
           <ul className="svc-phase__cell-list">
             {item.deliverables.map((entry) => (
               <li key={entry}>{entry}</li>
@@ -156,14 +160,18 @@ function ServiceItemBlock({ item }: { item: ServicePackageItem }) {
         </div>
 
         <div className="svc-phase__cell">
-          <p className="svc-phase__cell-label">Timeline</p>
+          <HeadlineMotion as="p" effect="01" className="svc-phase__cell-label">
+            Timeline
+          </HeadlineMotion>
           <p className="svc-phase__cell-body">
             {item.timeline ?? "Based on project scope"}
           </p>
         </div>
 
         <div className="svc-phase__cell">
-          <p className="svc-phase__cell-label">Fee</p>
+          <HeadlineMotion as="p" effect="01" className="svc-phase__cell-label">
+            Fee
+          </HeadlineMotion>
           <p className="svc-phase__cell-body">{item.fee.label}</p>
         </div>
       </div>

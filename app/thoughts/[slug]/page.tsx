@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { FrostIndexLink } from "@/components/FrostIndexLink";
+import { HeadlineMotion } from "@/components/HeadlineMotion";
 import { InsightBody } from "@/components/InsightBody";
 import { InsightMasonry } from "@/components/InsightMasonry";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
@@ -98,9 +99,14 @@ export default async function InsightDetailPage({ params }: InsightPageProps) {
 
         {related.length > 0 ? (
           <section className="insights-related" aria-labelledby="insights-related-title">
-            <h2 id="insights-related-title" className="insights-related__title">
+            <HeadlineMotion
+              as="h2"
+              effect="01"
+              id="insights-related-title"
+              className="insights-related__title"
+            >
               Related
-            </h2>
+            </HeadlineMotion>
             <InsightMasonry insights={related} layout="related" />
             <FrostIndexLink href="/thoughts">All thoughts</FrostIndexLink>
           </section>

@@ -16,7 +16,7 @@ import { HomeRecognitionPhotoAccordion } from "@/components/HomeRecognitionPhoto
 import { HomeRecognitionProductBox } from "@/components/HomeRecognitionProductBox";
 import { homeRecognition } from "@/content/homeCopy";
 import { getRecognitionProductBoxSetsForSlide } from "@/content/recognitionProductBox";
-import { useCardMotion } from "@/lib/cardMotion";
+import { useAppleCardReveal } from "@/lib/appleCardReveal";
 import { useSwipeNav } from "@/lib/useSwipeNav";
 /**
  * Home recognition — Apple-style highlights carousel demo.
@@ -278,20 +278,15 @@ export function HomeRecognitionBand() {
   useSwipeNav(viewportRef, swipeTo, count > 1);
 
   /*
-   * C02 错峰上浮 — cards rise in staggered as the band scrolls into view.
+   * Apple card reveal — the five cards rise in a 150ms stagger as the band's
+   * top crosses 85% of the viewport. Authored params, untouched; see
+   * `lib/appleCardReveal.ts`.
    *
-   * Opacity stays with CSS here: the carousel dims unfocused cards to 0.55, and
-   * fading every card to 1 would snap back the moment the animation settles.
-   *
-   * `stagger` is doubled from the authored 120ms and `duration` stretched from
-   * 1000ms — at the authored values all five cards overlapped and the whole
-   * entrance was over in ~1.6s.
+   * `fade: false` — opacity stays with CSS here. The carousel dims unfocused
+   * cards to 0.55, so fading every card to 1 would snap back the moment the
+   * entrance settles. The rise still runs.
    */
-  useCardMotion(sectionRef, ".home-recognition__card", "C02", {
-    fade: false,
-    stagger: 260,
-    duration: 1650,
-  });
+  useAppleCardReveal(sectionRef, ".home-recognition__card", { fade: false });
 
   const measure = useCallback(() => {
     const viewport = viewportRef.current;

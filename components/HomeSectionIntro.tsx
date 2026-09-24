@@ -6,6 +6,13 @@ type HomeSectionIntroProps = {
   /** Small mono label — use a placeholder like `Label` until real copy exists */
   label: string;
   title: string;
+  /**
+   * Optional paragraph under the headline. When present the intro renders as a
+   * centred stack — label · headline · paragraph — with the headline and the
+   * paragraph sharing one width (see `.home-section-intro__desc` in
+   * `app/globals.css`).
+   */
+  description?: string;
 };
 
 /**
@@ -16,6 +23,7 @@ export function HomeSectionIntro({
   titleId,
   label,
   title,
+  description,
 }: HomeSectionIntroProps) {
   return (
     <header className="home-section-intro">
@@ -28,6 +36,9 @@ export function HomeSectionIntro({
       >
         {title}
       </HeadlineMotion>
+      {description ? (
+        <p className="home-section-intro__desc">{description}</p>
+      ) : null}
     </header>
   );
 }

@@ -81,8 +81,9 @@ export default function HomePage() {
         >
           <HomeSectionIntro
             titleId="home-products-title"
-            label="portfolio"
-            title="Products Brought to Life."
+            label="Portfolio"
+            title="Products I’ve Brought to Life."
+            description="A selection of products I’ve worked on across different stages of development, manufacturing, and delivery."
           />
           <ProjectFeaturedLead project={projectsFeaturedLead} priority={false} />
           <ProjectMasonry
@@ -99,8 +100,9 @@ export default function HomePage() {
         >
           <HomeSectionIntro
             titleId="home-thoughts-title"
-            label="thoughts"
-            title="How I Think."
+            label="Thoughts"
+            title="How I Think About My Work."
+            description="Ideas and lessons from my experience in product development, manufacturing, sourcing, and quality control."
           />
           {featuredInsight ? (
             <InsightsLead insight={featuredInsight} priority={false} />

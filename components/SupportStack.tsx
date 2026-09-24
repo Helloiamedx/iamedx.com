@@ -519,6 +519,7 @@ export function SupportStack() {
     >
       <div className="support-know__shell">
         <header className="home-section-intro support-know__intro">
+          <p className="home-section-intro__label">{supportBentoSection.label}</p>
           <HeadlineMotion
             as="h2"
             effect="01"
@@ -527,6 +528,9 @@ export function SupportStack() {
           >
             {supportBentoSection.title}
           </HeadlineMotion>
+          <p className="home-section-intro__desc">
+            {supportBentoSection.description}
+          </p>
         </header>
 
         <div

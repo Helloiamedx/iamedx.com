@@ -12,6 +12,7 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
+import { HeadlineMotion } from "@/components/HeadlineMotion";
 import { HeroSegmentVideo } from "@/components/HeroSegmentVideo";
 import { OriginButton } from "@/components/ui/origin-button";
 import { ProjectFallbackVideo } from "@/components/ProjectFallbackVideo";
@@ -115,6 +116,75 @@ function readAboutPushMs() {
 
 function easeInOutCubic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+/**
+ * Chapter title (Background / Challenge / What I did / Outcome) with effect 01,
+ * played when the title itself reaches the viewport.
+ *
+ * Deliberately **not** `trigger="view"`. The About panel is a `0fr → 1fr` grid
+ * collapse whose inner flips to `overflow: visible` the instant it opens — that
+ * property is not animated, so all four titles are un-clipped while the push is
+ * still moving. A plain view observer therefore reports all four as
+ * intersecting at once, they play together, and they have finished before the
+ * reader has scrolled to them.
+ *
+ * So the observer is armed only once the push has settled. What it measures at
+ * that point is the real scroll position: the first chapter plays as the panel
+ * lands, the rest wait until they are actually scrolled to.
+ *
+ * Mount/unmount is keyed on `active` by the caller, so closing the panel
+ * rewinds every title and reopening replays the entrance.
+ */
+function CaseCopyTitle({ label, active }: { label: string; active: boolean }) {
+  const slotRef = useRef<HTMLDivElement>(null);
+  const [revealed, setRevealed] = useState(false);
+
+  useEffect(() => {
+    if (!active) return;
+
+    let observer: IntersectionObserver | undefined;
+    /* Every state write below is inside a callback, never the effect body. */
+    const armId = window.setTimeout(() => {
+      const slot = slotRef.current;
+      const reduced = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      if (!slot || reduced || typeof IntersectionObserver === "undefined") {
+        setRevealed(true);
+        return;
+      }
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry?.isIntersecting) return;
+          setRevealed(true);
+          /* Once per open — leaving and re-entering does not replay. */
+          observer?.disconnect();
+        },
+        { threshold: 0 },
+      );
+      observer.observe(slot);
+    }, readAboutPushMs());
+
+    return () => {
+      window.clearTimeout(armId);
+      observer?.disconnect();
+    };
+  }, [active]);
+
+  return (
+    <div ref={slotRef} className="project-case-demo__panel-title-slot">
+      <HeadlineMotion
+        as="h3"
+        effect="01"
+        trigger="manual"
+        play={revealed}
+        className="project-case-demo__panel-title"
+      >
+        {label}
+      </HeadlineMotion>
+    </div>
+  );
 }
 
 type StillSize = { w: number; h: number };
@@ -900,9 +970,16 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
                     key={section.id}
                     className="project-case-demo__panel-block"
                   >
-                    <h3 className="project-case-demo__panel-title">
-                      {section.label}
-                    </h3>
+                    {/*
+                     * Effect 01, scroll-triggered once the panel push settles.
+                     * Keyed on `open` so closing rewinds the entrance and
+                     * reopening replays it. See `CaseCopyTitle`.
+                     */}
+                    <CaseCopyTitle
+                      key={`${section.id}-${open}`}
+                      label={section.label}
+                      active={open}
+                    />
                     {section.body.map((paragraph, index) => {
                       const trimmed = paragraph.trim();
                       const isSubhead =
@@ -938,7 +1015,13 @@ export function ProjectCaseDemo({ project }: ProjectCaseDemoProps) {
           aria-label="Special thanks and collaborators"
         >
           <div className="project-case-demo__credits-grid">
-            <p className="project-case-demo__credits-label">Special thanks</p>
+            <HeadlineMotion
+              as="p"
+              effect="01"
+              className="project-case-demo__credits-label"
+            >
+              Special thanks
+            </HeadlineMotion>
             {specialThanks.map((item) => (
               <div
                 key={item.company}

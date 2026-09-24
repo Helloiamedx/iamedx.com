@@ -11,9 +11,8 @@ const favicon = asset("/brand/favicon.svg");
 
 export const metadata: Metadata = {
   title: {
-    default:
-      "Edward Xu | End-to-End Product Development & Manufacturing Partner",
-    template: "Edward Xu · %s",
+    default: "Hey, I'm Edward Xu",
+    template: "Hey, I'm Edward Xu · %s",
   },
   description:
     "Driven by loyalty, transparency, and a commitment to exceed expectations, I help clients build highly tailored supply chains in China.",

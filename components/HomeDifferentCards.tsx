@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { HomeSectionIntro } from "@/components/HomeSectionIntro";
 import { whatSetsMeApart, type HomeCopyPoint } from "@/content/homeCopy";
-import { useCardMotion } from "@/lib/cardMotion";
+import { useAppleCardReveal } from "@/lib/appleCardReveal";
 
 const POINTS = whatSetsMeApart.points;
 
@@ -36,14 +36,11 @@ export function HomeDifferentCards() {
   const sectionRef = useRef<HTMLElement>(null);
 
   /*
-   * C02 错峰上浮 — character cards rise in staggered as the band arrives.
-   * `stagger` raised from the authored 120ms and `duration` stretched from
-   * 1000ms so each card reads on its own and the rise is unhurried.
+   * Apple card reveal — the five Character cards rise in a 150ms stagger as
+   * the band's top crosses 85% of the viewport. Authored params, untouched;
+   * see `lib/appleCardReveal.ts`.
    */
-  useCardMotion(sectionRef, ".home-different__feature", "C02", {
-    stagger: 260,
-    duration: 1650,
-  });
+  useAppleCardReveal(sectionRef, ".home-different__feature");
 
   return (
     <section
@@ -68,6 +65,7 @@ export function HomeDifferentCards() {
           titleId={`${whatSetsMeApart.id}-title`}
           label={whatSetsMeApart.eyebrow}
           title={whatSetsMeApart.title}
+          description={whatSetsMeApart.subtitle}
         />
 
         <div className="home-different__features-wrap">

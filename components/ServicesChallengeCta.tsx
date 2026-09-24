@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { HeadlineMotion } from "@/components/HeadlineMotion";
 import { OriginButton } from "@/components/ui/origin-button";
 import { whatsAppCta } from "@/content/nav";
 import { asset } from "@/lib/assets";
@@ -41,7 +42,9 @@ export function ChallengeCta({ className }: ChallengeCtaProps) {
           onLoad={() => setGifReady(true)}
         />
       </div>
-      <p className="svc-challenge__headline">bring me your challenge</p>
+      <HeadlineMotion as="p" effect="01" className="svc-challenge__headline">
+        bring me your challenge
+      </HeadlineMotion>
       <OriginButton href={whatsAppCta.href} external>
         Contact me
       </OriginButton>

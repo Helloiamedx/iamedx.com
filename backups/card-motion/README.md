@@ -2,6 +2,11 @@
 
 **状态：已收录，未接入站点。** 需要时按 `.cursor/rules/card-motion.mdc` 的协议移植。
 
+站点当前在用的是 **Apple 出场**（`lib/appleCardReveal.ts`，首页三个卡片 band）。
+这里存档的 C 系列是另一套协议，**没有站点实现**：早期曾有一份
+`lib/cardMotion.ts`，在首页改用 Apple 出场后已被用户要求删除。
+要恢复 C 系列就从本目录重新移植，不要去 import 已经不存在的模块。
+
 ## 文件
 
 - `card-entrance.js` — 用户提供的原始脚本，逐字保留（含中文注释）
@@ -50,4 +55,5 @@
 两套是**独立协议**，编号前缀不同、不要混用：
 
 - 标题出场：`01`–`07` → `lib/headlineMotion.ts` + `components/HeadlineMotion.tsx`
-- 卡片出场：`C01`–`C06` → 本目录（待移植）
+- 卡片出场 — Apple 出场（站点在用）→ `lib/appleCardReveal.ts`
+- 卡片出场 — `C01`–`C06`（存档，未接入）→ 本目录

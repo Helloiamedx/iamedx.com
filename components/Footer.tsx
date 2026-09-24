@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import {
   contactInfo,
   footerLeadLine,
@@ -16,6 +17,7 @@ import { asset } from "@/lib/assets";
 
 export function Footer() {
   const year = new Date().getFullYear();
+  const pathname = usePathname();
 
   return (
     <footer className="site-footer">
@@ -25,10 +27,20 @@ export function Footer() {
         <div className="site-footer__shell">
           <div className="site-footer__top">
             <div className="site-footer__primary">
-              {/* Effect 01 (轻移渐显) — same entrance as the hero + home sections */}
+              {/*
+               * Effect 01 (轻移渐显) — same entrance as the hero + home sections.
+               *
+               * Keyed on the route: the footer lives in the root layout, so it
+               * survives every navigation and never re-mounts on its own. The
+               * engine plays once per mounted element (its `replay()` retires
+               * the view observer and latches `started`), so without this key
+               * the headline would animate on the first page of the session and
+               * never again. Remounting gives it a fresh observer per route.
+               */}
               <HeadlineMotion
                 as="p"
                 effect="01"
+                key={pathname}
                 className="site-footer__lead"
               >
                 {footerLeadLine}

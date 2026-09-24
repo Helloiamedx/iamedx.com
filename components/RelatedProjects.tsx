@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { FrostIndexLink } from "@/components/FrostIndexLink";
+import { HeadlineMotion } from "@/components/HeadlineMotion";
 import { ProjectMasonry } from "@/components/ProjectMasonry";
 import type { Project } from "@/content/projects";
 import {
@@ -86,7 +87,9 @@ export function RelatedProjects({
       className={`section${hasPeers ? " projects-related" : ""} project-detail__related`}
     >
       {hasPeers ? (
-        <h2 className="projects-related__title">Related</h2>
+        <HeadlineMotion as="h2" effect="01" className="projects-related__title">
+          Related
+        </HeadlineMotion>
       ) : null}
       {related.length > 0 ? (
         <ProjectMasonry

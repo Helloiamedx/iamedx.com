@@ -19,7 +19,7 @@ type ProjectFeaturedLeadProps = {
 };
 
 /** Same placeholder cycle as filter cards when hover stills are not set yet */
-const HOVER_SWAP_FRAME_COLORS = ["#0a0a0a", "#0076dd", "#86868b"] as const;
+const HOVER_SWAP_FRAME_COLORS = ["#1d1d1f", "#0076dd", "#86868b"] as const;
 
 /** Featured lead cover — first hover still (no card video; that moves to case gallery). */
 function featuredCoverSrc(project: ProjectsFeaturedLead): string {

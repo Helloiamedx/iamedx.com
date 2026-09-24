@@ -200,12 +200,21 @@
 
 :root {
   /*
-   * THE black. Sitewide ink, rules, icons and dark plates all resolve to this
-   * one value — do not introduce another near-black (#000 / #111 / #1d1d1f …).
-   * Alpha inks are `rgba(10, 10, 10, x)`; box-shadows and mask gradients keep
-   * pure black (a mask's black *is* its alpha channel).
+   * THE black — `#1d1d1f`. Sitewide ink, rules, icons, dark plates, button
+   * fills and shadows all resolve to this one value; do not introduce another
+   * near-black (#000 / #111 / #0a0a0a …).
+   *
+   * Alpha inks are `rgba(29, 29, 31, x)`.
+   *
+   * Two deliberate exceptions keep pure black, where black is not a colour but
+   * alpha data — a mid-gradient stop of `mask-image` / SVG `<mask>` fill, which
+   * would become 89% opaque at `#1d1d1f` and soften the mask:
+   *   · CSS `mask-image` gradients (e.g. `.svc-workflow__media-roll-stage`)
+   *   · SVG `<mask>` fills (e.g. the Recognition product-box cutout)
+   * These plates are pure black by design — `--footer-bg`, `--nav-plate` and
+   * the “Clients Come Back” card (`.home-recognition__card--product-box`).
    */
-  --ink-black: #0a0a0a;
+  --ink-black: #1d1d1f;
   --site-bg: #eaeae1;
   --background: var(--site-bg);
   --foreground: var(--ink-black);
@@ -221,10 +230,10 @@
   --secondary-foreground: var(--ink-black);
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --border: rgba(10, 10, 10, 0.14);
-  --input: rgba(10, 10, 10, 0.14);
+  --border: rgba(29, 29, 31, 0.14);
+  --input: rgba(29, 29, 31, 0.14);
   --ring: #0076dd;
-  --line: rgba(10, 10, 10, 0.12);
+  --line: rgba(29, 29, 31, 0.12);
   /* Sitewide control corners — square (no soft radius) */
   --button-radius: 0;
   --index-card-radius: 0;
@@ -411,7 +420,7 @@ body {
   display: flex;
   flex-direction: column;
   background: var(--site-bg);
-  color: #0a0a0a;
+  color: #1d1d1f;
   font-family: var(--font-sans);
   font-weight: 400;
   line-height: 1.5;
@@ -583,14 +592,14 @@ button.origin-button {
   .origin-button-wrap:has(.origin-button:hover),
   .origin-button-wrap:has(a.origin-button:hover) {
     mix-blend-mode: normal;
-    color: #0a0a0a;
+    color: #1d1d1f;
   }
 
   a.origin-button:hover,
   button.origin-button:hover {
-    background: #0a0a0a;
+    background: #1d1d1f;
     color: #fff;
-    border-color: #0a0a0a;
+    border-color: #1d1d1f;
   }
 
   /* Dark-band hovers — solid white fill, no difference */
@@ -599,7 +608,7 @@ button.origin-button {
   .projects-collection .origin-button:hover,
   .site-footer__stage .origin-button:hover {
     background: #fff;
-    color: #0a0a0a;
+    color: #1d1d1f;
     border-color: #fff;
   }
 
@@ -617,16 +626,16 @@ button.origin-button {
 .origin-button-wrap:has(.origin-button.is-pressed),
 .origin-button-wrap:has(a.origin-button.is-pressed) {
   mix-blend-mode: normal !important;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 a.origin-button:active,
 button.origin-button:active,
 a.origin-button.is-pressed,
 button.origin-button.is-pressed {
-  background: #0a0a0a !important;
+  background: #1d1d1f !important;
   color: #fff !important;
-  border-color: #0a0a0a !important;
+  border-color: #1d1d1f !important;
 }
 
 .hero .origin-button:active,
@@ -638,7 +647,7 @@ button.origin-button.is-pressed {
 .projects-collection .origin-button.is-pressed,
 .site-footer__stage .origin-button.is-pressed {
   background: #fff !important;
-  color: #0a0a0a !important;
+  color: #1d1d1f !important;
   border-color: #fff !important;
 }
 
@@ -662,15 +671,15 @@ button.origin-button.is-pressed {
 
 a.origin-button:focus-visible,
 button.origin-button:focus-visible {
-  outline: 2px solid #0a0a0a;
+  outline: 2px solid #1d1d1f;
   outline-offset: 2px;
 }
 
 button.origin-button:disabled,
 a.origin-button[aria-disabled="true"] {
   opacity: 0.45;
-  color: rgba(10, 10, 10, 0.45);
-  border-color: rgba(10, 10, 10, 0.35);
+  color: rgba(29, 29, 31, 0.45);
+  border-color: rgba(29, 29, 31, 0.35);
   pointer-events: none;
   cursor: not-allowed;
 }
@@ -737,7 +746,7 @@ main.section {
 
 .site-header,
 .site-header-chrome {
-  --nav-solid-black: #0a0a0a;
+  --nav-solid-black: #1d1d1f;
   --nav-solid-white: #ededed;
   --nav-type-size: clamp(calc(0.6875rem + 2px), calc(0.67vw + 2px), calc(0.8125rem + 2px));
   --nav-type-tracking: 0.03em;
@@ -853,7 +862,7 @@ body.is-mobile-menu-open .mobile-menu a {
   /* Climb through sticky header spacer — hero padding matches other index intros */
   margin-top: calc(-1 * var(--header-offset));
   background: var(--site-bg);
-  color: #0a0a0a;
+  color: #1d1d1f;
   padding-top: 0;
   /* Footer air from .site-main > main (--content-footer-gap) */
   padding-bottom: 0;
@@ -867,10 +876,10 @@ body.is-mobile-menu-open .mobile-menu a {
 }
 
 .faq-shell {
-  --faq-ink: #0a0a0a;
-  --faq-muted: rgba(10, 10, 10, 0.55);
-  --faq-line: rgba(10, 10, 10, 0.12);
-  --faq-toc-active: rgba(10, 10, 10, 0.06);
+  --faq-ink: #1d1d1f;
+  --faq-muted: rgba(29, 29, 31, 0.55);
+  --faq-line: rgba(29, 29, 31, 0.12);
+  --faq-toc-active: rgba(29, 29, 31, 0.06);
   --faq-nav-font-size: clamp(0.95rem, 0.9rem + 0.2vw, 1.05rem);
   --faq-nav-font-weight: 500;
   --faq-answer-font-size: calc(0.95rem - 1px);
@@ -897,7 +906,7 @@ body.is-mobile-menu-open .mobile-menu a {
   margin: 0 0 clamp(1.05rem, 2.1vw, 1.45rem);
   padding: 0 0 calc(clamp(0.85rem, 1.5vw, 1rem) * 0.95);
   width: 100%;
-  border-bottom: 1px solid rgba(10, 10, 10, 0.12);
+  border-bottom: 1px solid rgba(29, 29, 31, 0.12);
   font-family: var(--font-desc);
   font-size: calc(clamp(0.8125rem, 0.75rem + 0.35vw, 0.9375rem) * 0.95);
   font-weight: 700;
@@ -905,7 +914,7 @@ body.is-mobile-menu-open .mobile-menu a {
   line-height: 1.2;
   text-transform: uppercase;
   white-space: nowrap;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .faq-shell__panel {
@@ -1024,7 +1033,7 @@ body.is-mobile-menu-open .mobile-menu a {
   font-weight: var(--faq-nav-font-weight);
   line-height: 1.3;
   letter-spacing: normal;
-  color: rgba(10, 10, 10, 0.72);
+  color: rgba(29, 29, 31, 0.72);
   transition: color 0.2s ease;
 }
 
@@ -1052,8 +1061,8 @@ body.is-mobile-menu-open .mobile-menu a {
 .site-faq {
   flex-shrink: 0;
   background: #fff;
-  color: #0a0a0a;
-  border-top: 1px solid rgba(10, 10, 10, 0.14);
+  color: #1d1d1f;
+  border-top: 1px solid rgba(29, 29, 31, 0.14);
   padding-block: clamp(2.5rem, 5vw, 4rem);
 }
 
@@ -1123,7 +1132,7 @@ body.is-mobile-menu-open .mobile-menu a {
 /* Contact page */
 .contact-page {
   background: var(--site-bg);
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .contact-page__intro {
@@ -1131,11 +1140,11 @@ body.is-mobile-menu-open .mobile-menu a {
 }
 
 .contact-page__intro h1 {
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .contact-page__intro .lede {
-  color: rgba(10, 10, 10, 0.55);
+  color: rgba(29, 29, 31, 0.55);
 }
 
 .contact-page__grid {
@@ -1166,14 +1175,14 @@ body.is-mobile-menu-open .mobile-menu a {
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(10, 10, 10, 0.45);
+  color: rgba(29, 29, 31, 0.45);
 }
 
 .contact-page__channel-value {
   display: inline-block;
   font-size: 1.05rem;
   font-weight: 500;
-  color: #0a0a0a;
+  color: #1d1d1f;
   text-decoration: none;
 }
 
@@ -1185,7 +1194,7 @@ body.is-mobile-menu-open .mobile-menu a {
   margin: 1.75rem 0 0;
   font-size: 0.9rem;
   line-height: 1.45;
-  color: rgba(10, 10, 10, 0.5);
+  color: rgba(29, 29, 31, 0.5);
 }
 
 @media (max-width: 800px) {
@@ -1196,6 +1205,7 @@ body.is-mobile-menu-open .mobile-menu a {
 
 /* ===== Site footer ===== */
 .site-footer {
+  /* Footer plate is pure black by design — the one exception to `--ink-black`. */
   --footer-bg: #000;
   --footer-ink: #fff;
   --footer-muted: rgba(255, 255, 255, 0.55);
@@ -1306,7 +1316,7 @@ body.is-mobile-menu-open .mobile-menu a {
 .site-footer__whatsapp {
   --background: transparent;
   --primary: #ffffff;
-  --primary-foreground: #0a0a0a;
+  --primary-foreground: #1d1d1f;
   flex: 0 0 auto;
 }
 
@@ -1529,7 +1539,7 @@ body.is-mobile-menu-open .mobile-menu a {
   margin: 0;
   padding: 0;
   border: 0;
-  background: rgba(10, 10, 10, 0.72);
+  background: rgba(29, 29, 31, 0.72);
   cursor: pointer;
   animation: wechat-qr-fade 280ms ease;
 }
@@ -1541,8 +1551,8 @@ body.is-mobile-menu-open .mobile-menu a {
   padding: 1.15rem 1.15rem 1.25rem;
   border-radius: 0;
   background: #f5f5f7;
-  color: #0a0a0a;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+  color: #1d1d1f;
+  box-shadow: 0 24px 80px rgba(29, 29, 31, 0.35);
   animation: wechat-qr-pop 420ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -1835,7 +1845,8 @@ body.is-mobile-menu-open .mobile-menu a {
 
 .mobile-nav {
   /* Solid plate — no frosted wash / difference blend (looked different on every page) */
-  --nav-plate: #0a0a0a;
+  /* Menu plate is pure black by design — the one exception to `--ink-black`. */
+  --nav-plate: #000;
   --mobile-ink: #ffffff;
   --mobile-muted: rgba(255, 255, 255, 0.55);
   --mobile-strip-ease: cubic-bezier(0.65, 0, 0.35, 1);
@@ -2187,11 +2198,39 @@ body.is-mobile-menu-open .project-case-demo__toggle-pin {
   min-height: 100svh;
   margin-top: calc(-1 * var(--header-offset));
   display: grid;
-  align-items: center;
+  /* Copy + CTAs are one block, seated on the hero’s bottom edge */
+  align-items: end;
   justify-items: center;
   color: #f7f7f7;
   overflow: hidden;
   background: transparent;
+  /*
+   * Height of one hero CTA — derived from the button's own box, not the site's
+   * `min-height` token alone: `min-height` is only a floor, and the real box is
+   * padding × 2 + one line (`line-height: 1`), so with the current tokens the
+   * button renders taller than that floor. `max()` covers both cases, so this
+   * tracks the button whichever term wins.
+   *
+   * `--hero-cta-h` adds the 1px borders, which the ≤899px scale does not touch.
+   */
+  --hero-cta-core: max(
+    var(--origin-button-min-height),
+    calc(2 * var(--origin-button-pad-block) + var(--origin-button-font-size))
+  );
+  --hero-cta-h: calc(var(--hero-cta-core) + 2px);
+}
+
+/*
+ * Phones scale the CTA's padding and type by `--origin-button-mobile-scale`
+ * (see the `a.origin-button` rule in the ≤899px block), so the reference height
+ * has to scale with it to stay one button tall.
+ */
+@media (max-width: 899px) {
+  .hero {
+    --hero-cta-h: calc(
+      var(--hero-cta-core) * var(--origin-button-mobile-scale) + 2px
+    );
+  }
 }
 
 /*
@@ -2202,7 +2241,7 @@ body.is-mobile-menu-open .project-case-demo__toggle-pin {
  * video paints.
  */
 html[data-hero-copy-fallback="1"] .hero {
-  background: #0a0a0a;
+  background: #1d1d1f;
 }
 
 .hero__media {
@@ -2284,15 +2323,22 @@ html[data-chrome-ready="1"] .hero__video.is-loaded,
   max-width: none;
   margin: 0;
   padding: 0;
+  /*
+   * The copy + CTA block is seated on the hero’s bottom edge
+   * (`.hero { align-items: end }`), held off it by exactly one hero CTA height
+   * — the CTA is the last element in the block, so that gap is what shows under
+   * the hero's own buttons. `--hero-cta-h` is measured from the button's box
+   * model (see `.hero`), and the safe-area term clears the iPhone home
+   * indicator. Replaces the old `translateY(45%)` nudge.
+   */
+  padding-block-end: calc(var(--hero-cta-h) + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: clamp(1.35rem, 3.2vw, 2rem);
   text-align: left;
   color: #fff;
-  /* From vertical center — shift the whole copy+CTA block down 45% of its height */
-  transform: translateY(45%);
-  /* Hidden until video pops in — otherwise copy covers the progress bar */
+  /* Hidden until the video pops in — the copy must not paint before the clip */
   visibility: hidden;
   pointer-events: none;
 }
@@ -2433,8 +2479,7 @@ html[data-hero-copy-ready="1"] .hero__content {
     max-width: none;
     align-items: flex-start;
     text-align: left;
-    /* Same downward shift as desktop (45% of block height) */
-    transform: translateY(45%);
+    /* Bottom-anchored like desktop — the old `translateY(45%)` nudge is gone */
   }
 
   .hero__copy {
@@ -2537,7 +2582,7 @@ html[data-hero-copy-ready="1"] .hero__content {
 
 .button--light {
   background: #fff;
-  color: #0a0a0a;
+  color: #1d1d1f;
   border-color: #fff;
 }
 
@@ -2547,11 +2592,11 @@ html[data-hero-copy-ready="1"] .hero__content {
   border-color: rgba(255, 255, 255, 0.55);
 }
 
-/* —— Home (light shell — hero loads transparent over white, not black) —— */
+/* —— Home (site beige shell — hero loads transparent over white, not black) —— */
 .site-main > main.home-page,
 .home-page {
-  background: #fff;
-  color: #0a0a0a;
+  /* Ground is set in the “Home ground” block below (site beige). */
+  color: #1d1d1f;
   --home-section-pad: clamp(3rem, 7vw, 5.5rem);
   --card-meta-type-font: var(--font-title);
   --card-meta-type-weight: 400;
@@ -2564,12 +2609,18 @@ html[data-hero-copy-ready="1"] .hero__content {
   --home-section-intro-gap: clamp(0.4rem, 0.85vw, 0.6rem);
   /* Intro / band title → content below — one gap for every home section */
   --home-section-intro-margin-bottom: clamp(1.85rem, 3.2vw, 2.65rem);
+  /*
+   * Centre-led intros only (Support + Character): the headline and the
+   * paragraph under it share this width, so the two blocks are the same width
+   * by construction rather than by matching numbers.
+   */
+  --home-intro-lead-w: 46rem;
   /* Label = Character / svc-demo eyebrow recipe */
   --home-section-label-font: var(--font-label); /* FK Grotesk Mono Medium */
   --home-section-label-size: clamp(0.7rem, 0.85vw, 0.8rem);
   --home-section-label-weight: 500;
   --home-section-label-tracking: 0.14em;
-  --home-section-label-color: rgba(10, 10, 10, 0.45);
+  --home-section-label-color: rgba(29, 29, 31, 0.45);
   /* Title = Grtsk Medium (+15px vs prior home size) */
   --home-section-title-font: "Grtsk", var(--font-sans);
   --home-section-title-size: calc(
@@ -2582,7 +2633,7 @@ html[data-hero-copy-ready="1"] .hero__content {
   --home-section-title-weight: 500;
   --home-section-title-tracking: -0.04em;
   --home-section-title-leading: 1.05;
-  --home-section-title-color: #0a0a0a;
+  --home-section-title-color: #1d1d1f;
   /*
    * Shared home band headlines — Recognition / Support / Approach / Products / Thoughts.
    * Change once → all section titles follow.
@@ -2592,7 +2643,18 @@ html[data-hero-copy-ready="1"] .hero__content {
   --home-band-title-weight: 600;
   --home-band-title-tracking: -0.04em;
   --home-band-title-leading: 1.05;
-  --home-band-title-color: #0a0a0a;
+  --home-band-title-color: #1d1d1f;
+  /*
+   * One headline size for every home band — the centre-led intros (Support /
+   * Character / Products / Thoughts) and the two carousel bands (Recognition /
+   * My approach) all render at this step.
+   *
+   * Built on `--home-band-title-size` rather than restating the clamp, so the
+   * ≤900px step follows on its own. Change the `+` term to resize every band
+   * headline at once.
+   */
+  --home-band-headline-size: calc(var(--home-band-title-size) + 6px);
+
   /*
    * Shared card / approach keyword titles — Recognition card titles.
    */
@@ -2601,7 +2663,7 @@ html[data-hero-copy-ready="1"] .hero__content {
   --home-card-title-weight: 600;
   --home-card-title-tracking: -0.035em;
   --home-card-title-leading: 1;
-  --home-card-title-color: #0a0a0a;
+  --home-card-title-color: #1d1d1f;
   /*
    * Shared body type — Recognition / Support / Character / Approach.
    * Always lock to project + insight card description size (all breakpoints).
@@ -2611,7 +2673,7 @@ html[data-hero-copy-ready="1"] .hero__content {
   --home-band-body-weight: 400;
   --home-band-body-tracking: -0.01em;
   --home-band-body-leading: var(--card-meta-desc-lh);
-  --home-band-body-color: rgba(10, 10, 10, 0.72);
+  --home-band-body-color: rgba(29, 29, 31, 0.72);
   /*
    * Shared chip / approach keyword labels — Support chips + Approach points.
    */
@@ -2621,7 +2683,7 @@ html[data-hero-copy-ready="1"] .hero__content {
   --home-chip-label-weight: 500;
   --home-chip-label-tracking: -0.01em;
   --home-chip-label-leading: 1.2;
-  --home-chip-label-color: #0a0a0a;
+  --home-chip-label-color: #1d1d1f;
   /*
    * Approach keywords only (I work hard…) — NOT tied to Support chips.
    * Desktop 15px; mobile bumps +2px in the ≤900 block.
@@ -2631,7 +2693,7 @@ html[data-hero-copy-ready="1"] .hero__content {
   --home-approach-label-weight: 600;
   --home-approach-label-tracking: -0.01em;
   --home-approach-label-leading: 1.2;
-  --home-approach-label-color: #0a0a0a;
+  --home-approach-label-color: #1d1d1f;
   /*
    * Shared body copy — Character cards, how i do points, main service card desc.
    */
@@ -2639,7 +2701,7 @@ html[data-hero-copy-ready="1"] .hero__content {
   --home-point-body-size: calc(clamp(0.72rem, 0.85vw, 0.84rem) + 2px);
   --home-point-body-weight: 400;
   --home-point-body-leading: 1.5;
-  --home-point-body-color: rgba(10, 10, 10, 0.55);
+  --home-point-body-color: rgba(29, 29, 31, 0.55);
   /*
    * Shared keywords — Character (Loyalty…) + how i do (I Care Your Review…).
    */
@@ -2649,7 +2711,7 @@ html[data-hero-copy-ready="1"] .hero__content {
   --home-point-keyword-weight: 700;
   --home-point-keyword-tracking: 0.06em;
   --home-point-keyword-leading: 1;
-  --home-point-keyword-color: #0a0a0a;
+  --home-point-keyword-color: #1d1d1f;
   /* Legacy aliases — HomePricing / HomeCopyBlock still reference these */
   --home-intro-width: var(--home-section-intro-width);
   --home-intro-eyebrow-font: var(--home-section-label-font);
@@ -2671,14 +2733,15 @@ html[data-hero-copy-ready="1"] .hero__content {
   );
   --home-intro-desc-weight: 400;
   --home-intro-desc-leading: 1.45;
-  --home-intro-desc-color: rgba(10, 10, 10, 0.55);
-  --home-band-plate-a: #f5f5f7;
-  --home-band-plate-b: #fff;
-  --home-band-gray: var(--home-band-plate-a);
-  --home-band-white: var(--home-band-plate-b);
-  --home-band-black: var(--home-band-plate-a);
+  --home-intro-desc-color: rgba(29, 29, 31, 0.55);
+  /*
+   * The page ground is `--home-base` (the site beige) — see the “home ground”
+   * block below. This token is the light plate used *inside* a few cards
+   * (Character feature cards), not a band background.
+   */
+  --home-band-gray: #f5f5f7;
   --portfolio-card-radius: 0;
-  --type-label-color: rgba(10, 10, 10, 0.45);
+  --type-label-color: rgba(29, 29, 31, 0.45);
   --type-chip-font: clamp(
     calc(0.5625rem * 0.97),
     calc(0.52rem * 0.97 + 0.15vw * 0.97),
@@ -2687,16 +2750,10 @@ html[data-hero-copy-ready="1"] .hero__content {
   --font-type-label: var(--font-label);
 }
 
-/* Home overscroll / footer air matches the light shell */
+/* Home overscroll / footer air — same plate as the page (see “home ground”) */
 html:has(.home-page),
 body:has(.home-page) {
-  background: #fff;
-  color: #0a0a0a;
-}
-
-body:has(.home-page) .site-footer__gap {
-  /* Continue last home band (Thoughts #F5F5F7) into content↔footer air */
-  background: #f5f5f7;
+  color: #1d1d1f;
 }
 
 @media (max-width: 900px) {
@@ -2715,7 +2772,8 @@ body:has(.home-page) .site-footer__gap {
         calc(1.75rem - 3px)
       ) - 5px + 15px - 2px
     );
-    /* Recognition / Support / Approach band titles — 1px smaller on mobile */
+    /* Band headline step — 1px smaller on mobile; `--home-band-headline-size`
+     * rides on this, so every band headline follows. */
     --home-band-title-size: calc(clamp(1.75rem, 3.6vw, 3.25rem) - 6px);
     /* Approach keywords — independent of chips; +2px vs desktop 0.9375rem */
     --home-approach-label-size: calc(0.9375rem + 3px);
@@ -2759,61 +2817,113 @@ body:has(.home-page) .site-footer__gap {
 }
 
 /*
-  After hero: white / #F5F5F7 alternate (hero + footer excluded).
-  Recognition white | Support F5F5F7 | Character white | Approach F5F5F7 | Products white | Thoughts F5F5F7
-  */
+ * After hero — ink only. Every band rides on the one home ground; the beige
+ * plate itself is set in the “home ground” block below (search for it).
+ * Bands: Recognition | Support | Character | Approach | Products | Thoughts.
+ */
 .home-page > .home-recognition {
-  background: #fff;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .home-page > .support-know {
-  background: #f5f5f7;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .home-page > .home-someone-draft {
-  background: #f5f5f7;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .home-page > .home-someone {
-  background: var(--home-band-gray);
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .home-page > .home-different {
-  background: #fff;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .home-page > .section.home-page__section {
-  /* Products — white */
-  background: #fff;
-  color: #0a0a0a;
-  --home-section-label-color: rgba(10, 10, 10, 0.45);
-  --home-section-title-color: #0a0a0a;
+  /* Products / Thoughts */
+  color: #1d1d1f;
+  --home-section-label-color: rgba(29, 29, 31, 0.45);
+  --home-section-title-color: #1d1d1f;
 }
 
+/*
+ * ── Home ground ────────────────────────────────────────────────────────────
+ *
+ * The whole home page below the hero sits on the same beige plate as the rest
+ * of the site (`--site-bg`). There is no white / #F5F5F7 band alternation.
+ *
+ * Scope: the page ground only. Interior plates keep their own fills — the
+ * Character feature cards, the “Clients Come Back” card, the Recognition pager
+ * and the Support stage / panels.
+ *
+ * The hero is excluded on purpose. It is transparent and used to read its
+ * backdrop from the page shell; with the shell beige that backdrop would
+ * change, so it gets an explicit white plate. Its fail-open dark plate
+ * (`html[data-hero-copy-fallback="1"] .hero`) still wins when it applies.
+ *
+ * `--home-base` is defined on `:root`, not on `.home-page`: the footer air
+ * (`.site-footer__gap`) and the `html` / `body` canvas live *outside*
+ * `.home-page`, so a token scoped to the page would not resolve there — the
+ * declarations would fall back to `transparent` and the browser canvas would
+ * show through as a band above the footer.
+ */
+:root {
+  --home-base: var(--site-bg);
+}
+
+.home-page > .hero {
+  background: #fff;
+}
+
+.site-main > main.home-page,
+.home-page,
+html:has(.home-page),
+body:has(.home-page) {
+  background: var(--home-base);
+}
+
+.home-page > .home-recognition,
+.home-page > .support-know,
+.home-page > .home-someone-draft,
+.home-page > .home-someone,
+.home-page > .home-different,
+.home-page > .section.home-page__section,
 .home-page > .section.home-page__section ~ .section.home-page__section {
-  /* Thoughts — #F5F5F7 */
-  background: #f5f5f7;
+  background: var(--home-base);
+}
+
+body:has(.home-page) .site-footer__gap {
+  background: var(--home-base);
+}
+
+/*
+ * Apple card reveal (`lib/appleCardReveal.ts`) transition guard.
+ *
+ * The module writes each item's transform / opacity inline, frame by frame. Any
+ * transition already declared on those properties (e.g. the Recognition card's
+ * `transition: opacity 420ms ease`) would interpolate between frames and turn
+ * the rise into a lag. Off for the duration, handed back on settle.
+ */
+[data-apple-reveal].is-revealing [data-reveal-item] {
+  transition: none !important;
 }
 
 .home-page__section .section__header h2,
 .home-page__section .project-card__meta h3,
 .home-page__section .insight-list h3 {
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .home-page__section .section__header a,
 .home-page__section .project-card__meta p,
 .home-page__section .insight-list p {
-  color: rgba(10, 10, 10, 0.55);
+  color: rgba(29, 29, 31, 0.55);
 }
 
 .home-page__section .section__header a:hover {
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .home-page .project-window__title,
@@ -2821,7 +2931,7 @@ body:has(.home-page) .site-footer__gap {
 .home-page .insight-showcase__title,
 .home-page .project-featured__title,
 .home-page .insights-lead__title {
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .home-page .project-window__tagline,
@@ -2829,7 +2939,7 @@ body:has(.home-page) .site-footer__gap {
 .home-page .project-featured__tagline,
 .home-page .insight-showcase__excerpt,
 .home-page .insights-lead__excerpt {
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .home-page .project-type-chip,
@@ -2881,32 +2991,17 @@ body:has(.home-page) .site-footer__gap {
   margin-inline: auto;
 }
 
-/* Products / Thoughts — same band title as Recognition / Support / Character */
+/*
+ * Products / Thoughts — intro sits on the content shell. Alignment, label
+ * visibility and the type recipe come from the shared centre-led block further
+ * down (search for “Centre-led intros”), so these bands stay in step with
+ * Support and Character.
+ */
 .home-page > .section.home-page__section .home-section-intro {
-  align-items: flex-start;
   width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
   max-width: 100%;
   margin-inline: auto;
   margin-bottom: var(--home-section-intro-margin-bottom);
-  text-align: left;
-}
-
-.home-page > .section.home-page__section .home-section-intro__label {
-  display: none;
-}
-
-.home-page > .section.home-page__section .home-section-intro__title {
-  font-family: var(--home-band-title-font);
-  font-size: var(--home-band-title-size);
-  font-weight: var(--home-band-title-weight);
-  letter-spacing: var(--home-band-title-tracking);
-  line-height: var(--home-band-title-leading);
-  color: var(--home-band-title-color);
-  text-transform: none;
-  width: 100%;
-  max-width: 100%;
-  overflow: visible;
-  text-wrap: wrap;
 }
 
 .home-page__section .detail-index-cta {
@@ -2964,8 +3059,8 @@ body:has(.home-page) .site-footer__gap {
 .home-someone,
 .home-different,
 .support-know {
-  --home-section-label-color: rgba(10, 10, 10, 0.45);
-  --home-section-title-color: #0a0a0a;
+  --home-section-label-color: rgba(29, 29, 31, 0.45);
+  --home-section-title-color: #1d1d1f;
 }
 
 /* —— Home section intro (legacy class — same tokens; no description on home) —— */
@@ -3011,7 +3106,7 @@ body:has(.home-page) .site-footer__gap {
 }
 
 .home-page .empty-state {
-  color: rgba(10, 10, 10, 0.45);
+  color: rgba(29, 29, 31, 0.45);
 }
 
 /* —— My Approach (Apple-style snap gallery — ChatGPT carousel logic) —— */
@@ -3026,12 +3121,8 @@ body:has(.home-page) .site-footer__gap {
   isolation: isolate;
   width: 100%;
   overflow: hidden;
-  /*
-   * Shared home band plate — the same token the Character card plates use
-   * (`--home-different__feature`), so those two surfaces can never drift apart.
-   */
-  background: var(--home-band-gray);
-  color: #0a0a0a;
+  /* Ground comes from the page (see “Home ground”); this band adds no plate. */
+  color: #1d1d1f;
   padding-block: var(--home-section-pad);
 }
 
@@ -3046,7 +3137,8 @@ body:has(.home-page) .site-footer__gap {
 .home-someone__title {
   margin: 0;
   font-family: var(--home-band-title-font);
-  font-size: var(--home-band-title-size);
+  /* The one band-headline step — see `--home-band-headline-size` */
+  font-size: var(--home-band-headline-size);
   font-weight: var(--home-band-title-weight);
   font-synthesis: none;
   letter-spacing: var(--home-band-title-tracking);
@@ -3170,7 +3262,7 @@ body:has(.home-page) .site-footer__gap {
 
 .home-someone__caption strong,
 .home-someone__caption-hl {
-  color: #0a0a0a;
+  color: #1d1d1f;
   font-weight: inherit;
 }
 
@@ -3203,7 +3295,7 @@ body:has(.home-page) .site-footer__gap {
   border: 0;
   border-radius: 0;
   overflow: visible;
-  color: rgba(10, 10, 10, 0.56);
+  color: rgba(29, 29, 31, 0.56);
   background: rgba(210, 210, 215, 0.64);
   cursor: pointer;
   pointer-events: auto;
@@ -3231,7 +3323,7 @@ body:has(.home-page) .site-footer__gap {
 
 .home-someone__paddle:hover:not(:disabled) {
   background: rgba(223, 223, 227, 0.72);
-  color: rgba(10, 10, 10, 0.72);
+  color: rgba(29, 29, 31, 0.72);
 }
 
 .home-someone__paddle:active:not(:disabled) {
@@ -3239,12 +3331,12 @@ body:has(.home-page) .site-footer__gap {
 }
 
 .home-someone__paddle:focus-visible {
-  outline: 2px solid #0a0a0a;
+  outline: 2px solid #1d1d1f;
   outline-offset: 3px;
 }
 
 .home-someone__paddle:disabled {
-  color: rgba(10, 10, 10, 0.2);
+  color: rgba(29, 29, 31, 0.2);
   background: rgba(210, 210, 215, 0.28);
   cursor: default;
 }
@@ -3289,8 +3381,7 @@ body:has(.home-page) .site-footer__gap {
 /* —— Are You Looking… (draft copy park — layout TBD) —— */
 .home-someone-draft {
   width: 100%;
-  background: #fff;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .home-someone-draft__inner {
@@ -3342,7 +3433,7 @@ body:has(.home-page) .site-footer__gap {
   font-weight: 500;
   letter-spacing: -0.02em;
   line-height: 1.3;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .home-someone-draft__item-body {
@@ -3351,14 +3442,13 @@ body:has(.home-page) .site-footer__gap {
   font-size: clamp(0.875rem, 1vw, 1rem);
   font-weight: 400;
   line-height: 1.5;
-  color: rgba(10, 10, 10, 0.55);
+  color: rgba(29, 29, 31, 0.55);
 }
 
 /* —— Client recognition / highlights carousel —— */
 .home-recognition {
   width: 100%;
-  background: #fff;
-  color: #0a0a0a;
+  color: #1d1d1f;
   --home-recognition-card-gap: clamp(0.75rem, 1.4vw, 1.15rem);
   --home-recognition-autoplay-ms: 6000ms;
   /* Same vertical pad as every other home section */
@@ -3388,7 +3478,8 @@ body:has(.home-page) .site-footer__gap {
 
 .home-recognition .home-section-intro__title {
   font-family: var(--home-band-title-font);
-  font-size: var(--home-band-title-size);
+  /* The one band-headline step — see `--home-band-headline-size` */
+  font-size: var(--home-band-headline-size);
   font-weight: var(--home-band-title-weight);
   letter-spacing: var(--home-band-title-tracking);
   line-height: var(--home-band-title-leading);
@@ -3603,7 +3694,7 @@ body:has(.home-page) .site-footer__gap {
   inset: 0 auto 0 0;
   width: 0%;
   border-radius: inherit;
-  background: #0a0a0a;
+  background: #1d1d1f;
   animation: home-recognition-progress var(--home-recognition-autoplay-ms)
     linear forwards;
 }
@@ -3637,7 +3728,7 @@ body:has(.home-page) .site-footer__gap {
   border: 0;
   border-radius: 0;
   background: #f5f5f7;
-  color: #0a0a0a;
+  color: #1d1d1f;
   cursor: pointer;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -3660,12 +3751,28 @@ body:has(.home-page) .site-footer__gap {
   height: 100%;
   overflow: hidden;
   isolation: isolate;
+  /* Panel colour behind the panels — a sub-pixel seam must not show the band */
+  background: var(--ink-black);
 }
 
 .home-recognition-photo-accordion__panel {
   position: relative;
   display: block;
-  flex: 0 0 25%;
+  /*
+   * `flex-basis` carries the authored proportions; `flex-grow: 1` is a safety
+   * net, not a layout tool — at rest the four bases add up to exactly 100%, so
+   * no free space exists and the grow never bites.
+   *
+   * It matters when a hover interrupts a running tween. An interrupted
+   * transition restarts only the panels whose target changed; the others carry
+   * on from their own older progress, so for those frames the four bases no
+   * longer add up to 100%. With `flex-grow: 0` that shortfall stayed
+   * unallocated — up to ~27px on a wide card — and the row ended short of the
+   * card's right edge, showing the bare band through it while the pointer
+   * swept across the strips. Any free space is now distributed instead, so the
+   * four panels always reach the right edge.
+   */
+  flex: 1 1 25%;
   min-width: 0;
   height: 100%;
   margin: 0;
@@ -3673,7 +3780,7 @@ body:has(.home-page) .site-footer__gap {
   border: 0;
   border-radius: 0;
   overflow: hidden;
-  background: #0a0a0a;
+  background: var(--ink-black);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition:
@@ -3692,23 +3799,23 @@ body:has(.home-page) .site-footer__gap {
 .home-recognition-photo-accordion__panel:nth-child(2) {
   z-index: 2;
   box-shadow:
-    -16px 0 28px rgba(0, 0, 0, 0.55),
-    -4px 0 10px rgba(0, 0, 0, 0.35);
+    -16px 0 28px rgba(29, 29, 31, 0.55),
+    -4px 0 10px rgba(29, 29, 31, 0.35);
 }
 .home-recognition-photo-accordion__panel:nth-child(3) {
   z-index: 3;
   box-shadow:
-    -20px 0 34px rgba(0, 0, 0, 0.6),
-    -5px 0 12px rgba(0, 0, 0, 0.38);
+    -20px 0 34px rgba(29, 29, 31, 0.6),
+    -5px 0 12px rgba(29, 29, 31, 0.38);
 }
 .home-recognition-photo-accordion__panel:nth-child(4) {
   z-index: 4;
   box-shadow:
-    -24px 0 40px rgba(0, 0, 0, 0.68),
-    -6px 0 14px rgba(0, 0, 0, 0.42);
+    -24px 0 40px rgba(29, 29, 31, 0.68),
+    -6px 0 14px rgba(29, 29, 31, 0.42);
 }
 
-/* Expanded: other three share the remainder */
+/* Expanded: the other three share the remainder */
 .home-recognition-photo-accordion.is-active
   .home-recognition-photo-accordion__panel {
   flex-basis: 14.5833333333%;
@@ -3723,9 +3830,9 @@ body:has(.home-page) .site-footer__gap {
   flex-basis: 56.25%;
   z-index: 5;
   box-shadow:
-    -48px 0 56px rgba(0, 0, 0, 0.72),
-    24px 0 40px rgba(0, 0, 0, 0.42),
-    0 18px 40px rgba(0, 0, 0, 0.4);
+    -48px 0 56px rgba(29, 29, 31, 0.72),
+    24px 0 40px rgba(29, 29, 31, 0.42),
+    0 18px 40px rgba(29, 29, 31, 0.4);
 }
 
 .home-recognition-photo-accordion__panel img {
@@ -3733,6 +3840,14 @@ body:has(.home-page) .site-footer__gap {
   top: 0;
   left: 50%;
   width: auto;
+  /*
+   * `min-width: 100%` guarantees coverage. The square resolve is exactly the
+   * card height, which is exactly what the expanded panel measures — so at
+   * rest the two are the same width, but sub-pixel rounding can leave a
+   * hairline of panel plate down one side. Never let the image be narrower
+   * than the window; `object-fit: cover` absorbs the difference.
+   */
+  min-width: 100%;
   max-width: none;
   height: 100%;
   aspect-ratio: 1;
@@ -3786,7 +3901,12 @@ body:has(.home-page) .site-footer__gap {
 
 /* —— Recognition card 1: one plate — copy + packs —— */
 .home-recognition__card--product-box {
-  background: #f5f5f7;
+  /*
+   * Pure black by request (not `--ink-black`) — the plate reads as a stage for
+   * the packs’ glow. Copy stays on the media cards’ light ink, i.e. the
+   * product-box dark-ink override is gone.
+   */
+  background: #000;
   border: 0;
   /* Pack tops / sticker glow must not shear against the plate */
   overflow: visible;
@@ -3794,11 +3914,6 @@ body:has(.home-page) .site-footer__gap {
 
 .home-page .home-recognition__card--product-box {
   overflow: visible;
-}
-
-.home-recognition__card--product-box .home-recognition__card-title,
-.home-recognition__card--product-box .home-recognition__card-body {
-  color: #0a0a0a;
 }
 
 .home-recognition__media--product-box {
@@ -4053,11 +4168,10 @@ body:has(.home-page) .site-footer__gap {
   isolation: isolate;
   width: 100%;
   overflow: hidden;
-  background: #fff;
-  color: #0a0a0a;
+  color: #1d1d1f;
   padding-block: var(--home-section-pad);
-  --home-different-dim: rgba(10, 10, 10, 0.38);
-  --home-different-lit: #0a0a0a;
+  --home-different-dim: rgba(29, 29, 31, 0.38);
+  --home-different-lit: #1d1d1f;
   /* Same block pad as every other home section */
   --home-different-pad-block: var(--home-section-pad);
   /* Even space between the five columns */
@@ -4111,33 +4225,10 @@ body:has(.home-page) .site-footer__gap {
   gap: 0;
 }
 
-/* Intro — left-aligned with the five-card row (same band title as above) */
-.home-different .home-section-intro {
-  align-items: flex-start;
-  width: 100%;
-  max-width: none;
-  margin-inline: 0;
-  margin-bottom: var(--home-section-intro-margin-bottom);
-  text-align: left;
-}
-
-.home-different .home-section-intro__label {
-  display: none;
-}
-
-.home-different .home-section-intro__title {
-  font-family: var(--home-band-title-font);
-  font-size: var(--home-band-title-size);
-  font-weight: var(--home-band-title-weight);
-  letter-spacing: var(--home-band-title-tracking);
-  line-height: var(--home-band-title-leading);
-  color: var(--home-band-title-color);
-  text-transform: none;
-  width: 100%;
-  max-width: 100%;
-  overflow: visible;
-  text-wrap: wrap;
-}
+/*
+ * Intro sits here (centred) — see “Centre-led intros (Support + Character)”
+ * further down, where Support and Character share one block.
+ */
 
 /* Full shell width — five columns */
 .home-different__features-wrap {
@@ -4166,8 +4257,8 @@ body:has(.home-page) .site-footer__gap {
 /* One card container — solid plate; copy on top; keyword + cutout below */
 .home-different__feature {
   /* Light plate (Clients Come Back) — dark body + lit keyword */
-  --home-different-dim: rgba(10, 10, 10, 0.38);
-  --home-different-lit: #0a0a0a;
+  --home-different-dim: rgba(29, 29, 31, 0.38);
+  --home-different-lit: #1d1d1f;
   box-sizing: border-box;
   min-width: 0;
   position: relative;
@@ -4176,10 +4267,9 @@ body:has(.home-page) .site-footer__gap {
   overflow: hidden;
   min-height: clamp(30rem, 68vh, 44rem);
   /*
-   * Shared home band plate — the same token the My Approach band uses
-   * (`.home-someone`), so all five plates are one colour by construction and
-   * match that container. `--home-band-gray` resolves to `--home-band-plate-a`
-   * (#f5f5f7) on `.home-page`; this component only ever renders there.
+   * Character card plate — slightly darker than the page ground, and the same
+   * value as the Recognition “Clients Come Back” card, so those two surfaces
+   * cannot drift apart.
    */
   background: var(--home-band-gray);
   border: 0;
@@ -4240,7 +4330,7 @@ body:has(.home-page) .site-footer__gap {
   letter-spacing: var(--home-point-keyword-tracking);
   line-height: var(--home-point-keyword-leading);
   text-transform: uppercase;
-  color: #0a0a0a;
+  color: #1d1d1f;
   white-space: nowrap;
   /* Cap/alphabetic edges so vertical keyword sits flush to the pad */
   text-box-trim: trim-both;
@@ -4349,7 +4439,7 @@ body:has(.home-page) .site-footer__gap {
   font-weight: 600;
   letter-spacing: -0.025em;
   line-height: 1.25;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .home-copy__point-body {
@@ -4357,13 +4447,13 @@ body:has(.home-page) .site-footer__gap {
   font-size: clamp(0.875rem, 1vw, 0.95rem);
   font-weight: 500;
   line-height: 1.5;
-  color: rgba(10, 10, 10, 0.55);
+  color: rgba(29, 29, 31, 0.55);
 }
 
 .home-copy__placeholder {
   margin: 0;
   font-size: 1.25rem;
-  color: rgba(10, 10, 10, 0.22);
+  color: rgba(29, 29, 31, 0.22);
   letter-spacing: 0.08em;
 }
 
@@ -4391,7 +4481,7 @@ body:has(.home-page) .site-footer__gap {
 
 .home-pricing__card {
   padding: clamp(1.1rem, 2vw, 1.35rem) 0 0;
-  border-top: 1px solid rgba(10, 10, 10, 0.12);
+  border-top: 1px solid rgba(29, 29, 31, 0.12);
 }
 
 .home-pricing__card-title {
@@ -4400,7 +4490,7 @@ body:has(.home-page) .site-footer__gap {
   font-weight: 600;
   letter-spacing: -0.025em;
   line-height: 1.25;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .home-pricing__card-body {
@@ -4408,7 +4498,7 @@ body:has(.home-page) .site-footer__gap {
   font-size: clamp(0.8125rem, 0.95vw, 0.9rem);
   font-weight: 500;
   line-height: 1.45;
-  color: rgba(10, 10, 10, 0.55);
+  color: rgba(29, 29, 31, 0.55);
 }
 
 .home-pricing__footer {
@@ -4422,12 +4512,12 @@ body:has(.home-page) .site-footer__gap {
 .home-pricing__more {
   font-size: clamp(0.875rem, 1vw, 0.95rem);
   font-weight: 500;
-  color: rgba(10, 10, 10, 0.55);
+  color: rgba(29, 29, 31, 0.55);
   text-decoration: none;
 }
 
 .home-pricing__more:hover {
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .home-pricing__cta {
@@ -4438,7 +4528,7 @@ body:has(.home-page) .site-footer__gap {
   padding: 0 1.35rem;
   border-radius: 0;
   background: #fff;
-  color: #0a0a0a;
+  color: #1d1d1f;
   font-size: 0.9375rem;
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -4467,9 +4557,8 @@ body:has(.home-page) .site-footer__gap {
   isolation: isolate;
   width: 100%;
   padding-block: var(--home-section-pad);
-  color: #0a0a0a;
+  color: #1d1d1f;
   overflow: hidden;
-  background: #f5f5f7;
 }
 
 .support-know__shell {
@@ -4479,30 +4568,89 @@ body:has(.home-page) .site-footer__gap {
   margin: 0 auto;
 }
 
-/* Intro — single left-aligned headline, flush with stage left edge */
+/*
+ * ── Centre-led intros (Support · Character · Products · Thoughts) ──────────
+ *
+ * These bands open with the same centred stack — label · headline · paragraph
+ * — unlike Recognition / My approach, which lead from the left edge. They share
+ * one block on purpose, so the bands cannot drift apart:
+ *
+ *   · the label is shown and takes the headline's ink (the paragraph is the
+ *     only gray), and reads as written rather than all-caps
+ *   · the headline runs one step above the shared band title step, and
+ *   · headline and paragraph share `--home-intro-lead-w`, so the two blocks
+ *     are the same width by construction rather than by matching numbers
+ *
+ * The label / title selectors below land after the shell-placement rules above
+ * (and after the Products / Thoughts label rule), so visibility and type
+ * resolve here.
+ */
 .support-know .home-section-intro,
-.support-know__intro {
-  align-items: flex-start;
+.support-know__intro,
+.home-different .home-section-intro {
+  align-items: center;
   width: 100%;
   max-width: none;
   margin-inline: 0;
   margin-bottom: var(--home-section-intro-margin-bottom);
-  text-align: left;
+  text-align: center;
   overflow: visible;
 }
 
-.support-know .home-section-intro__title {
+/*
+ * Products / Thoughts need no container rule here: their shell placement above
+ * already sets the width and centring, and the base `.home-section-intro`
+ * centres its children. Restating `width: 100%` would drop the shell gutter and
+ * let the headline run to the viewport edges on phones.
+ */
+
+.support-know .home-section-intro__label,
+.home-different .home-section-intro__label,
+.home-page > .section.home-page__section .home-section-intro__label {
+  /* Products / Thoughts hide the label in their own rule — show it here */
+  display: block;
+  text-transform: none;
+  color: var(--home-band-title-color);
+}
+
+.support-know .home-section-intro__title,
+.home-different .home-section-intro__title,
+.home-page > .section.home-page__section .home-section-intro__title {
   font-family: var(--home-band-title-font);
-  font-size: var(--home-band-title-size);
+  /* The one band-headline step — see `--home-band-headline-size` */
+  font-size: var(--home-band-headline-size);
   font-weight: var(--home-band-title-weight);
   letter-spacing: var(--home-band-title-tracking);
   line-height: var(--home-band-title-leading);
   color: var(--home-band-title-color);
   text-transform: none;
   width: 100%;
-  max-width: 100%;
+  /* Same width as the paragraph — see `--home-intro-lead-w` */
+  max-width: var(--home-intro-lead-w);
   overflow: visible;
   text-wrap: wrap;
+}
+
+/*
+ * Intro paragraph — the home band body recipe.
+ * `--home-band-body-*` is the band body token (Recognition / Support /
+ * Character / Approach); it follows the project / insight card description size
+ * and switches to the phone step at ≤800px on its own.
+ */
+.home-section-intro__desc {
+  margin: 0;
+  /* Own gap — wider than the label ↔ title step the flex `gap` applies */
+  margin-block-start: clamp(1rem, 2vw, 1.6rem);
+  width: 100%;
+  /* Same width as the headline — see `--home-intro-lead-w` */
+  max-width: var(--home-intro-lead-w);
+  font-family: var(--home-band-body-font);
+  font-size: var(--home-band-body-size);
+  font-weight: var(--home-band-body-weight);
+  letter-spacing: var(--home-band-body-tracking);
+  line-height: var(--home-band-body-leading);
+  color: var(--home-band-body-color);
+  text-wrap: pretty;
 }
 
 .support-know__stage {
@@ -4526,7 +4674,7 @@ body:has(.home-page) .site-footer__gap {
   height: auto;
   min-height: 0;
   padding: 0;
-  background: #0a0a0a;
+  background: #1d1d1f;
   border-radius: 0;
   overflow: hidden;
 }
@@ -4538,7 +4686,7 @@ body:has(.home-page) .site-footer__gap {
   z-index: 0;
   min-width: 0;
   min-height: 0;
-  background: #0a0a0a;
+  background: #1d1d1f;
   border-radius: 0;
   overflow: hidden;
   pointer-events: none;
@@ -4616,13 +4764,13 @@ body:has(.home-page) .site-footer__gap {
   padding: 0;
   border: 0;
   border-radius: 0;
-  background: rgba(10, 10, 10, 0.72);
+  background: rgba(29, 29, 31, 0.72);
   color: #fff;
   cursor: pointer;
 }
 
 .support-know__playback:hover {
-  background: rgba(10, 10, 10, 0.88);
+  background: rgba(29, 29, 31, 0.88);
 }
 
 .support-know__playback svg {
@@ -4822,13 +4970,13 @@ body:has(.home-page) .site-footer__gap {
   width: 100%;
   height: 100%;
   border-radius: 0;
-  background: #0a0a0a;
+  background: #1d1d1f;
   overflow: hidden;
 }
 
 .support-know__panel--video,
 .support-know__panel--stack {
-  background: #0a0a0a;
+  background: #1d1d1f;
 }
 
 .support-know__panel--price {
@@ -4879,8 +5027,8 @@ body:has(.home-page) .site-footer__gap {
   object-position: center top;
   border-radius: 0;
   box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.28),
-    0 12px 32px rgba(0, 0, 0, 0.42);
+    0 1px 2px rgba(29, 29, 31, 0.28),
+    0 12px 32px rgba(29, 29, 31, 0.42);
   background: #fff;
   opacity: 0;
   pointer-events: none;
@@ -4922,7 +5070,7 @@ body:has(.home-page) .site-footer__gap {
 /* Cost Optimization continuous story — fills the media panel */
 .support-know-cost {
   --cost-paper: #fff;
-  --cost-ink: #0a0a0a;
+  --cost-ink: #1d1d1f;
   --cost-muted: #69736c;
   --cost-line: #e4e8e5;
   --cost-green: #16734e;
@@ -5539,7 +5687,7 @@ body:has(.home-page) .site-footer__gap {
   align-items: center;
   justify-content: center;
   gap: 0.38em;
-  color: #0a0a0a;
+  color: #1d1d1f;
   font-family: "Grtsk-SemiBold", "Grtsk", var(--font-sans);
   font-weight: 600;
   font-synthesis: none;
@@ -5583,7 +5731,7 @@ body:has(.home-page) .site-footer__gap {
   inset: 0;
   width: 100%;
   height: 100%;
-  background: #0a0a0a;
+  background: #1d1d1f;
 }
 
 @media (max-width: 900px) {
@@ -5724,7 +5872,7 @@ body:has(.home-page) .site-footer__gap {
   margin-top: calc(-1 * var(--header-offset));
   display: flex;
   align-items: flex-end;
-  color: #0a0a0a;
+  color: #1d1d1f;
   overflow: hidden;
   background: #fff;
 }
@@ -5770,7 +5918,7 @@ body:has(.home-page) .site-footer__gap {
   font-weight: 700;
   letter-spacing: -0.035em;
   line-height: 1;
-  color: #0a0a0a;
+  color: #1d1d1f;
   text-transform: none;
 }
 
@@ -5829,7 +5977,7 @@ body:has(.home-page) .site-footer__gap {
   padding: var(--page-index-intro-pad-top) var(--shell-gutter)
     var(--page-index-intro-gap-below);
   text-align: center;
-  color: #0a0a0a;
+  color: #1d1d1f;
   -webkit-user-select: text;
   user-select: text;
 }
@@ -5935,27 +6083,23 @@ body:has(.home-page) .site-footer__gap {
   justify-content: flex-start;
   gap: 1.25rem;
   margin: 0 0 clamp(0.85rem, 1.6vw, 1.15rem);
-  opacity: 0;
-  transform: translateY(0.45rem);
+  /*
+   * No opacity / transform here. The Filter label's entrance is effect 01 from
+   * the headline-motion engine (`components/ProjectFilter.tsx`), which owns
+   * that node. A second reveal on this wrapper would double the motion — and
+   * would hide the node the engine needs visible to animate.
+   */
 }
 
-.project-filter-bar.is-revealed {
-  opacity: 1;
-  transform: translateY(0);
-  transition:
-    opacity 1400ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 1400ms cubic-bezier(0.22, 1, 0.36, 1);
+.project-filter-trigger__label {
+  /* Inline-block: keeps the count on the same line and makes the engine's
+   * 26px travel actually transform (plain inline boxes ignore transforms). */
+  display: inline-block;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .project-filter-bar {
-    opacity: 1;
-    transform: none;
-  }
-
-  .project-filter-bar.is-revealed {
-    transition: none;
-  }
+.project-filter-trigger__count.is-pending {
+  /* Waits for the label's gate — see `revealed` in ProjectFilter.tsx */
+  visibility: hidden;
 }
 
 .project-filter-trigger,
@@ -5971,29 +6115,29 @@ body:has(.home-page) .site-footer__gap {
   letter-spacing: 0.12em;
   line-height: 1.2;
   text-transform: uppercase;
-  color: #0a0a0a;
+  color: #1d1d1f;
   cursor: pointer;
 }
 
 .project-filter-trigger:hover,
 .project-filter-clear:hover {
-  color: rgba(10, 10, 10, 0.65);
+  color: rgba(29, 29, 31, 0.65);
 }
 
 .project-filter-trigger.is-active {
-  color: rgba(10, 10, 10, 0.4);
+  color: rgba(29, 29, 31, 0.4);
 }
 
 .project-filter-trigger.is-active:hover {
-  color: rgba(10, 10, 10, 0.55);
+  color: rgba(29, 29, 31, 0.55);
 }
 
 .project-filter-clear {
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .project-filter-clear:hover {
-  color: rgba(10, 10, 10, 0.65);
+  color: rgba(29, 29, 31, 0.65);
 }
 
 /* Left filter drawer — Further-style */
@@ -6009,7 +6153,7 @@ body:has(.home-page) .site-footer__gap {
   position: absolute;
   inset: 0;
   border: 0;
-  background: rgba(10, 10, 10, 0.42);
+  background: rgba(29, 29, 31, 0.42);
   pointer-events: auto;
   cursor: pointer;
   opacity: 0;
@@ -6032,9 +6176,9 @@ body:has(.home-page) .site-footer__gap {
   max-width: 100%;
   height: 100%;
   background: var(--site-bg);
-  color: #0a0a0a;
+  color: #1d1d1f;
   pointer-events: auto;
-  box-shadow: 8px 0 32px rgba(10, 10, 10, 0.08);
+  box-shadow: 8px 0 32px rgba(29, 29, 31, 0.08);
   transform: translateX(-100%);
 }
 
@@ -6119,12 +6263,12 @@ body:has(.home-page) .site-footer__gap {
   letter-spacing: 0.12em;
   line-height: 1.2;
   text-transform: uppercase;
-  color: #0a0a0a;
+  color: #1d1d1f;
   cursor: pointer;
 }
 
 .project-filter-drawer__close:hover {
-  color: rgba(10, 10, 10, 0.65);
+  color: rgba(29, 29, 31, 0.65);
 }
 
 .project-filter-drawer__body {
@@ -6141,14 +6285,14 @@ body:has(.home-page) .site-footer__gap {
 .project-filter-drawer__section-heading {
   margin: 0;
   padding: 0 0 calc(clamp(0.85rem, 1.5vw, 1rem) * 0.95);
-  border-bottom: 1px solid rgba(10, 10, 10, 0.12);
+  border-bottom: 1px solid rgba(29, 29, 31, 0.12);
   font-family: var(--font-desc);
   font-size: calc(clamp(0.8125rem, 0.75rem + 0.35vw, 0.9375rem) * 0.95);
   font-weight: 700;
   letter-spacing: 0.06em;
   line-height: 1.2;
   text-transform: uppercase;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .project-filter-drawer__section + .project-filter-drawer__section {
@@ -6173,7 +6317,7 @@ body:has(.home-page) .site-footer__gap {
   font-size: calc(clamp(0.875rem, 0.82rem + 0.25vw, 0.9375rem) * 0.95);
   font-weight: 400;
   line-height: 1.35;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .project-filter-drawer__checkbox {
@@ -6182,14 +6326,14 @@ body:has(.home-page) .site-footer__gap {
   width: calc(1rem * 0.95);
   height: calc(1rem * 0.95);
   margin: 0.15em 0 0;
-  border: 1px solid #0a0a0a;
+  border: 1px solid #1d1d1f;
   border-radius: var(--button-radius, 0);
   background: transparent;
   cursor: pointer;
 }
 
 .project-filter-drawer__checkbox:checked {
-  background: #0a0a0a;
+  background: #1d1d1f;
   box-shadow: inset 0 0 0 2px var(--site-bg);
 }
 
@@ -6199,7 +6343,7 @@ body:has(.home-page) .site-footer__gap {
   align-items: center;
   gap: calc(clamp(1rem, 2vw, 1.5rem) * 0.95);
   padding: calc(clamp(1.25rem, 2.5vw, 1.75rem) * 0.95);
-  border-top: 1px solid rgba(10, 10, 10, 0.12);
+  border-top: 1px solid rgba(29, 29, 31, 0.12);
 }
 
 .project-filter-drawer__apply {
@@ -6208,7 +6352,7 @@ body:has(.home-page) .site-footer__gap {
   justify-content: center;
   min-height: calc(2.375rem * 0.95);
   padding: 0 calc(1.15rem * 0.95);
-  border: 1px solid #0a0a0a;
+  border: 1px solid #1d1d1f;
   border-radius: var(--button-radius, 0);
   background: transparent;
   font-family: var(--font-label);
@@ -6220,12 +6364,12 @@ body:has(.home-page) .site-footer__gap {
   text-align: center;
   /* Letter-spacing on uppercase reads left-heavy when flex-centered */
   text-indent: 0.1em;
-  color: #0a0a0a;
+  color: #1d1d1f;
   cursor: pointer;
 }
 
 .project-filter-drawer__apply:hover {
-  background: #0a0a0a;
+  background: #1d1d1f;
   color: var(--site-bg);
 }
 
@@ -6284,12 +6428,12 @@ body:has(.home-page) .site-footer__gap {
 .projects-page {
   margin-top: calc(-1 * var(--header-offset));
   background: var(--site-bg);
-  color: #0a0a0a;
+  color: #1d1d1f;
   --card-meta-type-font: var(--font-title);
   --card-meta-type-weight: 400;
   --index-card-radius: 0;
   --portfolio-card-radius: var(--index-card-radius);
-  --type-label-color: rgba(10, 10, 10, 0.5);
+  --type-label-color: rgba(29, 29, 31, 0.5);
   --type-chip-font: clamp(
     calc(0.5625rem * 0.97),
     calc(0.52rem * 0.97 + 0.15vw * 0.97),
@@ -6300,13 +6444,13 @@ body:has(.home-page) .site-footer__gap {
 
 .projects-page .project-window__title,
 .projects-page .project-featured__title {
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .projects-page .project-window__tagline,
 .projects-page .project-window__meta--stack .project-window__tagline,
 .projects-page .project-featured__tagline {
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .projects-page .project-type-chip {
@@ -6330,7 +6474,7 @@ body:has(.home-page) .site-footer__gap {
   min-height: clamp(14rem, 38vh, 26rem);
   margin: 0;
   text-align: center;
-  color: rgba(10, 10, 10, 0.55);
+  color: rgba(29, 29, 31, 0.55);
 }
 
 /* Further-style full-width lead — meta under cover (same as InsightsLead) */
@@ -6429,7 +6573,7 @@ body:has(.home-page) .site-footer__gap {
   letter-spacing: -0.015em;
   line-height: var(--card-meta-head-lh, 1);
   text-transform: none;
-  color: #0a0a0a;
+  color: #1d1d1f;
   text-wrap: balance;
 }
 
@@ -6447,7 +6591,7 @@ body:has(.home-page) .site-footer__gap {
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.35;
-  color: #0a0a0a;
+  color: #1d1d1f;
   /* Natural wrap at the container edge — no pretty/balance reshaping */
   text-wrap: wrap;
   overflow-wrap: break-word;
@@ -6691,7 +6835,7 @@ body:has(.home-page) .site-footer__gap {
   letter-spacing: -0.015em;
   line-height: var(--card-meta-title-lh);
   text-transform: none;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .project-window__meta--stack .project-window__title {
@@ -6701,7 +6845,7 @@ body:has(.home-page) .site-footer__gap {
   letter-spacing: -0.015em;
   line-height: var(--card-meta-title-lh);
   text-transform: none;
-  color: #0a0a0a;
+  color: #1d1d1f;
   min-width: 0;
   max-width: 100%;
   margin: 0;
@@ -6780,7 +6924,7 @@ body:has(.home-page) .site-footer__gap {
     calc(0.52rem * 0.97 + 0.15vw * 0.97),
     calc(0.6875rem * 0.97)
   );
-  --type-label-color: rgba(10, 10, 10, 0.5);
+  --type-label-color: rgba(29, 29, 31, 0.5);
   --font-type-label: var(--font-label);
 }
 
@@ -6997,7 +7141,7 @@ body:has(.home-page) .site-footer__gap {
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: var(--card-meta-desc-lh);
-  color: #0a0a0a;
+  color: #1d1d1f;
   text-wrap: wrap;
   overflow-wrap: break-word;
   word-break: normal;
@@ -7016,7 +7160,7 @@ body:has(.home-page) .site-footer__gap {
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: var(--card-meta-desc-lh);
-  color: #0a0a0a;
+  color: #1d1d1f;
   text-wrap: wrap;
   overflow-wrap: break-word;
   word-break: normal;
@@ -7172,7 +7316,7 @@ body:has(.home-page) .site-footer__gap {
   z-index: 0;
   height: calc(100% - 0.56rem);
   border-radius: var(--button-radius);
-  background: #0a0a0a;
+  background: #1d1d1f;
   pointer-events: none;
   opacity: 0;
   transition:
@@ -7200,7 +7344,7 @@ body:has(.home-page) .site-footer__gap {
   font-weight: 500;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #0a0a0a;
+  color: #1d1d1f;
   text-decoration: none;
   white-space: nowrap;
   background: transparent;
@@ -7212,7 +7356,7 @@ body:has(.home-page) .site-footer__gap {
 }
 
 .project-involvement__pill:hover {
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .project-involvement__pill.is-active {
@@ -7270,7 +7414,7 @@ body:has(.home-page) .site-footer__gap {
     padding: calc(0.4rem * 0.97) calc(0.75rem * 0.97);
     border-radius: var(--button-radius);
     background: #fff;
-    color: #0a0a0a;
+    color: #1d1d1f;
     font-family: var(--font-label);
     font-size: calc(0.75rem * 0.97 - 2px);
     font-weight: 500;
@@ -7284,16 +7428,16 @@ body:has(.home-page) .site-footer__gap {
 
   .project-involvement__pill:hover {
     background: #f0f0f0;
-    color: #0a0a0a;
+    color: #1d1d1f;
   }
 
   .project-involvement__pill.is-active {
-    background: #0a0a0a;
+    background: #1d1d1f;
     color: #fff;
   }
 
   .project-involvement__pill.is-active:hover {
-    background: #0a0a0a;
+    background: #1d1d1f;
     color: #fff;
   }
 }
@@ -7353,7 +7497,7 @@ body:has(.home-page) .site-footer__gap {
   height: var(--collection-frame-height);
   min-height: var(--collection-frame-height);
   max-height: var(--collection-frame-height);
-  background: #0a0a0a;
+  background: #1d1d1f;
   color: #fff;
   overflow: hidden;
   border-radius: var(--index-card-radius, var(--portfolio-card-radius, 0));
@@ -7458,7 +7602,7 @@ body:has(.home-page) .site-footer__gap {
   width: var(--collection-panel-width);
   height: var(--collection-panel-height);
   overflow: hidden;
-  background: #0a0a0a;
+  background: #1d1d1f;
   border-radius: var(--index-card-radius, var(--portfolio-card-radius, 0));
 }
 
@@ -7658,7 +7802,7 @@ body:has(.home-page) .site-footer__gap {
   font-size: var(--collection-headline-size);
   width: 100%;
   max-width: 100%;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .projects-collection__cta {
@@ -7717,10 +7861,10 @@ body:has(.home-page) .site-footer__gap {
   padding-top: 0;
   min-height: 100svh;
   background: var(--site-bg);
-  color: #0a0a0a;
+  color: #1d1d1f;
   --index-card-radius: 0;
   --portfolio-card-radius: var(--index-card-radius);
-  --type-label-color: rgba(10, 10, 10, 0.5);
+  --type-label-color: rgba(29, 29, 31, 0.5);
   --type-chip-font: clamp(
     calc(0.5625rem * 0.97),
     calc(0.52rem * 0.97 + 0.15vw * 0.97),
@@ -7779,7 +7923,7 @@ body:has(.home-page) .site-footer__gap {
 .collection-detail__rule {
   margin: 0;
   border: 0;
-  border-top: 1px solid rgba(10, 10, 10, 0.22);
+  border-top: 1px solid rgba(29, 29, 31, 0.22);
   width: 100%;
 }
 
@@ -7831,12 +7975,12 @@ body:has(.home-page) .site-footer__gap {
  */
 .collection-detail__entry-media .origin-button-wrap {
   mix-blend-mode: normal;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .collection-detail__entry-media .origin-button {
-  border-color: #0a0a0a;
-  color: #0a0a0a;
+  border-color: #1d1d1f;
+  color: #1d1d1f;
 }
 
 .collection-detail__entry-media-frame,
@@ -7892,7 +8036,7 @@ body:has(.home-page) .site-footer__gap {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #0a0a0a;
+  background: #1d1d1f;
   padding: clamp(1.25rem, 4vw, 2.25rem);
 }
 
@@ -7995,7 +8139,7 @@ body:has(.home-page) .site-footer__gap {
   letter-spacing: 0.04em;
   line-height: 1;
   text-transform: uppercase;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .collection-detail__project-title {
@@ -8007,7 +8151,7 @@ body:has(.home-page) .site-footer__gap {
   letter-spacing: 0.04em;
   line-height: 1.15;
   text-transform: uppercase;
-  color: #0a0a0a;
+  color: #1d1d1f;
   text-wrap: pretty;
 }
 
@@ -8020,7 +8164,7 @@ body:has(.home-page) .site-footer__gap {
 .collection-detail__project-rule {
   margin-block: clamp(2.5rem, 5vw, 3.75rem);
   border: 0;
-  border-top: 1px solid rgba(10, 10, 10, 0.22);
+  border-top: 1px solid rgba(29, 29, 31, 0.22);
   width: 100%;
 }
 
@@ -8048,7 +8192,7 @@ body:has(.home-page) .site-footer__gap {
   letter-spacing: -0.01em;
   line-height: 1.3;
   text-transform: none;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 /* Match project detail About body (`.project-case-demo__panel-copy`) */
@@ -8340,7 +8484,7 @@ body:has(.home-page) .site-footer__gap {
   z-index: 2;
   opacity: 0;
   pointer-events: none;
-  background-color: var(--swap-color-1, #0a0a0a);
+  background-color: var(--swap-color-1, #1d1d1f);
 }
 
 .project-showcase__swap-layer--images {
@@ -8485,7 +8629,7 @@ body:has(.home-page) .site-footer__gap {
 @keyframes project-showcase-color-cycle {
   0%,
   33.32% {
-    background-color: var(--swap-color-1, #0a0a0a);
+    background-color: var(--swap-color-1, #1d1d1f);
   }
   33.33%,
   66.65% {
@@ -8657,7 +8801,7 @@ body:has(.home-page) .site-footer__gap {
   padding: calc(var(--challenge-band-pad-y) * 1.05) var(--shell-gutter)
     var(--related-rule-gap);
   background: var(--site-bg);
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 /* Challenge owns the air above Related — don't stack related top margin */
@@ -8679,8 +8823,8 @@ body:has(.home-page) .site-footer__gap {
   align-items: end;
   color: #fff;
   background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.7)),
-    linear-gradient(120deg, #0a0a0a, #3b2d22 50%, #0a0a0a);
+    linear-gradient(180deg, rgba(29, 29, 31, 0.15), rgba(29, 29, 31, 0.7)),
+    linear-gradient(120deg, #1d1d1f, #3b2d22 50%, #1d1d1f);
 }
 
 .page-cover__content {
@@ -8739,7 +8883,7 @@ body:has(.home-page) .site-footer__gap {
 
 .project-detail {
   background: var(--site-bg);
-  color: #0a0a0a;
+  color: #1d1d1f;
   --index-card-radius: 0;
   --portfolio-card-radius: var(--index-card-radius);
   /* Challenge bottom ↔ Related rule ↔ Related title — equal air */
@@ -8757,12 +8901,12 @@ body:has(.home-page) .site-footer__gap {
 }
 
 .project-detail .projects-related {
-  border-top-color: rgba(10, 10, 10, 0.14);
+  border-top-color: rgba(29, 29, 31, 0.14);
   padding-top: var(--related-rule-gap);
 }
 
 .project-detail .projects-related__title {
-  color: #0a0a0a;
+  color: #1d1d1f;
   font-size: var(--detail-related-label-size);
   letter-spacing: -0.01em;
   line-height: 1.15;
@@ -8775,12 +8919,12 @@ body:has(.home-page) .site-footer__gap {
 }
 
 .project-detail .project-window__title {
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .project-detail .project-window__tagline,
 .project-detail .project-window__meta--stack .project-window__tagline {
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .project-detail .project-type-chip {
@@ -8803,7 +8947,7 @@ body:has(.home-page) .site-footer__gap {
 /* —— Case statement (title left · copy block right, text LTR left-aligned) —— */
 .project-case-statement {
   background: #fff;
-  color: #0a0a0a;
+  color: #1d1d1f;
   padding: clamp(2.5rem, 6vw, 4.5rem) 0;
 }
 
@@ -8826,7 +8970,7 @@ body:has(.home-page) .site-footer__gap {
   line-height: 1.2;
   text-transform: uppercase;
   text-align: left;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .project-case-statement__copy {
@@ -8844,7 +8988,7 @@ body:has(.home-page) .site-footer__gap {
   letter-spacing: 0.06em;
   line-height: 1.25;
   text-transform: uppercase;
-  color: #0a0a0a;
+  color: #1d1d1f;
   text-wrap: pretty;
 }
 
@@ -8855,7 +8999,7 @@ body:has(.home-page) .site-footer__gap {
   font-weight: 500;
   letter-spacing: -0.01em;
   line-height: 1.4;
-  color: #0a0a0a;
+  color: #1d1d1f;
   text-wrap: pretty;
 }
 
@@ -8883,7 +9027,7 @@ body:has(.home-page) .site-footer__gap {
   min-height: 100svh;
   margin-top: calc(-1 * var(--header-offset));
   overflow: hidden;
-  background: #0a0a0a;
+  background: #1d1d1f;
   color: #fff;
 }
 
@@ -8991,7 +9135,7 @@ body:has(.home-page) .site-footer__gap {
   justify-content: center;
   color: #fff;
   overflow: hidden;
-  background: #0a0a0a;
+  background: #1d1d1f;
 }
 
 .case-cover__media {
@@ -9005,10 +9149,10 @@ body:has(.home-page) .site-footer__gap {
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(0, 0, 0, 0.28) 0%,
-    rgba(0, 0, 0, 0.22) 38%,
-    rgba(0, 0, 0, 0.45) 72%,
-    rgba(0, 0, 0, 0.62) 100%
+    rgba(29, 29, 31, 0.28) 0%,
+    rgba(29, 29, 31, 0.22) 38%,
+    rgba(29, 29, 31, 0.45) 72%,
+    rgba(29, 29, 31, 0.62) 100%
   );
   pointer-events: none;
 }
@@ -9087,7 +9231,7 @@ body:has(.home-page) .site-footer__gap {
 .case-cover__cta:hover {
   background: #fff;
   border-color: #fff;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .case-study-placeholder {
@@ -9133,7 +9277,7 @@ body:has(.home-page) .site-footer__gap {
 /* Services — hero under transparent nav + three phase bands */
 .services-page {
   background: #eaeae1;
-  color: #0a0a0a;
+  color: #1d1d1f;
   /* Climb through sticky header spacer — content paints under transparent nav */
   margin-top: calc(-1 * var(--header-offset));
   --index-card-radius: 0;
@@ -9177,7 +9321,7 @@ body:has(.home-page) .site-footer__gap {
   letter-spacing: -0.04em;
   line-height: 1.05;
   text-transform: uppercase;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .svc-demo__hero-title.is-pending {
@@ -9209,7 +9353,7 @@ body:has(.home-page) .site-footer__gap {
   font-weight: var(--svc-body-weight, 400);
   line-height: var(--svc-body-lh);
   text-align: center;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .faq-index-intro .svc-demo__hero-desc a,
@@ -9226,7 +9370,7 @@ body:has(.home-page) .site-footer__gap {
   display: flex;
   align-items: stretch;
   background: #eaeae1;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 /* Hero owns the gap above the first phase rule */
@@ -9303,7 +9447,7 @@ body:has(.home-page) .site-footer__gap {
   text-transform: uppercase;
   text-align: center;
   text-wrap: balance;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 @media (min-width: 900px) {
@@ -9320,7 +9464,7 @@ body:has(.home-page) .site-footer__gap {
 .svc-demo__stage--2,
 .svc-demo__stage--3 {
   background: #eaeae1;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 /* Phase band — content-width rule, then half columns top-aligned */
@@ -9336,7 +9480,7 @@ body:has(.home-page) .site-footer__gap {
 .svc-phase__rule {
   width: 100%;
   height: 1px;
-  background: #0a0a0a;
+  background: #1d1d1f;
   flex: 0 0 auto;
 }
 
@@ -9382,7 +9526,7 @@ body:has(.home-page) .site-footer__gap {
   letter-spacing: -0.04em;
   line-height: 1;
   text-transform: none;
-  color: #0a0a0a;
+  color: #1d1d1f;
   overflow: visible;
   text-wrap: wrap;
 }
@@ -9455,7 +9599,7 @@ body:has(.home-page) .site-footer__gap {
 .svc-item + .svc-item {
   margin-top: clamp(2rem, 4vw, 3rem);
   padding-top: clamp(2rem, 4vw, 3rem);
-  border-top: 1px solid #0a0a0a;
+  border-top: 1px solid #1d1d1f;
 }
 
 .svc-item__intro {
@@ -9478,7 +9622,7 @@ body:has(.home-page) .site-footer__gap {
   font-weight: 500;
   letter-spacing: -0.02em;
   line-height: 1.2;
-  color: #0a0a0a;
+  color: #1d1d1f;
   overflow: visible;
   /* Normal wrap — balance was forcing early breaks while space remained */
   text-wrap: wrap;
@@ -9494,7 +9638,7 @@ body:has(.home-page) .site-footer__gap {
 /* Light band — label ink + border share one color/weight (no difference blend) */
 .svc-demo .origin-button-wrap {
   mix-blend-mode: normal;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .svc-demo a.origin-button,
@@ -9515,9 +9659,9 @@ body:has(.home-page) .site-footer__gap {
 
   .svc-demo a.origin-button:hover,
   .svc-demo button.origin-button:hover {
-    background: #0a0a0a;
+    background: #1d1d1f;
     color: #fff;
-    border-color: #0a0a0a;
+    border-color: #1d1d1f;
   }
 }
 
@@ -9604,7 +9748,7 @@ body:has(.home-page) .site-footer__gap {
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .svc-phase__cell-body {
@@ -9809,7 +9953,7 @@ body:has(.home-page) .site-footer__gap {
   padding: 0;
   overflow: visible;
   background: transparent;
-  color: #0a0a0a;
+  color: #1d1d1f;
   box-shadow: none;
 }
 
@@ -9832,7 +9976,7 @@ body:has(.home-page) .site-footer__gap {
   overflow: hidden;
   border-radius: 0;
   background: #fff;
-  box-shadow: 0 28px 100px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 28px 100px rgba(29, 29, 31, 0.2);
 }
 
 /* Fixed edge veils — height matches L/R pad; sit above scroll content */
@@ -9881,7 +10025,7 @@ body:has(.home-page) .site-footer__gap {
   padding: 0;
   border: 0;
   border-radius: 0;
-  background: #0a0a0a;
+  background: #1d1d1f;
   color: #fff;
   cursor: pointer;
 }
@@ -9945,7 +10089,7 @@ body:has(.home-page) .site-footer__gap {
   font-size: clamp(1.35rem, 2.5vw, 1.75rem);
   font-weight: 600;
   line-height: 1.2;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .svc-workflow__coming-soon-body {
@@ -9982,7 +10126,7 @@ body:has(.home-page) .site-footer__gap {
   content: "";
   display: block;
   width: 100%;
-  border-top: 1px solid rgba(10, 10, 10, 0.14);
+  border-top: 1px solid rgba(29, 29, 31, 0.14);
 }
 
 /*
@@ -10046,12 +10190,12 @@ body:has(.home-page) .site-footer__gap {
 }
 
 .svc-workflow__step-media--wall {
-  background: #0a0a0a;
+  background: #1d1d1f;
   overflow: hidden;
 }
 
 .svc-workflow__step-media--cut {
-  background: #0a0a0a;
+  background: #1d1d1f;
   overflow: hidden;
 }
 
@@ -10059,7 +10203,7 @@ body:has(.home-page) .site-footer__gap {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: #0a0a0a;
+  background: #1d1d1f;
 }
 
 .svc-workflow__photo-cut-frame {
@@ -10093,9 +10237,9 @@ body:has(.home-page) .site-footer__gap {
 
 .svc-workflow__eval {
   --se-bg: #f5f5f7;
-  --se-text: #0a0a0a;
-  --se-muted: rgba(10, 10, 10, 0.48);
-  --se-line: rgba(10, 10, 10, 0.12);
+  --se-text: #1d1d1f;
+  --se-muted: rgba(29, 29, 31, 0.48);
+  --se-line: rgba(29, 29, 31, 0.12);
   --se-green: #0f5c34;
   --se-green-bg: #d8f0e0;
   --se-amber: #996414;
@@ -10279,7 +10423,7 @@ body:has(.home-page) .site-footer__gap {
 }
 
 .svc-workflow__eval-row[data-state="active"] {
-  background: rgba(10, 10, 10, 0.04);
+  background: rgba(29, 29, 31, 0.04);
   color: var(--se-text);
 }
 
@@ -10403,9 +10547,9 @@ body:has(.home-page) .site-footer__gap {
 /* Factory visit prep demo — Define What Needs to Be Verified */
 .svc-workflow__fvp {
   --fvp-bg: #f5f5f7;
-  --fvp-text: #0a0a0a;
-  --fvp-muted: rgba(10, 10, 10, 0.48);
-  --fvp-line: rgba(10, 10, 10, 0.12);
+  --fvp-text: #1d1d1f;
+  --fvp-muted: rgba(29, 29, 31, 0.48);
+  --fvp-line: rgba(29, 29, 31, 0.12);
   --fvp-side: #e4e4e7;
   --fvp-plan: #d0d0d4;
   --fvp-pad: clamp(0.55rem, 1.5vw, 0.8rem);
@@ -10541,7 +10685,7 @@ body:has(.home-page) .site-footer__gap {
   font-weight: 400;
   letter-spacing: 0.01em;
   line-height: 1.35;
-  color: #0a0a0a;
+  color: #1d1d1f;
   text-align: center;
   overflow-wrap: anywhere;
   word-break: break-word;
@@ -10607,9 +10751,9 @@ body:has(.home-page) .site-footer__gap {
 /* Factory risk compare — Identify Risks Before Production */
 .svc-workflow__frc {
   --frc-bg: #f5f5f7;
-  --frc-text: #0a0a0a;
-  --frc-muted: rgba(10, 10, 10, 0.48);
-  --frc-line: rgba(10, 10, 10, 0.12);
+  --frc-text: #1d1d1f;
+  --frc-muted: rgba(29, 29, 31, 0.48);
+  --frc-line: rgba(29, 29, 31, 0.12);
   --frc-side: #e4e4e7;
   --frc-plan: #d0d0d4;
   --frc-amber: #996414;
@@ -10866,7 +11010,7 @@ body:has(.home-page) .site-footer__gap {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: #0a0a0a;
+  background: #1d1d1f;
   pointer-events: none;
 }
 
@@ -10930,7 +11074,7 @@ body:has(.home-page) .site-footer__gap {
   width: 100%;
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  background: #0a0a0a;
+  background: #1d1d1f;
   border-radius: 0;
 }
 
@@ -10995,7 +11139,7 @@ body:has(.home-page) .site-footer__gap {
   letter-spacing: 0.025em;
   text-transform: uppercase;
   line-height: 1.15;
-  color: #0a0a0a;
+  color: #1d1d1f;
   white-space: nowrap;
   transform-origin: center center;
   -webkit-backface-visibility: hidden;
@@ -11045,7 +11189,7 @@ body:has(.home-page) .site-footer__gap {
   min-width: 0;
   margin: 0;
   padding: 0.65rem 0;
-  border-bottom: 1px solid rgba(10, 10, 10, 0.075);
+  border-bottom: 1px solid rgba(29, 29, 31, 0.075);
   background: transparent;
 }
 
@@ -11068,10 +11212,10 @@ body:has(.home-page) .site-footer__gap {
   box-sizing: border-box;
   width: 1rem;
   height: 1rem;
-  border: 1px solid rgba(10, 10, 10, 0.25);
+  border: 1px solid rgba(29, 29, 31, 0.25);
   border-radius: 3px;
   background: rgba(255, 255, 255, 0.8);
-  color: #0a0a0a;
+  color: #1d1d1f;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -11123,7 +11267,7 @@ body:has(.home-page) .site-footer__gap {
   font-weight: 600;
   /* lh 1 — media top lines up with visible type, not half-leading */
   line-height: 1;
-  color: #0a0a0a;
+  color: #1d1d1f;
   text-box-trim: trim-start;
   text-box-edge: cap alphabetic;
 }
@@ -11141,7 +11285,7 @@ body:has(.home-page) .site-footer__gap {
 .svc-workflow__step-body-em {
   font-family: "Grtsk-Medium", "Grtsk", var(--font-sans);
   font-weight: 500;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 @media (max-width: 1100px) {
@@ -11378,13 +11522,13 @@ body:has(.home-page) .site-footer__gap {
 .svc-demo__stage--2 .svc-strip,
 .svc-demo__stage--3 .svc-strip {
   background: #fff;
-  color: #0a0a0a;
-  border-color: rgba(10, 10, 10, 0.1);
+  color: #1d1d1f;
+  border-color: rgba(29, 29, 31, 0.1);
 }
 
 .svc-demo__stage--2 .svc-strip :is(.svc-strip__code, .svc-strip__title),
 .svc-demo__stage--3 .svc-strip :is(.svc-strip__code, .svc-strip__title) {
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .svc-strip.is-active {
@@ -11450,13 +11594,13 @@ body:has(.home-page) .site-footer__gap {
 .svc-demo__stage--2 .svc-tags__cell,
 .svc-demo__stage--3 .svc-tags__cell {
   background: rgba(255, 255, 255, 0.72);
-  border-color: rgba(10, 10, 10, 0.1);
-  color: #0a0a0a;
+  border-color: rgba(29, 29, 31, 0.1);
+  color: #1d1d1f;
 }
 
 .svc-demo__stage--2 .svc-tags__cell .svc-tags__label,
 .svc-demo__stage--3 .svc-tags__cell .svc-tags__label {
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .svc-tags__label {
@@ -11601,7 +11745,7 @@ body:has(.home-page) .site-footer__gap {
   top: 5rem;
   border: 1px solid rgba(255, 255, 255, 0.14);
   padding: 1.25rem;
-  background: #0a0a0a;
+  background: #1d1d1f;
 }
 
 .service-summary ul {
@@ -11663,7 +11807,7 @@ body:has(.home-page) .site-footer__gap {
   --index-card-radius: 0;
   --portfolio-card-radius: var(--index-card-radius);
   background: var(--site-bg);
-  color: #0a0a0a;
+  color: #1d1d1f;
   margin-top: calc(-1 * var(--header-offset));
   padding-block-start: calc(var(--header-offset) + 8rem);
   min-height: 100svh;
@@ -11725,7 +11869,7 @@ body:has(.home-page) .site-footer__gap {
   line-height: 1.12;
   text-wrap: balance;
   text-transform: none;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .insight-detail__cover {
@@ -11733,7 +11877,7 @@ body:has(.home-page) .site-footer__gap {
   margin: 0 0 clamp(2.5rem, 5vw, 4rem);
   overflow: hidden;
   border-radius: var(--index-card-radius);
-  background: #0a0a0a;
+  background: #1d1d1f;
   aspect-ratio: 3000 / 1687;
 }
 
@@ -11779,7 +11923,7 @@ body:has(.home-page) .site-footer__gap {
   font-weight: 500;
   letter-spacing: -0.02em;
   line-height: 1.25;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .insight-detail__heading:first-child {
@@ -11793,7 +11937,7 @@ body:has(.home-page) .site-footer__gap {
   font-weight: 700;
   letter-spacing: -0.015em;
   line-height: 1.3;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .insight-detail__list {
@@ -11819,7 +11963,7 @@ body:has(.home-page) .site-footer__gap {
   font-size: inherit;
   font-weight: inherit;
   font-style: inherit;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .insight-detail__heading strong,
@@ -11834,7 +11978,7 @@ body:has(.home-page) .site-footer__gap {
   margin: 0 0 1.25em;
   padding: 0;
   border: 0;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .insight-detail__quote p {
@@ -11846,7 +11990,7 @@ body:has(.home-page) .site-footer__gap {
 /* Pull emphasis — same body type, black ink */
 .insight-detail__quote--pull {
   font-size: inherit;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .insight-detail__quote--pull p {
@@ -11868,7 +12012,7 @@ body:has(.home-page) .site-footer__gap {
 .insights-related {
   margin-top: clamp(3rem, 6vw, 4.5rem);
   padding-top: clamp(1.75rem, 3vw, 2.5rem);
-  border-top: 1px solid rgba(10, 10, 10, 0.12);
+  border-top: 1px solid rgba(29, 29, 31, 0.12);
 }
 
 .insights-related__title {
@@ -11882,11 +12026,11 @@ body:has(.home-page) .site-footer__gap {
   font-weight: 600;
   font-synthesis: none;
   letter-spacing: -0.03em;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .insight-detail .empty-state {
-  color: rgba(10, 10, 10, 0.55);
+  color: rgba(29, 29, 31, 0.55);
 }
 
 @media (max-width: 1100px) {
@@ -11941,7 +12085,7 @@ body:has(.home-page) .site-footer__gap {
   --card-meta-type-weight: 400;
   --index-card-radius: 0;
   --portfolio-card-radius: var(--index-card-radius);
-  --type-label-color: rgba(10, 10, 10, 0.5);
+  --type-label-color: rgba(29, 29, 31, 0.5);
   --type-chip-font: clamp(
     calc(0.5625rem * 0.97),
     calc(0.52rem * 0.97 + 0.15vw * 0.97),
@@ -11949,22 +12093,22 @@ body:has(.home-page) .site-footer__gap {
   );
   --font-type-label: var(--font-label);
   background: var(--site-bg);
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .insights-page .insight-showcase__title,
 .insights-page .insights-lead__title {
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .insights-page .insight-showcase__excerpt,
 .insights-page .insights-lead__excerpt {
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .insight-detail .insights-related .insight-showcase__title,
 .insight-detail .insights-related .insight-showcase__excerpt {
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .insight-detail .insights-related .insight-chip {
@@ -12026,7 +12170,7 @@ body:has(.home-page) .site-footer__gap {
   min-height: clamp(14rem, 38vh, 26rem);
   margin: 0;
   text-align: center;
-  color: rgba(10, 10, 10, 0.55);
+  color: rgba(29, 29, 31, 0.55);
 }
 
 .insights-page .insight-filter-bar {
@@ -12230,7 +12374,7 @@ body:has(.home-page) .site-footer__gap {
   --case-media-gap: var(--shell-gutter);
   /* Hero → first gallery: same as media-stack row gap (not ultra-wide side inset) */
   --case-gallery-top-gap: var(--case-media-gap);
-  color: #0a0a0a;
+  color: #1d1d1f;
   background: var(--site-bg);
 }
 
@@ -12428,7 +12572,7 @@ body:has(.home-page) .site-footer__gap {
 .project-detail .youtube-background__veil,
 .project-case-demo .youtube-background__veil {
   /* Same as dark case page — hide YT chrome without a beige flash */
-  background: #0a0a0a;
+  background: #1d1d1f;
 }
 
 /* Meta bar — TITLE 35% | 8% | DESC (rest) | 8% | TAGS (full intrinsic, right) */
@@ -12722,7 +12866,7 @@ body:has(.home-page) .site-footer__gap {
 @media (hover: hover) {
   .project-case-demo__toggle-pin:has(.origin-button:hover) {
     mix-blend-mode: normal;
-    color: #0a0a0a;
+    color: #1d1d1f;
   }
 }
 
@@ -12730,7 +12874,7 @@ body:has(.home-page) .site-footer__gap {
 .project-case-demo__toggle-pin:has(.origin-button:active),
 .project-case-demo__toggle-pin:has(.origin-button.is-pressed) {
   mix-blend-mode: normal;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 /* Sheet open: float over dark panel — white fill like other dark bands */
@@ -12742,7 +12886,7 @@ body:has(.home-page) .site-footer__gap {
 .project-case-demo__toggle-pin.is-sheet-float .origin-button:active,
 .project-case-demo__toggle-pin.is-sheet-float .origin-button.is-pressed {
   background: #fff !important;
-  color: #0a0a0a !important;
+  color: #1d1d1f !important;
   border-color: #fff !important;
 }
 
@@ -12781,8 +12925,8 @@ body:has(.home-page) .site-footer__gap {
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   box-shadow:
-    0 0.5px 0 rgba(0, 0, 0, 0.06),
-    0 4px 16px rgba(0, 0, 0, 0.12);
+    0 0.5px 0 rgba(29, 29, 31, 0.06),
+    0 4px 16px rgba(29, 29, 31, 0.12);
 }
 
 .project-case-demo__toggle-glare::before,
@@ -12818,7 +12962,7 @@ body:has(.home-page) .site-footer__gap {
   border: 0;
   border-radius: inherit;
   background: transparent;
-  color: #0a0a0a;
+  color: #1d1d1f;
   font-family: var(--font-sans);
   font-size: 0.9375rem;
   font-weight: 500;
@@ -12839,7 +12983,7 @@ body:has(.home-page) .site-footer__gap {
   border: 0;
   border-radius: inherit;
   background: transparent;
-  color: #0a0a0a;
+  color: #1d1d1f;
   font-family: var(--font-sans);
   font-size: 0.9375rem;
   font-weight: 500; /* Medium — one step above Regular */
@@ -13085,6 +13229,15 @@ body:has(.home-page) .site-footer__gap {
   margin-bottom: 0;
 }
 
+.project-case-demo__panel-title-slot {
+  /*
+   * `flow-root` keeps the title's bottom margin inside the slot instead of
+   * letting it collapse through — same spacing as before, but the slot itself
+   * is what the title observer measures.
+   */
+  display: flow-root;
+}
+
 .project-case-demo__panel-title {
   /* One blank body line under the chapter label */
   margin: 0 0 1.3rem;
@@ -13095,7 +13248,7 @@ body:has(.home-page) .site-footer__gap {
   letter-spacing: 0.04em;
   line-height: 1.25;
   text-transform: uppercase;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .project-case-demo__panel-subhead {
@@ -13106,7 +13259,7 @@ body:has(.home-page) .site-footer__gap {
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.3;
-  color: #0a0a0a;
+  color: #1d1d1f;
 }
 
 .project-case-demo__panel-block > .project-case-demo__panel-subhead:first-of-type {
@@ -13142,7 +13295,7 @@ body:has(.home-page) .site-footer__gap {
   max-width: 100%;
   margin: 5.5rem 0 5.5rem;
   padding: 2.75rem 0 0;
-  border-top: 1px solid rgba(10, 10, 10, 0.22);
+  border-top: 1px solid rgba(29, 29, 31, 0.22);
   box-sizing: border-box;
 }
 
@@ -13178,7 +13331,7 @@ body:has(.home-page) .site-footer__gap {
   letter-spacing: -0.01em;
   line-height: 1.15;
   text-transform: uppercase;
-  color: #0a0a0a;
+  color: #1d1d1f;
   text-box-trim: trim-start;
   text-box-edge: cap alphabetic;
   white-space: nowrap;
@@ -13195,7 +13348,7 @@ body:has(.home-page) .site-footer__gap {
   text-align: left;
   /* Same face as “Special thanks”; 3px smaller than the section label */
   font-family: var(--font-desc);
-  color: rgba(10, 10, 10, 0.5);
+  color: rgba(29, 29, 31, 0.5);
   font-size: calc(var(--detail-related-label-size, 1rem) - 3px);
   font-weight: 600;
   font-synthesis: none;
@@ -13228,7 +13381,7 @@ body:has(.home-page) .site-footer__gap {
   margin: 0;
   padding: 0;
   font-family: var(--font-sans);
-  color: #0a0a0a;
+  color: #1d1d1f;
   /* Names: prior +2px over label, then −3px (desktop + mobile) */
   font-size: calc(var(--detail-related-label-size, 1rem) + 2px - 3px);
   font-weight: 400;
@@ -13244,7 +13397,7 @@ body:has(.home-page) .site-footer__gap {
   .project-case-demo__credits {
     margin: clamp(2.5rem, 7vw, 3.5rem) 0 clamp(3rem, 8vw, 4rem);
     padding-top: clamp(1.5rem, 4.5vw, 2rem);
-    border-top-color: rgba(10, 10, 10, 0.14);
+    border-top-color: rgba(29, 29, 31, 0.14);
   }
 
   .project-case-demo__credits-grid {
@@ -13340,13 +13493,13 @@ body:has(.home-page) .site-footer__gap {
     margin-right: 0 !important;
     padding-left: 0;
     background: var(--site-bg);
-    color: #0a0a0a;
+    color: #1d1d1f;
     top: 0 !important;
     transform: translateX(100%);
   }
 
   .project-case-demo__panel-title {
-    color: #0a0a0a;
+    color: #1d1d1f;
     /* Chapter labels (Background / Challenge / …) — 6px smaller on phone */
     font-size: calc(1.375rem - 3px - 6px);
   }
@@ -13354,7 +13507,7 @@ body:has(.home-page) .site-footer__gap {
   .project-case-demo__panel-subhead {
     /* Match mobile body size */
     font-size: calc(1rem - 1px);
-    color: #0a0a0a;
+    color: #1d1d1f;
   }
 
   .project-case-demo__panel-copy,
@@ -13449,10 +13602,10 @@ body:has(.home-page) .site-footer__gap {
 /* About page — bouayaben.com content design (nav/footer stay site chrome) */
 .about-page {
   --about-bg: var(--site-bg);
-  --about-ink: #0a0a0a;
-  --about-ink-dim: rgba(10, 10, 10, 0.55);
-  --about-ink-faint: rgba(10, 10, 10, 0.35);
-  --about-line: rgba(10, 10, 10, 0.12);
+  --about-ink: #1d1d1f;
+  --about-ink-dim: rgba(29, 29, 31, 0.55);
+  --about-ink-faint: rgba(29, 29, 31, 0.35);
+  --about-line: rgba(29, 29, 31, 0.12);
   --about-accent: #ff5c28;
   /* Site type — Grtsk / FK Grotesk Mono */
   --about-font-display-stack: var(--font-sans);
@@ -13535,17 +13688,6 @@ body:has(.about-page) .site-end {
   text-box-edge: cap alphabetic;
 }
 
-.about-boua__link {
-  position: relative;
-  color: inherit;
-  text-decoration: none;
-}
-
-.about-boua__link:hover,
-.about-boua__link:focus-visible {
-  color: var(--about-ink);
-}
-
 .about-boua__work,
 .about-boua__about,
 .about-boua__testimonials,
@@ -13593,13 +13735,6 @@ body:has(.about-page) .site-end {
     max-width: 100%;
     justify-self: end;
   }
-}
-
-.about-boua__section-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: var(--about-space-6);
 }
 
 .about-boua__work {
@@ -13699,7 +13834,7 @@ body:has(.about-page) .site-end {
 }
 
 .about-boua__work-row--trigger:focus-visible {
-  outline: 2px solid rgba(10, 10, 10, 0.35);
+  outline: 2px solid rgba(29, 29, 31, 0.35);
   outline-offset: 4px;
 }
 
@@ -13980,22 +14115,45 @@ body:has(.about-page) .site-end {
 }
 
 .about-boua__intro {
+  /*
+   * The photo column is a fixed reservation, and that is load-bearing: the
+   * portrait scales to the copy column's height (see `.about-boua__portrait`),
+   * which makes its width a function of that height. If the width could feed
+   * back into the grid the layout would be circular — photo widens → copy
+   * narrows → copy reflows taller → photo grows again. Pinning the track keeps
+   * the copy width stable, so its height is definite.
+   */
+  --about-intro-photo-col: clamp(11rem, 24vw, 18rem);
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: var(--about-intro-photo-col) minmax(0, 1fr);
   gap: 2.5rem;
-  align-items: start;
+  align-items: stretch;
 }
 
 .about-boua__portrait {
   position: relative;
-  width: clamp(11rem, 24vw, 18rem);
+  /*
+   * `height: 100%` + `aspect-ratio` + `width: auto` = proportional scaling.
+   * The row height comes from the copy column, so the photo takes that height
+   * and derives its own width from 3:4 — the image scales whole rather than
+   * being squashed into a box of the wrong shape.
+   * Both of the next two are required, not decoration: `justify-self: start`
+   * keeps `aspect-ratio` in charge of the width (a stretched grid item would
+   * fill the track instead), and `align-self: stretch` is the definite height
+   * the ratio resolves against. `max-width` only bites when the scaled photo
+   * would exceed its reserved column.
+   */
+  height: 100%;
+  width: auto;
   aspect-ratio: 3 / 4;
+  justify-self: start;
+  align-self: stretch;
+  max-width: 100%;
   flex-shrink: 0;
   line-height: 0;
   font-size: 0;
   overflow: hidden;
   border-radius: 0;
-  align-self: start;
   min-height: 0;
 }
 
@@ -14033,14 +14191,6 @@ body:has(.about-page) .site-end {
   text-box: normal;
   text-box-trim: none;
   text-box-edge: auto;
-}
-
-.about-boua__lede-line {
-  display: block;
-}
-
-.about-boua__lede-line + .about-boua__lede-line {
-  margin-block-start: 0.7em;
 }
 
 .about-boua__intro-copy .about-boua__body {
@@ -14122,22 +14272,6 @@ body:has(.about-page) .site-end {
   font-size: var(--about-step--1);
   letter-spacing: 0.04em;
   line-height: 1.15;
-}
-
-.about-boua__notes-head {
-  display: block;
-  margin-top: var(--about-space-8);
-}
-
-.about-boua__notes {
-  display: grid;
-  gap: 0.4rem;
-  margin: var(--about-space-2) 0 0;
-  padding: var(--about-space-3) 0 0;
-  border-top: 1px solid var(--about-line);
-  list-style: none;
-  font-size: var(--about-step--1);
-  color: var(--about-ink-faint);
 }
 
 /* Expertise — rail + four columns with identical inter-column gaps */
@@ -14511,73 +14645,6 @@ body:has(.about-page) .site-end {
   color: var(--about-ink-dim);
   text-wrap: pretty;
 }
-
-.about-boua__rs-meta {
-  margin: 0 0 var(--about-space-2);
-  font-size: var(--about-step--1);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--about-ink-faint);
-  line-height: 1;
-}
-
-.about-boua__rs-title {
-  margin: 0;
-  max-width: 30ch;
-  font-family: var(--about-font-display-stack);
-  font-weight: 600;
-  font-size: var(--about-step-2);
-  letter-spacing: -0.01em;
-  line-height: 1.15;
-  text-wrap: pretty;
-}
-
-.about-boua__rs-prose {
-  display: grid;
-  gap: var(--about-space-3);
-  margin-top: var(--about-space-4);
-  max-width: 58ch;
-  color: var(--about-ink-dim);
-  text-wrap: pretty;
-}
-
-.about-boua__rs-prose p {
-  margin: 0;
-}
-
-.about-boua__rs-figures {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--about-space-8);
-  margin: var(--about-space-8) 0 0;
-}
-
-.about-boua__rs-figures dt {
-  font-family: var(--about-font-display-stack);
-  font-weight: 700;
-  font-size: var(--about-step-2);
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-}
-
-.about-boua__rs-figures dd {
-  margin: 0.4rem 0 0;
-  font-size: var(--about-step--1);
-  color: var(--about-ink-dim);
-}
-
-.about-boua__rs-notes {
-  display: grid;
-  gap: 0.5rem;
-  margin: var(--about-space-8) 0 0;
-  padding: var(--about-space-3) 0 0;
-  border-top: 1px solid var(--about-line);
-  list-style: none;
-  font-size: var(--about-step--1);
-  color: var(--about-ink-faint);
-}
-
-/* Contact CTA removed from About page */
 
 /* About — mobile only (≤800px); desktop unchanged */
 @media (max-width: 800px) {

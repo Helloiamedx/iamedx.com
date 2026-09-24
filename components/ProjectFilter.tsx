@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { useLenis } from "lenis/react";
 import { useReducedMotion } from "motion/react";
+import { HeadlineMotion } from "@/components/HeadlineMotion";
 import {
   buildCountryQueryValue,
   buildInvolvementQueryValue,
@@ -112,6 +113,12 @@ export function ProjectFilter({
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
   const [exiting, setExiting] = useState(false);
+  /**
+   * Drives the Filter label's entrance. Held back until `load` plus
+   * FILTER_ENTER_DELAY_MS so the small control is noticed rather than landing
+   * with the first paint.
+   */
+  const [revealed, setRevealed] = useState(false);
   const [draft, setDraft] = useState<DraftState>(() =>
     normalizeDraft({
       involvement: activeInvolvement,
@@ -130,16 +137,17 @@ export function ProjectFilter({
 
   /*
    * Filter enter: wait for load + delay, then play when in view.
+   *
+   * The delay is the point of this control — it is deliberately late so the
+   * small label is noticed after the page has settled. Effect 01 runs on
+   * `trigger="manual"` for exactly that reason: `trigger="view"` would fire the
+   * moment the bar intersects, well before the gate opens.
+   *
    * Leave settles visible; each re-entry plays again.
    */
   useEffect(() => {
     const bar = barRef.current;
     if (!bar || typeof IntersectionObserver === "undefined") return;
-
-    if (reduceMotion) {
-      bar.classList.add("is-revealed");
-      return;
-    }
 
     let delayTimer = 0;
     let gateReady = false;
@@ -147,12 +155,10 @@ export function ProjectFilter({
     let cancelled = false;
 
     const play = () => {
-      bar.classList.remove("is-revealed");
-      bar.style.transition = "none";
-      void bar.offsetWidth;
-      bar.style.removeProperty("transition");
+      /* Drop back to false first so the true flip is a fresh replay. */
+      setRevealed(false);
       requestAnimationFrame(() => {
-        if (!cancelled) bar.classList.add("is-revealed");
+        if (!cancelled) setRevealed(true);
       });
     };
 
@@ -162,10 +168,18 @@ export function ProjectFilter({
     };
 
     const armGate = () => {
-      delayTimer = window.setTimeout(() => {
-        gateReady = true;
-        tryPlay();
-      }, FILTER_ENTER_DELAY_MS);
+      /*
+       * The hold only exists so a small control gets noticed after the page has
+       * settled. Reduced motion gets none of it — the engine shows the label at
+       * its resting state instead of animating, so there is nothing to notice.
+       */
+      delayTimer = window.setTimeout(
+        () => {
+          gateReady = true;
+          tryPlay();
+        },
+        reduceMotion ? 0 : FILTER_ENTER_DELAY_MS,
+      );
     };
 
     if (document.readyState === "complete") {
@@ -376,12 +390,19 @@ export function ProjectFilter({
                 data-lenis-prevent
               >
                 <div className="project-filter-drawer__section">
-                  <h2
+                  {/*
+                   * Effect 01. The drawer body is a real scroll container, so a
+                   * view observer clips to it — the heading for the section you
+                   * can actually see plays, the rest wait for the scroll.
+                   */}
+                  <HeadlineMotion
+                    as="h2"
+                    effect="01"
                     id={`${panelId}-title`}
                     className="project-filter-drawer__section-heading"
                   >
                     Project type
-                  </h2>
+                  </HeadlineMotion>
                   <ul className="project-filter-drawer__options" role="list">
                     {involvementFilters.map((item) => {
                       const checked = isOptionChecked(item.id, draft.involvement);
@@ -415,9 +436,13 @@ export function ProjectFilter({
                 </div>
 
                 <div className="project-filter-drawer__section">
-                  <h2 className="project-filter-drawer__section-heading">
+                  <HeadlineMotion
+                    as="h2"
+                    effect="01"
+                    className="project-filter-drawer__section-heading"
+                  >
                     Region
-                  </h2>
+                  </HeadlineMotion>
                   <ul className="project-filter-drawer__options" role="list">
                     {countryFilters.map((item) => {
                       const checked = isOptionChecked(item.id, draft.country);
@@ -451,9 +476,13 @@ export function ProjectFilter({
                 </div>
 
                 <div className="project-filter-drawer__section">
-                  <h2 className="project-filter-drawer__section-heading">
+                  <HeadlineMotion
+                    as="h2"
+                    effect="01"
+                    className="project-filter-drawer__section-heading"
+                  >
                     Material
-                  </h2>
+                  </HeadlineMotion>
                   <ul className="project-filter-drawer__options" role="list">
                     {materialOptions.map((item) => {
                       const checked = isOptionChecked(item.id, draft.material);
@@ -520,8 +549,38 @@ export function ProjectFilter({
           aria-controls={open || visible ? panelId : undefined}
           onClick={() => setOpen(true)}
         >
-          Filter
-          {filtersActive ? ` (${matchCount})` : ""}
+          {/*
+           * Effect 01, same as the section labels and item titles.
+           *
+           * The animated span wraps the static word only. The count stays
+           * outside it so `Filter (2)` never changes the span's children — the
+           * engine owns that node, and a text swap would fight React for it.
+           */}
+          <HeadlineMotion
+            as="span"
+            effect="01"
+            trigger="manual"
+            play={revealed}
+            className="project-filter-trigger__label"
+          >
+            Filter
+          </HeadlineMotion>
+          {filtersActive ? (
+            /*
+             * Held back with the label. The engine only hides its own node, so
+             * without this a filtered URL would show a bare ` (3)` for the
+             * length of the gate before the word arrives.
+             */
+            <span
+              className={
+                revealed
+                  ? "project-filter-trigger__count"
+                  : "project-filter-trigger__count is-pending"
+              }
+            >
+              {` (${matchCount})`}
+            </span>
+          ) : null}
         </button>
         {filtersActive ? (
           <button

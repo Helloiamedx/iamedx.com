@@ -157,22 +157,42 @@ export function HomeRecognitionProductBox({
 }
 
 function ProductCutout({ item }: { item: RecognitionProductBoxItem }) {
-  const bakedHref = useBakedStickerHref(item.src, item.width, item.height);
+  /*
+   * The item’s `scale` is folded into the *baked* geometry instead of being
+   * applied as a transform on the bitmap.
+   *
+   * A transform scaled the baked white outline together with the product, so
+   * the outline’s rendered width came out multiplied by the item’s own scale:
+   * the pieces here span `0.72`–`1.79`, a 2.47× spread in outline weight
+   * across one card. The outline is a fixed radius in user units, so it has to
+   * be baked into the drawing rather than scaled in the rendering — baking at
+   * the final size gives every product in the card the same outline.
+   *
+   * Nothing else changes, and `scale: 1` renders exactly as before: the scale
+   * still grows about the item’s own centre, and the rotation origin is scaled
+   * about that same centre (uniform scaling about C commutes with a rotation
+   * about O once O moves to `C + s·(O − C)`).
+   */
   const s = item.scale ?? 1;
-  const cx = item.x + item.width / 2;
-  const cy = item.y + item.height / 2;
-  const scaleXf =
-    s === 1
-      ? undefined
-      : `translate(${cx} ${cy}) scale(${s}) translate(${-cx} ${-cy})`;
+  const centerX = item.x + item.width / 2;
+  const centerY = item.y + item.height / 2;
+  const aboutCenter = (value: number, c: number) => c + (value - c) * s;
+  /* Final on-screen box, in the SVG’s 760×650 user space. */
+  const boxW = Math.round(item.width * s);
+  const boxH = Math.round(item.height * s);
+
+  const bakedHref = useBakedStickerHref(item.src, boxW, boxH);
 
   const pad = STICKER_PAD;
   const href = bakedHref ?? item.src;
   const padded = Boolean(bakedHref);
-  const x = padded ? item.x - pad : item.x;
-  const y = padded ? item.y - pad : item.y;
-  const width = padded ? item.width + pad * 2 : item.width;
-  const height = padded ? item.height + pad * 2 : item.height;
+  const x = centerX - boxW / 2 - (padded ? pad : 0);
+  const y = centerY - boxH / 2 - (padded ? pad : 0);
+  const width = padded ? boxW + pad * 2 : boxW;
+  const height = padded ? boxH + pad * 2 : boxH;
+
+  const rotateOriginX = aboutCenter(item.rotateOriginX, centerX);
+  const rotateOriginY = aboutCenter(item.rotateOriginY, centerY);
 
   return (
     <g
@@ -187,19 +207,17 @@ function ProductCutout({ item }: { item: RecognitionProductBoxItem }) {
           } as CSSProperties
         }
       >
-        <g transform={scaleXf}>
-          {/* Static bitmap (baked outline) — parents own all motion */}
-          <image
-            href={href}
-            x={x}
-            y={y}
-            width={width}
-            height={height}
-            transform={`rotate(${item.rotate} ${item.rotateOriginX} ${item.rotateOriginY})`}
-            preserveAspectRatio="xMidYMid meet"
-            style={{ pointerEvents: "none" }}
-          />
-        </g>
+        {/* Static bitmap (baked outline) — parents own all motion */}
+        <image
+          href={href}
+          x={x}
+          y={y}
+          width={width}
+          height={height}
+          transform={`rotate(${item.rotate} ${rotateOriginX} ${rotateOriginY})`}
+          preserveAspectRatio="xMidYMid meet"
+          style={{ pointerEvents: "none" }}
+        />
       </g>
     </g>
   );

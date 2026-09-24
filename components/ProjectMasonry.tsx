@@ -17,7 +17,7 @@ type ProjectMasonryProps = {
 };
 
 /** Placeholder colors for hover cycle — replace with per-project stills later. */
-const HOVER_SWAP_FRAME_COLORS = ["#0a0a0a", "#0076dd", "#86868b"] as const;
+const HOVER_SWAP_FRAME_COLORS = ["#1d1d1f", "#0076dd", "#86868b"] as const;
 
 /** Grid / related cards: optional override, else first hover still (no card video). */
 function cardCoverSrc(project: Project): string {

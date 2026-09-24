@@ -111,7 +111,7 @@ async function bakeOnce(
   const outlineY = padPx - Math.ceil(radiusPx) - 1;
 
   ctx.save();
-  ctx.shadowColor = `rgba(0, 0, 0, ${STICKER_SHADOW_OPACITY})`;
+  ctx.shadowColor = `rgba(29, 29, 31, ${STICKER_SHADOW_OPACITY})`;
   ctx.shadowBlur = STICKER_SHADOW_BLUR * scale;
   ctx.shadowOffsetX = 0;
   ctx.shadowOffsetY = STICKER_SHADOW_DY * scale;

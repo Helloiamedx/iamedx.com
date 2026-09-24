@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CoverLoopVideo } from "@/components/CoverLoopVideo";
 import { HeadlineMotion } from "@/components/HeadlineMotion";
 import { myApproach } from "@/content/homeCopy";
-import { useCardMotion } from "@/lib/cardMotion";
+import { useAppleCardReveal } from "@/lib/appleCardReveal";
 import { SnapCarousel } from "@/lib/snapCarousel";
 
 const POINTS = myApproach.points;
@@ -210,27 +210,15 @@ export function HomeMyApproach() {
   }, []);
 
   /*
-   * C02 错峰上浮 — approach cards rise in staggered as the rail arrives.
+   * Apple card reveal — the five approach cards rise in a 150ms stagger as the
+   * rail's top crosses 85% of the viewport. Authored params, untouched; see
+   * `lib/appleCardReveal.ts`.
+   *
    * The translate is vertical only, so it never disturbs the carousel's
-   * horizontal stop measurements (`offsetLeft`).
-   *
-   * `stagger` raised from the authored 120ms and `duration` stretched from
-   * 1000ms so all five cards are read in sequence rather than arriving as one
-   * block.
-   *
-   * `fade: false` — position only, no opacity ramp. These cards are revealed
-   * already in their opening pose, so a fade on top of the rise read as a
-   * separate transparency beat (on the near-white `#f5f5f7` band the card
-   * artwork sits behind an opacity ramp for most of the entrance, which looks
-   * like a flash rather than a rise). Nothing else on `.home-someone__slide`
-   * owns opacity, so there is no resting value to preserve — unlike
-   * Recognition, where the dimmed off-focus cards required it.
+   * horizontal stop measurements (`offsetLeft`). Nothing on
+   * `.home-someone__slide` owns opacity, so the fade rides along with the rise.
    */
-  useCardMotion(galleryRef, ".home-someone__slide", "C02", {
-    fade: false,
-    stagger: 260,
-    duration: 1650,
-  });
+  useAppleCardReveal(galleryRef, ".home-someone__slide");
 
   return (
     <section

@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useEffect } from "react";
+import { HeadlineMotion } from "@/components/HeadlineMotion";
 import { HeroSegmentVideo } from "@/components/HeroSegmentVideo";
 import { OriginButton } from "@/components/ui/origin-button";
 import { YouTubeBackground } from "@/components/YouTubeBackground";
@@ -242,9 +243,13 @@ function CollectionProjectBlock({
               key={section.id}
               className="project-case-demo__panel-block collection-detail__entry-section"
             >
-              <h3 className="collection-detail__entry-section-title">
+              <HeadlineMotion
+                as="h3"
+                effect="01"
+                className="collection-detail__entry-section-title"
+              >
                 {section.id === "outcome" ? "OUTCOME" : section.label}
-              </h3>
+              </HeadlineMotion>
               {section.body.map((paragraph) => {
                 const trimmed = paragraph.trim();
                 if (!trimmed) return null;
