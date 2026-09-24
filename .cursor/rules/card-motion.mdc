@@ -17,7 +17,7 @@ alwaysApply: true
 
 来源：用户提供的 Apple 页面脚本（`lib/appleCardReveal.ts` 逐字移植机制）。
 参数为原作者值，**不要**改：错峰 `150ms` · 上移 `30px` · 位移 `700ms` ·
-淡入 `900ms` · 触发「组顶到达视口高度 `85%`」· 缓动 `easeInOutQuad`。
+淡入 `900ms` · 触发「卡片顶部到达视口高度 `85%`」· 缓动 `easeInOutQuad`。
 
 ```tsx
 import { useAppleCardReveal } from "@/lib/appleCardReveal";
@@ -31,7 +31,14 @@ useAppleCardReveal(sectionRef, ".home-recognition__card", { fade: false });
 - 挂载期间给根节点加 `data-apple-reveal`、给卡片加 `data-reveal-item`；
   `app/globals.css` 里 `.is-revealing [data-reveal-item] { transition: none !important }`
   负责屏蔽卡片自带的过渡（否则每帧都会被过渡插值，位移会变黏）。
-- 触发按**整组**判断（组顶过 `85%` 视口高），不是逐卡 `amount`。
+- 触发按**每一张卡片自己**判断：卡顶过 `85%` 视口高才播。不要改成整组判断 ——
+  首页项目 / 见解网格是三行以上的长列表，整组触发会在首行刚进视口时把整列一次跑完，
+  下面几行在看不见的地方就播完了。**同一行**的卡片才彼此错峰（左 → 右 0 / 150 / 300ms），
+  行的划分按实际布局（`getBoundingClientRect`）读取，所以二列 / 一列重排后依然正确。
+  单行轮播（Recognition / My approach）行为不变：五张卡同属一行，仍然是 0/150/300 级联。
+- 挂载**之后**才出现的卡片也会被接上：模块用 `MutationObserver` 监听根节点，
+  新卡自动进入待播队列（项目页 “See more projects” 展开、以及筛选切换都是这个路径）。
+  为此 `useAppleCardReveal` 会把 `selector` 一起传进引擎 —— 去掉它新卡就不会出场。
 - `fade: false` 用于透明度归 CSS 管的卡片。
 
 ## 已接线的卡片（当前）
@@ -41,6 +48,12 @@ useAppleCardReveal(sectionRef, ".home-recognition__card", { fade: false });
 | 首页 `Recognition comes first.` | `.home-recognition__card` | Apple 出场 · `fade: false` |
 | 首页 `What makes me stand out.` | `.home-different__feature` | Apple 出场 |
 | 首页 `My approach.` | `.home-someone__slide` | Apple 出场（只做纵向位移，不干扰轮播横向测量） |
+| 首页 Products / Thoughts 卡片 | `.project-showcase__item` / `.insight-showcase__item` | Apple 出场（同组 3 张） |
+| `/projects` 网格 | `.project-showcase__item` | Apple 出场（含 “See more projects” 新增卡） |
+| `/thoughts` 网格 | `.insight-showcase__item` | Apple 出场（筛选切换后重挂载重播） |
+
+除轮播三处外，其余全部走 `components/CardRevealGroup.tsx` 包装 —— 它把出场限定在
+指定页面，不污染共享的 `ProjectMasonry` / `InsightMasonry`。
 
 **Recognition 用 `fade: false` 的原因**：轮播把非当前卡片压到 `opacity: .55`；
 若统一淡入到 1，结束释放控制权时会回弹。这批卡片透明度交给 CSS，只做位移。

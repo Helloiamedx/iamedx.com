@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { CardRevealGroup } from "@/components/CardRevealGroup";
 import { FilterResults } from "@/components/FilterResults";
 import { InsightFilter } from "@/components/InsightFilter";
 import { InsightMasonry } from "@/components/InsightMasonry";
@@ -42,7 +43,14 @@ export default async function InsightsPage({ searchParams }: InsightsPageProps) 
         <div className="insights-shell">
           <InsightFilter activeTag={activeTag} />
           <FilterResults filterKey={filterKey}>
-            <InsightMasonry insights={filtered} />
+            {/*
+             * Cards take the Apple entrance. `FilterResults` remounts its swap
+             * layer per `filterKey`, so changing the tag re-arms the group and
+             * the new set rises in rather than hard-cutting.
+             */}
+            <CardRevealGroup selector=".insight-showcase__item">
+              <InsightMasonry insights={filtered} />
+            </CardRevealGroup>
           </FilterResults>
         </div>
       </section>

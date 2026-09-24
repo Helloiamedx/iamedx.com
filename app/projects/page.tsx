@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { CardRevealGroup } from "@/components/CardRevealGroup";
 import { FilterResults } from "@/components/FilterResults";
 import { ProjectFeaturedLead } from "@/components/ProjectFeaturedLead";
 import { ProjectFilter } from "@/components/ProjectFilter";
@@ -128,13 +129,20 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
           ) : null}
         </div>
         <FilterResults filterKey={filterKey}>
-          <ProjectsFilterGrid
-            projects={listed}
-            filterKey={filterKey}
-            layout="related"
-            enableHoverSwap
-            interleaveCollections={!hasExplicitFilters}
-          />
+          {/*
+           * Cards take the Apple entrance. Because `FilterResults` remounts its
+           * swap layer per `filterKey`, switching a filter re-arms the group and
+           * the new set rises in — the same reveal, not a hard cut.
+           */}
+          <CardRevealGroup selector=".project-showcase__item">
+            <ProjectsFilterGrid
+              projects={listed}
+              filterKey={filterKey}
+              layout="related"
+              enableHoverSwap
+              interleaveCollections={!hasExplicitFilters}
+            />
+          </CardRevealGroup>
         </FilterResults>
       </section>
     </main>

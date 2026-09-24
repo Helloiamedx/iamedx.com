@@ -1,3 +1,4 @@
+import { CardRevealGroup } from "@/components/CardRevealGroup";
 import { FrostIndexLink } from "@/components/FrostIndexLink";
 import {
   HeroBackgroundVideo,
@@ -86,11 +87,13 @@ export default function HomePage() {
             description="A selection of products I’ve worked on across different stages of development, manufacturing, and delivery."
           />
           <ProjectFeaturedLead project={projectsFeaturedLead} priority={false} />
-          <ProjectMasonry
-            projects={selectedProjects}
-            layout="related"
-            enableHoverSwap
-          />
+          <CardRevealGroup selector=".project-showcase__item">
+            <ProjectMasonry
+              projects={selectedProjects}
+              layout="related"
+              enableHoverSwap
+            />
+          </CardRevealGroup>
           <FrostIndexLink href="/projects">All projects</FrostIndexLink>
         </section>
 
@@ -107,7 +110,9 @@ export default function HomePage() {
           {featuredInsight ? (
             <InsightsLead insight={featuredInsight} priority={false} />
           ) : null}
-          <InsightMasonry insights={selectedInsights} layout="related" />
+          <CardRevealGroup selector=".insight-showcase__item">
+            <InsightMasonry insights={selectedInsights} layout="related" />
+          </CardRevealGroup>
           <FrostIndexLink href="/thoughts">All thoughts</FrostIndexLink>
         </section>
       </main>

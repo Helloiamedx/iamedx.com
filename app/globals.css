@@ -2723,12 +2723,6 @@ body.is-mobile-menu-open .project-case-demo__toggle-pin {
   --home-intro-desc-weight: 400;
   --home-intro-desc-leading: 1.45;
   --home-intro-desc-color: rgba(29, 29, 31, 0.55);
-  /*
-   * The page ground is `--home-base` (the site beige) — see the “home ground”
-   * block below. This token is the light plate used *inside* a few cards
-   * (Character feature cards), not a band background.
-   */
-  --home-band-gray: #f5f5f7;
   --portfolio-card-radius: 0;
   --type-label-color: rgba(29, 29, 31, 0.45);
   --type-chip-font: clamp(
@@ -3616,8 +3610,8 @@ body:has(.home-page) .site-footer__gap {
   min-height: 2.85rem;
   padding: 0.7rem 1.05rem;
   border-radius: 0;
-  /* Light plate on white Recognition band */
-  background: #f5f5f7;
+  /* Site black plate — the light dots below are its ink */
+  background: var(--ink-black);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
@@ -3630,7 +3624,8 @@ body:has(.home-page) .site-footer__gap {
   padding: 0;
   border: 0;
   border-radius: 0;
-  background: #8d8d91;
+  /* Track sits on the black plate — a dim white groove, filled by the progress */
+  background: rgba(255, 255, 255, 0.3);
   cursor: pointer;
   overflow: hidden;
   transition:
@@ -3640,7 +3635,7 @@ body:has(.home-page) .site-footer__gap {
 
 .home-recognition__dot.is-active {
   width: 2.85rem;
-  background: #8d8d91;
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .home-recognition__dot.is-scrubbable {
@@ -3677,7 +3672,8 @@ body:has(.home-page) .site-footer__gap {
   inset: 0 auto 0 0;
   width: 0%;
   border-radius: inherit;
-  background: #1d1d1f;
+  /* Elapsed fill — light ink on the black plate */
+  background: #fff;
   animation: home-recognition-progress var(--home-recognition-autoplay-ms)
     linear forwards;
 }
@@ -3710,15 +3706,12 @@ body:has(.home-page) .site-footer__gap {
   padding: 0;
   border: 0;
   border-radius: 0;
-  background: #f5f5f7;
-  color: #1d1d1f;
+  /* Same black plate as the pager, with its icon as the light ink */
+  background: var(--ink-black);
+  color: #fff;
   cursor: pointer;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-}
-
-.home-recognition__playback:hover {
-  background: #ebebeb;
 }
 
 .home-recognition__playback-icon {
@@ -4239,7 +4232,7 @@ body:has(.home-page) .site-footer__gap {
 
 /* One card container — solid plate; copy on top; keyword + cutout below */
 .home-different__feature {
-  /* Light plate (Clients Come Back) — dark body + lit keyword */
+  /* Dark body + lit keyword on a light plate */
   --home-different-dim: rgba(29, 29, 31, 0.38);
   --home-different-lit: #1d1d1f;
   box-sizing: border-box;
@@ -4249,12 +4242,8 @@ body:has(.home-page) .site-footer__gap {
   padding: var(--home-different-col-pad);
   overflow: hidden;
   min-height: clamp(30rem, 68vh, 44rem);
-  /*
-   * Character card plate — slightly darker than the page ground, and the same
-   * value as the Recognition “Clients Come Back” card, so those two surfaces
-   * cannot drift apart.
-   */
-  background: var(--home-band-gray);
+  /* White plate — the cards lift off the beige page ground */
+  background: #fff;
   border: 0;
   border-radius: 0;
   box-shadow: none;
