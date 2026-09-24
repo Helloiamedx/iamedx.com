@@ -2,32 +2,32 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ProtectedVideo } from "@/components/ProtectedVideo";
-import { useDriveVideoPlayback } from "@/lib/videoPlayback";
 import { HERO_VIDEO_SRC } from "@/lib/heroMedia";
-import {
-  HERO_COPY_ATTR,
-  HERO_VIDEO_ATTR,
-  HERO_VIDEO_PLAYABLE_ATTR,
-  setHeroFlag,
-} from "@/lib/heroSequence";
+import { useDriveVideoPlayback } from "@/lib/videoPlayback";
 import {
   VIDEO_LOAD_PRIORITY,
   unlockVideosAfterHero,
   useVideoLoadSlot,
 } from "@/lib/videoLoadQueue";
 
-/** Beat after video pops in — then headline may appear */
-const COPY_AFTER_READY_MS = 420;
-
 /**
- * Home hero video.
- * Hero-first via the load queue — no fullscreen intro veil.
+ * Home hero background clip.
+ *
+ * The clip owns nothing but itself. It loads through the hero-priority slot,
+ * plays muted and looping, and fades in over the hero's black stage once a
+ * frame is on screen. It deliberately does *not* gate the copy: the stage is
+ * black enough for the white headline from the first paint, so the entrance
+ * belongs to `HeroHeadline` and never waits on a multi-megabyte download.
+ *
+ * The one page-level job it still has is opening the post-hero load gate
+ * (`unlockVideosAfterHero`) once it has settled — playing or hard-failed — so
+ * the near-viewport media further down can start. That runs on BOTH outcomes;
+ * a failure that never unlocked it would deadlock the queue.
  */
 export function HeroBackgroundVideo() {
   const rootRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [src, setSrc] = useState<string | null>(null);
-  const [revealed, setRevealed] = useState(false);
 
   const { allowed, releaseSlot } = useVideoLoadSlot(
     HERO_VIDEO_SRC,
@@ -37,64 +37,33 @@ export function HeroBackgroundVideo() {
   );
   const canLoad = Boolean(src) && allowed;
 
+  /*
+   * `src` lands one frame after mount, so the first paint — logo, nav, the
+   * black stage and its copy — is not competing with the download. The document
+   * head preloads the same URL, so the bytes are already in flight.
+   */
   useEffect(() => {
-    let cancelled = false;
-    const id = requestAnimationFrame(() => {
-      if (!cancelled) setSrc(HERO_VIDEO_SRC);
-    });
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(id);
-    };
+    const id = requestAnimationFrame(() => setSrc(HERO_VIDEO_SRC));
+    return () => cancelAnimationFrame(id);
   }, []);
 
-  useEffect(() => {
-    const root = document.documentElement;
-    delete root.dataset[HERO_VIDEO_PLAYABLE_ATTR];
-    delete root.dataset[HERO_VIDEO_ATTR];
-    delete root.dataset[HERO_COPY_ATTR];
-    return () => {
-      delete root.dataset[HERO_VIDEO_PLAYABLE_ATTR];
-      delete root.dataset[HERO_VIDEO_ATTR];
-      delete root.dataset[HERO_COPY_ATTR];
-    };
-  }, []);
-
-  useDriveVideoPlayback(
+  const { playing } = useDriveVideoPlayback(
     videoRef,
     canLoad,
     () => {
-      unlockVideosAfterHero();
       releaseSlot();
-      setHeroFlag(HERO_VIDEO_PLAYABLE_ATTR);
-      setRevealed(true);
-      setHeroFlag(HERO_VIDEO_ATTR);
+      unlockVideosAfterHero();
     },
     src ?? "",
   );
-
-  useEffect(() => {
-    if (!revealed) return;
-    const reduceMotion =
-      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    const delay = reduceMotion ? 0 : COPY_AFTER_READY_MS;
-    const copyTimer = window.setTimeout(() => {
-      setHeroFlag(HERO_COPY_ATTR);
-    }, delay);
-    return () => window.clearTimeout(copyTimer);
-  }, [revealed]);
-
-  if (!src) {
-    return <div ref={rootRef} className="hero__video-wrap" />;
-  }
 
   return (
     <div ref={rootRef} className="hero__video-wrap">
       {canLoad ? (
         <ProtectedVideo
           ref={videoRef}
-          className={`hero__video${revealed ? " is-loaded" : ""}`}
-          src={src}
+          className={`hero__video${playing ? " is-playing" : ""}`}
+          src={src ?? undefined}
           preload="auto"
           autoPlay={false}
           // @ts-expect-error — fetchPriority on HTMLVideoElement (Chromium+)

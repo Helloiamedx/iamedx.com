@@ -40,7 +40,6 @@ export function Header() {
   /* Portal only after mount — avoid Image/load callbacks updating pre-mount trees. */
   useEffect(() => {
     setMobilePortalReady(true);
-    document.documentElement.dataset.chromeReady = "1";
   }, []);
 
   useEffect(() => {

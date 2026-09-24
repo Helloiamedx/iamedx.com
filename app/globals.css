@@ -211,8 +211,9 @@
    * would become 89% opaque at `#1d1d1f` and soften the mask:
    *   · CSS `mask-image` gradients (e.g. `.svc-workflow__media-roll-stage`)
    *   · SVG `<mask>` fills (e.g. the Recognition product-box cutout)
-   * These plates are pure black by design — `--footer-bg`, `--nav-plate` and
-   * the “Clients Come Back” card (`.home-recognition__card--product-box`).
+   * These plates are pure black by design — the hero stage (`.hero`), the
+   * footer (`--footer-bg`), the mobile menu (`--nav-plate`) and the “Clients
+   * Come Back” card (`.home-recognition__card--product-box`).
    */
   --ink-black: #1d1d1f;
   --site-bg: #eaeae1;
@@ -2197,13 +2198,26 @@ body.is-mobile-menu-open .project-case-demo__toggle-pin {
   min-height: 100vh;
   min-height: 100svh;
   margin-top: calc(-1 * var(--header-offset));
+  /* Full-bleed on every device — clip and copy both span the viewport */
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
   display: grid;
   /* Copy + CTAs are one block, seated on the hero’s bottom edge */
   align-items: end;
   justify-items: center;
   color: #f7f7f7;
   overflow: hidden;
-  background: transparent;
+  /*
+   * Pure black stage, and the base the hero always sits on.
+   *
+   * The copy is white, so it needs a dark ground from the very first paint —
+   * this band used to be transparent over the beige shell, which left the
+   * headline invisible until the clip arrived. The clip covers this once it
+   * plays; if it never does, the stage stays black and the copy stays readable.
+   * One of the site's deliberate pure-black plates (see `:root`).
+   */
+  background: #000;
   /*
    * Height of one hero CTA — derived from the button's own box, not the site's
    * `min-height` token alone: `min-height` is only a floor, and the real box is
@@ -2233,17 +2247,6 @@ body.is-mobile-menu-open .project-case-demo__toggle-pin {
   }
 }
 
-/*
- * Fail-open stage. Only set when `HeroHeadline` gave up waiting on the hero
- * video and revealed the copy anyway. The copy is #f7f7f7, so over the beige
- * site plate it would be unreadable — this darkens the band instead. Never
- * applied on the normal path, so there is still no plate flash before the
- * video paints.
- */
-html[data-hero-copy-fallback="1"] .hero {
-  background: #1d1d1f;
-}
-
 .hero__media {
   position: absolute;
   inset: 0;
@@ -2262,18 +2265,21 @@ html[data-hero-copy-fallback="1"] .hero {
   height: 100%;
   object-fit: cover;
   object-position: center;
-  /* Transparent until playable — no dark plate flash */
+  /*
+   * Hidden until a frame is actually on screen, then faded over the black
+   * stage — the clip emerges instead of popping in. Before that the stage is
+   * plain black, which is a ground the white copy already reads on, so nothing
+   * is waiting on this.
+   */
   opacity: 0;
+  transition: opacity 600ms cubic-bezier(0.22, 1, 0.36, 1);
   animation: none;
   user-select: none;
   -webkit-user-drag: none;
 }
 
-/* Intro / return reveal — paint once JS marks playable */
-html[data-chrome-ready="1"] .hero__video.is-loaded,
-.hero__video.is-loaded {
+.hero__video.is-playing {
   opacity: 1;
-  animation: none;
 }
 
 /* Decorative video shells — never intercept taps (iOS: children default to auto!) */
@@ -2293,6 +2299,11 @@ html[data-chrome-ready="1"] .hero__video.is-loaded,
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* The clip still appears, just without the fade */
+  .hero__video {
+    transition: none;
+  }
+
   .project-fallback-video__media,
   .hero-segment-video__media {
     transition: none;
@@ -2305,18 +2316,10 @@ html[data-chrome-ready="1"] .hero__video.is-loaded,
   }
 }
 
-@keyframes hero-video-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 .hero__content {
   position: relative;
-  z-index: 0;
+  /* Above the clip */
+  z-index: 1;
   box-sizing: border-box;
   /* Same horizontal edge as `.site-header__bar` / logo + nav */
   width: min(var(--shell-max), calc(100% - var(--shell-gutter) * 2));
@@ -2338,15 +2341,6 @@ html[data-chrome-ready="1"] .hero__video.is-loaded,
   gap: clamp(1.35rem, 3.2vw, 2rem);
   text-align: left;
   color: #fff;
-  /* Hidden until the video pops in — the copy must not paint before the clip */
-  visibility: hidden;
-  pointer-events: none;
-}
-
-html[data-hero-copy-ready="1"] .hero__content {
-  z-index: 1;
-  visibility: visible;
-  pointer-events: auto;
 }
 
 .hero__copy {
@@ -2464,11 +2458,6 @@ html[data-hero-copy-ready="1"] .hero__content {
 
   .hero__copy.is-revealed,
   .hero__actions.is-revealed {
-    opacity: 1;
-  }
-
-  html[data-chrome-ready="1"] .hero__video.is-loaded {
-    animation: none;
     opacity: 1;
   }
 }
@@ -2858,10 +2847,8 @@ body:has(.home-page) {
  * Character feature cards, the “Clients Come Back” card, the Recognition pager
  * and the Support stage / panels.
  *
- * The hero is excluded on purpose. It is transparent and used to read its
- * backdrop from the page shell; with the shell beige that backdrop would
- * change, so it gets an explicit white plate. Its fail-open dark plate
- * (`html[data-hero-copy-fallback="1"] .hero`) still wins when it applies.
+ * The hero is excluded: it carries its own pure-black stage for the white copy
+ * to sit on, so it does not read the beige shell at all. See `.hero`.
  *
  * `--home-base` is defined on `:root`, not on `.home-page`: the footer air
  * (`.site-footer__gap`) and the `html` / `body` canvas live *outside*
@@ -2871,10 +2858,6 @@ body:has(.home-page) {
  */
 :root {
   --home-base: var(--site-bg);
-}
-
-.home-page > .hero {
-  background: #fff;
 }
 
 .site-main > main.home-page,
@@ -12462,7 +12445,7 @@ body:has(.home-page) .site-footer__gap {
   object-fit: cover;
   /*
    * Always visible under still paint / black shell.
-   * Do NOT start at opacity:0 and rely on hero-video-in — iOS Low Power /
+   * Do NOT start at opacity:0 and rely on a CSS animation — iOS Low Power /
    * Reduce Motion can pause CSS animations and leave the hero permanently blank
    * while the <video> is already playing underneath.
    */
