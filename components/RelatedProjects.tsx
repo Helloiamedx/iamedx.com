@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { CardRevealGroup } from "@/components/CardRevealGroup";
 import { FrostIndexLink } from "@/components/FrostIndexLink";
 import { HeadlineMotion } from "@/components/HeadlineMotion";
 import { ProjectMasonry } from "@/components/ProjectMasonry";
@@ -92,11 +93,21 @@ export function RelatedProjects({
         </HeadlineMotion>
       ) : null}
       {related.length > 0 ? (
-        <ProjectMasonry
-          projects={related}
-          layout="related"
-          enableHoverSwap
-        />
+        /*
+         * The group mounts in the same commit as the cards, rather than
+         * wrapping them from the start: `ProjectMasonry` only exists once
+         * `selectRelated` has produced ids, and `useAppleCardReveal` bails out
+         * while the root is still empty. Cards land posed (offset + faded)
+         * because that hook runs in a layout effect — before the paint that
+         * first shows them.
+         */
+        <CardRevealGroup selector=".project-showcase__item">
+          <ProjectMasonry
+            projects={related}
+            layout="related"
+            enableHoverSwap
+          />
+        </CardRevealGroup>
       ) : null}
       {hasPeers && ids === null ? (
         <div

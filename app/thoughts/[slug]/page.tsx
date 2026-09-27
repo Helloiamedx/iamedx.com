@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { CardRevealGroup } from "@/components/CardRevealGroup";
 import { FrostIndexLink } from "@/components/FrostIndexLink";
 import { HeadlineMotion } from "@/components/HeadlineMotion";
 import { InsightBody } from "@/components/InsightBody";
@@ -107,7 +108,13 @@ export default async function InsightDetailPage({ params }: InsightPageProps) {
             >
               Related
             </HeadlineMotion>
-            <InsightMasonry insights={related} layout="related" />
+            {/* Related articles share the same Apple entrance as every other
+             * card list. The section is gated on `related.length > 0` (a
+             * related article needs a matching tag), so this fires the moment
+             * two articles are tagged alike — no further wiring needed. */}
+            <CardRevealGroup selector=".insight-showcase__item">
+              <InsightMasonry insights={related} layout="related" />
+            </CardRevealGroup>
             <FrostIndexLink href="/thoughts">All thoughts</FrostIndexLink>
           </section>
         ) : (
