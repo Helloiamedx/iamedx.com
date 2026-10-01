@@ -4632,6 +4632,18 @@ body:has(.home-page) .site-footer__gap {
   --support-know-frost-hover: rgba(29, 29, 31, 0.9);
   --support-know-frost-ink: #fff;
   --support-know-frost-muted: rgba(255, 255, 255, 0.78);
+  /*
+   * Prefix order matters for every use of this token below — do not swap the
+   * `-webkit-backdrop-filter` / `backdrop-filter` pair.
+   *
+   * The production CSS pipeline collapses a pair carrying the same value into a
+   * single declaration and keeps the last one. Written standard-first, the
+   * deployed build shipped *only* the `-webkit-` alias, which Safari honours and
+   * Chrome ignores — the frost over the stage video was there in `next dev` and
+   * gone on iamedx.com. `-webkit-` first, standard last is the order Tailwind's
+   * own `backdrop-filter` utility uses, and that pair survives the build intact.
+   * Same bug and same fix as `.svc-workflow__backdrop` further down this file.
+   */
   --support-know-frost-blur: blur(28px) saturate(1.4);
   /* Collapsed chip pill height (= L/R step diameter) */
   --support-know-chip-pad-y: calc(0.7rem - 2px);
@@ -4771,8 +4783,8 @@ body:has(.home-page) .site-footer__gap {
   border-radius: 0;
   background: var(--support-know-frost);
   color: var(--support-know-frost-ink);
-  backdrop-filter: var(--support-know-frost-blur);
   -webkit-backdrop-filter: var(--support-know-frost-blur);
+  backdrop-filter: var(--support-know-frost-blur);
   cursor: pointer;
   flex: 0 0 auto;
   align-self: flex-end;
@@ -4836,8 +4848,8 @@ body:has(.home-page) .site-footer__gap {
   border-radius: 0;
   background: var(--support-know-frost);
   color: var(--support-know-frost-ink);
-  backdrop-filter: var(--support-know-frost-blur);
   -webkit-backdrop-filter: var(--support-know-frost-blur);
+  backdrop-filter: var(--support-know-frost-blur);
   cursor: pointer;
   text-align: left;
   overflow: hidden;
@@ -5774,8 +5786,8 @@ body:has(.home-page) .site-footer__gap {
     margin-bottom: 0;
     background: var(--support-know-frost);
     color: var(--support-know-frost-ink);
-    backdrop-filter: var(--support-know-frost-blur);
     -webkit-backdrop-filter: var(--support-know-frost-blur);
+    backdrop-filter: var(--support-know-frost-blur);
   }
 
   .support-know__step:hover:not(:disabled) {
