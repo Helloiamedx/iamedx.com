@@ -71,6 +71,10 @@ export function ProjectsFilterGrid({
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
   const [isSingleColumn, setIsSingleColumn] = useState(false);
   const lenis = useLenis();
+  const gridRef = useRef<HTMLDivElement>(null);
+  const pendingHeightRef = useRef<number | null>(null);
+  const expansionRef = useRef<Animation | null>(null);
+  const revealRangeRef = useRef<{ from: number; to: number } | null>(null);
   const prevCountRef = useRef(visibleCount);
   const pendingScrollYRef = useRef<number | null>(null);
   const filterKeyRef = useRef(filterKey);
@@ -145,37 +149,60 @@ export function ProjectsFilterGrid({
     return () => mq.removeEventListener("change", sync);
   }, []);
 
-  /*
-   * “See more” inserts content above the focused button — the browser then
-   * scrolls to keep that button in view (reads as a jump to the bottom).
-   * Lock the pre-click Y across the layout pass.
-   */
+  /* Reveal pixels inside the grid; never animate document height or the footer position. */
   useLayoutEffect(() => {
     const pendingY = pendingScrollYRef.current;
+    const fromHeight = pendingHeightRef.current;
     const grew = visibleCount > prevCountRef.current;
     prevCountRef.current = visibleCount;
+    pendingScrollYRef.current = null;
+    pendingHeightRef.current = null;
 
-    if (!grew || pendingY == null) return;
+    const grid = gridRef.current;
+    if (!grew || pendingY == null || fromHeight == null || !grid) return;
 
+    const toHeight = grid.getBoundingClientRect().height;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
     lockWindowScrollY(pendingY, lenis);
-    const raf = requestAnimationFrame(() => {
-      lockWindowScrollY(pendingY, lenis);
-      requestAnimationFrame(() => lockWindowScrollY(pendingY, lenis));
-    });
-    const t1 = window.setTimeout(() => lockWindowScrollY(pendingY, lenis), 80);
-    const t2 = window.setTimeout(() => {
-      lockWindowScrollY(pendingY, lenis);
-      pendingScrollYRef.current = null;
-    }, 220);
+    if (reduced.matches || toHeight <= fromHeight) return;
 
-    return () => {
-      cancelAnimationFrame(raf);
-      window.clearTimeout(t1);
-      window.clearTimeout(t2);
+    // The layout already has its final height. Only the lower clipping edge moves;
+    // existing cards remain visible and new cards retain their Apple entrance.
+    const animation = grid.animate(
+      [
+        { clipPath: `inset(0px 0px ${toHeight - fromHeight}px 0px)` },
+        { clipPath: "inset(0px 0px 0px 0px)" },
+      ],
+      { duration: 700, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
+    );
+    expansionRef.current = animation;
+    revealRangeRef.current = { from: fromHeight, to: toHeight };
+
+    const cleanup = () => {
+      animation.onfinish = null;
+      animation.cancel();
+      if (expansionRef.current === animation) {
+        expansionRef.current = null;
+        revealRangeRef.current = null;
+      }
+      window.removeEventListener("resize", cleanup);
+      reduced.removeEventListener("change", cleanup);
     };
+    animation.onfinish = cleanup;
+    window.addEventListener("resize", cleanup);
+    reduced.addEventListener("change", cleanup);
+    return cleanup;
   }, [visibleCount, lenis]);
 
   const loadMore = () => {
+    const animation = expansionRef.current;
+    const range = revealRangeRef.current;
+    const progress = animation?.effect?.getComputedTiming().progress;
+    // Continue from the visible edge on rapid clicks, not the full layout height.
+    pendingHeightRef.current = range && progress != null
+      ? range.from + (range.to - range.from) * progress
+      : gridRef.current?.getBoundingClientRect().height ?? null;
+    animation?.cancel();
     pendingScrollYRef.current =
       window.scrollY || document.documentElement.scrollTop || 0;
     if (document.activeElement instanceof HTMLElement) {
@@ -213,24 +240,27 @@ export function ProjectsFilterGrid({
 
   if (layout !== "related") {
     return (
-      <div>
-        <ProjectMasonry
-          projects={visibleProjects}
-          layout={layout}
-          enableHoverSwap={enableHoverSwap}
-        />
+      <div style={{ overflowAnchor: "none" }}>
+        <div ref={gridRef}>
+          <ProjectMasonry
+            projects={visibleProjects}
+            layout={layout}
+            enableHoverSwap={enableHoverSwap}
+          />
+        </div>
         {seeMore}
       </div>
     );
   }
 
   return (
-    <>
-      <div className="projects-interleaved-grid">
+    <div style={{ overflowAnchor: "none" }}>
+      <div ref={gridRef} className="projects-interleaved-grid">
         {segments.map((segment, index) => {
           return (
             <div
-              key={`segment-${index}-${segment.collection?.slug ?? "grid"}`}
+              // Filling a segment adds a collection, but must not remount its cards.
+              key={`segment-${index}`}
               className="projects-interleaved-grid__segment"
             >
               {segment.grid.length > 0 ? (
@@ -248,6 +278,6 @@ export function ProjectsFilterGrid({
         })}
       </div>
       {seeMore}
-    </>
+    </div>
   );
 }
