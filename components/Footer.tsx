@@ -106,7 +106,7 @@ export function Footer() {
               </div>
 
               <div className="site-footer__aside-hq">
-                <p className="site-footer__aside-label">Headquarters</p>
+                <p className="site-footer__aside-label">Office address</p>
                 <div className="site-footer__aside-content">
                   <a
                     href={officeInfo.mapsHref}
