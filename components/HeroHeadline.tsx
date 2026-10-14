@@ -5,7 +5,7 @@ import { HeadlineMotion } from "@/components/HeadlineMotion";
 import { HeroActions } from "@/components/HeroActions";
 
 const HEADLINE =
-  "An experienced specialist who excels at leveraging physical mediums to connect IP value with fans through radical collaboration";
+  "Establish a Supply Chain From Scratch Tailored to Your Business";
 
 const SUBTITLE =
   "No matter how small you start, I help turn your product ideas into a reliable and scalable supply chain in China built around your actual needs, budget, and growth.";
