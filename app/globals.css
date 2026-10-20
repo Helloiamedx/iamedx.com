@@ -11896,6 +11896,20 @@ body:has(.home-page) .site-footer__gap {
   margin-bottom: 0;
 }
 
+/* Inline clip — `!video[Label](url)` in the article body */
+.insight-detail__video {
+  margin: 0 0 1.25em;
+}
+
+.insight-detail__video-el {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  background: #1d1d1f;
+  object-fit: contain;
+}
+
 .insight-detail__heading {
   margin: 2em 0 0.75em;
   font-family: var(--font-sans);

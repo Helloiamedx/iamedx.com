@@ -10,6 +10,13 @@
         "Supply Chain Operations",
         "Factory Partnerships"
       ]
+    },
+    {
+      "id": "manufacturing",
+      "title": "Manufacturing",
+      "tags": [
+        "Manufacturing"
+      ]
     }
   ]
 }

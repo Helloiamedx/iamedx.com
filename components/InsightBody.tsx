@@ -49,9 +49,19 @@ function isBulletLine(line: string) {
 }
 
 /**
+ * Standalone inline clip: `!video[Label](https://…/clip.mp4)`.
+ * The label becomes the video's accessible name; it is not shown on screen.
+ */
+const VIDEO_BLOCK = /^!video\[([^\]]*)\]\((\S+)\)$/;
+
+function isSafeVideoSrc(src: string) {
+  return /^(https?:\/\/|\/)/.test(src);
+}
+
+/**
  * Insight article body from Markdown hierarchy:
  * `##` / `###` headings, `>` quotations, `-` / `*` lists,
- * `**bold**` / `***bold-italic***` emphasis.
+ * `**bold**` / `***bold-italic***` emphasis, and `!video[Label](url)` clips.
  */
 export function InsightBody({ content }: InsightBodyProps) {
   const blocks = content
@@ -62,6 +72,23 @@ export function InsightBody({ content }: InsightBodyProps) {
   return (
     <article className="insight-detail__body">
       {blocks.map((block, index) => {
+        const video = block.match(VIDEO_BLOCK);
+        if (video && isSafeVideoSrc(video[2])) {
+          const [, label, src] = video;
+          return (
+            <figure key={index} className="insight-detail__video">
+              <video
+                className="insight-detail__video-el"
+                src={src}
+                controls
+                playsInline
+                preload="metadata"
+                aria-label={label.trim() || "Video"}
+              />
+            </figure>
+          );
+        }
+
         if (block.startsWith("### ")) {
           return (
             <h3 key={index} className="insight-detail__subheading">
