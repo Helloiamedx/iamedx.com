@@ -47,8 +47,13 @@ export default async function InsightsPage({ searchParams }: InsightsPageProps) 
              * Cards take the Apple entrance. `FilterResults` remounts its swap
              * layer per `filterKey`, so changing the tag re-arms the group and
              * the new set rises in rather than hard-cutting.
+             *
+             * `trigger={1}`: this grid sits under the featured lead + filter.
+             * At the authored 85% the first row waits below the fold and
+             * leaves a blank band at the bottom of the screen; arming at the
+             * viewport edge makes it rise as soon as it is actually visible.
              */}
-            <CardRevealGroup selector=".insight-showcase__item">
+            <CardRevealGroup selector=".insight-showcase__item" trigger={1}>
               <InsightMasonry insights={filtered} />
             </CardRevealGroup>
           </FilterResults>
