@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ProtectedVideo } from "@/components/ProtectedVideo";
 
 type InsightBodyProps = {
   content: string;
@@ -50,7 +51,7 @@ function isBulletLine(line: string) {
 
 /**
  * Standalone inline clip: `!video[Label](https://…/clip.mp4)`.
- * The label becomes the video's accessible name; it is not shown on screen.
+ * Renders muted, looping, control-free — the label is only its accessible name.
  */
 const VIDEO_BLOCK = /^!video\[([^\]]*)\]\((\S+)\)$/;
 
@@ -77,12 +78,14 @@ export function InsightBody({ content }: InsightBodyProps) {
           const [, label, src] = video;
           return (
             <figure key={index} className="insight-detail__video">
-              <video
+              <ProtectedVideo
                 className="insight-detail__video-el"
                 src={src}
-                controls
+                autoPlay
+                muted
+                loop
                 playsInline
-                preload="metadata"
+                preload="auto"
                 aria-label={label.trim() || "Video"}
               />
             </figure>
