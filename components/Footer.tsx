@@ -124,13 +124,7 @@ export function Footer() {
 
         <div className="site-footer__brand-block">
           <p className="site-footer__legal">
-            <span>© {year} iamedx</span>
-            <span className="site-footer__legal-extra">
-              <span className="site-footer__legal-sep" aria-hidden="true">
-                ·
-              </span>
-              <span>All rights reserved</span>
-            </span>
+            <span>© {year} Edward Xu</span>
           </p>
 
           <div className="site-footer__brand" aria-hidden="true">

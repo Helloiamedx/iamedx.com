@@ -1482,16 +1482,6 @@ body.is-mobile-menu-open .mobile-menu a {
   line-height: 1.4;
 }
 
-.site-footer__legal-extra {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.35rem;
-}
-
-.site-footer__legal-sep {
-  opacity: 0.7;
-}
-
 .site-footer__brand {
   margin: 0;
   padding: 0;
@@ -11861,7 +11851,8 @@ body:has(.home-page) .site-footer__gap {
   margin: 0 0 clamp(2.5rem, 5vw, 4rem);
   overflow: hidden;
   border-radius: var(--index-card-radius);
-  background: #1d1d1f;
+  /* No loading plate — the beige page ground shows until the cover paints */
+  background: var(--site-bg);
   aspect-ratio: 3000 / 1687;
 }
 
@@ -11871,6 +11862,11 @@ body:has(.home-page) .site-footer__gap {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* Video covers paint their own box — keep the plate beige, not black */
+.insight-detail__cover-video {
+  background: var(--site-bg);
 }
 
 .insight-detail__body {
@@ -11906,7 +11902,8 @@ body:has(.home-page) .site-footer__gap {
   width: 100%;
   height: auto;
   aspect-ratio: 16 / 9;
-  background: #1d1d1f;
+  /* Letterbox / pre-frame plate = page ground, never a black block */
+  background: var(--site-bg);
   object-fit: contain;
 }
 
